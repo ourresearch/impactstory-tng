@@ -269,11 +269,18 @@ angular.module("about-pages/about.tpl.html", []).run(["$templateCache", function
 
 angular.module("about-pages/sample.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/sample.tpl.html",
-    "<div class=\"page sample\">\n" +
-    "    <h2>Here's a sample of articles</h2>\n" +
+    "<div class=\"page products-sample\">\n" +
+    "    <h2>Here's a sample of {{ products.length }} articles</h2>\n" +
     "\n" +
     "    <div class=\"main\">\n" +
+    "        <div class=\"product row\" ng-repeat=\"product in products\">\n" +
+    "            <div class=\"id col-xs-2\">{{ product.id }}</div>\n" +
+    "            <div class=\"link col-xs-10\">\n" +
+    "                <a href=\"{{ product.url }}\">{{ product.title }}</a>\n" +
     "\n" +
+    "            </div>\n" +
+    "\n" +
+    "        </div>\n" +
     "\n" +
     "\n" +
     "\n" +

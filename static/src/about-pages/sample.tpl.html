@@ -1,8 +1,15 @@
-<div class="page sample">
-    <h2>Here's a sample of articles</h2>
+<div class="page products-sample">
+    <h2>Here's a sample of {{ products.length }} articles</h2>
 
     <div class="main">
+        <div class="product row" ng-repeat="product in products">
+            <div class="id col-xs-2">{{ product.id }}</div>
+            <div class="link col-xs-10">
+                <a href="{{ product.url }}">{{ product.title }}</a>
 
+            </div>
+
+        </div>
 
 
 
