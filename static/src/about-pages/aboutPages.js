@@ -38,6 +38,13 @@ angular.module('aboutPages', [])
     })
 
     .config(function($routeProvider) {
+        $routeProvider.when('/sample', {
+            templateUrl: 'about-pages/sample.tpl.html',
+            controller: 'samplePageCtrl'
+        })
+    })
+
+    .config(function($routeProvider) {
         $routeProvider.when('/about/achievements', {
             templateUrl: 'about-pages/about-badges.tpl.html',
             controller: 'aboutPageCtrl',
@@ -71,6 +78,17 @@ angular.module('aboutPages', [])
             .success(function(resp){
                 $scope.numProfiles = resp.count
             })
+    })
+
+    .controller("samplePageCtrl", function($scope, $http){
+        console.log("sample page ctrl!")
+        $http.get("/api/products").success(
+            function(resp){
+                console.log("got /api/product resp back", resp)
+                $scope.products = resp.list
+            }
+        )
+
     })
 
 
