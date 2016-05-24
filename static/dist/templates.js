@@ -276,7 +276,7 @@ angular.module("about-pages/sample.tpl.html", []).run(["$templateCache", functio
     "        <div class=\"product row\" ng-repeat=\"product in products\">\n" +
     "            <div class=\"id col-xs-2\">{{ product.id }}</div>\n" +
     "            <div class=\"link col-xs-10\">\n" +
-    "                <a href=\"{{ product.url }}\">{{ product.title }}</a>\n" +
+    "                <a href=\"http://doi.org/{{ product.doi }}\">{{ product.title }}</a>\n" +
     "\n" +
     "            </div>\n" +
     "\n" +
