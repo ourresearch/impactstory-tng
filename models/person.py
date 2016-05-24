@@ -426,6 +426,7 @@ class Person(db.Model):
                 p.open_url = p.url
                 p.open_urls = {"urls": [p.open_url]}
 
+
     def set_is_open(self):
 
         start_time = time()
