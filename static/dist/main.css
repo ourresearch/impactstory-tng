@@ -1503,3 +1503,13 @@ div.page.settings-page div.setting-panel div.second-q h4 {
   margin-top: 10px;
   font-size: 18px;
 }
+.page.products-sample h2 {
+  margin-bottom: 20px;
+}
+.page.products-sample .product {
+  margin-bottom: 10px;
+}
+.page.products-sample .product .id {
+  font-size: 14px;
+  color: #999;
+}

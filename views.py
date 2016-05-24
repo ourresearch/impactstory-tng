@@ -10,6 +10,7 @@ from models.person import refresh_profile
 from models.person import add_or_overwrite_person_from_orcid_id
 from models.person import num_people_in_db
 from models.person import delete_person
+from models.product import get_all_products
 from models.orcid import OrcidDoesNotExist
 from models.orcid import NoOrcidException
 from models.badge import badge_configs
@@ -248,6 +249,12 @@ def tweeted_quickly(orcid_id):
 def search(search_str):
     ret = autocomplete(search_str)
     return jsonify({"list": ret, "count": len(ret)})
+
+
+@app.route("/api/products")
+def all_products_endpoint():
+    res = get_all_products()
+    return jsonify({"list": res })
 
 @app.route("/api/people")
 def people_endpoint():
