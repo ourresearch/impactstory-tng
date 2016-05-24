@@ -80,8 +80,15 @@ angular.module('aboutPages', [])
             })
     })
 
-    .controller("samplePageCtrl", function(){
+    .controller("samplePageCtrl", function($scope, $http){
         console.log("sample page ctrl!")
+        $http.get("/api/products").success(
+            function(resp){
+                console.log("got /api/product resp back", resp)
+                $scope.products = resp.list
+            }
+        )
+
     })
 
 
