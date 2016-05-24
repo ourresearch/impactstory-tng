@@ -77,6 +77,16 @@ def distinct_product_list(new_product, list_so_far):
 
     return list_so_far
 
+
+def get_all_products(limit=10):
+    q = db.session.query(Product.title, Product.url, Product.id)
+    q = q.filter(Product.in_doaj==False)
+    q = q.order_by(Product.id)
+    q = q.limit(limit)
+    products = q.all()
+    return products
+
+
 class Product(db.Model):
     id = db.Column(db.Text, primary_key=True)
     doi = db.Column(db.Text)
