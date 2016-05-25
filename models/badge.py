@@ -1022,7 +1022,7 @@ class interdisciplinarity(BadgeAssigner):
             if proportion >= 0.1 and person.mendeley_disciplines[name] >= 5:
                 disciplines_above_threshold.append(name)
 
-        if len(disciplines_above_threshold) > 3:
+        if len(disciplines_above_threshold) >= 3:
             self.assigned = True
             self.candidate_badge.value = len(disciplines_above_threshold)
             self.candidate_badge.support = u"The fields include: {}".format(
