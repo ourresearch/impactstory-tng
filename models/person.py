@@ -85,7 +85,7 @@ def make_person(dirty_orcid_id, high_priority=False):
     orcid_id = clean_orcid(dirty_orcid_id)
     my_person = Person(orcid_id=orcid_id)
     db.session.add(my_person)
-    print u"\nmade new person for {}".format(orcid_id)
+    print u"\nin make_person: made new person for {}".format(orcid_id)
     my_person.refresh(refsets, high_priority=high_priority)
     commit_success = safe_commit(db)
     if not commit_success:
@@ -297,7 +297,10 @@ class Person(db.Model):
 
 
     # doesn't throw errors; sets error column if error
-    def refresh(self, my_refsets, high_priority=False):
+    def refresh(self, my_refsets=None, high_priority=False):
+
+        if not my_refsets:
+            my_refsets = get_refsets()
 
         print u"* refreshing {} ({})".format(self.orcid_id, self.full_name)
         self.error = None
@@ -1245,7 +1248,7 @@ def get_refsets():
         print u"Not loading refsets because IS_LOCAL. Will not set percentiles when creating or refreshing profiles."
     else:
         refsets = shortcut_all_percentile_refsets()
-    print u"finished with refsets in {}s".format(elapsed(start_time))
+    print u"finished loading refsets in {}s".format(elapsed(start_time))
     return refsets
 
 refsets = get_refsets()
