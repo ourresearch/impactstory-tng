@@ -735,10 +735,12 @@ class Product(db.Model):
         resp = defaultdict(int)
         title_lookup = {
             "Librarian": "Librarian",
+            "Student  > Bachelor": "Undergrad Student",
             "Student (Bachelor)": "Undergrad Student",
             "Student (Master)": "Masters Student",
             "Student (Postgraduate)": "Masters Student",
             "Student  > Master": "Masters Student",
+            "Student  > Postgraduate": "Masters Student",
             "Doctoral Student": "PhD Student",
             "Ph.D. Student": "PhD Student",
             "Student  > Doctoral Student": "PhD Student",
@@ -747,7 +749,10 @@ class Product(db.Model):
             "Professor": "Faculty",
             "Associate Professor": "Faculty",
             "Assistant Professor": "Faculty",
+            "Professor > Associate Professor": "Faculty",
+            "Professor > Assistant Professor": "Faculty",
             "Senior Lecturer": "Faculty",
+            "Lecturer > Senior Lecturer": "Faculty",
             "Lecturer": "Faculty",
             "Researcher (at an Academic Institution)": "Faculty",
             "Researcher (at a non-Academic Institution)": "Researcher (non-academic)",
