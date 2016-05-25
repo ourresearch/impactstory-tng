@@ -347,7 +347,6 @@ def orcid_auth():
         token = my_person.get_token()
     except AttributeError:  # my_person is None. So make a new user
 
-        # @todo: make_person() is untested. Test.
         my_person = make_person(my_orcid_id, high_priority=True)
         token = my_person.get_token()
 
