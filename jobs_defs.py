@@ -157,7 +157,7 @@ q = db.session.query(Person.id)
 update_registry.register(Update(
     job=Person.assign_badges,
     query=q,
-    shortcut_fn=lambda: ["teaching_phd", "global_south_using_mendeley", "interdisciplinarity", "faculty"]
+    shortcut_fn=lambda: ["interdisciplinarity"]
 ))
 
 q = db.session.query(Person.id)
