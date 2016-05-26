@@ -246,6 +246,18 @@ def underscore_to_camelcase(value):
 
     return "".join(capitalized_words)
 
+def chunk_into_n_sublists(input, num_sublists):
+    """
+    returns num_sublists chunks of roughly equal size
+    from http://stackoverflow.com/a/4119142/596939
+    """
+    start = 0
+    for i in xrange(num_sublists):
+        stop = start + len(input[i::num_sublists])
+        yield input[start:stop]
+        start = stop
+
+
 def chunks(l, n):
     """
     Yield successive n-sized chunks from l.
