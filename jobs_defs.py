@@ -19,13 +19,6 @@ update_registry.register(Update(
     queue_id=0
 ))
 
-
-q = db.session.query(Person.id)
-update_registry.register(Update(
-    job=Person.set_hybrid,
-    query=q
-))
-
 q = db.session.query(Person.id)
 update_registry.register(Update(
     job=Person.calculate,
