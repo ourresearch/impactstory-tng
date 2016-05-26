@@ -1032,7 +1032,7 @@ class Product(db.Model):
             "is_oa_repository": self.is_oa_repository,
             "is_open": self.is_open_property,
             "is_open_new": self.is_open,
-            "open_urls": self.open_urls.values(),
+            "open_urls": self.open_urls,
             "sources": [s.to_dict() for s in self.sources],
             "posts": self.posts,
             "events_last_week_count": self.events_last_week_count,
