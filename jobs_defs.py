@@ -16,7 +16,6 @@ q = q.filter(Person.orcid_id != None)
 update_registry.register(Update(
     job=Person.refresh,
     query=q,
-    # shortcut_fn=person.shortcut_all_percentile_refsets,
     queue_id=0
 ))
 
@@ -31,7 +30,6 @@ q = db.session.query(Person.id)
 update_registry.register(Update(
     job=Person.calculate,
     query=q,
-    shortcut_fn=person.shortcut_all_percentile_refsets
 ))
 
 
@@ -137,9 +135,6 @@ update_registry.register(Update(
 
 
 q = db.session.query(Person.id)
-# q = q.filter(Person.campaign.in_(["2015_with_urls"]))
-# q = q.filter(Person.campaign != "2015_with_urls")
-# q = q.filter(Person.campaign.in_(["impactstory_nos", "impactstory_subscribers"]))  #@todo remove this
 # q = q.filter(Person.orcid_id.in_([
 #             "0000-0002-6133-2581",
 #             "0000-0002-0159-2197",
@@ -149,23 +144,21 @@ q = db.session.query(Person.id)
 #             "0000-0001-6728-7745"]))
 update_registry.register(Update(
     job=Person.set_badge_percentiles,
-    query=q,
-    shortcut_fn=person.shortcut_badge_percentile_refsets
+    query=q
 ))
 
 q = db.session.query(Person.id)
 update_registry.register(Update(
     job=Person.assign_badges,
     query=q,
-    shortcut_fn=lambda: ["interdisciplinarity"]
+    # shortcut_fn=lambda: ["interdisciplinarity"]
 ))
 
 q = db.session.query(Person.id)
 # q = q.filter(Person.updated < '2016-04-10 10:00:51.972209')
 update_registry.register(Update(
     job=Person.refresh_from_db,
-    query=q,
-    shortcut_fn=person.shortcut_all_percentile_refsets
+    query=q
 ))
 
 q = db.session.query(Person.id)

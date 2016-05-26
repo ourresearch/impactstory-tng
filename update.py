@@ -12,10 +12,10 @@ import jobs_defs
 examples of calling this:
 
 # update everything
-python update.py Package.test --limit 10 --chunk 5 --no-rq
+python update.py Person.refresh --limit 10 --chunk 5 --rq
 
-# update one thing
-python update.py Package.test --id cran:BioGeoBEARS  --no-rq
+# update one thing not using rq
+python update.py Package.test --id 0000-1111-2222-3333
 
 """
 

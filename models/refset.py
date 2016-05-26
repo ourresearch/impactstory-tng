@@ -12,9 +12,17 @@ from app import db
 
 from models.badge import Badge
 from models.badge import get_badge_assigner
-from models.person import num_people_in_db
 from util import safe_commit
 from util import chunk_into_n_sublists
+
+def num_people_in_db():
+    # speed optimizations are from https://gist.github.com/hest/8798884
+    count_q = db.session.query(Person)
+    # count_q = count_q.filter(Person.campaign == "2015_with_urls")
+    count_q = count_q.statement.with_only_columns([func.count()]).order_by(None)
+    count = db.session.execute(count_q).scalar()
+    print "refsize count", count
+    return count
 
 def update_refsets():
     print u"getting the badge percentile refsets...."
