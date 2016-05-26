@@ -19,6 +19,7 @@ from models.orcid import OrcidDoesNotExist
 from models.orcid import make_and_populate_orcid_profile
 from models.source import sources_metadata
 from models.source import Source
+from models.refset import Refset
 from models.country import country_info
 from models.top_news import top_news_titles
 from models.oa import is_open_product_id
@@ -53,8 +54,8 @@ from collections import defaultdict
 from requests_oauthlib import OAuth1Session
 from util import update_recursive_sum
 
-def delete_person(orcid_id):
 
+def delete_person(orcid_id):
     # also need delete all the badges, products
     product.Product.query.filter_by(orcid_id=orcid_id).delete()
     badge.Badge.query.filter_by(orcid_id=orcid_id).delete()
@@ -86,7 +87,7 @@ def make_person(dirty_orcid_id, high_priority=False):
     my_person = Person(orcid_id=orcid_id)
     db.session.add(my_person)
     print u"\nin make_person: made new person for {}".format(orcid_id)
-    my_person.refresh(refsets, high_priority=high_priority)
+    my_person.refresh(high_priority=high_priority)
     commit_success = safe_commit(db)
     if not commit_success:
         print u"COMMIT fail on {}".format(orcid_id)
@@ -98,7 +99,7 @@ def make_person(dirty_orcid_id, high_priority=False):
 
 def refresh_profile(orcid_id, high_priority=False):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
-    my_person.refresh(refsets, high_priority=high_priority)
+    my_person.refresh(high_priority=high_priority)
     db.session.merge(my_person)
     commit_success = safe_commit(db)
     if not commit_success:
@@ -154,7 +155,7 @@ def add_or_overwrite_person_from_orcid_id(orcid_id,
         db.session.add(my_person)
         print u"\nmade new person for {}".format(orcid_id)
 
-    my_person.refresh(refsets, high_priority=high_priority)
+    my_person.refresh(high_priority=high_priority)
 
     # now write to the db
     commit_success = safe_commit(db)
@@ -267,16 +268,16 @@ class Person(db.Model):
 
 
     # doesn't have error handling; called by refresh when you want it to be robust
-    def refresh_from_db(self, my_refsets):
+    def refresh_from_db(self):
         print u"* refresh_from_db {}".format(self.orcid_id)
         self.error = None
         start_time = time()
         try:
             print u"** calling call_apis with overwrites false"
-            self.call_apis(my_refsets, overwrite_orcid=False, overwrite_metrics=False)
+            self.call_apis(overwrite_orcid=False, overwrite_metrics=False)
 
             print u"** calling calculate"
-            self.calculate(my_refsets)
+            self.calculate()
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
             raise
@@ -297,11 +298,7 @@ class Person(db.Model):
 
 
     # doesn't throw errors; sets error column if error
-    def refresh(self, my_refsets=None, high_priority=False):
-
-        if not my_refsets:
-            my_refsets = get_refsets()
-
+    def refresh(self, high_priority=False):
         print u"* refreshing {} ({})".format(self.orcid_id, self.full_name)
         self.error = None
         start_time = time()
@@ -310,7 +307,7 @@ class Person(db.Model):
             self.call_apis(high_priority=high_priority)
 
             print u"** calling calculate"
-            self.calculate(my_refsets)
+            self.calculate()
 
             print u"** finished refreshing all {num} products for {orcid_id} ({name}) in {sec}s".format(
                 orcid_id=self.orcid_id,
@@ -384,7 +381,7 @@ class Person(db.Model):
 
 
 
-    def calculate(self, my_refsets):
+    def calculate(self):
         # things with api calls in them, or things needed to make those calls
         start_time = time()
         self.set_publisher()
@@ -412,9 +409,8 @@ class Person(db.Model):
 
         start_time = time()
         self.assign_badges()
-        if my_refsets:
-            print u"** calling set_badge_percentiles"
-            self.set_badge_percentiles(my_refsets)
+        self.set_badge_percentiles()
+
         print u"finished badges part of {method_name} on {num} products in {sec}s".format(
             method_name="calculate".upper(),
             num = len(self.products),
@@ -977,10 +973,18 @@ class Person(db.Model):
                     badge.Badge.query.filter_by(id=already_assigned_badge.id).delete()
 
 
-    def set_badge_percentiles(self, my_refset_list_dict):
+    def set_badge_percentiles(self):
+        badge_names = [my_badge.name for my_badge in self.badges]
+        refsets = Refset.query.filter(Refset.name.in_(badge_names)).all()
+
         for my_badge in self.badges:
             if my_badge.name in badge.all_badge_assigner_names():
-                my_badge.set_percentile(my_refset_list_dict[my_badge.name])
+
+                # from http://stackoverflow.com/a/7125547/596939
+                matching_refset = next((ref for ref in refsets if ref.name==my_badge.name), None)
+
+                if matching_refset:
+                    my_badge.set_percentile(matching_refset.cutoffs)
 
 
     @property
@@ -1198,57 +1202,3 @@ def h_index(citations):
 
 
 
-# This takes a while.  Do it here so is part of expected boot-up.
-
-def num_people_in_db():
-    # from https://gist.github.com/hest/8798884
-    count_q = db.session.query(Person)
-    # count_q = count_q.filter(Person.campaign == "2015_with_urls")
-    count_q = count_q.statement.with_only_columns([func.count()]).order_by(None)
-    count = db.session.execute(count_q).scalar()
-    print "refsize count", count
-    return count
-
-def shortcut_all_percentile_refsets():
-    refsets = shortcut_badge_percentile_refsets()
-    return refsets
-
-def shortcut_badge_percentile_refsets():
-    print u"getting the badge percentile refsets...."
-    refset_list_dict = defaultdict(list)
-    q = db.session.query(
-        badge.Badge.name,
-        badge.Badge.value,
-    )
-    q = q.filter(badge.Badge.value != None)
-    rows = q.all()
-
-    print u"query finished, now set the values in the lists"
-    for row in rows:
-        if row[1]:
-            refset_list_dict[row[0]].append(row[1])
-
-    num_in_refset = num_people_in_db()
-
-    for name, values in refset_list_dict.iteritems():
-        assigner = badge.get_badge_assigner(name)
-        if assigner.pad_percentiles_with_zeros:
-            # pad with zeros for all the people who didn't get the badge
-            values.extend([0] * (num_in_refset - len(values)))
-
-        # now sort
-        refset_list_dict[name] = sorted(values)
-
-    return refset_list_dict
-
-def get_refsets():
-    refsets = None
-    start_time = time()
-    if os.getenv("IS_LOCAL", False) == "True":
-        print u"Not loading refsets because IS_LOCAL. Will not set percentiles when creating or refreshing profiles."
-    else:
-        refsets = shortcut_all_percentile_refsets()
-    print u"finished loading refsets in {}s".format(elapsed(start_time))
-    return refsets
-
-refsets = get_refsets()
