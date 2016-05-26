@@ -16,6 +16,8 @@ from util import safe_commit
 from util import chunk_into_n_sublists
 
 def num_people_in_db():
+    from models.person import Person
+
     # speed optimizations are from https://gist.github.com/hest/8798884
     count_q = db.session.query(Person)
     # count_q = count_q.filter(Person.campaign == "2015_with_urls")
