@@ -29,22 +29,21 @@ def set_mendeley_data(product):
                     doi=product.doi,
                     view='stats')
 
-        else:
+        elif product.title and product.year:
             biblio_title = remove_punctuation(product.title).lower()
             biblio_year = product.year
-            if biblio_title and biblio_year:
-                try:
-                    method = "title"
-                    doc = mendeley_session.catalog.advanced_search(
-                            title=biblio_title,
-                            min_year=biblio_year,
-                            max_year=biblio_year,
-                            view='stats').list(page_size=1).items[0]
-                    mendeley_title = remove_punctuation(doc.title).lower()
-                    if biblio_title != mendeley_title:
-                        return None
-                except (UnicodeEncodeError, IndexError):
+            try:
+                method = "title"
+                doc = mendeley_session.catalog.advanced_search(
+                        title=biblio_title,
+                        min_year=biblio_year,
+                        max_year=biblio_year,
+                        view='stats').list(page_size=1).items[0]
+                mendeley_title = remove_punctuation(doc.title).lower()
+                if biblio_title != mendeley_title:
                     return None
+            except (UnicodeEncodeError, IndexError):
+                return None
 
         if not doc:
             return None
