@@ -416,6 +416,14 @@ class Person(db.Model):
 
 
     def set_is_open(self):
+        for p in self.all_products:
+            if not p.is_open and is_open_product_id(p):
+                # print u"is open! {}".format(p.url)
+                p.is_open = True
+                p.open_urls = {"urls": [p.url]}
+
+
+    def set_is_open_full(self):
 
         total_start_time = time()
         start_time = time()
