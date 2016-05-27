@@ -41,7 +41,7 @@ def update_fn(cls, method_name, obj_id_list, shortcut_data=None, index=1):
 
         method_to_run = getattr(obj, method_name)
 
-        print u"\n{count}: starting {repr}.{method_name}() method".format(
+        print u"\n***\n{count}: starting {repr}.{method_name}() method".format(
             count=count + (num_obj_rows*index),
             repr=obj,
             method_name=method_name
