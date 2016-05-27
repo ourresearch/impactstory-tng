@@ -158,8 +158,8 @@ class Product(db.Model):
 
     def set_oa_from_sherlock(self, high_priority=False):
         try:
-            if self.base_dcoa == "2":
-                url_to_check = self.repo_urls.values()[0][0]
+            if self.base_dcoa=="2":
+                url_to_check = self.repo_urls["urls"][0]
                 host = "repo"
             elif self.doi:
                 url_to_check = self.url
