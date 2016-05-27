@@ -165,7 +165,7 @@ class Product(db.Model):
                 url_to_check = self.url
                 host = "journal"
 
-            url_template = "http://sherlockoa.org/product/{}/{}"
+            url_template = u"http://sherlockoa.org/product/{}/{}"
             url = url_template.format(host, url_to_check)
             # print "checking sherlock with", url
             r = requests.get(url)
