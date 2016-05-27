@@ -50,7 +50,12 @@ def distinct_product_list(new_product, list_so_far):
 
     if not products_with_this_title:
         # print u"add new product {} because new title".format(new_product.normalized_title)
-        return list_so_far + [new_product]
+        if new_product.doi:
+            # don't add if slightly different title if actually has the same doi
+            if not new_product.doi in [p.doi for p in list_so_far if p.doi]:
+                return list_so_far + [new_product]
+        else:
+            return list_so_far + [new_product]
 
     for product_in_list in products_with_this_title:
 
