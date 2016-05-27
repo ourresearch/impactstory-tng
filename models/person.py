@@ -460,7 +460,11 @@ class Person(db.Model):
         print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
         ## and that's a wrap!
+        for p in self.all_products:
+            if not p.is_open:
+                p.open_step = "closed"  # so can tell it didn't error out
         print u"finished all of set_is_open in {}s".format(elapsed(total_start_time, 2))
+
 
     def call_sherlock(self, products):
         if not products:
