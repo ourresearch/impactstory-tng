@@ -27,7 +27,7 @@ from models.country import country_info
 from models.country import get_name_from_iso
 from models.country import map_mendeley_countries
 from models.language import get_language_from_abbreviation
-from models.oa import get_oa_issns
+from models.oa import get_doaj_issns
 from models.orcid import set_biblio_from_biblio_dict
 from models.orcid import get_doi_from_biblio_dict
 from models.orcid import clean_doi
@@ -647,7 +647,7 @@ class Product(db.Model):
         try:
             issns = self.crossref_api_raw["ISSN"]
             for issn in issns:
-                if issn in get_oa_issns():
+                if issn in get_doaj_issns():
                     self.in_doaj = True
             # print u"set in_doaj", self.in_doaj
         except (KeyError, TypeError):
