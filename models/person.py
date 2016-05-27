@@ -22,7 +22,7 @@ from models.source import Source
 from models.refset import Refset
 from models.country import country_info
 from models.top_news import top_news_titles
-from models.oa import is_open_product_id
+from models.oa import check_if_is_open_product_id
 from util import elapsed
 from util import chunks
 from util import date_as_iso_utc
@@ -436,12 +436,15 @@ class Person(db.Model):
             p.repo_urls = {"urls": []}
             p.open_step = None
 
+        print u"starting set_is_open_full with {} products".format(len([p for p in self.all_products if not p.is_open]))
+
         ### first go see if it is open based on its id
         for p in self.all_products:
-            if is_open_product_id(p):
+            open_reason = check_if_is_open_product_id(p)
+            if open_reason:
                 p.is_open = True
                 p.open_urls = {"urls": [p.url]}
-                p.open_step = "local lookup"
+                p.open_step = "local lookup: {}".format(open_reason)
         print u"finished local step of set_is_open in {}s".format(elapsed(start_time, 2))
         print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
@@ -460,10 +463,17 @@ class Person(db.Model):
         print u"finished all of set_is_open in {}s".format(elapsed(total_start_time, 2))
 
     def call_sherlock(self, products):
-        self.set_data_for_all_products("set_oa_from_sherlock", high_priority=True, products=products)
+        if not products:
+            print "empty product list so not calling sherlock"
+            return
+        self.set_data_for_all_products("set_oa_from_sherlock", high_priority=True, include_products=products)
 
 
     def call_base(self, products):
+        if not products:
+            print "empty product list so not calling base"
+            return
+
         titles = []
         # may be more than one product for a given title, so is a dict of lists
         titles_to_products = defaultdict(list)
@@ -498,11 +508,11 @@ class Person(db.Model):
         r = None
         try:
             r = requests.get(url, proxies=proxies, timeout=4)
-            print u"** querying with {} titles took {}s".format(len(titles), elapsed(start_time))
+            # print u"** querying with {} titles took {}s".format(len(titles), elapsed(start_time))
         except requests.exceptions.ConnectionError:
             print u"connection error in set_is_open on {}, skipping.".format(self.orcid_id)
         except requests.Timeout:
-            print u"timeout error in set_is_open on {} {}, skipping.".format(self.orcid_id, self.id)
+            print u"timeout error in set_is_open on {}, skipping.".format(self.orcid_id)
 
         if r and r.status_code != 200:
             print u"problem!  status_code={}".format(r.status_code)
@@ -510,7 +520,6 @@ class Person(db.Model):
             try:
                 data = r.json()["response"]
                 # print "number found:", data["numFound"]
-                print "num docs in this response", len(data["docs"])
                 for doc in data["docs"]:
                     try:
                         matching_products = titles_to_products[normalize(doc["dctitle"])]
@@ -536,7 +545,8 @@ class Person(db.Model):
                 pass
 
 
-        print u"finished base step of set_is_open in {}s".format(elapsed(start_time, 2))
+        print u"finished base step of set_is_open with {} titles in {}s".format(
+            len(titles_to_products), elapsed(start_time, 2))
 
 
     def set_depsy(self):
@@ -613,16 +623,16 @@ class Person(db.Model):
         self.set_products(products_to_add)
 
 
-    def set_data_for_all_products(self, method_name, high_priority=False, products=None):
+    def set_data_for_all_products(self, method_name, high_priority=False, include_products=None):
         start_time = time()
         threads = []
 
         # use all products unless passed a specific set
-        if not products:
-            products = self.products
+        if not include_products:
+            include_products = self.all_products
 
         # start a thread for each product
-        for work in products:
+        for work in include_products:
             method = getattr(work, method_name)
             process = threading.Thread(target=method, args=[high_priority])
             process.start()
@@ -635,7 +645,7 @@ class Person(db.Model):
         # now go see if any of them had errors
         # need to do it this way because can't catch thread failures; have to check
         # object afterwards instead to see if they logged failures
-        for work in self.products:
+        for work in include_products:
             if work.error:
                 # don't print out doi here because that could cause another bug
                 # print u"setting person error; {} for product {}".format(work.error, work.id)
@@ -643,7 +653,7 @@ class Person(db.Model):
 
         print u"finished {method_name} on {num} products in {sec}s".format(
             method_name=method_name.upper(),
-            num = len(self.products),
+            num = len(include_products),
             sec = elapsed(start_time, 2)
         )
 
