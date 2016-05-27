@@ -383,7 +383,7 @@ class Person(db.Model):
         start_time = time()
         self.set_publisher()
         self.set_openness()
-        self.set_is_open()
+        # self.set_is_open()
         self.set_depsy()
         print u"finished api calling part of {method_name} on {num} products in {sec}s".format(
             method_name="calculate".upper(),
