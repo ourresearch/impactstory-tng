@@ -417,7 +417,7 @@ class Person(db.Model):
 
     def set_is_open(self):
         for p in self.all_products:
-            if not p.is_open and is_open_product_id(p):
+            if not p.is_open and check_if_is_open_product_id(p):
                 # print u"is open! {}".format(p.url)
                 p.is_open = True
                 p.open_urls = {"urls": [p.url]}
@@ -527,17 +527,23 @@ class Person(db.Model):
                 data = r.json()["response"]
                 # print "number found:", data["numFound"]
                 for doc in data["docs"]:
+                    base_dcoa = str(doc["dcoa"])
                     try:
                         matching_products = titles_to_products[normalize(doc["dctitle"])]
                         for p in matching_products:
-                            p.base_dcoa = str(doc["dcoa"])
-                            p.base_dcprovider = doc["dcprovider"]
-                            if p.base_dcoa == "1":
+                            if base_dcoa == "1":
+                                # got a 1 hit.  yay!  overwrite no matter what.
                                 p.is_open = True
                                 p.open_urls["urls"] += doc["dcidentifier"]
                                 p.open_step = "base 1"
-                            elif p.base_dcoa == "2":
+                                p.repo_urls["urls"] = {}
+                                p.base_dcoa = base_dcoa
+                                p.base_dcprovider = doc["dcprovider"]
+                            elif base_dcoa == "2" and p.base_dcoa != "1":
+                                # got a 2 hit.  use only if we don't already have a 1.
                                 p.repo_urls["urls"] += doc["dcidentifier"]
+                                p.base_dcoa = base_dcoa
+                                p.base_dcprovider = doc["dcprovider"]
                     except KeyError:
                         # print u"no hit with title {}".format(doc["dctitle"])
                         # print u"normalized: {}".format(normalize(doc["dctitle"]))
