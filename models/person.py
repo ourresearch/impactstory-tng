@@ -435,6 +435,8 @@ class Person(db.Model):
             p.open_urls = {"urls": []}
             p.repo_urls = {"urls": []}
             p.open_step = None
+            p.base_dcoa = None
+            p.base_dcprovider = None
 
         print u"starting set_is_open_full with {} products".format(len([p for p in self.all_products if not p.is_open]))
 
