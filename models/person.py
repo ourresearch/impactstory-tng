@@ -456,9 +456,9 @@ class Person(db.Model):
         print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
         ### check sherlock with all base 2s and all not-yet-open dois
-        products_for_sherlock = [p for p in self.all_products if p.base_dcoa=="2" and not p.is_open]
-        products_for_sherlock += [p for p in self.all_products if p.doi and not p.is_open]
-        self.call_sherlock(products_for_sherlock)
+        products_for_sherlock = set([p for p in self.all_products if p.base_dcoa=="2" and not p.is_open])
+        products_for_sherlock.update([p for p in self.all_products if p.doi and not p.is_open])
+        self.call_sherlock(list(products_for_sherlock))
         print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
         ## and that's a wrap!
