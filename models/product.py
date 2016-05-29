@@ -132,6 +132,7 @@ class Product(db.Model):
     open_step = db.Column(db.Text)
     license_url = db.Column(db.Text)
     tdm_response = db.Column(db.Text)
+    sherlock_response = db.Column(db.Text)
 
     error = db.Column(db.Text)
 
@@ -170,17 +171,29 @@ class Product(db.Model):
                 url_to_check = self.url
                 host = "journal"
 
+            self.sherlock_response = u"sherlock calling: {}".format(host)
+
             url_template = u"http://sherlockoa.org/product/{}/{}"
             url = url_template.format(host, url_to_check)
+
             # print "checking sherlock with", url
             r = requests.get(url)
             if r and r.status_code==200:
                 data = r.json()
-                if data["is_oa"]:
+                if "error" in data:
+                    self.is_open = None
+                    self.sherlock_response = u"sherlock error: {} {}".format(host, data["error"])
+
+                elif data["is_oa"]:
                     print "sherlock says it is open!", url
                     self.is_open = True
                     self.open_urls["urls"] = url_to_check
                     self.open_step = "sherlock {}".format(host)
+                    self.sherlock_response = u"sherlock says: open {}".format(host)
+
+                else:
+                    self.sherlock_response = u"sherlock says: closed {}".format(host)
+
 
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
@@ -189,6 +202,7 @@ class Product(db.Model):
             logging.exception("exception in set_oa_from_sherlock")
             print u"in generic exception handler, so rolling back in case it is needed"
             db.session.rollback()
+            self.sherlock_response = u"sherlock error: exception calling api"
 
 
     def set_biblio_from_orcid(self):

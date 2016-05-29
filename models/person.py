@@ -437,11 +437,14 @@ class Person(db.Model):
             p.open_step = None
             p.base_dcoa = None
             p.base_dcprovider = None
+            p.sherlock_reason = None
 
         print u"starting set_is_open_full with {} products".format(len([p for p in self.all_products if not p.is_open]))
+        print u"STARTING WITH: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
         ### first go see if it is open based on its id
-        for p in self.all_products:
+        products_for_lookup = [p for p in self.all_products if not p.is_open]
+        for p in products_for_lookup:
             open_reason = check_if_is_open_product_id(p)
             if open_reason:
                 p.is_open = True
