@@ -62,7 +62,7 @@ def check_if_is_open_product_id(my_product):
     try:
         journal = my_product.journal
         if journal:
-            if journal in get_doaj_journal_titles()[0:10]:
+            if journal.encode('utf-8') in get_doaj_journal_titles():
                 # print "open: doaj journal name match!"
                 return "doaj journal title"
     except (AttributeError, KeyError, TypeError):
@@ -99,14 +99,9 @@ def check_if_is_open_product_id(my_product):
     return None
 
 
-def UnicodeDictReader(utf8_data, **kwargs):
-    csv_reader = csv.DictReader(utf8_data, **kwargs)
-    for row in csv_reader:
-        yield {key: unicode(value, 'utf-8') for key, value in row.iteritems()}
-
 
 def read_extract_doaj_file():
-    doaj_file = open("data/extract_doaj_20160526_0530_utf8.csv", "r", encoding='utf-8')
+    doaj_file = open("data/extract_doaj_20160526_0530_utf8.csv", "r")
     my_reader = csv.DictReader(doaj_file)
     rows = [row for row in my_reader]
     doaj_file.close()
