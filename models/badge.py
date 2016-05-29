@@ -806,7 +806,6 @@ class oa_advocate(BadgeAssigner):
                 self.candidate_badge.value = person.openness_proportion * 100
                 self.assigned = True
 
-# NEW
 class open_sesame_new_oa(BadgeAssigner):
     display_name = "Open Sesame"
     group = "openness"
@@ -816,9 +815,10 @@ class open_sesame_new_oa(BadgeAssigner):
     show_in_ui = False
 
     def decide_if_assigned(self, person):
-        if person.openness_proportion_all_products:  # the openness_proportion takes into account having enough papers
-            if person.openness_proportion >= 0.1:
-                self.candidate_badge.value = person.openness_proportion * 100
+        openness = person.openness_proportion_all_products
+        if openness:  # the openness_proportion takes into account having enough papers
+            if openness >= 0.1:
+                self.candidate_badge.value = openness * 100
                 self.assigned = True
 
 
