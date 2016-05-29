@@ -437,7 +437,7 @@ class Person(db.Model):
             p.open_step = None
             p.base_dcoa = None
             p.base_dcprovider = None
-            p.sherlock_reason = None
+            p.sherlock_response = None
 
         print u"starting set_is_open_full with {} products".format(len([p for p in self.all_products if not p.is_open]))
         print u"STARTING WITH: {} open\n".format(len([p for p in self.all_products if p.is_open]))
