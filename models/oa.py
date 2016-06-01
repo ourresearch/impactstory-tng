@@ -1,5 +1,6 @@
 import csv
 from operator import itemgetter
+from app import doaj_rows
 
 # for things not in jdap.
 # right now the url fragments and the doi fragments are the same
@@ -101,14 +102,6 @@ def check_if_is_open_product_id(my_product):
 
 
 
-def read_extract_doaj_file():
-    doaj_file = open("data/extract_doaj_20160526_0530_utf8.csv", "r")
-    my_reader = csv.DictReader(doaj_file)
-    rows = [row for row in my_reader]
-    doaj_file.close()
-    return rows
-
-
 def save_extract_doaj_file():
     ## cut and paste these lines into terminal to make the /data/extract_doaj file
 
@@ -139,9 +132,8 @@ def save_extract_doaj_file():
 
 
 def get_doaj_journal_titles():
-    rows = read_extract_doaj_file()
     journal_titles = []
-    for row in rows:
+    for row in doaj_rows:
         for column_name in ['Journal title', 'Alternative title']:
             journal_title = row[column_name]
             if journal_title:
@@ -149,9 +141,8 @@ def get_doaj_journal_titles():
     return journal_titles
 
 def get_doaj_issns():
-    rows = read_extract_doaj_file()
     issns = []
-    for row in rows:
+    for row in doaj_rows:
         for issn_column_name in ['Journal ISSN (print version)', 'Journal EISSN (online version)']:
             issn = row[issn_column_name]
             if issn:

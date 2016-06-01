@@ -11,6 +11,7 @@ from sqlalchemy.pool import Pool
 from util import safe_commit
 from util import elapsed
 from util import HTTPMethodOverrideMiddleware
+from util import read_csv_file
 
 import logging
 import sys
@@ -90,6 +91,7 @@ for i in range(0, 2):  # number of queues to spin up
         Queue("ti-queue-{}".format(i), connection=redis_rq_conn)
     )
 
+doaj_rows = read_csv_file("data/extract_doaj_20160526_0530_utf8.csv")
 
 # imports got here for tables that need auto-created.
 # from models import temp_orcid_profile
