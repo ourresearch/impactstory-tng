@@ -253,6 +253,13 @@ class Product(db.Model):
     def display_authors(self):
         return self.authors_short
 
+    @property
+    def fulltext_url(self):
+        try:
+            return self.open_urls["urls"][0]
+        except (KeyError, IndexError):
+            return None
+
     def set_altmetric_score(self):
         self.altmetric_score = 0
         try:
@@ -1060,7 +1067,8 @@ class Product(db.Model):
             "sources": [s.to_dict() for s in self.sources],
             "posts": self.posts,
             "events_last_week_count": self.events_last_week_count,
-            "genre": self.guess_genre()
+            "genre": self.guess_genre(),
+            "fulltext_url": self.fulltext_url
         }
 
 
