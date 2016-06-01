@@ -94,8 +94,19 @@
             </div>
 
             <div class="content">
-                <div class="title">
-                    <a href="u/{{person.orcid_id}}/p/{{ product.id }}">{{ product.title }}</a>
+                <div class="title-row row">
+                    <div class="title col-md-10">
+                        <a href="u/{{person.orcid_id}}/p/{{ product.id }}">{{ product.title }}</a>
+                    </div>
+                    <div class="fulltext col-md-2">
+                        <a class="val"
+                           target="_blank"
+                           href="{{ product.fulltext_url }}"
+                           ng-show="product.fulltext_url">
+                            [full text]
+                        </a>
+                    </div>
+
                 </div>
                 <div class="under">
                     <span class="year date">{{ product.year }}</span>
