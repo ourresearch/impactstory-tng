@@ -1143,6 +1143,7 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.publication .content .fulltext a {
   font-size: 12px;
   margin-top: 5px;
+  display: none;
 }
 .view-item.publication .content .source-icons a.sort-score {
   margin-right: 5px;
