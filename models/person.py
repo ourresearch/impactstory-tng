@@ -19,9 +19,10 @@ from models.orcid import OrcidDoesNotExist
 from models.orcid import make_and_populate_orcid_profile
 from models.source import sources_metadata
 from models.source import Source
+from models.refset import Refset
 from models.country import country_info
 from models.top_news import top_news_titles
-from models.oa import is_open_product_id
+from models.oa import check_if_is_open_product_id
 from util import elapsed
 from util import chunks
 from util import date_as_iso_utc
@@ -53,8 +54,8 @@ from collections import defaultdict
 from requests_oauthlib import OAuth1Session
 from util import update_recursive_sum
 
-def delete_person(orcid_id):
 
+def delete_person(orcid_id):
     # also need delete all the badges, products
     product.Product.query.filter_by(orcid_id=orcid_id).delete()
     badge.Badge.query.filter_by(orcid_id=orcid_id).delete()
@@ -85,8 +86,8 @@ def make_person(dirty_orcid_id, high_priority=False):
     orcid_id = clean_orcid(dirty_orcid_id)
     my_person = Person(orcid_id=orcid_id)
     db.session.add(my_person)
-    print u"\nmade new person for {}".format(orcid_id)
-    my_person.refresh(refsets, high_priority=high_priority)
+    print u"\nin make_person: made new person for {}".format(orcid_id)
+    my_person.refresh(high_priority=high_priority)
     commit_success = safe_commit(db)
     if not commit_success:
         print u"COMMIT fail on {}".format(orcid_id)
@@ -98,7 +99,7 @@ def make_person(dirty_orcid_id, high_priority=False):
 
 def refresh_profile(orcid_id, high_priority=False):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
-    my_person.refresh(refsets, high_priority=high_priority)
+    my_person.refresh(high_priority=high_priority)
     db.session.merge(my_person)
     commit_success = safe_commit(db)
     if not commit_success:
@@ -154,7 +155,7 @@ def add_or_overwrite_person_from_orcid_id(orcid_id,
         db.session.add(my_person)
         print u"\nmade new person for {}".format(orcid_id)
 
-    my_person.refresh(refsets, high_priority=high_priority)
+    my_person.refresh(high_priority=high_priority)
 
     # now write to the db
     commit_success = safe_commit(db)
@@ -267,16 +268,16 @@ class Person(db.Model):
 
 
     # doesn't have error handling; called by refresh when you want it to be robust
-    def refresh_from_db(self, my_refsets):
+    def refresh_from_db(self):
         print u"* refresh_from_db {}".format(self.orcid_id)
         self.error = None
         start_time = time()
         try:
             print u"** calling call_apis with overwrites false"
-            self.call_apis(my_refsets, overwrite_orcid=False, overwrite_metrics=False)
+            self.call_apis(overwrite_orcid=False, overwrite_metrics=False)
 
             print u"** calling calculate"
-            self.calculate(my_refsets)
+            self.calculate()
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
             raise
@@ -297,8 +298,7 @@ class Person(db.Model):
 
 
     # doesn't throw errors; sets error column if error
-    def refresh(self, my_refsets, high_priority=False):
-
+    def refresh(self, high_priority=False):
         print u"* refreshing {} ({})".format(self.orcid_id, self.full_name)
         self.error = None
         start_time = time()
@@ -307,7 +307,7 @@ class Person(db.Model):
             self.call_apis(high_priority=high_priority)
 
             print u"** calling calculate"
-            self.calculate(my_refsets)
+            self.calculate()
 
             print u"** finished refreshing all {num} products for {orcid_id} ({name}) in {sec}s".format(
                 orcid_id=self.orcid_id,
@@ -334,9 +334,6 @@ class Person(db.Model):
             if self.error:
                 print u"ERROR refreshing person {} {}: {}".format(self.id, self.orcid_id, self.error)
 
-
-    def set_hybrid(self, high_priority=False):
-        self.set_data_for_all_products("set_data_from_hybrid", high_priority)
 
     def set_mendeley(self, high_priority=False):
         self.set_data_for_all_products("set_data_from_mendeley", high_priority)
@@ -381,12 +378,12 @@ class Person(db.Model):
 
 
 
-    def calculate(self, my_refsets):
+    def calculate(self):
         # things with api calls in them, or things needed to make those calls
         start_time = time()
         self.set_publisher()
         self.set_openness()
-        self.set_is_open()
+        # self.set_is_open()
         self.set_depsy()
         print u"finished api calling part of {method_name} on {num} products in {sec}s".format(
             method_name="calculate".upper(),
@@ -409,9 +406,8 @@ class Person(db.Model):
 
         start_time = time()
         self.assign_badges()
-        if my_refsets:
-            print u"** calling set_badge_percentiles"
-            self.set_badge_percentiles(my_refsets)
+        self.set_badge_percentiles()
+
         print u"finished badges part of {method_name} on {num} products in {sec}s".format(
             method_name="calculate".upper(),
             num = len(self.products),
@@ -419,122 +415,153 @@ class Person(db.Model):
         )
 
 
-    def set_is_open_temp(self):
+    def set_is_open(self):
         for p in self.all_products:
-            if not p.is_open and is_open_product_id(p):
+            if not p.is_open and check_if_is_open_product_id(p):
                 # print u"is open! {}".format(p.url)
                 p.is_open = True
-                p.open_url = p.url
-                p.open_urls = {"urls": [p.open_url]}
+                p.open_urls = {"urls": [p.url]}
 
 
-    def set_is_open(self):
+    def set_is_open_full(self):
 
+        total_start_time = time()
         start_time = time()
 
+        #### default everything to closed
+        # could save time by not doing this later: if we found it open once consider it open forever
         for p in self.all_products:
             p.is_open = False
-            p.open_url = None
             p.open_urls = {"urls": []}
+            p.repo_urls = {"urls": []}
+            p.open_step = None
+            p.base_dcoa = None
+            p.base_dcprovider = None
+            p.sherlock_response = None
 
-        # may be more than one product for a given title, so is a dict of lists
-        titles = []
-        titles_to_products = defaultdict(list)
-        for p in self.all_products:
-            if is_open_product_id(p):
-                # print u"is open! {}".format(p.url)
+        print u"starting set_is_open_full with {} products".format(len([p for p in self.all_products if not p.is_open]))
+        print u"STARTING WITH: {} open\n".format(len([p for p in self.all_products if p.is_open]))
+
+        ### first go see if it is open based on its id
+        products_for_lookup = [p for p in self.all_products if not p.is_open]
+        for p in products_for_lookup:
+            open_reason = check_if_is_open_product_id(p)
+            if open_reason:
                 p.is_open = True
-                p.open_url = p.url
-                p.open_urls = {"urls": [p.open_url]}
+                p.open_urls = {"urls": [p.url]}
+                p.open_step = "local lookup: {}".format(open_reason)
+        print u"finished local step of set_is_open in {}s".format(elapsed(start_time, 2))
+        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
-                # is already open, so don't need to look it up
-                continue
+        ### check base with everything that isn't yet open and has a title
+        products_for_base = [p for p in self.all_products if p.title and not p.is_open]
+        self.call_base(products_for_base)
+        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
-        print u"finished local step of set_is_open in {sec}s".format(
-            sec = elapsed(start_time, 2)
-        )
-        # start_time = time()
+        ### check sherlock with all base 2s and all not-yet-open dois
+        products_for_sherlock = set([p for p in self.all_products if p.base_dcoa=="2" and not p.is_open])
+        products_for_sherlock.update([p for p in self.all_products if p.doi and not p.is_open])
+        self.call_sherlock(list(products_for_sherlock))
+        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
-        # uncomment this when we want to use base again
-        #     if p.title:
-        #         title = p.title
-        #         titles_to_products[normalize(title)].append(p)
-        #
-        #         title = title.lower()
-        #         # can't just replace all punctuation because ' replaced with ? gets no hits
-        #         title = title.replace('"', "?")
-        #         title = title.replace('#', "?")
-        #         title = title.replace('=', "?")
-        #         title = title.replace('&', "?")
-        #         title = title.replace('%', "?")
-        #
-        #         # only bother looking up titles that are at least 3 words long
-        #         title_words = title.split()
-        #         if len(title_words) >= 3:
-        #             # only look up the first 12 words
-        #             title_to_query = u" ".join(title_words[0:12])
-        #             titles.append(title_to_query)
-        #
-        # # for title_group in chunks(titles, 1):
-        # for title_group in chunks(titles, 100):
-        #     titles_string = u"%20OR%20".join([u'%22{}%22'.format(title) for title in title_group])
-        #
-        #     url_template = u"https://api.base-search.net/cgi-bin/BaseHttpSearchInterface.fcgi?func=PerformSearch&query=(dcoa:1%20OR%20dcoa:2)%20AND%20dctitle:({titles_string})&fields=dctitle,dccreator,dcyear,dcrights,dcprovider,dcidentifier,dcoa,dclink&hits=100000&format=json"
-        #     url = url_template.format(titles_string=titles_string)
-        #     # print u"calling {}".format(url)
-        #
-        #     start_time = time()
-        #     proxies = {"https": "http://quotaguard5381:ccbae172bbeb@us-east-static-01.quotaguard.com:9293"}
-        #     try:
-        #         r = requests.get(url, proxies=proxies, timeout=4)
-        #         print u"** querying with {} titles took {}s".format(len(title_group), elapsed(start_time))
-        #     except requests.exceptions.ConnectionError:
-        #         for p in self.all_products:
-        #             p.is_open = None
-        #         print u"connection error in set_is_open on {}, skipping.".format(self.orcid_id)
-        #         return
-        #     except requests.Timeout:
-        #         for p in self.all_products:
-        #             p.is_open = None
-        #         print u"timeout error in set_is_open on {} {}, skipping.".format(self.orcid_id, self.id)
-        #         return
-        #
-        #     if r.status_code != 200:
-        #         print u"problem!  status_code={}".format(r.status_code)
-        #     else:
-        #         try:
-        #             data = r.json()["response"]
-        #             # print "number found:", data["numFound"]
-        #             print "num docs in this response", len(data["docs"])
-        #             for doc in data["docs"]:
-        #                 try:
-        #                     matching_products = titles_to_products[normalize(doc["dctitle"])]
-        #                     for p in matching_products:
-        #                         p.is_open = True
-        #                         p.open_urls["urls"] += doc["dcidentifier"]
-        #                         if not p.base_dcoa or p.base_dcoa == "2":
-        #                             p.base_dcoa = str(doc["dcoa"])
-        #                             p.base_dcprovider = doc["dcprovider"]
-        #
-        #                         # use a doi whenever we have it
-        #                         for identifier in doc["dcidentifier"]:
-        #                             if "doi.org" in identifier or not p.open_url:
-        #                                 p.open_url = identifier
-        #
-        #
-        #                 except KeyError:
-        #                     # print u"no hit with title {}".format(doc["dctitle"])
-        #                     # print u"normalized: {}".format(normalize(doc["dctitle"]))
-        #                     pass
-        #         except ValueError:  # includes simplejson.decoder.JSONDecodeError
-        #             logging.exception("Value Error")
-        #             for p in self.all_products:
-        #                 p.is_open = None
-        #             print u'***Error: decoding JSON has failed on {} {}'.format(self.orcid_id, url)
+        ## and that's a wrap!
+        for p in self.all_products:
+            if not p.is_open:
+                p.open_step = "closed"  # so can tell it didn't error out
+        print u"finished all of set_is_open in {}s".format(elapsed(total_start_time, 2))
 
-        # print u"finished base step of set_is_open in {sec}s".format(
-        #     sec = elapsed(start_time, 2)
-        # )
+
+    def call_sherlock(self, products):
+        if not products:
+            print "empty product list so not calling sherlock"
+            return
+        self.set_data_for_all_products("set_oa_from_sherlock", high_priority=True, include_products=products)
+
+
+    def call_base(self, products):
+        if not products:
+            print "empty product list so not calling base"
+            return
+
+        titles = []
+        # may be more than one product for a given title, so is a dict of lists
+        titles_to_products = defaultdict(list)
+
+        for p in products:
+            title = p.title
+            titles_to_products[normalize(title)].append(p)
+
+            title = title.lower()
+            # can't just replace all punctuation because ' replaced with ? gets no hits
+            title = title.replace('"', "?")
+            title = title.replace('#', "?")
+            title = title.replace('=', "?")
+            title = title.replace('&', "?")
+            title = title.replace('%', "?")
+
+            # only bother looking up titles that are at least 3 words long
+            title_words = title.split()
+            if len(title_words) >= 3:
+                # only look up the first 12 words
+                title_to_query = u" ".join(title_words[0:12])
+                titles.append(title_to_query)
+
+        # now do the lookup in base
+        titles_string = u"%20OR%20".join([u'%22{}%22'.format(title) for title in titles])
+        url_template = u"https://api.base-search.net/cgi-bin/BaseHttpSearchInterface.fcgi?func=PerformSearch&query=(dcoa:1%20OR%20dcoa:2)%20AND%20dctitle:({titles_string})&fields=dctitle,dccreator,dcyear,dcrights,dcprovider,dcidentifier,dcoa,dclink&hits=100000&format=json"
+        url = url_template.format(titles_string=titles_string)
+        # print u"calling {}".format(url)
+
+        start_time = time()
+        proxies = {"https": "http://quotaguard5381:ccbae172bbeb@us-east-static-01.quotaguard.com:9293"}
+        r = None
+        try:
+            r = requests.get(url, proxies=proxies, timeout=6)
+            # print u"** querying with {} titles took {}s".format(len(titles), elapsed(start_time))
+        except requests.exceptions.ConnectionError:
+            print u"connection error in set_is_open on {}, skipping.".format(self.orcid_id)
+        except requests.Timeout:
+            print u"timeout error in set_is_open on {}, skipping.".format(self.orcid_id)
+
+        if r and r.status_code != 200:
+            print u"problem!  status_code={}".format(r.status_code)
+        else:
+            try:
+                data = r.json()["response"]
+                # print "number found:", data["numFound"]
+                for doc in data["docs"]:
+                    base_dcoa = str(doc["dcoa"])
+                    try:
+                        matching_products = titles_to_products[normalize(doc["dctitle"])]
+                        for p in matching_products:
+                            if base_dcoa == "1":
+                                # got a 1 hit.  yay!  overwrite no matter what.
+                                p.is_open = True
+                                p.open_urls["urls"] += doc["dcidentifier"]
+                                p.open_step = "base 1"
+                                p.repo_urls["urls"] = {}
+                                p.base_dcoa = base_dcoa
+                                p.base_dcprovider = doc["dcprovider"]
+                            elif base_dcoa == "2" and p.base_dcoa != "1":
+                                # got a 2 hit.  use only if we don't already have a 1.
+                                p.repo_urls["urls"] += doc["dcidentifier"]
+                                p.base_dcoa = base_dcoa
+                                p.base_dcprovider = doc["dcprovider"]
+                    except KeyError:
+                        # print u"no hit with title {}".format(doc["dctitle"])
+                        # print u"normalized: {}".format(normalize(doc["dctitle"]))
+                        pass
+            except ValueError:  # includes simplejson.decoder.JSONDecodeError
+                logging.exception("Value Error")
+                print u'***Error: decoding JSON has failed on {} {}'.format(self.orcid_id, url)
+            except AttributeError:  # no json
+                # print u"no hit with title {}".format(doc["dctitle"])
+                # print u"normalized: {}".format(normalize(doc["dctitle"]))
+                pass
+
+
+        print u"finished base step of set_is_open with {} titles in {}s".format(
+            len(titles_to_products), elapsed(start_time, 2))
 
 
     def set_depsy(self):
@@ -611,14 +638,16 @@ class Person(db.Model):
         self.set_products(products_to_add)
 
 
-    def set_data_for_all_products(self, method_name, high_priority=False):
+    def set_data_for_all_products(self, method_name, high_priority=False, include_products=None):
         start_time = time()
         threads = []
 
-        # start a thread for each work
-        # threads may block for a while sleeping if run out of API calls
+        # use all products unless passed a specific set
+        if not include_products:
+            include_products = self.all_products
 
-        for work in self.products:
+        # start a thread for each product
+        for work in include_products:
             method = getattr(work, method_name)
             process = threading.Thread(target=method, args=[high_priority])
             process.start()
@@ -631,7 +660,7 @@ class Person(db.Model):
         # now go see if any of them had errors
         # need to do it this way because can't catch thread failures; have to check
         # object afterwards instead to see if they logged failures
-        for work in self.products:
+        for work in include_products:
             if work.error:
                 # don't print out doi here because that could cause another bug
                 # print u"setting person error; {} for product {}".format(work.error, work.id)
@@ -639,7 +668,7 @@ class Person(db.Model):
 
         print u"finished {method_name} on {num} products in {sec}s".format(
             method_name=method_name.upper(),
-            num = len(self.products),
+            num = len(include_products),
             sec = elapsed(start_time, 2)
         )
 
@@ -974,10 +1003,18 @@ class Person(db.Model):
                     badge.Badge.query.filter_by(id=already_assigned_badge.id).delete()
 
 
-    def set_badge_percentiles(self, my_refset_list_dict):
+    def set_badge_percentiles(self):
+        badge_names = [my_badge.name for my_badge in self.badges]
+        refsets = Refset.query.filter(Refset.name.in_(badge_names)).all()
+
         for my_badge in self.badges:
             if my_badge.name in badge.all_badge_assigner_names():
-                my_badge.set_percentile(my_refset_list_dict[my_badge.name])
+
+                # from http://stackoverflow.com/a/7125547/596939
+                matching_refset = next((ref for ref in refsets if ref.name==my_badge.name), None)
+
+                if matching_refset:
+                    my_badge.set_percentile(matching_refset.cutoffs)
 
 
     @property
@@ -1195,57 +1232,3 @@ def h_index(citations):
 
 
 
-# This takes a while.  Do it here so is part of expected boot-up.
-
-def num_people_in_db():
-    # from https://gist.github.com/hest/8798884
-    count_q = db.session.query(Person)
-    # count_q = count_q.filter(Person.campaign == "2015_with_urls")
-    count_q = count_q.statement.with_only_columns([func.count()]).order_by(None)
-    count = db.session.execute(count_q).scalar()
-    print "refsize count", count
-    return count
-
-def shortcut_all_percentile_refsets():
-    refsets = shortcut_badge_percentile_refsets()
-    return refsets
-
-def shortcut_badge_percentile_refsets():
-    print u"getting the badge percentile refsets...."
-    refset_list_dict = defaultdict(list)
-    q = db.session.query(
-        badge.Badge.name,
-        badge.Badge.value,
-    )
-    q = q.filter(badge.Badge.value != None)
-    rows = q.all()
-
-    print u"query finished, now set the values in the lists"
-    for row in rows:
-        if row[1]:
-            refset_list_dict[row[0]].append(row[1])
-
-    num_in_refset = num_people_in_db()
-
-    for name, values in refset_list_dict.iteritems():
-        assigner = badge.get_badge_assigner(name)
-        if assigner.pad_percentiles_with_zeros:
-            # pad with zeros for all the people who didn't get the badge
-            values.extend([0] * (num_in_refset - len(values)))
-
-        # now sort
-        refset_list_dict[name] = sorted(values)
-
-    return refset_list_dict
-
-def get_refsets():
-    refsets = None
-    start_time = time()
-    if os.getenv("IS_LOCAL", False) == "True":
-        print u"Not loading refsets because IS_LOCAL. Will not set percentiles when creating or refreshing profiles."
-    else:
-        refsets = shortcut_all_percentile_refsets()
-    print u"finished with refsets in {}s".format(elapsed(start_time))
-    return refsets
-
-refsets = get_refsets()
