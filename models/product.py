@@ -133,6 +133,7 @@ class Product(db.Model):
     license_url = db.Column(db.Text)
     tdm_response = db.Column(db.Text)
     sherlock_response = db.Column(db.Text)
+    # sherlock_error = db.Column(db.Text)
 
     error = db.Column(db.Text)
 
@@ -164,34 +165,41 @@ class Product(db.Model):
 
     def set_oa_from_sherlock(self, high_priority=False):
         try:
+            sherlock_request_list = []
+            host = 0
             if self.base_dcoa=="2":
-                url_to_check = self.repo_urls["urls"][0]
                 host = "repo"
+                for repo_url in self.repo_urls["urls"]:
+                    sherlock_request_list.append([repo_url, host])
             elif self.doi:
-                url_to_check = self.url
                 host = "journal"
+                sherlock_request_list.append([self.url, host])
+            else:
+                return  # shouldn't have been called
 
-            self.sherlock_response = u"sherlock calling: {}".format(host)
+            self.sherlock_response = u"sherlock error: timeout on {}".format(host)
 
-            url_template = u"http://sherlockoa.org/product/{}/{}"
-            url = url_template.format(host, url_to_check)
-
-            # print "checking sherlock with", url
-            r = requests.get(url)
+            url = u"http://sherlockoa.org/article"
+            r = requests.post(url, data=sherlock_request_list)
             if r and r.status_code==200:
-                data = r.json()
-                if "error" in data:
-                    self.is_open = None
-                    self.sherlock_response = u"sherlock error: {} {}".format(host, data["error"])
-
-                elif data["is_oa"]:
-                    print "sherlock says it is open!", url
+                results = r.json()["results"]
+                open_responses = [r for r in results if r["is_open"]]
+                error_responses = [r for r in results if "error" in r]
+                if open_responses:
+                    response = open_responses[0]
+                    print u"sherlock says it is open!", response["url"]
                     self.is_open = True
-                    self.open_urls["urls"] = url_to_check
-                    self.open_step = "sherlock {}".format(host)
-                    self.sherlock_response = u"sherlock says: open {}".format(host)
-
+                    self.open_urls["urls"] = response["url"]
+                    self.open_step = "sherlock {}".format(response["host"])
+                    self.sherlock_response = u"sherlock says: open {}".format(response["host"])
+                elif error_responses:
+                    response = error_responses[0]
+                    print u"sherlock says error: {} {}".format(response["error"])
+                    self.is_open = None
+                    self.sherlock_response = u"sherlock error: {} {}".format(host, response["error"])
+                    self.sherlock_error = response["error_message"]
                 else:
+                    # print u"sherlock says it is closed:", sherlock_request_list
                     self.sherlock_response = u"sherlock says: closed {}".format(host)
 
 
@@ -199,6 +207,7 @@ class Product(db.Model):
             # let these ones through, don't save anything to db
             raise
         except Exception:
+            print u"sherlock says exception"
             logging.exception("exception in set_oa_from_sherlock")
             print u"in generic exception handler, so rolling back in case it is needed"
             db.session.rollback()

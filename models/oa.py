@@ -11,7 +11,8 @@ preprint_url_fragments = [
     "10.15200/winn.",
     "/peerj.preprints",
     ".figshare.",
-    "10.1101/"  #biorxiv
+    "10.1101/",  #biorxiv
+    "10.15363/"
 ]
 dataset_url_fragments = [
                  "/dryad.",
