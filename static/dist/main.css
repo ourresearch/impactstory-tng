@@ -888,6 +888,10 @@ div.page.person .tab-view.overview .widget.publications .title,
 div.page.product-page .tab-view.overview .widget.publications .title {
   font-size: 16px;
 }
+div.page.person .tab-view.overview .widget.publications .fulltext .val,
+div.page.product-page .tab-view.overview .widget.publications .fulltext .val {
+  display: none;
+}
 div.page.person .tab-view.publications .main-col .title,
 div.page.product-page .tab-view.publications .main-col .title {
   font-size: 18px;
@@ -1134,6 +1138,11 @@ div.page.product-page .row.person-footer .buttons a.btn {
   font-size: 18px;
 }
 .view-item.publication .content .title .extra {
+  display: none;
+}
+.view-item.publication .content .fulltext a {
+  font-size: 12px;
+  margin-top: 5px;
   display: none;
 }
 .view-item.publication .content .source-icons a.sort-score {
