@@ -200,7 +200,7 @@ class Product(db.Model):
                     self.sherlock_response = u"sherlock says: open {}".format(response["host"])
                 elif error_responses:
                     response = error_responses[0]
-                    print u"sherlock says error: {} {}".format(response["error"])
+                    print u"sherlock says error: {} {}".format(host, response["error"])
                     self.is_open = None
                     self.sherlock_response = u"sherlock error: {} {}".format(host, response["error"])
                     self.sherlock_error = response["error_message"]
