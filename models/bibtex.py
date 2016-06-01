@@ -2,7 +2,7 @@ from StringIO import StringIO
 import json, re
 
 from pybtex.database.input import bibtex
-from pybtex.errors import enable_strict_mode, format_error
+from pybtex.errors import format_error
 from pybtex.scanner import PybtexSyntaxError, PybtexError
 
 from util import to_unicode_or_bust
@@ -34,7 +34,6 @@ def _parse_bibtex_entries(entries):
     return biblio_list
 
 def parse(bibtex_contents):
-    enable_strict_mode(True) #throw errors
     ret = []
     cleaned_string = bibtex_contents.replace("\&", "").replace("%", "").strip()
     entries = ["@"+entry for entry in cleaned_string.split("@") if entry]

@@ -8,9 +8,9 @@ from models.person import set_person_claimed_at
 from models.person import link_twitter
 from models.person import refresh_profile
 from models.person import add_or_overwrite_person_from_orcid_id
-from models.person import num_people_in_db
 from models.person import delete_person
 from models.product import get_all_products
+from models.refset import num_people_in_db
 from models.orcid import OrcidDoesNotExist
 from models.orcid import NoOrcidException
 from models.badge import badge_configs
@@ -347,7 +347,6 @@ def orcid_auth():
         token = my_person.get_token()
     except AttributeError:  # my_person is None. So make a new user
 
-        # @todo: make_person() is untested. Test.
         my_person = make_person(my_orcid_id, high_priority=True)
         token = my_person.get_token()
 

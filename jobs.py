@@ -41,7 +41,7 @@ def update_fn(cls, method_name, obj_id_list, shortcut_data=None, index=1):
 
         method_to_run = getattr(obj, method_name)
 
-        print u"\n{count}: starting {repr}.{method_name}() method".format(
+        print u"\n***\n{count}: starting {repr}.{method_name}() method".format(
             count=count + (num_obj_rows*index),
             repr=obj,
             method_name=method_name
@@ -137,21 +137,24 @@ def enqueue_jobs(cls,
 
         if True: # index % 10 == 0 and index != 0:
             num_jobs_remaining = num_jobs - (index * chunk_size)
-            jobs_per_hour_this_chunk = chunk_size / float(elapsed(new_loop_start_time) / 3600)
-            predicted_mins_to_finish = round(
-                (num_jobs_remaining / float(jobs_per_hour_this_chunk)) * 60,
-                1
-            )
-            print "\n\nWe're doing {} jobs per hour. At this rate, done in {}min".format(
-                int(jobs_per_hour_this_chunk),
-                predicted_mins_to_finish
-            )
-            print "(finished chunk {} of {} chunks in {}sec total, {}sec this loop)\n".format(
-                index,
-                num_jobs/chunk_size,
-                elapsed(start_time),
-                elapsed(new_loop_start_time)
-            )
+            try:
+                jobs_per_hour_this_chunk = chunk_size / float(elapsed(new_loop_start_time) / 3600)
+                predicted_mins_to_finish = round(
+                    (num_jobs_remaining / float(jobs_per_hour_this_chunk)) * 60,
+                    1
+                )
+                print "\n\nWe're doing {} jobs per hour. At this rate, done in {}min".format(
+                    int(jobs_per_hour_this_chunk),
+                    predicted_mins_to_finish
+                )
+                print "(finished chunk {} of {} chunks in {}sec total, {}sec this loop)\n".format(
+                    index,
+                    num_jobs/chunk_size,
+                    elapsed(start_time),
+                    elapsed(new_loop_start_time)
+                )
+            except ZeroDivisionError:
+                print u"not printing status because divide by zero"
 
 
             new_loop_start_time = time()
