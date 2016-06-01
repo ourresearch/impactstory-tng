@@ -1,6 +1,7 @@
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import deferred
+from sqlalchemy import or_
 from collections import defaultdict
 import langdetect
 import json
@@ -85,7 +86,11 @@ def distinct_product_list(new_product, list_so_far):
 
 def get_all_products(limit=100):
     q = db.session.query(Product.title, Product.doi, Product.id)
-    q = q.filter(Product.in_doaj==False)
+    q = q.filter( or_(
+        Product.open_step=="closed",
+        Product.open_step=="sherlock journal"
+        )
+    )
     q = q.filter(Product.doi != None)
     q = q.order_by(Product.id)
     q = q.limit(limit)
@@ -256,6 +261,13 @@ class Product(db.Model):
     @property
     def display_authors(self):
         return self.authors_short
+
+    @property
+    def fulltext_url(self):
+        try:
+            return self.open_urls["urls"][0]
+        except (KeyError, IndexError):
+            return None
 
     def set_altmetric_score(self):
         self.altmetric_score = 0
@@ -1064,7 +1076,8 @@ class Product(db.Model):
             "sources": [s.to_dict() for s in self.sources],
             "posts": self.posts,
             "events_last_week_count": self.events_last_week_count,
-            "genre": self.guess_genre()
+            "genre": self.guess_genre(),
+            "fulltext_url": self.fulltext_url
         }
 
 
