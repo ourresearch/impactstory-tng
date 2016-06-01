@@ -498,6 +498,7 @@ class Person(db.Model):
             title = title.replace('=', "?")
             title = title.replace('&', "?")
             title = title.replace('%', "?")
+            title = title.replace('-', "*")
 
             # only bother looking up titles that are at least 3 words long
             title_words = title.split()
