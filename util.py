@@ -10,8 +10,14 @@ import bisect
 import re
 import string
 import collections
+import csv
 
-
+def read_csv_file(filename):
+    fh = open(filename, "r")
+    my_reader = csv.DictReader(filename)
+    rows = [row for row in my_reader]
+    fh.close()
+    return rows
 
 class NoDoiException(Exception):
     pass
