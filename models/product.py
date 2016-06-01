@@ -138,7 +138,7 @@ class Product(db.Model):
     license_url = db.Column(db.Text)
     tdm_response = db.Column(db.Text)
     sherlock_response = db.Column(db.Text)
-    # sherlock_error = db.Column(db.Text)
+    sherlock_error = db.Column(db.Text)
 
     error = db.Column(db.Text)
 
@@ -184,11 +184,12 @@ class Product(db.Model):
 
             self.sherlock_response = u"sherlock error: timeout on {}".format(host)
 
-            url = u"http://sherlockoa.org/article"
-            r = requests.post(url, data=sherlock_request_list)
+            url = u"http://sherlockoa.org/articles"
+            # print u"calling sherlock with", sherlock_request_list
+            r = requests.post(url, json=sherlock_request_list)
             if r and r.status_code==200:
                 results = r.json()["results"]
-                open_responses = [r for r in results if r["is_open"]]
+                open_responses = [r for r in results if r["is_oa"]]
                 error_responses = [r for r in results if "error" in r]
                 if open_responses:
                     response = open_responses[0]
@@ -212,11 +213,9 @@ class Product(db.Model):
             # let these ones through, don't save anything to db
             raise
         except Exception:
-            print u"sherlock says exception"
             logging.exception("exception in set_oa_from_sherlock")
-            print u"in generic exception handler, so rolling back in case it is needed"
+            print u"rolling back in case it is needed"
             db.session.rollback()
-            self.sherlock_response = u"sherlock error: exception calling api"
 
 
     def set_biblio_from_orcid(self):
@@ -266,7 +265,7 @@ class Product(db.Model):
     def fulltext_url(self):
         try:
             return self.open_urls["urls"][0]
-        except (KeyError, IndexError):
+        except (KeyError, IndexError, TypeError):
             return None
 
     def set_altmetric_score(self):
@@ -979,7 +978,7 @@ class Product(db.Model):
     def clean_doi(self):
         # this shouldn't be necessary because we clean DOIs
         # before we put them in. however, there are a few legacy ones that were
-        # not fully cleaned. this is to deal with them.
+        # not fully cleaned. this igis to deal with them.
         return clean_doi(self.doi)
 
     def __repr__(self):

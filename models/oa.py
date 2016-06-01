@@ -12,7 +12,7 @@ preprint_url_fragments = [
     "/peerj.preprints",
     ".figshare.",
     "10.1101/",  #biorxiv
-    "10.15363/"
+    "10.15363/" #thinklab
 ]
 dataset_url_fragments = [
                  "/dryad.",
