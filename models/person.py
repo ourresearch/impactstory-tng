@@ -377,6 +377,11 @@ class Person(db.Model):
         self.products = updated_products
 
 
+    def recalculate_openness(self):
+        self.set_openness()
+        self.assign_badges(limit_to_badges=["open_sesame_new_oa"])
+        self.set_badge_percentiles(limit_to_badges=["open_sesame_new_oa"])
+
 
     def calculate(self):
         # things with api calls in them, or things needed to make those calls
@@ -438,11 +443,19 @@ class Person(db.Model):
             p.base_dcoa = None
             p.base_dcprovider = None
             p.sherlock_response = None
+            p.sherlock_error = None
 
         print u"starting set_is_open_full with {} products".format(len([p for p in self.all_products if not p.is_open]))
         print u"STARTING WITH: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
-        ### first go see if it is open based on its id
+        ### first: user supplied a url?  it is open!
+        for p in self.all_products:
+            if p.user_supplied_fulltext_url:
+                p.is_open = True
+                p.open_urls = {"urls": p.user_supplied_fulltext_url}
+                p.open_step = "user supplied fulltext url"
+
+        ### go see if it is open based on its id
         products_for_lookup = [p for p in self.all_products if not p.is_open]
         for p in products_for_lookup:
             open_reason = check_if_is_open_product_id(p)
@@ -1004,13 +1017,17 @@ class Person(db.Model):
                     badge.Badge.query.filter_by(id=already_assigned_badge.id).delete()
 
 
-    def set_badge_percentiles(self):
+    def set_badge_percentiles(self, limit_to_badges=[]):
         badge_names = [my_badge.name for my_badge in self.badges]
         refsets = Refset.query.filter(Refset.name.in_(badge_names)).all()
 
         for my_badge in self.badges:
-            if my_badge.name in badge.all_badge_assigner_names():
+            if limit_to_badges:
+                if my_badge.name not in limit_to_badges:
+                    # isn't a badge we want to assign right now, so skip
+                    continue
 
+            if my_badge.name in badge.all_badge_assigner_names():
                 # from http://stackoverflow.com/a/7125547/596939
                 matching_refset = next((ref for ref in refsets if ref.name==my_badge.name), None)
 

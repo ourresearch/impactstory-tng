@@ -228,7 +228,21 @@ def profile_endpoint_twitter(screen_name):
 @app.route("/api/person/<orcid_id>", methods=["POST"])
 @app.route("/api/person/<orcid_id>.json", methods=["POST"])
 def refresh_profile_endpoint(orcid_id):
-    my_person = refresh_profile(orcid_id)
+    if request.json:
+        my_person = Person.query.filter_by(orcid_id=orcid_id).first()
+
+        product_id = request.json["product"]["id"]
+        my_product = next(my_product for my_product in my_person.products if my_product.id==product_id)
+        my_product.user_supplied_fulltext_url = request.json["product"]["fulltext_url"]
+        my_product.is_open = True
+        my_product.open_urls = {"urls": my_product.user_supplied_fulltext_url}
+        my_product.open_step = "user supplied fulltext url"
+
+        my_person.recalculate_openness()
+
+        safe_commit(db)
+    else:
+        my_person = refresh_profile(orcid_id)
     return json_resp(my_person.to_dict())
 
 
