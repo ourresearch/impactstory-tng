@@ -139,6 +139,7 @@ class Product(db.Model):
     tdm_response = db.Column(db.Text)
     sherlock_response = db.Column(db.Text)
     sherlock_error = db.Column(db.Text)
+    user_supplied_fulltext_url = db.Column(db.Text)
 
     error = db.Column(db.Text)
 
@@ -263,10 +264,14 @@ class Product(db.Model):
 
     @property
     def fulltext_url(self):
+        if self.user_supplied_fulltext_url:
+            return self.user_supplied_fulltext_url
+
         try:
             return self.open_urls["urls"][0]
         except (KeyError, IndexError, TypeError):
             return None
+
 
     def set_altmetric_score(self):
         self.altmetric_score = 0
