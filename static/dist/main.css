@@ -9,6 +9,9 @@
 .no-fulltext {
   display: none;
 }
+html {
+  height: auto;
+}
 html body {
   font-size: 16px;
   font-family: "Lato", sans-serif;
@@ -1443,10 +1446,10 @@ div.page.settings-page div.setting-panel div.second-q h4 {
   position: fixed;
   top: 50%;
   left: 50%;
-  width: 200px;
-  height: 200px;
-  margin-top: -100px;
-  margin-left: -100px;
+  width: 100px;
+  height: 100px;
+  margin-top: -50px;
+  margin-left: -50px;
 }
 .login-loading {
   display: -webkit-flex;

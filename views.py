@@ -39,6 +39,7 @@ import time
 import json
 import logging
 from urlparse import parse_qs, parse_qsl
+from time import sleep
 
 logger = logging.getLogger("views")
 
