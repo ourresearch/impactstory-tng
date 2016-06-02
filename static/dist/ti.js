@@ -2100,40 +2100,80 @@ angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", f
 angular.module("about-pages/about-data.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-data.tpl.html",
     "<div class=\"page about about-data\">\n" +
-    "\n" +
+    "    <h2>About the data</h2>\n" +
     "\n" +
     "\n" +
     "    <h3 id=\"data-sources\">Data sources</h3>\n" +
-    "    <p>\n" +
-    "        We're currently working on this section. Stay tuned...\n" +
-    "    </p>\n" +
+    "    <ul>\n" +
+    "        <li>\n" +
+    "            <a href=\"http://www.altmetric.com\">Altmetric</a> supplies most of our data for tracking the online\n" +
+    "            impact of publications.\n" +
+    "        </li>\n" +
+    "        <li>\n" +
+    "            <a href=\"https://www.base-search.net/\">BASE</a> helps us find free fulltext for articles.\n" +
+    "        </li>\n" +
+    "        <li>\n" +
+    "            <a href=\"http://dev.mendeley.com\">Mendeley</a> gives us information about how articles are saved on their\n" +
+    "            reference manager platform.\n" +
+    "        </li>\n" +
+    "        <li>\n" +
+    "            <a href=\"http://www.crossref.org\">CrossRef</a> helps us find metadata for articles that have DOIs.\n" +
+    "        </li>\n" +
+    "        <li>\n" +
+    "            <a href=\"http://www.orcid.org\">ORCID</a> provides researcher identity management services that form the backbone\n" +
+    "            of our profile system.\n" +
+    "        </li>\n" +
+    "        <li>\n" +
+    "            <a href=\"http://twitter.com\">Twitter</a> supplies a convenient identity provider for signin (also, more Twitter\n" +
+    "            analytics are on the roadmap).\n" +
+    "        </li>\n" +
+    "    </ul>\n" +
+    "\n" +
+    "    <!--\n" +
     "    <h3 id=\"metrics\">Metrics</h3>\n" +
     "    <p>\n" +
     "        We're currently working on this section. Stay tuned...\n" +
     "    </p>\n" +
+    "    -->\n" +
+    "\n" +
     "    <h3 id=\"publications\">Publications</h3>\n" +
     "    <p>\n" +
-    "        Impactstory imports all your Public works on ORCID that have DOIs (A <a\n" +
-    "            href=\"http://www.apastyle.org/learn/faqs/what-is-doi.aspx\">DOI</a> is a unique\n" +
-    "        ID assigned to most scholarly articles, as well as many other products like datasets and figures).\n" +
-    "    </p>\n" +
-    "    <p>\n" +
-    "        Sometimes a publication might show up on your ORCID, but not on Impactstory. Here's a troubleshooting checklist:\n" +
+    "        Impactstory uses ORCID to find and import your scholarly works.\n" +
+    "        Are you missing publications on Impactstory? Here's how to fix it.\n" +
     "    </p>\n" +
     "    <div class=\"ways-to-fix-missing-publications\">\n" +
-    "        <h4><i class=\"fa fa-check\"></i>Make your works Public on ORCID</h4>\n" +
+    "        <h4>\n" +
+    "            <strong>1.</strong>\n" +
+    "            Get your publications into your ORCID</h4>\n" +
     "        <p>\n" +
-    "            Impactstory can't see your works unless their privacy is set to Public. Luckily, that's easy to do:\n" +
-    "            <img src=\"static/img/gif/orcid-set-public.gif\" width=\"400\">\n" +
-    "        </p>\n" +
-    "        <h4><i class=\"fa fa-check\"></i>Make sure your works have DOIs on ORCID</h4>\n" +
-    "        <p>\n" +
-    "            Impactstory needs DOIs to work.\n" +
-    "            But if you entered your ORCID works via BibTeX in the past, the DOIs for your works may have\n" +
-    "            not been added correctly. You can fix that by re-adding the works using ORCID's <em>Scopus</em>\n" +
-    "            importer; these will import the works again, but this time with DOIs:\n" +
+    "            Since we import from ORCID, if your ORCID is missing articles then so are we.\n" +
+    "            Visit your ORCID to make sure it's got all your work. If not,\n" +
+    "            use their <em>Scopus</em> importer to remedy that situation:\n" +
     "            <img src=\"static/img/gif/orcid-import-scopus.gif\" width=\"400\">\n" +
     "        </p>\n" +
+    "\n" +
+    "        <h4>\n" +
+    "            <strong>2.</strong>\n" +
+    "            Ensure your works are Public on ORCID\n" +
+    "        </h4>\n" +
+    "        <p>\n" +
+    "            Once you've got all your publications on your ORCID, we need to make sure\n" +
+    "            Impactstory can see them. To do that, make sure their privacy is set to Public.\n" +
+    "            If not, it's easy to fix:\n" +
+    "            <img src=\"static/img/gif/orcid-set-public.gif\" width=\"400\">\n" +
+    "        </p>\n" +
+    "        <h4>\n" +
+    "            <strong>3.</strong>\n" +
+    "            Re-sync Impactstory ORCID\n" +
+    "        </h4>\n" +
+    "        <p>\n" +
+    "           If you've made any changes to your ORCID, they'll get synced over to Impactstory\n" +
+    "            automatically within 24 hours. Or if you're feeling like some instant gratification,\n" +
+    "            you can sync manually from your Settings page: just click the\n" +
+    "            <i class=\"fa fa-gear\"></i> icon at the top right of the page, then\n" +
+    "            click \"Sync with my ORCID now.\"\n" +
+    "        </p>\n" +
+    "        <!--\n" +
     "        <h4><i class=\"fa fa-check\"></i>Get DOIs for your remaining works</h4>\n" +
     "        <p>\n" +
     "            Some small publishers don't assign DOIs. Neither do YouTube, SlideShare, or\n" +
@@ -2146,12 +2186,9 @@ angular.module("about-pages/about-data.tpl.html", []).run(["$templateCache", fun
     "                Archive your articles, slides, datasets, and more.\n" +
     "            </a>\n" +
     "        </p>\n" +
+    "        -->\n" +
     "    </div>\n" +
     "\n" +
-    "    <h3 id=\"engagement-score\">Engagement score</h3>\n" +
-    "    <p>\n" +
-    "        We're currently working on this section. Stay tuned...\n" +
-    "    </p>\n" +
     "\n" +
     "</div>");
 }]);
