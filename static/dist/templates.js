@@ -805,6 +805,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                            <span class=\"subscore {{ subscore.name }}\"\n" +
     "                                  ng-class=\"{ unselected: selectedSubscore && selectedSubscore.name != subscore.name}\"\n" +
     "                                  ng-click=\"toggleSeletedSubscore(subscore)\"\n" +
+    "                                  ng-show=\"subscore.badgesCount\"\n" +
     "                                  ng-repeat=\"subscore in subscores | orderBy: 'sortOrder' | filter: { name: '!fun' }\">\n" +
     "                                <i class=\"fa fa-{{ getBadgeIcon(subscore.name) }}\"></i>\n" +
     "                                <span class=\"number\">{{ subscore.badgesCount }}</span>\n" +
