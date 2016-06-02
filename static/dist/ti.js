@@ -2657,7 +2657,7 @@ angular.module("loading.tpl.html", []).run(["$templateCache", function($template
   $templateCache.put("loading.tpl.html",
     "<div id=\"loading\">\n" +
     "     <md-progress-circular class=\"md-primary\"\n" +
-    "                           md-diameter=\"170\">\n" +
+    "                           md-diameter=\"100px\">\n" +
     "     </md-progress-circular>\n" +
     "</div>");
 }]);
@@ -3710,7 +3710,7 @@ angular.module("static-pages/login.tpl.html", []).run(["$templateCache", functio
     "<div class=\"login-loading main\">\n" +
     "  <div class=\"content\">\n" +
     "     <md-progress-circular class=\"md-primary\"\n" +
-    "                           md-diameter=\"170\">\n" +
+    "                           md-diameter=\"100\">\n" +
     "     </md-progress-circular>\n" +
     "     <h2>Getting your profile...</h2>\n" +
     "     <img src=\"static/img/impactstory-logo-sideways.png\">\n" +
@@ -3723,7 +3723,7 @@ angular.module("static-pages/twitter-login.tpl.html", []).run(["$templateCache",
     "<div class=\"login-loading twitter\">\n" +
     "  <div class=\"content\">\n" +
     "     <md-progress-circular class=\"md-primary\"\n" +
-    "                           md-diameter=\"170\">\n" +
+    "                           md-diameter=\"100\">\n" +
     "     </md-progress-circular>\n" +
     "     <h2>Setting your Twitter...</h2>\n" +
     "     <img src=\"static/img/impactstory-logo-sideways.png\">\n" +
