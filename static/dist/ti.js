@@ -1341,6 +1341,7 @@ angular.module('productPage', [
         $scope.product = product
         $scope.d = {}
 
+
         console.log("$scope.product", $scope.product, $routeParams.filter)
 
 
@@ -1438,9 +1439,11 @@ angular.module('productPage', [
                 .cancel('Cancel');
 
             $mdDialog.show(confirm).then(function(result) {
-              $scope.status = 'You decided to name your dog ' + result + '.';
+                Person.setFulltextUrl(id, result)
+
+
             }, function() {
-              $scope.status = 'You didn\'t name your dog.';
+                console.log("cancelled the setFulltextUrl dialog")
             });
         }
 
@@ -1681,6 +1684,16 @@ angular.module('person', [
             })
         }
 
+        function setFulltextUrl(productId, url) {
+            console.log("calling setFulltextUrl with:", productId, url)
+            _.each(data.products, function(myProduct){
+                if (myProduct.id == productId){
+                    console.log("found the correct product to edit", myProduct)
+                    myProduct.fulltext_url = url
+                }
+            })
+        }
+
 
         function getBadgesWithConfigs(configDict) {
             var ret = []
@@ -1704,6 +1717,7 @@ angular.module('person', [
                 })
             },
             getBadgesWithConfigs: getBadgesWithConfigs,
+            setFulltextUrl: setFulltextUrl,
             reload: function(){
                 return load(data.orcid_id, true)
             }
