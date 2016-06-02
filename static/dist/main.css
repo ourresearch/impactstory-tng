@@ -1143,7 +1143,6 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.publication .content .fulltext a {
   font-size: 12px;
   margin-top: 5px;
-  display: none;
 }
 .view-item.publication .content .source-icons a.sort-score {
   margin-right: 5px;
@@ -1303,29 +1302,11 @@ div.page.settings-page div.setting-panel div.second-q h4 {
 .page.product-page .biblio-row .biblio-col .journal a i {
   font-size: 60%;
 }
-.page.product-page .biblio-row .biblio-col .type {
-  font-size: 14px;
-}
-.page.product-page .biblio-row .biblio-col .type .oa {
+.page.product-page .biblio-row .biblio-col .fulltext a {
   color: #fb9d00;
-  margin-right: 20px;
 }
-.page.product-page .biblio-row .biblio-col .type .genre {
-  display: block;
-}
-.page.product-page .biblio-row .biblio-col .score {
-  margin-top: 10px;
-}
-.page.product-page .biblio-row .biblio-col .score img {
-  margin-top: -5px;
-}
-.page.product-page .biblio-row .biblio-col .score .val {
-  font-size: 16px;
-  font-weight: bold;
-}
-.page.product-page .biblio-row .biblio-col .score a.ti-label {
-  font-size: 12px;
-  color: #333;
+.page.product-page .biblio-row .biblio-col .fulltext a i.fa-external-link {
+  font-size: 10px;
 }
 .page.product-page .main-row .tab-view .small-col {
   margin-top: 0px;
