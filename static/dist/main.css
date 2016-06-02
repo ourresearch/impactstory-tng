@@ -9,6 +9,9 @@
 .no-fulltext {
   display: none;
 }
+html {
+  height: auto;
+}
 html body {
   font-size: 16px;
   font-family: "Lato", sans-serif;
@@ -1330,6 +1333,8 @@ div.page.settings-page div.setting-panel div.second-q h4 {
 .page.about-page {
   max-width: 600px;
   margin: 100px auto;
+  font-size: 18px;
+  line-height: 1.6;
 }
 .page.about-page h3 {
   text-transform: capitalize;
@@ -1344,6 +1349,8 @@ div.page.settings-page div.setting-panel div.second-q h4 {
   height: 100px;
 }
 .page.about-data {
+  font-size: 18px;
+  line-height: 1.6;
   max-width: 600px;
   margin: 100px auto;
 }
@@ -1443,10 +1450,10 @@ div.page.settings-page div.setting-panel div.second-q h4 {
   position: fixed;
   top: 50%;
   left: 50%;
-  width: 200px;
-  height: 200px;
-  margin-top: -100px;
-  margin-left: -100px;
+  width: 100px;
+  height: 100px;
+  margin-top: -50px;
+  margin-left: -50px;
 }
 .login-loading {
   display: -webkit-flex;
