@@ -147,12 +147,13 @@ angular.module('productPage', [
         $scope.setFulltextUrl = function(ev){
             console.log("stetting fulltext url for ", id)
             var confirm = $mdDialog.prompt()
-                  .title('Add link to free fulltext')
-                  .textContent('Paste your URL here.')
-                  .placeholder('URL')
-                  .targetEvent(ev)
-                  .ok('Okay!')
-                  .cancel('Cancel');
+                .clickOutsideToClose(true)
+                .title('Add link to free fulltext')
+                .textContent("(No free fulltext anywhere? Consider uploading this work to an open repository like Zenodo or Figshare.)")
+                .placeholder("What's the free fulltext URL?")
+                .targetEvent(ev)
+                .ok('Okay!')
+                .cancel('Cancel');
 
             $mdDialog.show(confirm).then(function(result) {
               $scope.status = 'You decided to name your dog ' + result + '.';
