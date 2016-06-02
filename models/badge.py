@@ -812,7 +812,7 @@ class open_sesame_new_oa(BadgeAssigner):
     description = u"You've published {value}% of your research in open access venues."
     context = u"This level of openness is matched by only {in_the_top_percentile}% of researchers."
     importance = .9
-    show_in_ui = False
+    show_in_ui = True
 
     def decide_if_assigned(self, person):
         openness = person.openness_proportion_all_products
