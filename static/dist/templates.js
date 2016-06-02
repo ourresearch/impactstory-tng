@@ -1330,9 +1330,13 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                    <i class=\"fa fa-unlock-alt\"></i>\n" +
     "                    Free fulltext available\n" +
     "                    <i class=\"fa fa-external-link\"></i>\n" +
-    "\n" +
     "                </a>\n" +
-    "\n" +
+    "            </div>\n" +
+    "            <div class=\"no-fulltext\" ng-show=\"!product.fulltext_url\">\n" +
+    "                <div class=\"btn btn-default\" ng-click=\"setFulltextUrl($event)\">\n" +
+    "                    <i class=\"fa fa-link\"></i>\n" +
+    "                    Add a link to free fulltext\n" +
+    "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -1350,7 +1354,7 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                    <a href=\"https://en.wikipedia.org/wiki/Digital_object_identifier\">\n" +
     "                        this standard unique identifier,\n" +
     "                    </a>\n" +
-    "                    it's hard to track any conversations about the work online or determine its\n" +
+    "                    it's harder to track only conversations about the work, and harder to determine its\n" +
     "                    open access status.\n" +
     "                </p>\n" +
     "                <p>\n" +

@@ -38,9 +38,13 @@
                     <i class="fa fa-unlock-alt"></i>
                     Free fulltext available
                     <i class="fa fa-external-link"></i>
-
                 </a>
-
+            </div>
+            <div class="no-fulltext" ng-show="!product.fulltext_url">
+                <div class="btn btn-default" ng-click="setFulltextUrl($event)">
+                    <i class="fa fa-link"></i>
+                    Add a link to free fulltext
+                </div>
             </div>
         </div>
     </div>
@@ -58,7 +62,7 @@
                     <a href="https://en.wikipedia.org/wiki/Digital_object_identifier">
                         this standard unique identifier,
                     </a>
-                    it's hard to track any conversations about the work online or determine its
+                    it's harder to track only conversations about the work, and harder to determine its
                     open access status.
                 </p>
                 <p>
