@@ -5,6 +5,10 @@
     A set of useful LESS mixins
     More info at: http://lesselements.com
   ---------------------------------------------------*/
+.fulltext,
+.no-fulltext {
+  display: none;
+}
 html body {
   font-size: 16px;
   font-family: "Lato", sans-serif;
