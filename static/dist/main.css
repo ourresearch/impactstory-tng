@@ -1349,6 +1349,8 @@ div.page.settings-page div.setting-panel div.second-q h4 {
   height: 100px;
 }
 .page.about-data {
+  font-size: 18px;
+  line-height: 1.6;
   max-width: 600px;
   margin: 100px auto;
 }
