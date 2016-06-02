@@ -2212,8 +2212,14 @@ angular.module("about-pages/about.tpl.html", []).run(["$templateCache", function
     "          incorporated as a 501(c)(3) nonprofit corporation.\n" +
     "       </p>\n" +
     "       <p>\n" +
-    "           You can contact us via <a href=\"mailto:team@impactstory.org\">email</a> or\n" +
+    "           Contact us via <a href=\"mailto:team@impactstory.org\">email</a> or\n" +
     "           <a href=\"http://twitter.com/impactstory\">Twitter.</a>\n" +
+    "\n" +
+    "       </p>\n" +
+    "       <p>\n" +
+    "           Learn more on our\n" +
+    "           <a href=\"about/data\">data sources</a> and\n" +
+    "           <a href=\"about/achievements\">achievements</a> pages.\n" +
     "       </p>\n" +
     "\n" +
     "      <!--\n" +
