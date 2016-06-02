@@ -20,8 +20,7 @@ html body span:focus {
   border: 0;
 }
 html body div:focus {
-  outline: none;
-  border: 0;
+  outline: none !important;
 }
 html body td:focus {
   outline: none;
@@ -1301,6 +1300,12 @@ div.page.settings-page div.setting-panel div.second-q h4 {
 }
 .page.product-page .biblio-row .biblio-col .journal a i {
   font-size: 60%;
+}
+.page.product-page .biblio-row .biblio-col .no-fulltext {
+  margin: 15px 0 10px;
+}
+.page.product-page .biblio-row .biblio-col .fulltext {
+  margin: 10px 0 5px;
 }
 .page.product-page .biblio-row .biblio-col .fulltext a {
   color: #fb9d00;

@@ -41,7 +41,6 @@ angular.module('productPage', [
                                            $location,
                                            $http,
                                            $mdDialog,
-                                           $location,
                                            Person,
                                            personResp){
 
@@ -143,6 +142,23 @@ angular.module('productPage', [
             else {
                 $location.url(rootUrl + "/" + channel.source_name)
             }
+        }
+
+        $scope.setFulltextUrl = function(ev){
+            console.log("stetting fulltext url for ", id)
+            var confirm = $mdDialog.prompt()
+                  .title('Add link to free fulltext')
+                  .textContent('Paste your URL here.')
+                  .placeholder('URL')
+                  .targetEvent(ev)
+                  .ok('Okay!')
+                  .cancel('Cancel');
+
+            $mdDialog.show(confirm).then(function(result) {
+              $scope.status = 'You decided to name your dog ' + result + '.';
+            }, function() {
+              $scope.status = 'You didn\'t name your dog.';
+            });
         }
 
 
