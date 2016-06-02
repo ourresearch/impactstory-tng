@@ -3,7 +3,7 @@ angular.module('person', [
 
 
 
-    .factory("Person", function($http, $q){
+    .factory("Person", function($http, $q, $route){
 
         var data = {}
         var badgeSortLevel = {
@@ -34,30 +34,33 @@ angular.module('person', [
             console.log("Person Service getting from server:", orcidId)
             return $http.get(url).success(function(resp){
 
-                // clear the data object
+                // clear the data object and put the new data in
                 for (var member in data) delete data[member];
-
-                // put the response in the data object
-                _.each(resp, function(v, k){
-                    data[k] = v
-                })
-
-                // add computed properties
-
-                // total posts
-                var postCounts = _.pluck(data.sources, "posts_count")
-                data.numPosts = postCounts.reduce(function(a, b){return a + b}, 0)
-
-                // date of earliest publication
-                var earliestPubYear = _.min(_.pluck(data.products, "year"))
-                if (earliestPubYear > 0 && earliestPubYear <= 2015) {
-                    data.publishingAge = 2016 - earliestPubYear
-                }
-                else {
-                    data.publishingAge = 1
-                }
+                overwriteData(resp)
 
             })
+        }
+
+        function overwriteData(newData){
+            // put the response in the data object
+            _.each(newData, function(v, k){
+                data[k] = v
+            })
+
+            // add computed properties
+
+            // total posts
+            var postCounts = _.pluck(data.sources, "posts_count")
+            data.numPosts = postCounts.reduce(function(a, b){return a + b}, 0)
+
+            // date of earliest publication
+            var earliestPubYear = _.min(_.pluck(data.products, "year"))
+            if (earliestPubYear > 0 && earliestPubYear <= 2015) {
+                data.publishingAge = 2016 - earliestPubYear
+            }
+            else {
+                data.publishingAge = 1
+            }
         }
 
         function setFulltextUrl(productId, fulltextUrl) {
@@ -66,6 +69,7 @@ angular.module('person', [
                     myProduct.fulltext_url = fulltextUrl
                 }
             });
+            // todo un-hardcode this
             var apiUrl = "https://impactstory.org/api/person/" + data.orcid_id
             var postBody = {
                 product: {
@@ -76,10 +80,15 @@ angular.module('person', [
 
             $http.post(apiUrl, postBody)
                 .success(function(resp){
-                    console.log("we set the fulltext url!"), resp
+                    console.log("we set the fulltext url!", resp)
+                    overwriteData(resp)
+
+                    // todo: figure out if we actually need this
+                    $route.reload()
                 })
                 .error(function(resp){
                     console.log("we failed to set the fulltext url", resp)
+                    $route.reload()
                 })
 
         }

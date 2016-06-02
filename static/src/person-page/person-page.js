@@ -273,7 +273,6 @@ angular.module('personPage', [
                 percent: countryPair[1]
             }
         })
-        console.log("$scope.mendeleyCountries", $scope.mendeleyCountries)
 
         $scope.mendeleyDisciplines = _.map(_.pairs(Person.d.mendeley.subdiscipline_percent), function(pair){
             return {
@@ -281,7 +280,6 @@ angular.module('personPage', [
                 percent: pair[1]
             }
         })
-        console.log("$scope.mendeleyDisciplines", $scope.mendeleyDisciplines)
 
         $scope.postsFilter = function(post){
             if ($scope.selectedChannel) {
