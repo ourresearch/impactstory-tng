@@ -891,6 +891,10 @@ div.page.person .tab-view.overview .widget.publications .title,
 div.page.product-page .tab-view.overview .widget.publications .title {
   font-size: 16px;
 }
+div.page.person .tab-view.overview .widget.publications .fulltext .val,
+div.page.product-page .tab-view.overview .widget.publications .fulltext .val {
+  display: none;
+}
 div.page.person .tab-view.publications .main-col .title,
 div.page.product-page .tab-view.publications .main-col .title {
   font-size: 18px;
