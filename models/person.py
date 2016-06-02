@@ -366,6 +366,7 @@ class Person(db.Model):
             needs_to_be_added = True
             for my_existing_product in self.products:
                 if my_existing_product.orcid_put_code == product_to_add.orcid_put_code:
+
                     # update the product biblio from the most recent orcid api response
                     my_existing_product.orcid_api_raw_json = product_to_add.orcid_api_raw_json
                     my_existing_product.set_biblio_from_orcid()
@@ -388,7 +389,7 @@ class Person(db.Model):
         start_time = time()
         self.set_publisher()
         self.set_openness()
-        # self.set_is_open()
+        self.set_is_open()
         self.set_depsy()
         print u"finished api calling part of {method_name} on {num} products in {sec}s".format(
             method_name="calculate".upper(),
@@ -421,31 +422,23 @@ class Person(db.Model):
 
 
     def set_is_open(self):
-        for p in self.all_products:
-            if not p.is_open and check_if_is_open_product_id(p):
-                # print u"is open! {}".format(p.url)
-                p.is_open = True
-                p.open_urls = {"urls": [p.url]}
-
-
-    def set_is_open_full(self):
 
         total_start_time = time()
         start_time = time()
 
         #### default everything to closed
-        # could save time by not doing this later: if we found it open once consider it open forever
+        # reset everything that we are going to redo
         for p in self.all_products:
-            p.is_open = False
-            p.open_urls = {"urls": []}
-            p.repo_urls = {"urls": []}
-            p.open_step = None
-            p.base_dcoa = None
-            p.base_dcprovider = None
-            p.sherlock_response = None
-            p.sherlock_error = None
+            if not p.is_open:
+                p.open_urls = {"urls": []}
+                p.repo_urls = {"urls": []}
+                p.open_step = None
+                p.base_dcoa = None
+                p.base_dcprovider = None
+                p.sherlock_response = None
+                p.sherlock_error = None
 
-        print u"starting set_is_open_full with {} products".format(len([p for p in self.all_products if not p.is_open]))
+        print u"starting set_is_open with {} products".format(len([p for p in self.all_products if not p.is_open]))
         print u"STARTING WITH: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
         ### first: user supplied a url?  it is open!
@@ -855,7 +848,7 @@ class Person(db.Model):
         return None
 
     @property
-    def openness_proportion_all_products(self):
+    def openness_proportion(self):
         if not self.all_products:
             return None
 
@@ -870,21 +863,6 @@ class Person(db.Model):
 
         return openness
 
-
-    @property
-    def openness_proportion(self):
-        num_open_products_since_2007 = 0
-        num_products_since_2007 = len([p for p in self.products_with_dois if p.year_int > 2007])
-        for p in self.products_with_dois:
-            if p.is_open_property and p.year_int > 2007:
-                num_open_products_since_2007 += 1
-
-        if num_products_since_2007 >= 3:
-            openness = num_open_products_since_2007 / float(num_products_since_2007)
-        else:
-            openness = None
-
-        return openness
 
     def set_openness(self):
         self.openness = self.openness_proportion

@@ -128,7 +128,6 @@ class Product(db.Model):
     poster_counts = db.Column(MutableDict.as_mutable(JSONB))
     event_dates = db.Column(MutableDict.as_mutable(JSONB))
 
-    in_doaj = db.Column(db.Boolean)
     is_open = db.Column(db.Boolean)
     open_urls = db.Column(MutableDict.as_mutable(JSONB))  #change to list when upgrade to sqla 1.1
     repo_urls = db.Column(MutableDict.as_mutable(JSONB))  #change to list when upgrade to sqla 1.1
@@ -136,7 +135,6 @@ class Product(db.Model):
     base_dcprovider = db.Column(db.Text)
     open_step = db.Column(db.Text)
     license_url = db.Column(db.Text)
-    tdm_response = db.Column(db.Text)
     sherlock_response = db.Column(db.Text)
     sherlock_error = db.Column(db.Text)
     user_supplied_fulltext_url = db.Column(db.Text)
@@ -254,7 +252,6 @@ class Product(db.Model):
         self.set_poster_counts()
         self.set_post_details()
         self.set_event_dates()
-        self.set_in_doaj()
         self.set_license_url()
         self.set_publisher()
 
@@ -681,31 +678,6 @@ class Product(db.Model):
         except (KeyError, TypeError):
             pass
 
-    def set_in_doaj(self):
-        self.in_doaj = False
-        try:
-            issns = self.crossref_api_raw["ISSN"]
-            for issn in issns:
-                if issn in get_doaj_issns():
-                    self.in_doaj = True
-            # print u"set in_doaj", self.in_doaj
-        except (KeyError, TypeError):
-            pass
-
-    @property
-    def is_open_property(self):
-        return (self.is_oa_journal or self.is_oa_repository)
-
-    @property
-    def is_oa_journal(self):
-        return self.in_doaj
-
-    @property
-    def is_oa_repository(self):
-        if self.doi:
-            if any(fragment in self.doi for fragment in open_doi_fragments):
-                return True
-        return False
 
     @property
     def sources(self):
@@ -1072,9 +1044,7 @@ class Product(db.Model):
             "altmetric_score": self.altmetric_score,
             "num_posts": self.num_posts,
             "num_mentions": self.num_mentions,
-            "is_oa_journal": self.is_oa_journal,
-            "is_oa_repository": self.is_oa_repository,
-            "is_open": self.is_open_property,
+            "is_open": self.is_open,
             "is_open_new": self.is_open,
             "open_urls": self.open_urls,
             "sources": [s.to_dict() for s in self.sources],
