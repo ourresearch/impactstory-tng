@@ -1684,14 +1684,28 @@ angular.module('person', [
             })
         }
 
-        function setFulltextUrl(productId, url) {
-            console.log("calling setFulltextUrl with:", productId, url)
+        function setFulltextUrl(productId, fulltextUrl) {
             _.each(data.products, function(myProduct){
                 if (myProduct.id == productId){
-                    console.log("found the correct product to edit", myProduct)
-                    myProduct.fulltext_url = url
+                    myProduct.fulltext_url = fulltextUrl
                 }
-            })
+            });
+            var apiUrl = "https://impactstory.org/api/person/" + data.orcid_id
+            var postBody = {
+                product: {
+                    id: productId,
+                    fulltext_url: fulltextUrl
+                }
+            }
+
+            $http.post(apiUrl, postBody)
+                .success(function(resp){
+                    console.log("we set the fulltext url!"), resp
+                })
+                .error(function(resp){
+                    console.log("we failed to set the fulltext url", resp)
+                })
+
         }
 
 
