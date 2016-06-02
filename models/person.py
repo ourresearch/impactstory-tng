@@ -429,6 +429,9 @@ class Person(db.Model):
         #### default everything to closed
         # reset everything that we are going to redo
         for p in self.all_products:
+
+            # p.is_open = False  # uncomment this if want to set open from scratch
+
             if not p.is_open:
                 p.open_urls = {"urls": []}
                 p.repo_urls = {"urls": []}
@@ -520,7 +523,8 @@ class Person(db.Model):
         # print u"calling {}".format(url)
 
         start_time = time()
-        proxies = {"https": "http://quotaguard5381:ccbae172bbeb@us-east-static-01.quotaguard.com:9293"}
+        proxy_url = os.getenv("STATIC_IP_PROXY")
+        proxies = {"https": proxy_url}
         r = None
         try:
             r = requests.get(url, proxies=proxies, timeout=6)

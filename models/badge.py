@@ -783,7 +783,7 @@ class open_science_triathlete(BadgeAssigner):
     importance = .5
 
     def decide_if_assigned(self, person):
-        has_oa_paper = [p.doi for p in person.products_with_dois if p.is_oa_journal]
+        has_oa_paper = [p.doi for p in person.products if p.is_open and p.guess_genre()=="article"]
         has_data = [p.id for p in person.all_products if p.guess_genre()=="dataset"]
         has_software = person.depsy_percentile > 0
 
@@ -816,7 +816,7 @@ class open_sesame_new_oa(BadgeAssigner):
     show_in_ui = False
 
     def decide_if_assigned(self, person):
-        openness = person.openness_proportion_all_products
+        openness = person.openness_proportion
         if openness:  # the openness_proportion takes into account having enough papers
             if openness >= 0.1:
                 self.candidate_badge.value = openness * 100
