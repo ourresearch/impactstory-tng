@@ -806,6 +806,7 @@ class oa_advocate(BadgeAssigner):
                 self.candidate_badge.value = person.openness_proportion * 100
                 self.assigned = True
 
+
 class open_sesame_new_oa(BadgeAssigner):
     display_name = "Open Sesame"
     group = "openness"
