@@ -33,31 +33,14 @@
 
             </div>
 
-            <div class="type">
-                <span class="oa" ng-show="product.is_oa_repository">
+            <div class="fulltext" ng-show="product.fulltext_url">
+                <a href="{{ product.fulltext_url }}">
                     <i class="fa fa-unlock-alt"></i>
-                    Open access
-                </span>
-                <span class="oa" ng-show="product.is_oa_journal">
-                    <i class="fa fa-unlock-alt"></i>
-                    Open Access
-                </span>
-                <span class="genre" ng-show="product.genre != 'article'">
-                    <!--
-                    <i class="fa fa-{{ getGenreIcon(product.genre) }}"></i>
-                    -->
-                    {{ product.genre }}
-                </span>
+                    Free fulltext available
+                    <i class="fa fa-external-link"></i>
 
-
-            </div>
-            <div class="score" ng-show="product.altmetric_score">
-                <a href="https://www.altmetric.com/details/{{ product.altmetric_id }}"
-                   class="ti-label">
-                    <img src="static/img/favicons/altmetric.ico" alt="">
-                    <span class="val">{{ numFormat.short(product.altmetric_score) }}</span>
-                    <span class="ti-label">Altmetric.com score</span>
                 </a>
+
             </div>
         </div>
     </div>

@@ -1325,31 +1325,14 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "\n" +
     "            </div>\n" +
     "\n" +
-    "            <div class=\"type\">\n" +
-    "                <span class=\"oa\" ng-show=\"product.is_oa_repository\">\n" +
+    "            <div class=\"fulltext\" ng-show=\"product.fulltext_url\">\n" +
+    "                <a href=\"{{ product.fulltext_url }}\">\n" +
     "                    <i class=\"fa fa-unlock-alt\"></i>\n" +
-    "                    Open access\n" +
-    "                </span>\n" +
-    "                <span class=\"oa\" ng-show=\"product.is_oa_journal\">\n" +
-    "                    <i class=\"fa fa-unlock-alt\"></i>\n" +
-    "                    Open Access\n" +
-    "                </span>\n" +
-    "                <span class=\"genre\" ng-show=\"product.genre != 'article'\">\n" +
-    "                    <!--\n" +
-    "                    <i class=\"fa fa-{{ getGenreIcon(product.genre) }}\"></i>\n" +
-    "                    -->\n" +
-    "                    {{ product.genre }}\n" +
-    "                </span>\n" +
+    "                    Free fulltext available\n" +
+    "                    <i class=\"fa fa-external-link\"></i>\n" +
     "\n" +
-    "\n" +
-    "            </div>\n" +
-    "            <div class=\"score\" ng-show=\"product.altmetric_score\">\n" +
-    "                <a href=\"https://www.altmetric.com/details/{{ product.altmetric_id }}\"\n" +
-    "                   class=\"ti-label\">\n" +
-    "                    <img src=\"static/img/favicons/altmetric.ico\" alt=\"\">\n" +
-    "                    <span class=\"val\">{{ numFormat.short(product.altmetric_score) }}</span>\n" +
-    "                    <span class=\"ti-label\">Altmetric.com score</span>\n" +
     "                </a>\n" +
+    "\n" +
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
