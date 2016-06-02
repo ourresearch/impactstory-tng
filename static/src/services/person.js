@@ -60,6 +60,16 @@ angular.module('person', [
             })
         }
 
+        function setFulltextUrl(productId, url) {
+            console.log("calling setFulltextUrl with:", productId, url)
+            _.each(data.products, function(myProduct){
+                if (myProduct.id == productId){
+                    console.log("found the correct product to edit", myProduct)
+                    myProduct.fulltext_url = url
+                }
+            })
+        }
+
 
         function getBadgesWithConfigs(configDict) {
             var ret = []
@@ -83,6 +93,7 @@ angular.module('person', [
                 })
             },
             getBadgesWithConfigs: getBadgesWithConfigs,
+            setFulltextUrl: setFulltextUrl,
             reload: function(){
                 return load(data.orcid_id, true)
             }

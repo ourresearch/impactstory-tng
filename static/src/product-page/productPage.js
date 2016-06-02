@@ -59,6 +59,7 @@ angular.module('productPage', [
         $scope.product = product
         $scope.d = {}
 
+
         console.log("$scope.product", $scope.product, $routeParams.filter)
 
 
@@ -156,9 +157,11 @@ angular.module('productPage', [
                 .cancel('Cancel');
 
             $mdDialog.show(confirm).then(function(result) {
-              $scope.status = 'You decided to name your dog ' + result + '.';
+                Person.setFulltextUrl(id, result)
+
+
             }, function() {
-              $scope.status = 'You didn\'t name your dog.';
+                console.log("cancelled the setFulltextUrl dialog")
             });
         }
 
