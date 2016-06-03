@@ -19,6 +19,7 @@ import os
 import requests
 import redis
 import time
+import json
 from collections import defaultdict
 from rq import Queue
 
@@ -91,7 +92,12 @@ for i in range(0, 2):  # number of queues to spin up
         Queue("ti-queue-{}".format(i), connection=redis_rq_conn)
     )
 
-doaj_rows = read_csv_file("data/extract_doaj_20160526_0530_utf8.csv")
+with open("data/doaj_issns.json", "r") as fh:
+    doaj_issns = json.load(fh)
+
+with open("data/doaj_titles.json", "r") as fh:
+    doaj_titles = json.load(fh)
+
 
 # imports got here for tables that need auto-created.
 # from models import temp_orcid_profile

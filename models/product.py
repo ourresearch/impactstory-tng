@@ -28,7 +28,6 @@ from models.country import country_info
 from models.country import get_name_from_iso
 from models.country import map_mendeley_countries
 from models.language import get_language_from_abbreviation
-from models.oa import get_doaj_issns
 from models.orcid import set_biblio_from_biblio_dict
 from models.orcid import get_doi_from_biblio_dict
 from models.orcid import clean_doi
@@ -117,7 +116,8 @@ class Product(db.Model):
     orcid_importer = db.Column(db.Text)
 
     orcid_api_raw_json = deferred(db.Column(JSONB))
-    crossref_api_raw = deferred(db.Column(JSONB))
+    # crossref_api_raw = deferred(db.Column(JSONB))
+    crossref_api_raw = db.Column(JSONB)
     altmetric_api_raw = deferred(db.Column(JSONB))
     # mendeley_api_raw = deferred(db.Column(JSONB)) #  @todo go back to this when done exploring
     mendeley_api_raw = db.Column(JSONB)
