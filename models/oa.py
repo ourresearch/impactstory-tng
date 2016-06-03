@@ -1,9 +1,11 @@
 import csv
+import json
 from time import time
 from util import elapsed
 
 from operator import itemgetter
-from app import doaj_rows
+from app import doaj_issns
+from app import doaj_titles
 
 # for things not in jdap.
 # right now the url fragments and the doi fragments are the same
@@ -53,30 +55,11 @@ def is_oa_license(license_url):
     return license_url in oa_licenses
 
 
-def get_doaj_journal_titles():
-    journal_titles = []
-    for row in doaj_rows:
-        for column_name in ['Journal title', 'Alternative title']:
-            journal_title = row[column_name]
-            if journal_title:
-                journal_titles.append(journal_title)
-    return journal_titles
 
-def get_doaj_issns():
-    issns = []
-    for row in doaj_rows:
-        for issn_column_name in ['Journal ISSN (print version)', 'Journal EISSN (online version)']:
-            issn = row[issn_column_name]
-            if issn:
-                issns.append(issn)
-    return issns
 
-doaj_issns = get_doaj_issns()
-doaj_journals = get_doaj_journal_titles()
 
 def check_if_is_open_product_id(my_product):
     start_time = time()
-    global doaj_issns
 
     try:
         issns = my_product.crossref_api_raw["ISSN"]
@@ -92,12 +75,11 @@ def check_if_is_open_product_id(my_product):
     try:
         journal = my_product.journal
         if journal:
-            if journal.encode('utf-8') in doaj_journals:
+            if journal.encode('utf-8') in doaj_titles:
                 # print "open: doaj journal name match!"
                 return "doaj journal title"
     except (AttributeError, KeyError, TypeError):
         pass
-
 
     try:
         if any(my_product.doi.startswith(prefix) for prefix in get_datacite_doi_prefixes()):
@@ -138,7 +120,8 @@ def save_extract_doaj_file():
     ## cut and paste these lines into terminal to make the /data/extract_doaj file
 
     csvfile = open("data/doaj_20160526_0530_utf8.csv", "rb")
-    outfile = open("data/extract_doaj_20160526_0530_utf8.csv", "wb")
+    issn_outfile = open("data/issn_extract_doaj_20160526_0530_utf8.csv", "wb")
+    title_outfile = open("data/title_extract_doaj_20160526_0530_utf8.csv", "wb")
 
     fieldnames = ('Journal title',
                      'Journal URL',
@@ -150,7 +133,7 @@ def save_extract_doaj_file():
                      'Journal license')
 
     my_reader = csv.DictReader(csvfile)
-    my_writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+    my_writer = csv.DictWriter(issn_outfile, fieldnames=fieldnames)
     my_writer.writeheader()
 
     for row in my_reader:
@@ -160,7 +143,6 @@ def save_extract_doaj_file():
         my_writer.writerow(row_dict)
 
     csvfile.close()
-    outfile.close()
 
 
 
@@ -857,3 +839,40 @@ datacite_doi_prefixes_string = """
 10.20386
 10.20391
 10.2122"""
+
+
+
+
+#### HOW WE BUILT data/doaj_issns.json and data/doaj_journals.json
+
+#
+# def get_doaj_journal_titles(doaj_rows):
+#     journal_titles = []
+#     for row in doaj_rows:
+#         for column_name in ['Journal title', 'Alternative title']:
+#             journal_title = row[column_name]
+#             if journal_title:
+#                 journal_titles.append(journal_title)
+#     return journal_titles
+#
+# def get_doaj_issns(doaj_rows):
+#     issns = []
+#     for row in doaj_rows:
+#         for issn_column_name in ['Journal ISSN (print version)', 'Journal EISSN (online version)']:
+#             issn = row[issn_column_name]
+#             if issn:
+#                 issns.append(issn)
+#     return issns
+#
+# from util import read_csv_file
+#
+# doaj_rows = read_csv_file("data/extract_doaj_20160526_0530_utf8.csv")
+#
+#
+# doaj_issns = get_doaj_issns(doaj_rows)
+# with open("data/doaj_issns.json", "w") as fh:
+#     json.dump(doaj_issns, fh, indent=4)
+#
+# doaj_titles = get_doaj_journal_titles(doaj_rows)
+# with open("data/doaj_titles.json", "w") as fh:
+#     json.dump(doaj_titles, fh, indent=4)
