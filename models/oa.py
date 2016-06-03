@@ -1,4 +1,7 @@
 import csv
+from datetime import time
+from util import elapsed
+
 from operator import itemgetter
 from app import doaj_rows
 
@@ -51,6 +54,7 @@ def is_oa_license(license_url):
 
 
 def check_if_is_open_product_id(my_product):
+    start_time = time()
 
     try:
         issns = my_product.crossref_api_raw["ISSN"]
@@ -62,6 +66,9 @@ def check_if_is_open_product_id(my_product):
     except (AttributeError, KeyError, TypeError):
         pass
 
+    print u"finished doaj issn of check_if_is_open_product_id in {}s".format(elapsed(start_time, 2))
+    start_time = time()
+
     try:
         journal = my_product.journal
         if journal:
@@ -71,6 +78,9 @@ def check_if_is_open_product_id(my_product):
     except (AttributeError, KeyError, TypeError):
         pass
 
+    print u"finished doaj journal of check_if_is_open_product_id in {}s".format(elapsed(start_time, 2))
+    start_time = time()
+
     try:
         if any(my_product.doi.startswith(prefix) for prefix in get_datacite_doi_prefixes()):
             # print "open: datacite match"
@@ -78,12 +88,18 @@ def check_if_is_open_product_id(my_product):
     except (AttributeError, TypeError):
         pass
 
+    print u"finished doaj prefix of check_if_is_open_product_id in {}s".format(elapsed(start_time, 2))
+    start_time = time()
+
     try:
         if is_oa_license(my_product.license_url):
             # print "open: licence!"
             return "license url"
     except (AttributeError, TypeError):
         pass
+
+    print u"finished license url of check_if_is_open_product_id in {}s".format(elapsed(start_time, 2))
+    start_time = time()
 
     try:
         if any(fragment in my_product.doi for fragment in open_doi_fragments):
@@ -98,6 +114,9 @@ def check_if_is_open_product_id(my_product):
             return "url fragment"
     except (AttributeError, TypeError):
         pass
+
+    print u"finished fragments of check_if_is_open_product_id in {}s".format(elapsed(start_time, 2))
+    start_time = time()
 
     return None
 
