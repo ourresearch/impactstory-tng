@@ -25,9 +25,12 @@ def set_mendeley_data(product):
         mendeley_session = get_mendeley_session()
         if product.doi:
             method = "doi"
-            doc = mendeley_session.catalog.by_identifier(
-                    doi=product.doi,
-                    view='stats')
+            try:
+                doc = mendeley_session.catalog.by_identifier(
+                        doi=product.doi,
+                        view='stats')
+            except (UnicodeEncodeError, IndexError):
+                return None
 
         elif product.title and product.year:
             biblio_title = remove_punctuation(product.title).lower()
