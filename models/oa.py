@@ -1,5 +1,5 @@
 import csv
-from datetime import time
+from time import time
 from util import elapsed
 
 from operator import itemgetter
