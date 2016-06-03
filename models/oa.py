@@ -53,12 +53,33 @@ def is_oa_license(license_url):
     return license_url in oa_licenses
 
 
+def get_doaj_journal_titles():
+    journal_titles = []
+    for row in doaj_rows:
+        for column_name in ['Journal title', 'Alternative title']:
+            journal_title = row[column_name]
+            if journal_title:
+                journal_titles.append(journal_title)
+    return journal_titles
+
+def get_doaj_issns():
+    issns = []
+    for row in doaj_rows:
+        for issn_column_name in ['Journal ISSN (print version)', 'Journal EISSN (online version)']:
+            issn = row[issn_column_name]
+            if issn:
+                issns.append(issn)
+    return issns
+
+doaj_issns = get_doaj_issns()
+doaj_journals = get_doaj_journal_titles()
+
 def check_if_is_open_product_id(my_product):
     start_time = time()
+    global doaj_issns
 
     try:
         issns = my_product.crossref_api_raw["ISSN"]
-        doaj_issns = get_doaj_issns()
         for issn in issns:
             if issn in doaj_issns:
                 # print "open: doaj issn match!", my_product.url, my_product.doi
@@ -66,20 +87,17 @@ def check_if_is_open_product_id(my_product):
     except (AttributeError, KeyError, TypeError):
         pass
 
-    print u"finished doaj issn of check_if_is_open_product_id in {}s".format(elapsed(start_time, 2))
-    start_time = time()
+    global doaj_journals
 
     try:
         journal = my_product.journal
         if journal:
-            if journal.encode('utf-8') in get_doaj_journal_titles():
+            if journal.encode('utf-8') in doaj_journals:
                 # print "open: doaj journal name match!"
                 return "doaj journal title"
     except (AttributeError, KeyError, TypeError):
         pass
 
-    print u"finished doaj journal of check_if_is_open_product_id in {}s".format(elapsed(start_time, 2))
-    start_time = time()
 
     try:
         if any(my_product.doi.startswith(prefix) for prefix in get_datacite_doi_prefixes()):
@@ -88,8 +106,6 @@ def check_if_is_open_product_id(my_product):
     except (AttributeError, TypeError):
         pass
 
-    print u"finished doaj prefix of check_if_is_open_product_id in {}s".format(elapsed(start_time, 2))
-    start_time = time()
 
     try:
         if is_oa_license(my_product.license_url):
@@ -98,8 +114,6 @@ def check_if_is_open_product_id(my_product):
     except (AttributeError, TypeError):
         pass
 
-    print u"finished license url of check_if_is_open_product_id in {}s".format(elapsed(start_time, 2))
-    start_time = time()
 
     try:
         if any(fragment in my_product.doi for fragment in open_doi_fragments):
@@ -115,8 +129,6 @@ def check_if_is_open_product_id(my_product):
     except (AttributeError, TypeError):
         pass
 
-    print u"finished fragments of check_if_is_open_product_id in {}s".format(elapsed(start_time, 2))
-    start_time = time()
 
     return None
 
@@ -151,23 +163,7 @@ def save_extract_doaj_file():
     outfile.close()
 
 
-def get_doaj_journal_titles():
-    journal_titles = []
-    for row in doaj_rows:
-        for column_name in ['Journal title', 'Alternative title']:
-            journal_title = row[column_name]
-            if journal_title:
-                journal_titles.append(journal_title)
-    return journal_titles
 
-def get_doaj_issns():
-    issns = []
-    for row in doaj_rows:
-        for issn_column_name in ['Journal ISSN (print version)', 'Journal EISSN (online version)']:
-            issn = row[issn_column_name]
-            if issn:
-                issns.append(issn)
-    return issns
 
 def get_datacite_doi_prefixes():
     datacite_doi_prefixes = ["{}/".format(prefix) for prefix in datacite_doi_prefixes_string.split("\n") if prefix]
