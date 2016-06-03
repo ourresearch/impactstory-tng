@@ -1202,7 +1202,7 @@ class Person(db.Model):
             "twitter": self.twitter,
             "depsy_id": self.depsy_id,
             "campaign": self.campaign,
-            "percent_oa": self.openness_proportion,
+            "percent_fulltext": self.openness_proportion,
 
             "num_posts": self.num_posts,
             "num_mentions": self.num_mentions,
