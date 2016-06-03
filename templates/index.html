@@ -112,18 +112,6 @@
                     <span class="year date">{{ product.year }}</span>
                     <span class="attr">
                         {{ product.journal }}
-                        <span class="oa-icon oa-journal" ng-show="product.is_oa_journal">
-                            <md-tooltip>
-                                This is an Open Access journal
-                            </md-tooltip>
-                            <i class="fa fa-unlock-alt"></i>
-                        </span>
-                        <span class="oa-icon oa-journal" ng-show="product.is_oa_repository && !product.is_oa_journal">
-                            <md-tooltip>
-                                This is an open-access repository
-                            </md-tooltip>
-                            <i class="fa fa-unlock-alt"></i>
-                        </span>
                         <span class="missing-doi" ng-show="!product.doi">
                             <md-tooltip>
                                 We may be missing data for this publication
