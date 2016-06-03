@@ -144,6 +144,7 @@ def is_doi_url(url):
     return False
 
 def clean_doi(dirty_doi):
+
     if not dirty_doi:
         raise NoDoiException("There's no valid DOI.")
 
@@ -155,7 +156,7 @@ def clean_doi(dirty_doi):
 
     matches = re.findall(p, dirty_doi)
     if len(matches) == 0:
-        raise NoDoiException("There's no valid DOI.")
+        raise NoDoiException("There's no valid DOI for {}.".format(dirty_doi))
 
     match = matches[0]
 
@@ -167,6 +168,11 @@ def clean_doi(dirty_doi):
     # remove any url fragments
     if u"#" in resp:
         resp = resp.split(u"#")[0]
+
+    figshare_version_pattern = re.compile(u".*figshare.*\.v\d+$")
+    matches = figshare_version_pattern.findall(resp)
+    if matches:
+        resp = resp.rsplit(u".", 1)[0]
 
     return resp
 
