@@ -1296,8 +1296,19 @@ div.page.settings-page div.setting-panel div.second-q h4 {
 .page.product-page .biblio-row .biblio-col {
   margin-bottom: 10px;
 }
+.page.product-page .biblio-row .biblio-col a.back-to-profile {
+  margin-bottom: 10px;
+  margin-left: -5px;
+  display: inline-block;
+}
+.page.product-page .biblio-row .biblio-col .genre {
+  font-size: 14px;
+}
+.page.product-page .biblio-row .biblio-col .genre i {
+  opacity: .8;
+}
 .page.product-page .biblio-row .biblio-col h2 {
-  margin-top: 10px;
+  margin-top: 0;
 }
 .page.product-page .biblio-row .biblio-col .journal {
   color: #333;

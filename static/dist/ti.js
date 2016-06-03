@@ -1337,6 +1337,7 @@ angular.module('productPage', [
         $scope.person = Person.d
         $scope.sources = product.sources
         $scope.product = product
+        $scope.displayGenre = product.genre.replace("-", " ")
         $scope.d = {}
 
 
@@ -3373,6 +3374,10 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                <i class=\"fa fa-chevron-left\"></i>\n" +
     "                Back to {{ person.first_name }}'s publications\n" +
     "            </a>\n" +
+    "            <div class=\"genre\" ng-show=\"product.genre != 'article' && product.genre != 'other'\">\n" +
+    "                <i class=\"fa fa-{{ getGenreIcon(product.genre) }}\"></i>\n" +
+    "                {{ product.genre.replace(\"-\", \" \") }}\n" +
+    "            </div>\n" +
     "            <h2 class=\"title\">\n" +
     "                {{ product.title }}\n" +
     "            </h2>\n" +
