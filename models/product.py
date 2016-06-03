@@ -37,6 +37,7 @@ from models.oa import preprint_doi_fragments
 from models.oa import open_doi_fragments
 from models.oa import dataset_url_fragments
 from models.oa import preprint_url_fragments
+from models.oa import check_if_is_open_product_id
 from models.mendeley import set_mendeley_data
 
 
@@ -216,6 +217,8 @@ class Product(db.Model):
             print u"rolling back in case it is needed"
             db.session.rollback()
 
+    def check_if_is_open_product_id(self):
+        return check_if_is_open_product_id(self)
 
     def set_biblio_from_orcid(self):
         if not self.orcid_api_raw_json:
