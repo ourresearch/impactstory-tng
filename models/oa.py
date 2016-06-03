@@ -54,9 +54,10 @@ def check_if_is_open_product_id(my_product):
 
     try:
         issns = my_product.crossref_api_raw["ISSN"]
+        doaj_issns = get_doaj_issns()
         for issn in issns:
-            if issn in get_doaj_issns():
-                # print "open: doaj issn match!"
+            if issn in doaj_issns:
+                # print "open: doaj issn match!", my_product.url, my_product.doi
                 return "doaj issn"
     except (AttributeError, KeyError, TypeError):
         pass

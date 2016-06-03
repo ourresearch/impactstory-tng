@@ -13,10 +13,10 @@ import collections
 import csv
 
 def read_csv_file(filename):
-    fh = open(filename, "r")
-    my_reader = csv.DictReader(filename)
-    rows = [row for row in my_reader]
-    fh.close()
+    print filename
+    with open(filename, "r") as csv_file:
+        my_reader = csv.DictReader(csv_file)
+        rows = [row for row in my_reader]
     return rows
 
 class NoDoiException(Exception):
