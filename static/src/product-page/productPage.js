@@ -57,6 +57,7 @@ angular.module('productPage', [
         $scope.person = Person.d
         $scope.sources = product.sources
         $scope.product = product
+        $scope.displayGenre = product.genre.replace("-", " ")
         $scope.d = {}
 
 
