@@ -563,8 +563,9 @@ class Person(db.Model):
                         # print u"normalized: {}".format(normalize(doc["dctitle"]))
                         pass
             except ValueError:  # includes simplejson.decoder.JSONDecodeError
-                logging.exception("Value Error")
-                print u'***Error: decoding JSON has failed on {} {}'.format(self.orcid_id, url)
+                print u'***Error: decoding JSON has failed on {}'.format(self.orcid_id)
+                for p in products:
+                    p.base_dcoa = "base lookup error: json response parsing"
             except AttributeError:  # no json
                 # print u"no hit with title {}".format(doc["dctitle"])
                 # print u"normalized: {}".format(normalize(doc["dctitle"]))
