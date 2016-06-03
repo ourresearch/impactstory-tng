@@ -113,7 +113,7 @@ update_registry.register(Update(
 
 q = db.session.query(Person.id)
 update_registry.register(Update(
-    job=Person.set_publisher,
+    job=Person.call_local_lookup_oa,
     query=q
 ))
 
