@@ -22,7 +22,6 @@ from models.source import Source
 from models.refset import Refset
 from models.country import country_info
 from models.top_news import top_news_titles
-from models.oa import check_if_is_open_product_id
 from util import elapsed
 from util import chunks
 from util import date_as_iso_utc
@@ -453,13 +452,7 @@ class Person(db.Model):
 
         ### go see if it is open based on its id
         products_for_lookup = [p for p in self.all_products if not p.is_open]
-        for p in products_for_lookup:
-            open_reason = check_if_is_open_product_id(p)
-            if open_reason:
-                p.is_open = True
-                p.open_urls = {"urls": [p.url]}
-                p.open_step = "local lookup: {}".format(open_reason)
-        print u"finished local step of set_is_open in {}s".format(elapsed(start_time, 2))
+        self.call_local_lookup_oa(products_for_lookup)
         print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
         ### check base with everything that isn't yet open and has a title
@@ -478,6 +471,25 @@ class Person(db.Model):
             if not p.is_open:
                 p.open_step = "closed"  # so can tell it didn't error out
         print u"finished all of set_is_open in {}s".format(elapsed(total_start_time, 2))
+
+
+    # if not called with products, run on everything
+    def call_local_lookup_oa(self, limit_to_products=None):
+        start_time = time()
+
+        if limit_to_products:
+            products = limit_to_products
+        else:
+            products = self.products
+
+        for p in products:
+            open_reason = p.check_if_is_open_product_id()
+            if open_reason:
+                p.is_open = True
+                p.open_urls = {"urls": [p.url]}
+                p.open_step = "local lookup: {}".format(open_reason)
+        print u"SO FAR: {} open\n".format(len([p for p in products if p.is_open]))
+        print u"finished local step of set_is_open in {}s".format(elapsed(start_time, 2))
 
 
     def call_sherlock(self, products):
