@@ -195,7 +195,7 @@ class Product(db.Model):
                     response = open_responses[0]
                     print u"sherlock says it is open!", response["url"]
                     self.is_open = True
-                    self.open_urls["urls"] = response["url"]
+                    self.open_urls["urls"] = [response["url"]]
                     self.open_step = "sherlock {}".format(response["host"])
                     self.sherlock_response = u"sherlock says: open {}".format(response["host"])
                 elif error_responses:
@@ -268,7 +268,12 @@ class Product(db.Model):
             return self.user_supplied_fulltext_url
 
         try:
-            return self.open_urls["urls"][0]
+            # had a bug where open_urls["urls"] was sometimes a string not a list.
+            # temporary fix
+            if isinstance(self.open_urls["urls"], basestring):
+                return self.open_urls["urls"]
+            else:
+                return self.open_urls["urls"][0]
         except (KeyError, IndexError, TypeError):
             return None
 
