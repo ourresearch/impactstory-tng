@@ -429,7 +429,7 @@ class Person(db.Model):
         # reset everything that we are going to redo
         for p in self.all_products:
 
-            # p.is_open = False  # uncomment this if want to set open from scratch
+            p.is_open = False  # uncomment this if want to set open from scratch
 
             if not p.is_open:
                 p.open_urls = {"urls": []}
