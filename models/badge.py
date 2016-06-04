@@ -792,20 +792,20 @@ class open_science_triathlete(BadgeAssigner):
             self.candidate_badge.value = 1
 
 # OLD
-class oa_advocate(BadgeAssigner):
-    display_name = "Open Sesame"
-    is_for_products = True
-    group = "openness"
-    description = u"You've published {value}% of your research in gold open access venues."
-    context = u"This level of openness is matched by only {in_the_top_percentile}% of researchers."
-    importance = .5
-    show_in_ui = False
-
-    def decide_if_assigned(self, person):
-        if person.openness_proportion:  # the openness_proportion takes into account having enough papers
-            if person.openness_proportion >= 0.25:
-                self.candidate_badge.value = person.openness_proportion * 100
-                self.assigned = True
+# class oa_advocate(BadgeAssigner):
+#     display_name = "Open Sesame"
+#     is_for_products = True
+#     group = "openness"
+#     description = u"You've published {value}% of your research in gold open access venues."
+#     context = u"This level of openness is matched by only {in_the_top_percentile}% of researchers."
+#     importance = .5
+#     show_in_ui = False
+#
+#     def decide_if_assigned(self, person):
+#         if person.openness_proportion:  # the openness_proportion takes into account having enough papers
+#             if person.openness_proportion >= 0.25:
+#                 self.candidate_badge.value = person.openness_proportion * 100
+#                 self.assigned = True
 
 
 class percent_fulltext(BadgeAssigner):
