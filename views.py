@@ -246,6 +246,14 @@ def refresh_profile_endpoint(orcid_id):
         my_person = refresh_profile(orcid_id)
     return json_resp(my_person.to_dict())
 
+@app.route("/api/person/<orcid_id>/fulltext", methods=["POST"])
+@app.route("/api/person/<orcid_id>fulltext.json", methods=["POST"])
+def refresh_fulltext(orcid_id):
+    my_person = Person.query.filter_by(orcid_id=orcid_id).first()
+    my_person.recalculate_openness()
+    safe_commit(db)
+    return json_resp(my_person.to_dict())
+
 
 @app.route("/api/person/<orcid_id>/tweeted-quickly", methods=["POST"])
 def tweeted_quickly(orcid_id):
