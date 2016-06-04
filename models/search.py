@@ -4,13 +4,13 @@ from app import db
 
 def autocomplete(search_str):
 
-    command = """(select first_name || ' ' || family_name as full_name, num_posts, orcid_id, id, 1 as sort_order
+    command = """(select given_names || ' ' || family_name as full_name, num_posts, orcid_id, id, 1 as sort_order
     from person
-    where (first_name || ' ' || family_name) ilike '{str}%'
+    where (given_names || ' ' || family_name) ilike '{str}%'
     order by num_posts desc
     limit 10)
     union
-    (select first_name || ' ' || family_name as full_name, num_posts, orcid_id, id, 2 as sort_order
+    (select given_names || ' ' || family_name as full_name, num_posts, orcid_id, id, 2 as sort_order
     from person
     where family_name ilike '{str}%'
     order by num_posts desc
