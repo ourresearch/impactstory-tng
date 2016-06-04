@@ -119,7 +119,7 @@ def redirects():
     try:
         if request.headers["X-Forwarded-Proto"] == "https":
             pass
-        else:
+        elif "http://" in request.url:
             new_url = request.url.replace("http://", "https://")
     except KeyError:
         #logger.debug(u"There's no X-Forwarded-Proto header; assuming localhost, serving http.")
