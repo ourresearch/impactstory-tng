@@ -379,8 +379,8 @@ class Person(db.Model):
 
     def recalculate_openness(self):
         self.set_openness()
-        self.assign_badges(limit_to_badges=["open_sesame_new_oa"])
-        self.set_badge_percentiles(limit_to_badges=["open_sesame_new_oa"])
+        self.assign_badges(limit_to_badges=["percent_fulltext"])
+        self.set_badge_percentiles(limit_to_badges=["percent_fulltext"])
 
 
     def calculate(self):

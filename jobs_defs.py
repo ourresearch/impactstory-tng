@@ -137,7 +137,7 @@ q = db.session.query(Person.id)
 update_registry.register(Update(
     job=Person.assign_badges,
     query=q,
-    shortcut_fn=lambda: ["open_sesame_new_oa"]
+    shortcut_fn=lambda: ["percent_fulltext"]
 ))
 
 q = db.session.query(Person.id)
