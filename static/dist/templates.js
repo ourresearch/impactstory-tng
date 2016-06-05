@@ -32,7 +32,8 @@ angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", f
     "                </p>\n" +
     "                <p class=\"def openness\" ng-show=\"badgeGroup.name=='openness'\">\n" +
     "                    <strong>Openness</strong> looks at how easy it is for people to actually read and use\n" +
-    "                    your research; publishing in Open Access venues is a big part of this, but so is\n" +
+    "                    your research. Publishing in Open Access journals (gold OA) and uploading your papers\n" +
+    "                    into preprint and institutional repositories (green OA) are important parts of this, as are\n" +
     "                    publishing open data and code, and publishing in ways that build lay and practioner\n" +
     "                    audiences.\n" +
     "\n" +
@@ -1068,8 +1069,9 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                        <span class=\"def openness\" ng-show=\"selectedSubscore.name=='openness'\">\n" +
     "                            <strong>Openness</strong> looks at how easy it is for people to actually read and use\n" +
     "                            your research; publishing in <a href=\"https://en.wikipedia.org/wiki/Open_access\">Open Access</a>\n" +
-    "                            venues is a big part of this, but so is publishing open data and code, and publishing in ways that build lay and practitioner\n" +
-    "                            audiences.\n" +
+    "                            venues is a big part of this, but so is publishing open data and code,\n" +
+    "                            and publishing in ways that build lay and practitioner\n" +
+    "                            audiences.  Currently {{ person.percent_fulltext }}% of your research products are freely available online.\n" +
     "                        </span>\n" +
     "\n" +
     "                        <span class=\"def fun\" ng-show=\"selectedSubscore.name=='fun'\">\n" +
