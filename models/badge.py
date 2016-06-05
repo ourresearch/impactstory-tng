@@ -811,8 +811,8 @@ class open_science_triathlete(BadgeAssigner):
 class percent_fulltext(BadgeAssigner):
     display_name = "Open Access"
     group = "openness"
-    description = u"You've made {value}% of your research openly available online."
-    context = u"This level of openness is matched by only {in_the_top_percentile}% of researchers."
+    description = u"{value}% of your research is freely available to read online."
+    context = u"This level of availability is matched by only {in_the_top_percentile}% of researchers."
     importance = .9
     show_in_ui = True
 
