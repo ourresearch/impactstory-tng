@@ -812,7 +812,7 @@ class percent_fulltext(BadgeAssigner):
     display_name = "Open Access"
     group = "openness"
     description = u"{value}% of your research is free to read online."
-    context = u"This level of availability puts you in {in_the_top_percentile}% of researchers."
+    context = u"This level of availability puts you in the top {in_the_top_percentile}% of researchers."
     importance = .9
     show_in_ui = True
 
