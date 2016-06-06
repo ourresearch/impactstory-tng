@@ -1040,7 +1040,7 @@ class Product(db.Model):
                 "mendeley_url": self.mendeley_url
             },
             "doi": self.doi,
-            "url": u"http://doi.org/{}".format(self.doi),
+            "url": self.url,
             "orcid_id": self.orcid_id,
             "year": self.year,
             "_title": self.display_title,  # duplicate just for api reading help
