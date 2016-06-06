@@ -44,7 +44,7 @@
                     <i class="fa fa-external-link"></i>
                 </a>
             </div>
-            <div class="no-fulltext" ng-show="!product.fulltext_url">
+            <div class="no-fulltext" ng-show="!product.fulltext_url && ownsThisProfile">
                 <div class="btn btn-default" ng-click="setFulltextUrl($event)">
                     <i class="fa fa-link"></i>
                     Add a link to free fulltext

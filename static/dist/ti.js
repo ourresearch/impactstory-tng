@@ -1321,11 +1321,15 @@ angular.module('productPage', [
                                            $location,
                                            $http,
                                            $mdDialog,
+                                           $auth,
                                            Person,
                                            personResp){
 
 
         var possibleChannels = _.pluck(Person.d.sources, "source_name")
+
+        var ownsThisProfile = $auth.isAuthenticated() && $auth.getPayload().sub == Person.d.orcid_id
+
         var id
         id = $routeParams.id
         var product = _.findWhere(Person.d.products, {id: id})
@@ -1338,6 +1342,7 @@ angular.module('productPage', [
         $scope.sources = product.sources
         $scope.product = product
         $scope.displayGenre = product.genre.replace("-", " ")
+        $scope.ownsThisProfile = ownsThisProfile
         $scope.d = {}
 
 
@@ -2069,10 +2074,7 @@ angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", f
     "                </p>\n" +
     "                <p class=\"def fun\" ng-show=\"badgeGroup.name=='fun'\">\n" +
     "                    <strong>Fun</strong> achievements are Not So Serious.\n" +
-    "\n" +
     "                </p>\n" +
-    "\n" +
-    "\n" +
     "            </div>\n" +
     "            <div class=\"badges-wrapper row\"\n" +
     "                 ng-include=\"'badge-item.tpl.html'\"\n" +
@@ -3408,7 +3410,7 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                    <i class=\"fa fa-external-link\"></i>\n" +
     "                </a>\n" +
     "            </div>\n" +
-    "            <div class=\"no-fulltext\" ng-show=\"!product.fulltext_url\">\n" +
+    "            <div class=\"no-fulltext\" ng-show=\"!product.fulltext_url && ownsThisProfile\">\n" +
     "                <div class=\"btn btn-default\" ng-click=\"setFulltextUrl($event)\">\n" +
     "                    <i class=\"fa fa-link\"></i>\n" +
     "                    Add a link to free fulltext\n" +
