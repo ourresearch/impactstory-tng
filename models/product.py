@@ -648,7 +648,7 @@ class Product(db.Model):
                 self.altmetric_api_raw = r.json()
                 # print u"yay nonzero metrics for {doi}".format(doi=self.doi)
             else:
-                self.error = u"got unexpected status_code code {}".format(r.status_code)
+                self.error = u"got unexpected altmetric status_code code {}".format(r.status_code)
 
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
