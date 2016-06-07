@@ -52,6 +52,7 @@ angular.module('personPage', [
                                            $auth,
                                            $mdDialog,
                                            $location,
+                                           $timeout,
                                            Person,
                                            personResp){
 
@@ -77,6 +78,43 @@ angular.module('personPage', [
 
         $scope.profileStatus = "all_good"
         $scope.tab =  $routeParams.tab || "overview"
+
+        // overview tab
+        if (!$routeParams.tab){
+            $scope.tab = "overview"
+        }
+
+        // someone is linking to a specific badge. show overview page behind a popup
+        else if ($routeParams.tab == "achievement") {
+            $scope.tab = "overview"
+            var badgeName = $routeParams.filter
+            console.log("show the badges modal, for this badge", badgeName)
+
+            var dialog = $mdDialog.alert()
+                .clickOutsideToClose(true)
+                .title('This is an alert title')
+                .textContent("badge! " + badgeName)
+                .ok('show me more')
+
+            var showDialog = function(){
+                $mdDialog.show(dialog).then(function(result) {
+                    console.log("cancelled the setFulltextUrl dialog")
+
+                }, function() {
+                    console.log("cancelled the setFulltextUrl dialog")
+                });
+            }
+
+            $timeout(showDialog, 5000)
+
+
+        }
+
+        // the other tabs
+        else {
+            $scope.tab = $routeParams.tab
+        }
+
         $scope.userForm = {}
 
         if (ownsThisProfile && !Person.d.email ) {
@@ -97,6 +135,7 @@ angular.module('personPage', [
         else {
             $scope.showMendeleyDetails = false
         }
+
 
 
         var reloadWithNewEmail = function(){
