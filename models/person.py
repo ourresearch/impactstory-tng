@@ -293,7 +293,7 @@ class Person(db.Model):
         finally:
             self.updated = datetime.datetime.utcnow().isoformat()
             if self.error:
-                print u"ERROR refreshing person {} {}: {}".format(self.id, self.orcid_id, self.error)
+                print u"ERROR refreshing person {}: {}".format(self.id, self.error)
 
 
     # doesn't throw errors; sets error column if error
@@ -331,7 +331,7 @@ class Person(db.Model):
         finally:
             self.updated = datetime.datetime.utcnow().isoformat()
             if self.error:
-                print u"ERROR refreshing person {} {}: {}".format(self.id, self.orcid_id, self.error)
+                print u"ERROR refreshing person {}: {}".format(self.id, self.error)
 
 
     def set_mendeley(self, high_priority=False):
@@ -530,9 +530,10 @@ class Person(db.Model):
 
         # now do the lookup in base
         titles_string = u"%20OR%20".join([u'%22{}%22'.format(title) for title in titles])
+        print u"{}: calling base with query string of length {}".format(self.id, len(titles_string))
         url_template = u"https://api.base-search.net/cgi-bin/BaseHttpSearchInterface.fcgi?func=PerformSearch&query=(dcoa:1%20OR%20dcoa:2)%20AND%20dctitle:({titles_string})&fields=dctitle,dccreator,dcyear,dcrights,dcprovider,dcidentifier,dcoa,dclink&hits=100000&format=json"
         url = url_template.format(titles_string=titles_string)
-        # print u"calling {}".format(url)
+        # print u"{}: calling base with {}".format(self.id, url)
 
         start_time = time()
         proxy_url = os.getenv("STATIC_IP_PROXY")
@@ -546,8 +547,11 @@ class Person(db.Model):
         except requests.Timeout:
             print u"timeout error in set_is_open on {}, skipping.".format(self.orcid_id)
 
-        if r and r.status_code != 200:
-            print u"problem!  status_code={}".format(r.status_code)
+        if r != None and r.status_code != 200:
+            print u"problem searching base for {}! status_code={}".format(self.id, r.status_code)
+            for p in products:
+                p.base_dcoa = u"base query error: status_code={}".format(r.status_code)
+
         else:
             try:
                 data = r.json()["response"]
@@ -576,8 +580,9 @@ class Person(db.Model):
                         pass
             except ValueError:  # includes simplejson.decoder.JSONDecodeError
                 print u'***Error: decoding JSON has failed on {}'.format(self.orcid_id)
+                print u"{}: base status_code {}".format(self.id, r.status_code)
                 for p in products:
-                    p.base_dcoa = "base lookup error: json response parsing"
+                    p.base_dcoa = u"base lookup error: json response parsing"
             except AttributeError:  # no json
                 # print u"no hit with title {}".format(doc["dctitle"])
                 # print u"normalized: {}".format(normalize(doc["dctitle"]))
