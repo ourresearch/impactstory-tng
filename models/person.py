@@ -530,7 +530,7 @@ class Person(db.Model):
 
         # now do the lookup in base
         titles_string = u"%20OR%20".join([u'%22{}%22'.format(title) for title in titles])
-        print u"{}: calling base with query string of length {}".format(self.id, len(titles_string))
+        print u"{}: calling base with query string of length {}, utf8 bits {}".format(self.id, len(titles_string), 8*len(titles_string.encode('utf-8')))
         url_template = u"https://api.base-search.net/cgi-bin/BaseHttpSearchInterface.fcgi?func=PerformSearch&query=(dcoa:1%20OR%20dcoa:2)%20AND%20dctitle:({titles_string})&fields=dctitle,dccreator,dcyear,dcrights,dcprovider,dcidentifier,dcoa,dclink&hits=100000&format=json"
         url = url_template.format(titles_string=titles_string)
         # print u"{}: calling base with {}".format(self.id, url)
