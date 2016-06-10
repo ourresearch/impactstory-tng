@@ -179,6 +179,9 @@ class Product(db.Model):
             elif self.doi:
                 host = "journal"
                 sherlock_request_list.append([self.url, host])
+            elif self.url:
+                host = "journal"
+                sherlock_request_list.append([self.url, host])
             else:
                 return  # shouldn't have been called
 
