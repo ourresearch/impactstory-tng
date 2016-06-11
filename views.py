@@ -234,10 +234,8 @@ def refresh_profile_endpoint(orcid_id):
 
         product_id = request.json["product"]["id"]
         my_product = next(my_product for my_product in my_person.products if my_product.id==product_id)
-        my_product.user_supplied_fulltext_url = request.json["product"]["fulltext_url"]
-        my_product.is_open = True
-        my_product.open_urls = {"urls": my_product.user_supplied_fulltext_url}
-        my_product.open_step = "user supplied fulltext url"
+        url = request.json["product"]["fulltext_url"]
+        my_product.set_oa_from_user_supplied_fulltext_url(url)
 
         my_person.recalculate_openness()
 

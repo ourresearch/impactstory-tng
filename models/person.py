@@ -388,7 +388,7 @@ class Person(db.Model):
         start_time = time()
         self.set_publisher()
         self.set_openness()
-        self.set_is_open()
+        self.set_fulltext_urls()
         self.set_depsy()
         print u"finished api calling part of {method_name} on {num} products in {sec}s".format(
             method_name="calculate".upper(),
@@ -420,7 +420,7 @@ class Person(db.Model):
         )
 
 
-    def set_is_open(self):
+    def set_fulltext_urls(self):
 
         total_start_time = time()
         start_time = time()
@@ -429,10 +429,9 @@ class Person(db.Model):
         # reset everything that we are going to redo
         for p in self.all_products:
 
-            p.is_open = False  # uncomment this if want to set open from scratch
+            p.fulltext_url = None  # uncomment this if want to set open from scratch
 
-            if not p.is_open:
-                p.open_urls = {"urls": []}
+            if not p.has_fulltext_url:
                 p.repo_urls = {"urls": []}
                 p.open_step = None
                 p.base_dcoa = None
@@ -440,37 +439,35 @@ class Person(db.Model):
                 p.sherlock_response = None
                 p.sherlock_error = None
 
-        print u"starting set_is_open with {} total products".format(len([p for p in self.all_products]))
-        print u"STARTING WITH: {} open\n".format(len([p for p in self.all_products if p.is_open]))
+        print u"starting set_fulltext_urls with {} total products".format(len([p for p in self.all_products]))
+        print u"STARTING WITH: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
 
         ### first: user supplied a url?  it is open!
         print u"first making user_supplied_fulltext_url products open"
         for p in self.all_products:
             if p.user_supplied_fulltext_url:
-                p.is_open = True
-                p.open_urls = {"urls": p.user_supplied_fulltext_url}
-                p.open_step = "user supplied fulltext url"
+                p.set_oa_from_user_supplied_fulltext_url(p.user_supplied_fulltext_url)
 
         ### go see if it is open based on its id
-        products_for_lookup = [p for p in self.all_products if not p.is_open]
+        products_for_lookup = [p for p in self.all_products if not p.has_fulltext_url]
         self.call_local_lookup_oa(products_for_lookup)
-        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
+        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
 
         ### check base with everything that isn't yet open and has a title
-        products_for_base = [p for p in self.all_products if p.title and not p.is_open]
+        products_for_base = [p for p in self.all_products if p.title and not p.has_fulltext_url]
         self.call_base(products_for_base)
-        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
+        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
 
         ### check sherlock with all base 2s and all not-yet-open dois
-        products_for_sherlock = set([p for p in self.all_products if not p.is_open])
+        products_for_sherlock = set([p for p in self.all_products if not p.has_fulltext_url])
         self.call_sherlock(list(products_for_sherlock))
-        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.is_open]))
+        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
 
         ## and that's a wrap!
         for p in self.all_products:
-            if not p.is_open:
+            if not p.has_fulltext_url:
                 p.open_step = "closed"  # so can tell it didn't error out
-        print u"finished all of set_is_open in {}s".format(elapsed(total_start_time, 2))
+        print u"finished all of set_fulltext_urls in {}s".format(elapsed(total_start_time, 2))
 
 
     # if not called with products, run on everything
@@ -484,8 +481,8 @@ class Person(db.Model):
 
         for p in products:
             p.set_local_lookup_oa()
-        print u"SO FAR: {} open\n".format(len([p for p in products if p.is_open]))
-        print u"finished local step of set_is_open in {}s".format(elapsed(start_time, 2))
+        print u"SO FAR: {} open\n".format(len([p for p in products if p.has_fulltext_url]))
+        print u"finished local step of set_fulltext_urls in {}s".format(elapsed(start_time, 2))
 
 
     def call_sherlock(self, products):
@@ -539,9 +536,9 @@ class Person(db.Model):
             r = requests.get(url, proxies=proxies, timeout=6)
             # print u"** querying with {} titles took {}s".format(len(titles), elapsed(start_time))
         except requests.exceptions.ConnectionError:
-            print u"connection error in set_is_open on {}, skipping.".format(self.orcid_id)
+            print u"connection error in set_fulltext_urls on {}, skipping.".format(self.orcid_id)
         except requests.Timeout:
-            print u"timeout error in set_is_open on {}, skipping.".format(self.orcid_id)
+            print u"timeout error in set_fulltext_urls on {}, skipping.".format(self.orcid_id)
 
         if r != None and r.status_code != 200:
             print u"problem searching base for {}! status_code={}".format(self.id, r.status_code)
@@ -559,8 +556,7 @@ class Person(db.Model):
                         for p in matching_products:
                             if base_dcoa == "1":
                                 # got a 1 hit.  yay!  overwrite no matter what.
-                                p.is_open = True
-                                p.open_urls["urls"] += doc["dcidentifier"]
+                                p.fulltext_url = doc["dcidentifier"][0]
                                 p.open_step = "base 1"
                                 p.repo_urls["urls"] = {}
                                 p.base_dcoa = base_dcoa
@@ -585,7 +581,7 @@ class Person(db.Model):
                 pass
 
 
-        print u"finished base step of set_is_open with {} titles in {}s".format(
+        print u"finished base step of set_fulltext_urls with {} titles in {}s".format(
             len(titles_to_products), elapsed(start_time, 2))
 
 
@@ -871,7 +867,7 @@ class Person(db.Model):
             return None
 
         num_products = len(self.all_products)
-        num_open_products = len([p for p in self.all_products if p.is_open])
+        num_open_products = len([p for p in self.all_products if p.has_fulltext_url])
 
         # only defined if three or more products
         if num_products >= 3:
