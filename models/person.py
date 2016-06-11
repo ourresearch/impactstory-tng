@@ -32,6 +32,7 @@ from util import NoDoiException
 from util import normalize
 from util import replace_punctuation
 from util import as_proportion
+from util import pick_best_url
 
 from time import time
 from time import sleep
@@ -556,7 +557,7 @@ class Person(db.Model):
                         for p in matching_products:
                             if base_dcoa == "1":
                                 # got a 1 hit.  yay!  overwrite no matter what.
-                                p.fulltext_url = doc["dcidentifier"][0]
+                                p.fulltext_url = pick_best_url(doc["dcidentifier"])
                                 p.open_step = "base 1"
                                 p.repo_urls["urls"] = {}
                                 p.base_dcoa = base_dcoa
