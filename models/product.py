@@ -12,7 +12,8 @@ import re
 import logging
 import iso8601
 import pytz
-import time
+from time import sleep
+from time import time
 import datetime
 
 from app import db
@@ -36,7 +37,7 @@ from models.oa import preprint_doi_fragments
 from models.oa import open_doi_fragments
 from models.oa import dataset_url_fragments
 from models.oa import preprint_url_fragments
-from models.oa import check_if_is_open_product_id
+from models import oa
 from models.mendeley import set_mendeley_data
 
 
@@ -112,6 +113,7 @@ class Product(db.Model):
     authors = deferred(db.Column(db.Text))
     authors_short = db.Column(db.Text)
     url = db.Column(db.Text)
+    arxiv = db.Column(db.Text)
     orcid_put_code = db.Column(db.Text)
     orcid_importer = db.Column(db.Text)
 
@@ -219,9 +221,6 @@ class Product(db.Model):
             logging.exception("exception in set_oa_from_sherlock")
             print u"rolling back in case it is needed"
             db.session.rollback()
-
-    def check_if_is_open_product_id(self):
-        return check_if_is_open_product_id(self)
 
     def set_biblio_from_orcid(self):
         if not self.orcid_api_raw_json:
@@ -630,7 +629,7 @@ class Product(db.Model):
             if (hourly_rate_limit_remaining and (hourly_rate_limit_remaining < 500) and not high_priority) or \
                     r.status_code == 420:
                 print u"sleeping for an hour until we have more calls remaining"
-                time.sleep(60*60) # an hour
+                sleep(60*60) # an hour
 
             # Altmetric.com doesn't have this DOI, so the DOI has no metrics.
             if r.status_code == 404:
@@ -1031,6 +1030,42 @@ class Product(db.Model):
         except (AttributeError, TypeError):
             pass
         return resp
+
+    @property
+    def issns(self):
+        try:
+            return self.crossref_api_raw["ISSN"]
+        except (AttributeError, TypeError, KeyError):
+            return None
+
+    def set_local_lookup_oa(self):
+        start_time = time()
+
+        open_reason = None
+        open_url = self.url
+
+
+        if oa.is_open_via_doaj_issn(self.issns):
+            open_reason = "doaj issn"
+        elif oa.is_open_via_doaj_journal(self.journal):
+            open_reason = "doaj journal"
+        elif oa.is_open_via_arxiv(self.arxiv):
+            open_reason = "arxiv"
+            open_url = u"http://arxiv.org/abs/{}".format(self.arxiv)  # override because open url isn't the base url
+        elif oa.is_open_via_datacite_prefix(self.doi):
+            open_reason = "datacite prefix"
+        elif oa.is_open_via_license_url(self.license_url):
+            open_reason = "license url"
+        elif oa.is_open_via_doi_fragment(self.doi):
+            open_reason = "doi fragment"
+        elif oa.is_open_via_url_fragment(self.url):
+            open_reason = "url fragment"
+
+        if open_reason:
+            self.is_open = True
+            self.open_step = u"local lookup: {}".format(open_reason)
+            self.open_urls = {"urls": [open_url]}
+
 
     def to_dict(self):
         return {

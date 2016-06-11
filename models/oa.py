@@ -55,64 +55,54 @@ def is_oa_license(license_url):
     return license_url in oa_licenses
 
 
-
-
-
-def check_if_is_open_product_id(my_product):
-    start_time = time()
-
-    try:
-        issns = my_product.crossref_api_raw["ISSN"]
+def is_open_via_doaj_issn(issns):
+    if issns:
         for issn in issns:
             if issn in doaj_issns:
-                # print "open: doaj issn match!", my_product.url, my_product.doi
-                return "doaj issn"
-    except (AttributeError, KeyError, TypeError):
-        pass
+                # print "open: doaj issn match!"
+                return True
+    return False
 
-    global doaj_journals
+def is_open_via_doaj_journal(journal_name):
+    if journal_name:
+        if journal_name.encode('utf-8') in doaj_titles:
+            # print "open: doaj journal name match!"
+            return True
+    return False
 
-    try:
-        journal = my_product.journal
-        if journal:
-            if journal.encode('utf-8') in doaj_titles:
-                # print "open: doaj journal name match!"
-                return "doaj journal title"
-    except (AttributeError, KeyError, TypeError):
-        pass
+def is_open_via_arxiv(arxiv):
+    if arxiv:
+        return True
+    return False
 
-    try:
-        if any(my_product.doi.startswith(prefix) for prefix in get_datacite_doi_prefixes()):
+def is_open_via_datacite_prefix(doi):
+    if doi:
+        if any(doi.startswith(prefix) for prefix in get_datacite_doi_prefixes()):
             # print "open: datacite match"
-            return "datacite prefix"
-    except (AttributeError, TypeError):
-        pass
+            return True
+    return False
 
-
-    try:
-        if is_oa_license(my_product.license_url):
+def is_open_via_license_url(license_url):
+    if license_url:
+        if is_oa_license(license_url):
             # print "open: licence!"
-            return "license url"
-    except (AttributeError, TypeError):
-        pass
+            return True
+    return False
 
-
-    try:
-        if any(fragment in my_product.doi for fragment in open_doi_fragments):
+def is_open_via_doi_fragment(doi):
+    if doi:
+        if any(fragment in doi for fragment in open_doi_fragments):
             # print "open: doi fragment!"
-            return "doi fragment"
-    except (AttributeError, TypeError):
-        pass
+            return True
+    return False
 
-    try:
-        if any(fragment in my_product.url for fragment in open_url_fragments):
+def is_open_via_url_fragment(url):
+    if url:
+        if any(fragment in url for fragment in open_url_fragments):
             # print "open: url fragment!"
-            return "url fragment"
-    except (AttributeError, TypeError):
-        pass
+            return True
+    return False
 
-
-    return None
 
 
 

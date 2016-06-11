@@ -130,6 +130,12 @@ def get_isbn_from_biblio_dict(orcid_product_dict):
             return nid.replace("-", "")
     return None
 
+def get_arxiv_from_biblio_dict(orcid_product_dict):
+    for (ns, nid) in get_identifiers_from_biblio_dict(orcid_product_dict):
+        if ns == "ARXIV":
+            return nid.lower().replace("arxiv:", "")
+    return None
+
 
 def get_doi_from_biblio_dict(orcid_product_dict):
     doi = None
@@ -229,6 +235,7 @@ def set_biblio_from_biblio_dict(my_product, biblio_dict):
         pass
 
     my_product.doi = get_doi_from_biblio_dict(biblio_dict)
+    my_product.arxiv = get_arxiv_from_biblio_dict(biblio_dict)
     my_product.isbn = get_isbn_from_biblio_dict(biblio_dict)  #not in db. just used in deduping for now.
 
 
