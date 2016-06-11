@@ -98,7 +98,7 @@ update_registry.register(Update(
 
 q = db.session.query(Person.id)
 update_registry.register(Update(
-    job=Person.set_is_open,
+    job=Person.set_fulltext_urls,
     query=q,
     queue_id=1
 ))

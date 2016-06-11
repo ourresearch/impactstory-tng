@@ -131,8 +131,6 @@ class Product(db.Model):
     poster_counts = db.Column(MutableDict.as_mutable(JSONB))
     event_dates = db.Column(MutableDict.as_mutable(JSONB))
 
-    is_open = db.Column(db.Boolean)
-    open_urls = db.Column(MutableDict.as_mutable(JSONB))  #change to list when upgrade to sqla 1.1
     repo_urls = db.Column(MutableDict.as_mutable(JSONB))  #change to list when upgrade to sqla 1.1
     base_dcoa = db.Column(db.Text)
     base_dcprovider = db.Column(db.Text)
@@ -140,6 +138,7 @@ class Product(db.Model):
     license_url = db.Column(db.Text)
     sherlock_response = db.Column(db.Text)
     sherlock_error = db.Column(db.Text)
+    fulltext_url = db.Column(db.Text)
     user_supplied_fulltext_url = db.Column(db.Text)
 
     error = db.Column(db.Text)
@@ -168,6 +167,12 @@ class Product(db.Model):
             print self.error
             print u"in generic exception handler, so rolling back in case it is needed"
             db.session.rollback()
+
+
+    def set_oa_from_user_supplied_fulltext_url(self, url):
+        self.user_supplied_fulltext_url = url
+        self.fulltext_url = url
+        self.open_step = "user supplied fulltext url"
 
 
     def set_oa_from_sherlock(self, high_priority=False):
@@ -199,20 +204,18 @@ class Product(db.Model):
                 if open_responses:
                     response = open_responses[0]
                     print u"sherlock says it is open!", response["url"]
-                    self.is_open = True
-                    self.open_urls["urls"] = [response["url"]]
+                    self.fulltext_url = response["url"]
                     self.open_step = "sherlock {}".format(response["host"])
                     self.sherlock_response = u"sherlock says: open {}".format(response["host"])
                 elif error_responses:
                     response = error_responses[0]
                     print u"sherlock says error: {} {}".format(host, response["error"])
-                    self.is_open = None
+                    self.fulltext_url = None
                     self.sherlock_response = u"sherlock error: {} {}".format(host, response["error"])
                     self.sherlock_error = response["error_message"]
                 else:
                     # print u"sherlock says it is closed:", sherlock_request_list
                     self.sherlock_response = u"sherlock says: closed {}".format(host)
-
 
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
@@ -221,6 +224,7 @@ class Product(db.Model):
             logging.exception("exception in set_oa_from_sherlock")
             print u"rolling back in case it is needed"
             db.session.rollback()
+
 
     def set_biblio_from_orcid(self):
         if not self.orcid_api_raw_json:
@@ -265,19 +269,8 @@ class Product(db.Model):
         return self.authors_short
 
     @property
-    def fulltext_url(self):
-        if self.user_supplied_fulltext_url:
-            return self.user_supplied_fulltext_url
-
-        try:
-            # had a bug where open_urls["urls"] was sometimes a string not a list.
-            # temporary fix
-            if isinstance(self.open_urls["urls"], basestring):
-                return self.open_urls["urls"]
-            else:
-                return self.open_urls["urls"][0]
-        except (KeyError, IndexError, TypeError):
-            return None
+    def has_fulltext_url(self):
+        return (self.fulltext_url != None)
 
 
     def set_altmetric_score(self):
@@ -1062,9 +1055,8 @@ class Product(db.Model):
             open_reason = "url fragment"
 
         if open_reason:
-            self.is_open = True
+            self.fulltext_url = open_url
             self.open_step = u"local lookup: {}".format(open_reason)
-            self.open_urls = {"urls": [open_url]}
 
 
     def to_dict(self):
@@ -1090,13 +1082,12 @@ class Product(db.Model):
             "altmetric_score": self.altmetric_score,
             "num_posts": self.num_posts,
             "num_mentions": self.num_mentions,
-            "is_open": self.is_open,
-            "is_open_new": self.is_open,
-            "open_urls": self.open_urls,
             "sources": [s.to_dict() for s in self.sources],
             "posts": self.posts,
             "events_last_week_count": self.events_last_week_count,
             "genre": self.guess_genre(),
+            "is_open": self.has_fulltext_url,
+            "has_fulltext_url": self.has_fulltext_url,
             "fulltext_url": self.fulltext_url
         }
 
