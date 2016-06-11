@@ -429,7 +429,7 @@ class Person(db.Model):
         # reset everything that we are going to redo
         for p in self.all_products:
 
-            # p.is_open = False  # uncomment this if want to set open from scratch
+            p.is_open = False  # uncomment this if want to set open from scratch
 
             if not p.is_open:
                 p.open_urls = {"urls": []}
@@ -440,10 +440,11 @@ class Person(db.Model):
                 p.sherlock_response = None
                 p.sherlock_error = None
 
-        print u"starting set_is_open with {} products".format(len([p for p in self.all_products if not p.is_open]))
+        print u"starting set_is_open with {} total products".format(len([p for p in self.all_products]))
         print u"STARTING WITH: {} open\n".format(len([p for p in self.all_products if p.is_open]))
 
         ### first: user supplied a url?  it is open!
+        print u"first making user_supplied_fulltext_url products open"
         for p in self.all_products:
             if p.user_supplied_fulltext_url:
                 p.is_open = True
@@ -482,11 +483,7 @@ class Person(db.Model):
             products = self.products
 
         for p in products:
-            open_reason = p.check_if_is_open_product_id()
-            if open_reason:
-                p.is_open = True
-                p.open_urls = {"urls": [p.url]}
-                p.open_step = "local lookup: {}".format(open_reason)
+            p.set_local_lookup_oa()
         print u"SO FAR: {} open\n".format(len([p for p in products if p.is_open]))
         print u"finished local step of set_is_open in {}s".format(elapsed(start_time, 2))
 
