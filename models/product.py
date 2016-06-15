@@ -12,7 +12,8 @@ import re
 import logging
 import iso8601
 import pytz
-import time
+from time import sleep
+from time import time
 import datetime
 
 from app import db
@@ -36,7 +37,7 @@ from models.oa import preprint_doi_fragments
 from models.oa import open_doi_fragments
 from models.oa import dataset_url_fragments
 from models.oa import preprint_url_fragments
-from models.oa import check_if_is_open_product_id
+from models import oa
 from models.mendeley import set_mendeley_data
 
 
@@ -112,6 +113,7 @@ class Product(db.Model):
     authors = deferred(db.Column(db.Text))
     authors_short = db.Column(db.Text)
     url = db.Column(db.Text)
+    arxiv = db.Column(db.Text)
     orcid_put_code = db.Column(db.Text)
     orcid_importer = db.Column(db.Text)
 
@@ -129,8 +131,6 @@ class Product(db.Model):
     poster_counts = db.Column(MutableDict.as_mutable(JSONB))
     event_dates = db.Column(MutableDict.as_mutable(JSONB))
 
-    is_open = db.Column(db.Boolean)
-    open_urls = db.Column(MutableDict.as_mutable(JSONB))  #change to list when upgrade to sqla 1.1
     repo_urls = db.Column(MutableDict.as_mutable(JSONB))  #change to list when upgrade to sqla 1.1
     base_dcoa = db.Column(db.Text)
     base_dcprovider = db.Column(db.Text)
@@ -138,6 +138,7 @@ class Product(db.Model):
     license_url = db.Column(db.Text)
     sherlock_response = db.Column(db.Text)
     sherlock_error = db.Column(db.Text)
+    fulltext_url = db.Column(db.Text)
     user_supplied_fulltext_url = db.Column(db.Text)
 
     error = db.Column(db.Text)
@@ -168,6 +169,12 @@ class Product(db.Model):
             db.session.rollback()
 
 
+    def set_oa_from_user_supplied_fulltext_url(self, url):
+        self.user_supplied_fulltext_url = url
+        self.fulltext_url = url
+        self.open_step = "user supplied fulltext url"
+
+
     def set_oa_from_sherlock(self, high_priority=False):
         try:
             sherlock_request_list = []
@@ -177,6 +184,9 @@ class Product(db.Model):
                 for repo_url in self.repo_urls["urls"]:
                     sherlock_request_list.append([repo_url, host])
             elif self.doi:
+                host = "journal"
+                sherlock_request_list.append([self.url, host])
+            elif self.url:
                 host = "journal"
                 sherlock_request_list.append([self.url, host])
             else:
@@ -194,20 +204,18 @@ class Product(db.Model):
                 if open_responses:
                     response = open_responses[0]
                     print u"sherlock says it is open!", response["url"]
-                    self.is_open = True
-                    self.open_urls["urls"] = [response["url"]]
+                    self.fulltext_url = response["url"]
                     self.open_step = "sherlock {}".format(response["host"])
                     self.sherlock_response = u"sherlock says: open {}".format(response["host"])
                 elif error_responses:
                     response = error_responses[0]
                     print u"sherlock says error: {} {}".format(host, response["error"])
-                    self.is_open = None
+                    self.fulltext_url = None
                     self.sherlock_response = u"sherlock error: {} {}".format(host, response["error"])
                     self.sherlock_error = response["error_message"]
                 else:
                     # print u"sherlock says it is closed:", sherlock_request_list
                     self.sherlock_response = u"sherlock says: closed {}".format(host)
-
 
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
@@ -217,8 +225,6 @@ class Product(db.Model):
             print u"rolling back in case it is needed"
             db.session.rollback()
 
-    def check_if_is_open_product_id(self):
-        return check_if_is_open_product_id(self)
 
     def set_biblio_from_orcid(self):
         if not self.orcid_api_raw_json:
@@ -263,19 +269,8 @@ class Product(db.Model):
         return self.authors_short
 
     @property
-    def fulltext_url(self):
-        if self.user_supplied_fulltext_url:
-            return self.user_supplied_fulltext_url
-
-        try:
-            # had a bug where open_urls["urls"] was sometimes a string not a list.
-            # temporary fix
-            if isinstance(self.open_urls["urls"], basestring):
-                return self.open_urls["urls"]
-            else:
-                return self.open_urls["urls"][0]
-        except (KeyError, IndexError, TypeError):
-            return None
+    def has_fulltext_url(self):
+        return (self.fulltext_url != None)
 
 
     def set_altmetric_score(self):
@@ -627,7 +622,7 @@ class Product(db.Model):
             if (hourly_rate_limit_remaining and (hourly_rate_limit_remaining < 500) and not high_priority) or \
                     r.status_code == 420:
                 print u"sleeping for an hour until we have more calls remaining"
-                time.sleep(60*60) # an hour
+                sleep(60*60) # an hour
 
             # Altmetric.com doesn't have this DOI, so the DOI has no metrics.
             if r.status_code == 404:
@@ -648,7 +643,7 @@ class Product(db.Model):
                 self.altmetric_api_raw = r.json()
                 # print u"yay nonzero metrics for {doi}".format(doi=self.doi)
             else:
-                self.error = u"got unexpected status_code code {}".format(r.status_code)
+                self.error = u"got unexpected altmetric status_code code {}".format(r.status_code)
 
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
@@ -1029,6 +1024,41 @@ class Product(db.Model):
             pass
         return resp
 
+    @property
+    def issns(self):
+        try:
+            return self.crossref_api_raw["ISSN"]
+        except (AttributeError, TypeError, KeyError):
+            return None
+
+    def set_local_lookup_oa(self):
+        start_time = time()
+
+        open_reason = None
+        open_url = self.url
+
+
+        if oa.is_open_via_doaj_issn(self.issns):
+            open_reason = "doaj issn"
+        elif oa.is_open_via_doaj_journal(self.journal):
+            open_reason = "doaj journal"
+        elif oa.is_open_via_arxiv(self.arxiv):
+            open_reason = "arxiv"
+            open_url = u"http://arxiv.org/abs/{}".format(self.arxiv)  # override because open url isn't the base url
+        elif oa.is_open_via_datacite_prefix(self.doi):
+            open_reason = "datacite prefix"
+        elif oa.is_open_via_license_url(self.license_url):
+            open_reason = "license url"
+        elif oa.is_open_via_doi_fragment(self.doi):
+            open_reason = "doi fragment"
+        elif oa.is_open_via_url_fragment(self.url):
+            open_reason = "url fragment"
+
+        if open_reason:
+            self.fulltext_url = open_url
+            self.open_step = u"local lookup: {}".format(open_reason)
+
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -1040,7 +1070,7 @@ class Product(db.Model):
                 "mendeley_url": self.mendeley_url
             },
             "doi": self.doi,
-            "url": u"http://doi.org/{}".format(self.doi),
+            "url": self.url,
             "orcid_id": self.orcid_id,
             "year": self.year,
             "_title": self.display_title,  # duplicate just for api reading help
@@ -1052,13 +1082,12 @@ class Product(db.Model):
             "altmetric_score": self.altmetric_score,
             "num_posts": self.num_posts,
             "num_mentions": self.num_mentions,
-            "is_open": self.is_open,
-            "is_open_new": self.is_open,
-            "open_urls": self.open_urls,
             "sources": [s.to_dict() for s in self.sources],
             "posts": self.posts,
             "events_last_week_count": self.events_last_week_count,
             "genre": self.guess_genre(),
+            "is_open": self.has_fulltext_url,
+            "has_fulltext_url": self.has_fulltext_url,
             "fulltext_url": self.fulltext_url
         }
 

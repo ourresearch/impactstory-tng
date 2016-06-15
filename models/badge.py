@@ -783,7 +783,7 @@ class open_science_triathlete(BadgeAssigner):
     importance = .5
 
     def decide_if_assigned(self, person):
-        has_oa_paper = [p.doi for p in person.products if p.is_open and p.guess_genre()=="article"]
+        has_oa_paper = [p.doi for p in person.products if p.has_fulltext_url and p.guess_genre() == "article"]
         has_data = [p.id for p in person.all_products if p.guess_genre()=="dataset"]
         has_software = person.depsy_percentile > 0
 
