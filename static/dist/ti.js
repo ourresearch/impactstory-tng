@@ -936,6 +936,7 @@ angular.module('personPage', [
                                            $mdDialog,
                                            $location,
                                            $timeout,
+                                           $sce,
                                            Person,
                                            personResp){
 
@@ -968,27 +969,42 @@ angular.module('personPage', [
         }
 
         // someone is linking to a specific badge. show overview page behind a popup
-        else if ($routeParams.tab == "achievement") {
+        else if ($routeParams.tab == "a") {
             $scope.tab = "overview"
             var badgeName = $routeParams.filter
             console.log("show the badges modal, for this badge", badgeName)
 
-            var dialog = $mdDialog.alert()
-                .clickOutsideToClose(true)
-                .title('This is an alert title')
-                .textContent("badge! " + badgeName)
-                .ok('show me more')
+
+            var badgeToShow = _.find(Person.d.badges, function(badge){
+                return badgeName == badge.display_name.toLowerCase().replace(" ", "-")
+            })
+            var badgeDialogCtrl = function($scope){
+                $scope.badge = badgeToShow
+
+                // this dialog has isolate scope so doesn't inherit this function
+                // from the application scope.
+                $scope.trustHtml = function(str){
+                    return $sce.trustAsHtml(str)
+                }
+            }
+
+            var dialogOptions = {
+                clickOutsideToClose: true,
+                templateUrl: 'badgeDialog.tmpl.html',
+                controller: badgeDialogCtrl
+            }
+
 
             var showDialog = function(){
-                $mdDialog.show(dialog).then(function(result) {
-                    console.log("cancelled the setFulltextUrl dialog")
+                $mdDialog.show(dialogOptions).then(function(result) {
+                    console.log("ok'd the setFulltextUrl dialog")
 
                 }, function() {
                     console.log("cancelled the setFulltextUrl dialog")
                 });
             }
 
-            $timeout(showDialog, 5000)
+            $timeout(showDialog, 0)
 
 
         }
@@ -1456,8 +1472,10 @@ angular.module('productPage', [
             $scope.postsSum += v.posts_count
         })
 
+        console.log("postsSum", $scope.postsSum)
+
         $scope.d.postsLimit = 20
-        $scope.selectedChannel = _.findWhere(Person.d.sources, {source_name: $routeParams.filter})
+        $scope.selectedChannel = _.findWhere($scope.sources, {source_name: $routeParams.filter})
 
         $scope.toggleSelectedChannel = function(channel){
             console.log("toggling selected channel", channel)
@@ -3397,6 +3415,14 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "\n" +
     "</div>\n" +
+    "\n" +
+    "<script type=\"text/ng-template\" id=\"badgeDialog.tmpl.html\">\n" +
+    "    <md-dialog>\n" +
+    "        <md-dialog-content>\n" +
+    "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
+    "        </md-dialog-content>\n" +
+    "    </md-dialog>\n" +
+    "</script>\n" +
     "\n" +
     "");
 }]);
