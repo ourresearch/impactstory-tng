@@ -143,6 +143,25 @@ def is_doi_url(url):
         return True
     return False
 
+def pick_best_url(urls):
+    if not urls:
+        return None
+
+    #get a backup
+    response = urls[0]
+
+    # now go through and pick the best one
+    for url in urls:
+        # doi if available
+        if "doi.org" in url:
+            response = url
+
+        # anything else if what we currently have is bogus
+        if response == "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC":
+            response = url
+
+    return response
+
 def clean_doi(dirty_doi):
 
     if not dirty_doi:
@@ -169,7 +188,8 @@ def clean_doi(dirty_doi):
     if u"#" in resp:
         resp = resp.split(u"#")[0]
 
-    figshare_version_pattern = re.compile(u".*figshare.*\.v\d+$")
+    # get rid of the version number at the end of a figshare url
+    figshare_version_pattern = re.compile(u".*figshare.*\.v\d+$", re.IGNORECASE)  #might be .v1 or .V1
     matches = figshare_version_pattern.findall(resp)
     if matches:
         resp = resp.rsplit(u".", 1)[0]
