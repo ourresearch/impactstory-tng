@@ -430,7 +430,7 @@ class Person(db.Model):
         # reset everything that we are going to redo
         for p in self.all_products:
 
-            p.fulltext_url = None  # uncomment this if want to set open from scratch
+            # p.fulltext_url = None  # uncomment this if want to set open from scratch
 
             if not p.has_fulltext_url:
                 p.repo_urls = {"urls": []}
