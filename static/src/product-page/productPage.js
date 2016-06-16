@@ -137,8 +137,10 @@ angular.module('productPage', [
             $scope.postsSum += v.posts_count
         })
 
+        console.log("postsSum", $scope.postsSum)
+
         $scope.d.postsLimit = 20
-        $scope.selectedChannel = _.findWhere(Person.d.sources, {source_name: $routeParams.filter})
+        $scope.selectedChannel = _.findWhere($scope.sources, {source_name: $routeParams.filter})
 
         $scope.toggleSelectedChannel = function(channel){
             console.log("toggling selected channel", channel)

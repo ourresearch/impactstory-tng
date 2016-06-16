@@ -1321,6 +1321,14 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "</div>\n" +
     "\n" +
+    "<script type=\"text/ng-template\" id=\"badgeDialog.tmpl.html\">\n" +
+    "    <md-dialog>\n" +
+    "        <md-dialog-content>\n" +
+    "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
+    "        </md-dialog-content>\n" +
+    "    </md-dialog>\n" +
+    "</script>\n" +
+    "\n" +
     "");
 }]);
 

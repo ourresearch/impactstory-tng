@@ -5,13 +5,10 @@
     A set of useful LESS mixins
     More info at: http://lesselements.com
   ---------------------------------------------------*/
-html {
-  height: auto;
-  background: #fff;
-}
 html body {
   font-size: 16px;
   font-family: "Lato", sans-serif;
+  height: auto;
 }
 html body .container-fluid {
   max-width: 993px;
