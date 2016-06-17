@@ -879,7 +879,7 @@ class Person(db.Model):
 
         # only defined if three or more products
         if self.num_products >= 3:
-            openness = num_open_products / float(self.num_products)
+            openness = round((num_open_products / float(self.num_products)), 3)
         else:
             openness = None
 
