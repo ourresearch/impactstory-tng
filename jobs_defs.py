@@ -25,6 +25,12 @@ update_registry.register(Update(
     query=q,
 ))
 
+q = db.session.query(Person.id)
+update_registry.register(Update(
+    job=Person.mini_calculate,
+    query=q,
+    queue_id=1
+))
 
 q = db.session.query(Person.id)
 update_registry.register(Update(

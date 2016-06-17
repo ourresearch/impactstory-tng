@@ -194,6 +194,7 @@ class Person(db.Model):
     mendeley_sums = db.Column(MutableDict.as_mutable(JSONB))
     num_products = db.Column(db.Integer)
     num_posts = db.Column(db.Integer)
+    num_mentions = db.Column(db.Integer)
     openness = db.Column(db.Float)
     weekly_event_count = db.Column(db.Float)
     monthly_event_count = db.Column(db.Float)
@@ -402,6 +403,8 @@ class Person(db.Model):
         self.set_post_counts() # do this first
         self.set_mendeley_sums()
         self.set_num_posts()
+        self.set_num_mentions()
+        self.set_num_products()
         self.set_event_counts()
         self.set_coauthors()  # do this last, uses scores
         print u"finished calculating part of {method_name} on {num} products in {sec}s".format(
@@ -419,6 +422,11 @@ class Person(db.Model):
             num = len(self.products),
             sec = elapsed(start_time, 2)
         )
+
+    def mini_calculate(self):
+        self.set_num_posts()
+        self.set_num_mentions()
+        self.set_num_products()
 
 
     def set_fulltext_urls(self):
@@ -867,12 +875,11 @@ class Person(db.Model):
         if not self.all_products:
             return None
 
-        num_products = len(self.all_products)
         num_open_products = len([p for p in self.all_products if p.has_fulltext_url])
 
         # only defined if three or more products
-        if num_products >= 3:
-            openness = num_open_products / float(num_products)
+        if self.num_products >= 3:
+            openness = num_open_products / float(self.num_products)
         else:
             openness = None
 
@@ -908,6 +915,11 @@ class Person(db.Model):
         if self.post_counts:
             self.num_posts = sum(self.post_counts.values())
 
+    def set_num_mentions(self):
+        self.num_mentions = sum([p.num_mentions for p in self.all_products])
+
+    def set_num_products(self):
+        self.num_products = len(self.all_products)
 
     def get_token(self):
         payload = {
@@ -1102,10 +1114,6 @@ class Person(db.Model):
     def all_products(self):
         ret = self.sorted_products
         return ret
-
-    @property
-    def num_mentions(self):
-        return sum([p.num_mentions for p in self.all_products])
 
 
     @property
