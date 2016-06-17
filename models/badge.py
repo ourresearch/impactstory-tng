@@ -422,8 +422,9 @@ class reading_level(BadgeAssigner):
 
         if reading_levels.values():
             average_reading_level = sum(reading_levels.values()) / float(len(reading_levels))
-            self.candidate_badge.value = average_reading_level
-            self.assigned = True
+            if average_reading_level <= 14:
+                self.candidate_badge.value = average_reading_level
+                self.assigned = True
 
 
 

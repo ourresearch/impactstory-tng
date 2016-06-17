@@ -950,10 +950,7 @@ class Person(db.Model):
         for my_badge in self.badges:
             if my_badge.value and my_badge.my_badge_type.valid_badge:
                 # custom exclusions specific to badge type
-                if my_badge.name=="reading_level" and my_badge.value > 14.0:
-                    pass
-                else:
-                    badges.append(my_badge)
+                badges.append(my_badge)
 
         badges.sort(key=lambda x: x.sort_score, reverse=True)
 
