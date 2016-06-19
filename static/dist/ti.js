@@ -1005,6 +1005,7 @@ angular.module('personPage', [
 
                 }, function() {
                     console.log("cancelled the setFulltextUrl dialog")
+                    $location.url("u/" + Person.d.orcid_id)
                 });
             }
 
