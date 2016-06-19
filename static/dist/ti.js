@@ -986,11 +986,15 @@ angular.module('personPage', [
                 $scope.trustHtml = function(str){
                     return $sce.trustAsHtml(str)
                 }
+                $scope.cancel = function() {
+                    $mdDialog.cancel();
+                };
+                $scope.firstName = Person.d.first_name
             }
 
             var dialogOptions = {
                 clickOutsideToClose: true,
-                templateUrl: 'badgeDialog.tmpl.html',
+                templateUrl: 'badgeDialog.tpl.html',
                 controller: badgeDialogCtrl
             }
 
@@ -1472,7 +1476,6 @@ angular.module('productPage', [
             $scope.postsSum += v.posts_count
         })
 
-        console.log("postsSum", $scope.postsSum)
 
         $scope.d.postsLimit = 20
         $scope.selectedChannel = _.findWhere($scope.sources, {source_name: $routeParams.filter})
@@ -3412,15 +3415,17 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "\n" +
-    "\n" +
     "</div>\n" +
     "\n" +
-    "<script type=\"text/ng-template\" id=\"badgeDialog.tmpl.html\">\n" +
-    "    <md-dialog>\n" +
+    "<script type=\"text/ng-template\" id=\"badgeDialog.tpl.html\">\n" +
+    "    <md-dialog id=\"badgeDialog\">\n" +
     "        <md-dialog-content>\n" +
+    "            <h2>Ooh nice, {{ firstName }} has unlocked this achievement:</h2>\n" +
     "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
     "        </md-dialog-content>\n" +
+    "        <md-dialog-actions>\n" +
+    "            <md-button ng-click=\"cancel()\">Dismiss</md-button>\n" +
+    "        </md-dialog-actions>\n" +
     "    </md-dialog>\n" +
     "</script>\n" +
     "\n" +

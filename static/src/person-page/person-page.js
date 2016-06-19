@@ -103,11 +103,15 @@ angular.module('personPage', [
                 $scope.trustHtml = function(str){
                     return $sce.trustAsHtml(str)
                 }
+                $scope.cancel = function() {
+                    $mdDialog.cancel();
+                };
+                $scope.firstName = Person.d.first_name
             }
 
             var dialogOptions = {
                 clickOutsideToClose: true,
-                templateUrl: 'badgeDialog.tmpl.html',
+                templateUrl: 'badgeDialog.tpl.html',
                 controller: badgeDialogCtrl
             }
 

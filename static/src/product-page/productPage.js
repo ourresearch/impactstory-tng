@@ -137,7 +137,6 @@ angular.module('productPage', [
             $scope.postsSum += v.posts_count
         })
 
-        console.log("postsSum", $scope.postsSum)
 
         $scope.d.postsLimit = 20
         $scope.selectedChannel = _.findWhere($scope.sources, {source_name: $routeParams.filter})
