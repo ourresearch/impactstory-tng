@@ -165,6 +165,7 @@
                     <a class="share"
                        target="_blank"
                        ng-show="ownsThisProfile"
+                       ng-click="shareBadge(badge.name)"
                        href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.orcid_id }}/a/{{ badge.display_name.toLowerCase().replace(' ', '-') }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:">
                         <i class="fa fa-twitter"></i>
                         <span class="text">share link</span>

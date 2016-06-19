@@ -259,6 +259,17 @@ angular.module('personPage', [
 
         }
 
+        $scope.shareBadge = function(badgeName){
+            window.Intercom('trackEvent', 'tweeted-badge', {
+                name: badgeName
+            });
+            var myOrcid = $auth.getPayload().sub // orcid ID
+            window.Intercom("update", {
+                user_id: myOrcid,
+                latest_tweeted_badge: badgeName
+            })
+        }
+
 
 
 
