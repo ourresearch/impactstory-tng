@@ -656,6 +656,13 @@ div.page.product-page div.tab-controls a {
   display: inline-block;
   border-bottom: 3px solid transparent;
 }
+@media only screen and (max-width: 992px) {
+  div.page.person div.tab-controls a,
+  div.page.product-page div.tab-controls a {
+    font-weight: bold;
+    padding: 7px;
+  }
+}
 div.page.person div.tab-controls a:hover,
 div.page.product-page div.tab-controls a:hover {
   text-decoration: none;
@@ -664,6 +671,12 @@ div.page.person div.tab-controls a.selected-true,
 div.page.product-page div.tab-controls a.selected-true {
   color: #ff4000;
   border-bottom: 3px solid #ff4000;
+}
+@media only screen and (max-width: 992px) {
+  div.page.person div.tab-controls a.selected-true,
+  div.page.product-page div.tab-controls a.selected-true {
+    border: none;
+  }
 }
 div.page.person .tab-view,
 div.page.product-page .tab-view {

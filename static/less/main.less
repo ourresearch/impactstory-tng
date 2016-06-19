@@ -649,6 +649,10 @@ div.page.person, div.page.product-page {
     }
 
     a {
+      @media @mobile {
+        font-weight: bold;
+        padding: 7px;
+      }
       font-size: 14px;
       padding: 7px 15px;
       text-transform: uppercase;
@@ -661,6 +665,9 @@ div.page.person, div.page.product-page {
       &.selected-true {
         color: @primaryColor;
         border-bottom: 3px solid @primaryColor;
+        @media @mobile {
+          border: none;
+        }
       }
     }
   }
