@@ -892,6 +892,18 @@ div.page.person .tab-view.overview .widget.publications .fulltext .val,
 div.page.product-page .tab-view.overview .widget.publications .fulltext .val {
   display: none;
 }
+div.page.person .tab-view.overview .widget.badges .achievement,
+div.page.product-page .tab-view.overview .widget.badges .achievement {
+  padding: 10px;
+}
+div.page.person .tab-view.overview .widget.badges .achievement .under,
+div.page.product-page .tab-view.overview .widget.badges .achievement .under {
+  font-size: 14px;
+}
+div.page.person .tab-view.overview .widget.badges .achievement .share,
+div.page.product-page .tab-view.overview .widget.badges .achievement .share {
+  display: none;
+}
 div.page.person .tab-view.publications .main-col .title,
 div.page.product-page .tab-view.publications .main-col .title {
   font-size: 18px;
@@ -1186,6 +1198,7 @@ div.page.product-page .row.person-footer .buttons a.btn {
 }
 .view-item.achievement .icon {
   line-height: 1;
+  margin-top: 5px;
   min-width: 70px;
 }
 .view-item.achievement .icon img {
@@ -1208,8 +1221,14 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.achievement .content .title .share i {
   opacity: .5;
 }
+.view-item.achievement .content .under {
+  font-size: 15px;
+}
 .view-item.achievement .content .under .descr em.n {
   font-size: 120%;
+}
+.view-item.achievement .content .under .support {
+  font-size: 90%;
 }
 .view-item.achievement .content .under .support .more:hover {
   cursor: pointer;
@@ -1551,15 +1570,9 @@ md-dialog#badgeDialog h2 {
   padding-bottom: 15px;
   text-align: center;
 }
-md-dialog#badgeDialog .icon {
-  margin-top: 5px;
-}
 md-dialog#badgeDialog .title {
   font-size: 24px;
 }
 md-dialog#badgeDialog .under {
   font-size: 16px;
-}
-md-dialog#badgeDialog .under .support-content {
-  font-size: 14px;
 }
