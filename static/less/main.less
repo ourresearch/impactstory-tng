@@ -1260,6 +1260,23 @@ div.page.person, div.page.product-page {
     //&:hover {
     //  background: #eee;
     //}
+    @media @mobile {
+      display: block;
+      .icon {
+        float: left;
+      }
+      .content {
+        .title {
+          min-height: 64px;
+          margin-top: 15px;
+          margin-left: 65px;
+          .share {
+            display: block;
+            padding-top: 5px !important;
+          }
+        }
+      }
+    }
 
     .group-engagement {color: @engagement;}
     .group-openness {color: @openness;}
