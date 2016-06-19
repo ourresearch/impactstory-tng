@@ -636,15 +636,17 @@
 
         </div>
     </div>
-
-
 </div>
 
-<script type="text/ng-template" id="badgeDialog.tmpl.html">
-    <md-dialog>
+<script type="text/ng-template" id="badgeDialog.tpl.html">
+    <md-dialog id="badgeDialog">
         <md-dialog-content>
+            <h2>Ooh nice, {{ firstName }} has unlocked this achievement:</h2>
             <div class="badge-container" ng-include="'badge-item.tpl.html'"></div>
         </md-dialog-content>
+        <md-dialog-actions>
+            <md-button ng-click="cancel()">Dismiss</md-button>
+        </md-dialog-actions>
     </md-dialog>
 </script>
 

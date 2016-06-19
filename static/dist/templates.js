@@ -1317,15 +1317,17 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "\n" +
-    "\n" +
     "</div>\n" +
     "\n" +
-    "<script type=\"text/ng-template\" id=\"badgeDialog.tmpl.html\">\n" +
-    "    <md-dialog>\n" +
+    "<script type=\"text/ng-template\" id=\"badgeDialog.tpl.html\">\n" +
+    "    <md-dialog id=\"badgeDialog\">\n" +
     "        <md-dialog-content>\n" +
+    "            <h2>Ooh nice, {{ firstName }} has unlocked this achievement:</h2>\n" +
     "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
     "        </md-dialog-content>\n" +
+    "        <md-dialog-actions>\n" +
+    "            <md-button ng-click=\"cancel()\">Dismiss</md-button>\n" +
+    "        </md-dialog-actions>\n" +
     "    </md-dialog>\n" +
     "</script>\n" +
     "\n" +
