@@ -1551,3 +1551,15 @@ md-dialog#badgeDialog h2 {
   padding-bottom: 15px;
   text-align: center;
 }
+md-dialog#badgeDialog .icon {
+  margin-top: 5px;
+}
+md-dialog#badgeDialog .title {
+  font-size: 24px;
+}
+md-dialog#badgeDialog .under {
+  font-size: 16px;
+}
+md-dialog#badgeDialog .under .support-content {
+  font-size: 14px;
+}
