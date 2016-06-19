@@ -3243,10 +3243,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                        </span>\n" +
     "                        <span class=\"val\" ng-show=\"subscore.badgesCount\">({{ subscore.badgesCount }})</span>\n" +
     "                    </span>\n" +
-    "\n" +
     "                </div>\n" +
-    "\n" +
-    "\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
