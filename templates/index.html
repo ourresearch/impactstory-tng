@@ -161,6 +161,12 @@
                         </md-tooltip>
                         {{ numFormat.decimalToPerc(badge.percentile) }}
                     </span>
+                    <a class="share"
+                       target="_blank"
+                       href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.orcid_id }}/a/{{ badge.display_name.toLowerCase().replace(' ', '-') }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:">
+                        <i class="fa fa-twitter"></i>
+                        <span class="text">share</span>
+                    </a>
                 </div>
                 <div class="under">
                     <div class="descr">

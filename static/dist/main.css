@@ -1193,6 +1193,18 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.achievement .content .title {
   font-size: 20px;
 }
+.view-item.achievement .content .title .share {
+  margin-right: 10%;
+  font-size: 12px;
+  color: #777;
+  padding: 10px;
+}
+.view-item.achievement .content .title .share:hover {
+  text-decoration: underline;
+}
+.view-item.achievement .content .title .share i {
+  opacity: .5;
+}
 .view-item.achievement .content .under .descr em.n {
   font-size: 120%;
 }
