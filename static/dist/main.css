@@ -1177,6 +1177,23 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.achievement {
   padding: 20px;
 }
+@media only screen and (max-width: 992px) {
+  .view-item.achievement {
+    display: block;
+  }
+  .view-item.achievement .icon {
+    float: left;
+  }
+  .view-item.achievement .content .title {
+    min-height: 64px;
+    margin-top: 15px;
+    margin-left: 65px;
+  }
+  .view-item.achievement .content .title .share {
+    display: block;
+    padding-top: 5px !important;
+  }
+}
 .view-item.achievement .group-engagement {
   color: #2196F3;
 }
