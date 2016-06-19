@@ -970,7 +970,7 @@ angular.module('personPage', [
 
         // someone is linking to a specific badge. show overview page behind a popup
         else if ($routeParams.tab == "a") {
-            $scope.tab = "overview"
+            $scope.tab = "achievements"
             var badgeName = $routeParams.filter
             console.log("show the badges modal, for this badge", badgeName)
 
@@ -1005,7 +1005,7 @@ angular.module('personPage', [
 
                 }, function() {
                     console.log("cancelled the setFulltextUrl dialog")
-                    $location.url("u/" + Person.d.orcid_id)
+                    $location.url("u/" + Person.d.orcid_id + "/achievements")
                 });
             }
 
@@ -1325,6 +1325,10 @@ angular.module('personPage', [
             }
         }
 
+        //$scope.showBadgeDialog = function(displayName){
+        //    console.log("show badge dialog!", displayName)
+        //    $location.url("u/" + Person.d.orcid_id + "/a/" + displayName.toLowerCase().replace(" ", "-"))
+        //}
 
 
 
@@ -3421,7 +3425,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "<script type=\"text/ng-template\" id=\"badgeDialog.tpl.html\">\n" +
     "    <md-dialog id=\"badgeDialog\">\n" +
     "        <md-dialog-content>\n" +
-    "            <h2>Ooh nice, {{ firstName }} has unlocked this achievement:</h2>\n" +
+    "            <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>\n" +
     "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
     "        </md-dialog-content>\n" +
     "        <md-dialog-actions>\n" +

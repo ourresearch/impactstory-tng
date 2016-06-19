@@ -1322,7 +1322,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "<script type=\"text/ng-template\" id=\"badgeDialog.tpl.html\">\n" +
     "    <md-dialog id=\"badgeDialog\">\n" +
     "        <md-dialog-content>\n" +
-    "            <h2>Ooh nice, {{ firstName }} has unlocked this achievement:</h2>\n" +
+    "            <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>\n" +
     "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
     "        </md-dialog-content>\n" +
     "        <md-dialog-actions>\n" +

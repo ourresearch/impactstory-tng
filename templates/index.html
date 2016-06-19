@@ -146,7 +146,8 @@
 
    <!-- BADGE ITEM -->
    <script type="text/ng-template" id="badge-item.tpl.html">
-        <div class="achievement group-{{ badge.group }} badge-{{ badge.name }} view-item" ng-controller="badgeItemCtrl">
+        <div class="achievement group-{{ badge.group }} badge-{{ badge.name }} view-item"
+             ng-controller="badgeItemCtrl">
 
             <div class="icon group-{{ badge.group }}">
                 <img ng-src="static/img/badges/{{ badge.name }}.png" alt="">
@@ -165,7 +166,7 @@
                        target="_blank"
                        href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.orcid_id }}/a/{{ badge.display_name.toLowerCase().replace(' ', '-') }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:">
                         <i class="fa fa-twitter"></i>
-                        <span class="text">share</span>
+                        <span class="text">share link</span>
                     </a>
                 </div>
                 <div class="under">

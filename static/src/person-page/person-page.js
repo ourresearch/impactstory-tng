@@ -87,7 +87,7 @@ angular.module('personPage', [
 
         // someone is linking to a specific badge. show overview page behind a popup
         else if ($routeParams.tab == "a") {
-            $scope.tab = "overview"
+            $scope.tab = "achievements"
             var badgeName = $routeParams.filter
             console.log("show the badges modal, for this badge", badgeName)
 
@@ -122,7 +122,7 @@ angular.module('personPage', [
 
                 }, function() {
                     console.log("cancelled the setFulltextUrl dialog")
-                    $location.url("u/" + Person.d.orcid_id)
+                    $location.url("u/" + Person.d.orcid_id + "/achievements")
                 });
             }
 
@@ -442,6 +442,10 @@ angular.module('personPage', [
             }
         }
 
+        //$scope.showBadgeDialog = function(displayName){
+        //    console.log("show badge dialog!", displayName)
+        //    $location.url("u/" + Person.d.orcid_id + "/a/" + displayName.toLowerCase().replace(" ", "-"))
+        //}
 
 
 

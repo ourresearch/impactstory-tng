@@ -1162,6 +1162,9 @@ div.page.product-page .row.person-footer .buttons a.btn {
   filter: none;
   -webkit-filter: none;
 }
+.view-item.achievement {
+  padding: 20px;
+}
 .view-item.achievement .group-engagement {
   color: #2196F3;
 }
