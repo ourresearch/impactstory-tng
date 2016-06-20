@@ -1401,8 +1401,7 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                    <a href=\"https://en.wikipedia.org/wiki/Digital_object_identifier\">\n" +
     "                        this standard unique identifier,\n" +
     "                    </a>\n" +
-    "                    it's harder to track only conversations about the work, and harder to determine its\n" +
-    "                    open access status.\n" +
+    "                    it's harder to track online conversations about the work.\n" +
     "                </p>\n" +
     "                <p>\n" +
     "                    If you've\n" +

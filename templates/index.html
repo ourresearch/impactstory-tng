@@ -112,12 +112,14 @@
                     <span class="year date">{{ product.year }}</span>
                     <span class="attr">
                         {{ product.journal }}
-                        <span class="missing-doi" ng-show="!product.doi">
+                        <a class="missing-doi"
+                           href="u/{{ person.orcid_id }}/p/{{ product.id }}"
+                           ng-show="!product.doi">
                             <md-tooltip>
                                 We may be missing data for this publication
                             </md-tooltip>
                             <i class="fa fa-adjust"></i>
-                        </span>
+                        </a>
                     </span>
                 </div>
                 <div class="source-icons" ng-show="product.num_mentions">
