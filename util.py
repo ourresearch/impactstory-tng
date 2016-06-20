@@ -81,38 +81,67 @@ def replace_punctuation(text, sub):
     return u"".join(chars)
 
 
-def conversational_number(number):
+def word_for_num(num):
     words = {
-        "1.0": "one",
-        "2.0": "two",
-        "3.0": "three",
-        "4.0": "four",
-        "5.0": "five",
-        "6.0": "six",
-        "7.0": "seven",
-        "8.0": "eight",
-        "9.0": "nine",
+        1.0: "a",
+        2.0: "two",
+        3.0: "three",
+        4.0: "four",
+        5.0: "five",
+        6.0: "six",
+        7.0: "seven",
+        8.0: "eight",
+        9.0: "nine",
+        10.0: "ten",
+        11.0: "eleven",
+        12.0: "twelve"
     }
 
-    if number < 1:
+    try:
+        return words[float(num)]
+    except KeyError:
+        return "{}".format(num)
+
+
+def conversational_number(number):
+
+    if number == 0:
+        return "zero"
+
+    elif number < 1:
         return round(number, 2)
 
     elif number < 1000:
         return int(math.floor(number))
 
     elif number < 1000000:
-        divided = number / 1000.0
         unit = "thousand"
 
+        # floor of how many thousands we have, using Integer Division
+        num_units = number / 1000
+        is_exact = number % 1000 == 0
+
     else:
-        divided = number / 1000000.0
         unit = "million"
+        divided = number / 1000000.0
 
-    short_number = '{}'.format(round(divided, 2))[:-1]
-    if short_number in words:
-        short_number = words[short_number]
+        # floor (not round) to the nearest .1
+        # eg 1.21 = 1.2
+        # eg 1.29 = 1.2
+        # eg 1.30 = 1.3
+        num_units = int(divided * 10) / 10.0
+        is_exact = number % 1000000 == 0
 
-    return short_number + " " + unit
+
+    ret_str = "{num} {unit}".format(
+        num=word_for_num(num_units),
+        unit=unit
+    )
+    if not is_exact:
+        ret_str = "over " + ret_str
+
+    return ret_str
+
 
 
 
