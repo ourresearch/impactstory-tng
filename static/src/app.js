@@ -115,6 +115,7 @@ angular.module('app').run(function($route,
             // user stuff for analytics
             percent_oa: percentOA,
             num_posts: resp.num_posts,
+            num_mentions: resp.num_mentions,
             num_products: resp.products.length,
             num_badges: resp.badges.length,
             num_twitter_followers: resp.num_twitter_followers,
