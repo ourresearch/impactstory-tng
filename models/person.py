@@ -195,6 +195,8 @@ class Person(db.Model):
     num_products = db.Column(db.Integer)
     num_posts = db.Column(db.Integer)
     num_mentions = db.Column(db.Integer)
+    num_badges = db.Column(db.Integer)
+
     openness = db.Column(db.Float)
     weekly_event_count = db.Column(db.Float)
     monthly_event_count = db.Column(db.Float)
@@ -638,6 +640,8 @@ class Person(db.Model):
 
 
     def set_from_orcid(self):
+        total_start_time = time()
+
         if not self.orcid_api_raw_json:
             print u"no orcid data in db for {}".format(self.orcid_id)
             return
@@ -752,7 +756,7 @@ class Person(db.Model):
     @property
     def countries(self):
         countries = set()
-        for my_product in self.products_with_dois:
+        for my_product in self.products:
             for my_country in my_product.countries:
                 if my_country:
                     countries.add(my_country)
@@ -774,7 +778,7 @@ class Person(db.Model):
     def sources(self):
         sources = []
         for source_name in sources_metadata:
-            source = Source(source_name, self.products_with_dois)
+            source = Source(source_name, self.products)
             if source.posts_count > 0:
                 sources.append(source)
         return sources
@@ -782,7 +786,7 @@ class Person(db.Model):
 
     # convenience so can have all of these set for one profile
     def set_post_details(self):
-        for my_product in self.non_zero_products:
+        for my_product in self.products_with_dois:
             my_product.set_post_details()
 
 
@@ -935,8 +939,12 @@ class Person(db.Model):
         return token.decode('unicode_escape')
 
     @property
+    def badges_to_show_in_ui(self):
+        return [b for b in self.badges_for_api if b.my_badge_type.show_in_ui]
+
+    @property
     def overview_badges(self):
-        overview_possibilities = [b for b in self.badges_for_api if b.my_badge_type.show_in_ui]
+        overview_possibilities = self.badges_to_show_in_ui
 
         if len(overview_possibilities) <= 3:
             return overview_possibilities
@@ -1018,6 +1026,9 @@ class Person(db.Model):
 
                     badge.Badge.query.filter_by(id=already_assigned_badge.id).delete()
 
+        self.num_badges = len(self.badges_to_show_in_ui)
+
+
 
     def set_badge_percentiles(self, limit_to_badges=[]):
         badge_names = [my_badge.name for my_badge in self.badges]
@@ -1054,24 +1065,11 @@ class Person(db.Model):
 
 
     @property
-    def num_non_zero_products(self):
-        return len(self.non_zero_products)
-
-    @property
     def num_twitter_followers(self):
         try:
             return self.twitter_creds["followers_count"]
         except TypeError:
             return None
-
-
-    @property
-    def non_zero_products(self):
-        resp = []
-        for my_product in self.products_with_dois:
-            if my_product.altmetric_score > 0:
-                resp.append(my_product)
-        return resp
 
     @property
     def display_coauthors(self):
