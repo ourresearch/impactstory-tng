@@ -751,7 +751,7 @@ class global_south(BadgeAssigner):
             ratio = (total_global_south_posts / total_geo_located_posts)
             if ratio >= 0.1:
                 self.assigned = True
-                self.candidate_badge.value = 100.0 * ratio
+                self.candidate_badge.value = round(100.0 * ratio, 2)
                 self.candidate_badge.support = "Countries include: {}".format(
                     ", ".join(sorted(countries)))
 
