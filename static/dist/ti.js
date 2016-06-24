@@ -275,7 +275,7 @@ angular.module('app').run(function($route,
 
     $rootScope.sendToIntercom = function(personResp){
         var resp = personResp
-        var percentOA = resp.percent_oa
+        var percentOA = resp.percent_fulltext
         if (percentOA === null) {
             percentOA = undefined
         }
