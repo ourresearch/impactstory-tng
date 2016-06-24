@@ -22,6 +22,7 @@ from util import days_ago
 from util import days_between
 from util import normalize
 from util import as_proportion
+from util import elapsed
 
 from models.source import sources_metadata
 from models.source import Source
@@ -44,6 +45,7 @@ from models.mendeley import set_mendeley_data
 def make_product(orcid_product_dict):
     my_product = Product()
     set_biblio_from_biblio_dict(my_product, orcid_product_dict)
+
     my_product.orcid_api_raw_json = orcid_product_dict
     return my_product
 
@@ -118,6 +120,7 @@ class Product(db.Model):
     orcid_importer = db.Column(db.Text)
 
     orcid_api_raw_json = deferred(db.Column(JSONB))
+    # orcid_api_raw_json = db.Column(JSONB)
     # crossref_api_raw = deferred(db.Column(JSONB))
     crossref_api_raw = db.Column(JSONB)
     altmetric_api_raw = deferred(db.Column(JSONB))
@@ -538,6 +541,7 @@ class Product(db.Model):
                 title = self.title,
                 first_author = self.first_author_family_name
             )
+            # print u"url: {}".format(url)
             try:
                 r = requests.get(url, timeout=5)
                 if r.status_code==200 and r.text and u"|" in r.text:
