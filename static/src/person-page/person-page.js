@@ -87,7 +87,7 @@ angular.module('personPage', [
 
         // someone is linking to a specific badge. show overview page behind a popup
         else if ($routeParams.tab == "a") {
-            $scope.tab = "overview"
+            $scope.tab = "achievements"
             var badgeName = $routeParams.filter
             console.log("show the badges modal, for this badge", badgeName)
 
@@ -103,11 +103,15 @@ angular.module('personPage', [
                 $scope.trustHtml = function(str){
                     return $sce.trustAsHtml(str)
                 }
+                $scope.cancel = function() {
+                    $mdDialog.cancel();
+                };
+                $scope.firstName = Person.d.first_name
             }
 
             var dialogOptions = {
                 clickOutsideToClose: true,
-                templateUrl: 'badgeDialog.tmpl.html',
+                templateUrl: 'badgeDialog.tpl.html',
                 controller: badgeDialogCtrl
             }
 
@@ -118,6 +122,7 @@ angular.module('personPage', [
 
                 }, function() {
                     console.log("cancelled the setFulltextUrl dialog")
+                    $location.url("u/" + Person.d.orcid_id + "/achievements")
                 });
             }
 
@@ -252,6 +257,17 @@ angular.module('personPage', [
                 })
             }
 
+        }
+
+        $scope.shareBadge = function(badgeName){
+            window.Intercom('trackEvent', 'tweeted-badge', {
+                name: badgeName
+            });
+            var myOrcid = $auth.getPayload().sub // orcid ID
+            window.Intercom("update", {
+                user_id: myOrcid,
+                latest_tweeted_badge: badgeName
+            })
         }
 
 
@@ -437,6 +453,10 @@ angular.module('personPage', [
             }
         }
 
+        //$scope.showBadgeDialog = function(displayName){
+        //    console.log("show badge dialog!", displayName)
+        //    $location.url("u/" + Person.d.orcid_id + "/a/" + displayName.toLowerCase().replace(" ", "-"))
+        //}
 
 
 

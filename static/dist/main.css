@@ -656,6 +656,13 @@ div.page.product-page div.tab-controls a {
   display: inline-block;
   border-bottom: 3px solid transparent;
 }
+@media only screen and (max-width: 992px) {
+  div.page.person div.tab-controls a,
+  div.page.product-page div.tab-controls a {
+    font-weight: bold;
+    padding: 7px;
+  }
+}
 div.page.person div.tab-controls a:hover,
 div.page.product-page div.tab-controls a:hover {
   text-decoration: none;
@@ -664,6 +671,12 @@ div.page.person div.tab-controls a.selected-true,
 div.page.product-page div.tab-controls a.selected-true {
   color: #ff4000;
   border-bottom: 3px solid #ff4000;
+}
+@media only screen and (max-width: 992px) {
+  div.page.person div.tab-controls a.selected-true,
+  div.page.product-page div.tab-controls a.selected-true {
+    border: none;
+  }
 }
 div.page.person .tab-view,
 div.page.product-page .tab-view {
@@ -890,6 +903,18 @@ div.page.product-page .tab-view.overview .widget.publications .title {
 }
 div.page.person .tab-view.overview .widget.publications .fulltext .val,
 div.page.product-page .tab-view.overview .widget.publications .fulltext .val {
+  display: none;
+}
+div.page.person .tab-view.overview .widget.badges .achievement,
+div.page.product-page .tab-view.overview .widget.badges .achievement {
+  padding: 10px;
+}
+div.page.person .tab-view.overview .widget.badges .achievement .under,
+div.page.product-page .tab-view.overview .widget.badges .achievement .under {
+  font-size: 14px;
+}
+div.page.person .tab-view.overview .widget.badges .achievement .share,
+div.page.product-page .tab-view.overview .widget.badges .achievement .share {
   display: none;
 }
 div.page.person .tab-view.publications .main-col .title,
@@ -1162,6 +1187,26 @@ div.page.product-page .row.person-footer .buttons a.btn {
   filter: none;
   -webkit-filter: none;
 }
+.view-item.achievement {
+  padding: 20px;
+}
+@media only screen and (max-width: 992px) {
+  .view-item.achievement {
+    display: block;
+  }
+  .view-item.achievement .icon {
+    float: left;
+  }
+  .view-item.achievement .content .title {
+    min-height: 64px;
+    margin-top: 15px;
+    margin-left: 65px;
+  }
+  .view-item.achievement .content .title .share {
+    display: block;
+    padding-top: 5px !important;
+  }
+}
 .view-item.achievement .group-engagement {
   color: #2196F3;
 }
@@ -1183,6 +1228,7 @@ div.page.product-page .row.person-footer .buttons a.btn {
 }
 .view-item.achievement .icon {
   line-height: 1;
+  margin-top: 5px;
   min-width: 70px;
 }
 .view-item.achievement .icon img {
@@ -1193,8 +1239,26 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.achievement .content .title {
   font-size: 20px;
 }
+.view-item.achievement .content .title .share {
+  margin-right: 10%;
+  font-size: 12px;
+  color: #777;
+  padding: 10px;
+}
+.view-item.achievement .content .title .share:hover {
+  text-decoration: underline;
+}
+.view-item.achievement .content .title .share i {
+  opacity: .5;
+}
+.view-item.achievement .content .under {
+  font-size: 15px;
+}
 .view-item.achievement .content .under .descr em.n {
   font-size: 120%;
+}
+.view-item.achievement .content .under .support {
+  font-size: 90%;
 }
 .view-item.achievement .content .under .support .more:hover {
   cursor: pointer;
@@ -1526,4 +1590,19 @@ div.page.settings-page div.setting-panel div.second-q h4 {
 }
 md-dialog {
   max-width: 500px;
+}
+md-dialog#badgeDialog {
+  padding: 20px 10px 0;
+}
+md-dialog#badgeDialog h2 {
+  font-size: 17px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  text-align: center;
+}
+md-dialog#badgeDialog .title {
+  font-size: 24px;
+}
+md-dialog#badgeDialog .under {
+  font-size: 16px;
 }
