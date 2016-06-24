@@ -492,7 +492,6 @@ class Person(db.Model):
 
         for p in products:
             p.set_local_lookup_oa()
-        print u"SO FAR: {} open\n".format(len([p for p in products if p.has_fulltext_url]))
         print u"finished local step of set_fulltext_urls in {}s".format(elapsed(start_time, 2))
 
 
