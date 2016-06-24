@@ -294,6 +294,7 @@ angular.module('app').run(function($route,
             // user stuff for analytics
             percent_oa: percentOA,
             num_posts: resp.num_posts,
+            num_mentions: resp.num_mentions,
             num_products: resp.products.length,
             num_badges: resp.badges.length,
             num_twitter_followers: resp.num_twitter_followers,
@@ -970,7 +971,7 @@ angular.module('personPage', [
 
         // someone is linking to a specific badge. show overview page behind a popup
         else if ($routeParams.tab == "a") {
-            $scope.tab = "overview"
+            $scope.tab = "achievements"
             var badgeName = $routeParams.filter
             console.log("show the badges modal, for this badge", badgeName)
 
@@ -986,11 +987,15 @@ angular.module('personPage', [
                 $scope.trustHtml = function(str){
                     return $sce.trustAsHtml(str)
                 }
+                $scope.cancel = function() {
+                    $mdDialog.cancel();
+                };
+                $scope.firstName = Person.d.first_name
             }
 
             var dialogOptions = {
                 clickOutsideToClose: true,
-                templateUrl: 'badgeDialog.tmpl.html',
+                templateUrl: 'badgeDialog.tpl.html',
                 controller: badgeDialogCtrl
             }
 
@@ -1001,6 +1006,7 @@ angular.module('personPage', [
 
                 }, function() {
                     console.log("cancelled the setFulltextUrl dialog")
+                    $location.url("u/" + Person.d.orcid_id + "/achievements")
                 });
             }
 
@@ -1135,6 +1141,17 @@ angular.module('personPage', [
                 })
             }
 
+        }
+
+        $scope.shareBadge = function(badgeName){
+            window.Intercom('trackEvent', 'tweeted-badge', {
+                name: badgeName
+            });
+            var myOrcid = $auth.getPayload().sub // orcid ID
+            window.Intercom("update", {
+                user_id: myOrcid,
+                latest_tweeted_badge: badgeName
+            })
         }
 
 
@@ -1320,6 +1337,10 @@ angular.module('personPage', [
             }
         }
 
+        //$scope.showBadgeDialog = function(displayName){
+        //    console.log("show badge dialog!", displayName)
+        //    $location.url("u/" + Person.d.orcid_id + "/a/" + displayName.toLowerCase().replace(" ", "-"))
+        //}
 
 
 
@@ -1472,7 +1493,6 @@ angular.module('productPage', [
             $scope.postsSum += v.posts_count
         })
 
-        console.log("postsSum", $scope.postsSum)
 
         $scope.d.postsLimit = 20
         $scope.selectedChannel = _.findWhere($scope.sources, {source_name: $routeParams.filter})
@@ -1930,7 +1950,6 @@ angular.module('settingsPage', [
             $http.post("/api/person/" + myOrcidId)
                 .success(function(resp){
                     // force a reload of the person
-                    Intercom('trackEvent', 'synced');
                     Intercom('trackEvent', 'synced-to-edit');
                     $rootScope.sendToIntercom(resp)
                     Person.load(myOrcidId, true).then(
@@ -3225,10 +3244,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                        </span>\n" +
     "                        <span class=\"val\" ng-show=\"subscore.badgesCount\">({{ subscore.badgesCount }})</span>\n" +
     "                    </span>\n" +
-    "\n" +
     "                </div>\n" +
-    "\n" +
-    "\n" +
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
@@ -3412,15 +3428,17 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "\n" +
-    "\n" +
     "</div>\n" +
     "\n" +
-    "<script type=\"text/ng-template\" id=\"badgeDialog.tmpl.html\">\n" +
-    "    <md-dialog>\n" +
+    "<script type=\"text/ng-template\" id=\"badgeDialog.tpl.html\">\n" +
+    "    <md-dialog id=\"badgeDialog\">\n" +
     "        <md-dialog-content>\n" +
+    "            <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>\n" +
     "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
     "        </md-dialog-content>\n" +
+    "        <md-dialog-actions>\n" +
+    "            <md-button ng-click=\"cancel()\">Dismiss</md-button>\n" +
+    "        </md-dialog-actions>\n" +
     "    </md-dialog>\n" +
     "</script>\n" +
     "\n" +
@@ -3497,8 +3515,7 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                    <a href=\"https://en.wikipedia.org/wiki/Digital_object_identifier\">\n" +
     "                        this standard unique identifier,\n" +
     "                    </a>\n" +
-    "                    it's harder to track only conversations about the work, and harder to determine its\n" +
-    "                    open access status.\n" +
+    "                    it's harder to track online conversations about the work.\n" +
     "                </p>\n" +
     "                <p>\n" +
     "                    If you've\n" +

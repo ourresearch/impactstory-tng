@@ -112,12 +112,14 @@
                     <span class="year date">{{ product.year }}</span>
                     <span class="attr">
                         {{ product.journal }}
-                        <span class="missing-doi" ng-show="!product.doi">
+                        <a class="missing-doi"
+                           href="u/{{ person.orcid_id }}/p/{{ product.id }}"
+                           ng-show="!product.doi">
                             <md-tooltip>
                                 We may be missing data for this publication
                             </md-tooltip>
                             <i class="fa fa-adjust"></i>
-                        </span>
+                        </a>
                     </span>
                 </div>
                 <div class="source-icons" ng-show="product.num_mentions">
@@ -146,7 +148,8 @@
 
    <!-- BADGE ITEM -->
    <script type="text/ng-template" id="badge-item.tpl.html">
-        <div class="achievement group-{{ badge.group }} badge-{{ badge.name }} view-item" ng-controller="badgeItemCtrl">
+        <div class="achievement group-{{ badge.group }} badge-{{ badge.name }} view-item"
+             ng-controller="badgeItemCtrl">
 
             <div class="icon group-{{ badge.group }}">
                 <img ng-src="static/img/badges/{{ badge.name }}.png" alt="">
@@ -161,6 +164,14 @@
                         </md-tooltip>
                         {{ numFormat.decimalToPerc(badge.percentile) }}
                     </span>
+                    <a class="share"
+                       target="_blank"
+                       ng-show="ownsThisProfile"
+                       ng-click="shareBadge(badge.name)"
+                       href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.orcid_id }}/a/{{ badge.display_name.toLowerCase().replace(' ', '-') }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:">
+                        <i class="fa fa-twitter"></i>
+                        <span class="text">share link</span>
+                    </a>
                 </div>
                 <div class="under">
                     <div class="descr">
