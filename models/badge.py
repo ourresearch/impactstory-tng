@@ -780,7 +780,10 @@ class open_science_triathlete(BadgeAssigner):
     def decide_if_assigned(self, person):
         has_oa_paper = [p.doi for p in person.products if p.has_fulltext_url and p.guess_genre() == "article"]
         has_data = [p.id for p in person.all_products if p.guess_genre()=="dataset"]
-        has_software = person.depsy_percentile > 0
+        if person.depsy_id:
+            has_software = True
+        else:
+            has_software = [p.id for p in person.all_products if p.guess_genre()=="software"]
 
         if (has_oa_paper and has_data and has_software):
             self.assigned = True

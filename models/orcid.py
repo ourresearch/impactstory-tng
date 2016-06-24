@@ -158,8 +158,8 @@ def get_doi_from_biblio_dict(orcid_product_dict):
 
 
 def set_biblio_from_biblio_dict(my_product, biblio_dict):
-
     my_product.orcid_put_code = biblio_dict["put-code"]
+
 
     citation_fields = {}
     try:
@@ -168,6 +168,7 @@ def set_biblio_from_biblio_dict(my_product, biblio_dict):
             # print "citation_fields", citation_fields
     except (TypeError, KeyError, IndexError):
         pass
+
 
     try:
         my_product.type = str(biblio_dict["work-type"].encode('utf-8')).lower().replace("_", "-")
@@ -178,6 +179,8 @@ def set_biblio_from_biblio_dict(my_product, biblio_dict):
     # replace many white spaces and \n with just one space
     try:
         my_product.title = re.sub(u"\s+", u" ", biblio_dict["work-title"]["title"]["value"])
+        replace_whitespace_pattern = re.compile(u"\s+")
+        my_product.title = replace_whitespace_pattern.sub(u" ", biblio_dict["work-title"]["title"]["value"])
     except (TypeError, KeyError):
         my_product.title = None
         pass
@@ -233,6 +236,7 @@ def set_biblio_from_biblio_dict(my_product, biblio_dict):
     except (TypeError, KeyError):
         my_product.orcid_importer = None
         pass
+
 
     my_product.doi = get_doi_from_biblio_dict(biblio_dict)
     my_product.arxiv = get_arxiv_from_biblio_dict(biblio_dict)
