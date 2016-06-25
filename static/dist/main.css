@@ -913,8 +913,8 @@ div.page.person .tab-view.overview .widget.badges .achievement .under,
 div.page.product-page .tab-view.overview .widget.badges .achievement .under {
   font-size: 14px;
 }
-div.page.person .tab-view.overview .widget.badges .achievement .share,
-div.page.product-page .tab-view.overview .widget.badges .achievement .share {
+div.page.person .tab-view.overview .widget.badges .achievement .badge-actions,
+div.page.product-page .tab-view.overview .widget.badges .achievement .badge-actions {
   display: none;
 }
 div.page.person .tab-view.publications .main-col .title,
@@ -1202,10 +1202,6 @@ div.page.product-page .row.person-footer .buttons a.btn {
     margin-top: 15px;
     margin-left: 65px;
   }
-  .view-item.achievement .content .title .share {
-    display: block;
-    padding-top: 5px !important;
-  }
 }
 .view-item.achievement .group-engagement {
   color: #2196F3;
@@ -1239,18 +1235,6 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.achievement .content .title {
   font-size: 20px;
 }
-.view-item.achievement .content .title .share {
-  margin-right: 10%;
-  font-size: 12px;
-  color: #777;
-  padding: 10px;
-}
-.view-item.achievement .content .title .share:hover {
-  text-decoration: underline;
-}
-.view-item.achievement .content .title .share i {
-  opacity: .5;
-}
 .view-item.achievement .content .under {
   font-size: 15px;
 }
@@ -1263,6 +1247,21 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.achievement .content .under .support .more:hover {
   cursor: pointer;
   text-decoration: underline;
+}
+.view-item.achievement .content .badge-actions {
+  font-size: 12px;
+  color: #777;
+  padding: 5px 0;
+  display: block;
+}
+.view-item.achievement .content .badge-actions a {
+  margin-left: 5px;
+}
+.view-item.achievement .content .badge-actions a:hover {
+  text-decoration: underline;
+}
+.view-item.achievement .content .badge-actions a i {
+  opacity: .5;
 }
 .view-item.rollup .content .title i.show-hide {
   font-size: 14px;
@@ -1605,4 +1604,11 @@ md-dialog#badgeDialog .title {
 }
 md-dialog#badgeDialog .under {
   font-size: 16px;
+}
+md-dialog#badgeDialog .dialog-actions .btn {
+  margin-left: 10px;
+  color: #555;
+}
+md-dialog#badgeDialog .dialog-actions .btn i {
+  opacity: .9;
 }
