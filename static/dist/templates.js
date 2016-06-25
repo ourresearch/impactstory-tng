@@ -1322,8 +1322,18 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "            <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>\n" +
     "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
     "        </md-dialog-content>\n" +
-    "        <md-dialog-actions>\n" +
-    "            <md-button ng-click=\"cancel()\">Dismiss</md-button>\n" +
+    "        <md-dialog-actions class=\"dialog-actions\">\n" +
+    "            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:\"\n" +
+    "               target=\"_blank\"\n" +
+    "               class=\"btn btn-default\"\n" +
+    "               ng-click=\"shareBadge()\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                <span class=\"text\">Share</span>\n" +
+    "            </a>\n" +
+    "            <span ng-click=\"cancel()\" class=\"btn btn-default\">\n" +
+    "                <i class=\"fa fa-times\"></i>\n" +
+    "                <span class=\"text\">Dismiss</span>\n" +
+    "            </span>\n" +
     "        </md-dialog-actions>\n" +
     "    </md-dialog>\n" +
     "</script>\n" +
