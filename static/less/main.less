@@ -876,7 +876,7 @@ div.page.person, div.page.product-page {
             .under {
               font-size: 14px;
             }
-            .share {
+            .badge-actions {
               display: none;
             }
           }
@@ -1277,10 +1277,10 @@ div.page.person, div.page.product-page {
           min-height: 64px;
           margin-top: 15px;
           margin-left: 65px;
-          .share {
-            display: block;
-            padding-top: 5px !important;
-          }
+          //.badge-actions {
+          //  display: block;
+          //  padding-top: 5px !important;
+          //}
         }
       }
     }
@@ -1317,18 +1317,7 @@ div.page.person, div.page.product-page {
     .content{
       .title{
         font-size: 20px;
-        .share {
-          margin-right: 10%;
-          font-size: 12px;
-          color: #777;
-          padding: 10px;
-          &:hover {
-            text-decoration: underline;
-          }
-          i {
-            opacity: .5;
-          }
-        }
+
       }
       .under {
         font-size: 15px;
@@ -1349,6 +1338,28 @@ div.page.person, div.page.product-page {
               cursor: pointer;
               text-decoration: underline;
             }
+          }
+        }
+      }
+      .badge-actions {
+        font-size: 12px;
+        color: #777;
+        padding: 5px 0;
+        display: block;
+        a {
+          margin-left: 5px;
+          //&.badge-group-engagement {color: @engagement;}
+          //&.badge-group-openness {color: @openness;}
+          //&.badge-group-buzz {color: @buzz;}
+          //&.badge-group-fun {color: @fun;}
+          &:hover {
+            text-decoration: underline;
+          }
+          i {
+            opacity: .5;
+          }
+          .text {
+            //display: none;
           }
         }
       }
@@ -1803,6 +1814,16 @@ md-dialog {
     }
     .under {
       font-size: 16px;
+    }
+
+    .dialog-actions {
+      .btn {
+        margin-left: 10px;
+        color: #555;
+        i{
+          opacity: .9;
+        }
+      }
     }
   }
 }

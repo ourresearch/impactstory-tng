@@ -71,6 +71,10 @@ angular.module('personPage', [
 
 
         var ownsThisProfile = $auth.isAuthenticated() && $auth.getPayload().sub == Person.d.orcid_id
+        var badgeUrlName = function(badge){
+           return badge.display_name.toLowerCase().replace(" ", "-")
+        }
+        $scope.badgeUrlName = badgeUrlName
 
         $scope.ownsThisProfile = ownsThisProfile
 
@@ -92,11 +96,12 @@ angular.module('personPage', [
             console.log("show the badges modal, for this badge", badgeName)
 
 
-            var badgeToShow = _.find(Person.d.badges, function(badge){
-                return badgeName == badge.display_name.toLowerCase().replace(" ", "-")
+            var badgeToShow = _.find(Person.d.badges, function(myBadge){
+                return badgeName == badgeUrlName(myBadge)
             })
             var badgeDialogCtrl = function($scope){
                 $scope.badge = badgeToShow
+                $scope.badgeUrl = "/u/" + Person.d.orcid_id + "/a/" + badgeUrlName(badgeToShow)
 
                 // this dialog has isolate scope so doesn't inherit this function
                 // from the application scope.
@@ -268,6 +273,11 @@ angular.module('personPage', [
                 user_id: myOrcid,
                 latest_tweeted_badge: badgeName
             })
+        }
+
+        $scope.showBadge = function(badge){
+            $location.url("u/" + Person.d.orcid_id + "/a/" + badgeUrlName(badge))
+
         }
 
 
@@ -453,10 +463,6 @@ angular.module('personPage', [
             }
         }
 
-        //$scope.showBadgeDialog = function(displayName){
-        //    console.log("show badge dialog!", displayName)
-        //    $location.url("u/" + Person.d.orcid_id + "/a/" + displayName.toLowerCase().replace(" ", "-"))
-        //}
 
 
 

@@ -955,6 +955,10 @@ angular.module('personPage', [
 
 
         var ownsThisProfile = $auth.isAuthenticated() && $auth.getPayload().sub == Person.d.orcid_id
+        var badgeUrlName = function(badge){
+           return badge.display_name.toLowerCase().replace(" ", "-")
+        }
+        $scope.badgeUrlName = badgeUrlName
 
         $scope.ownsThisProfile = ownsThisProfile
 
@@ -976,11 +980,12 @@ angular.module('personPage', [
             console.log("show the badges modal, for this badge", badgeName)
 
 
-            var badgeToShow = _.find(Person.d.badges, function(badge){
-                return badgeName == badge.display_name.toLowerCase().replace(" ", "-")
+            var badgeToShow = _.find(Person.d.badges, function(myBadge){
+                return badgeName == badgeUrlName(myBadge)
             })
             var badgeDialogCtrl = function($scope){
                 $scope.badge = badgeToShow
+                $scope.badgeUrl = "/u/" + Person.d.orcid_id + "/a/" + badgeUrlName(badgeToShow)
 
                 // this dialog has isolate scope so doesn't inherit this function
                 // from the application scope.
@@ -1152,6 +1157,11 @@ angular.module('personPage', [
                 user_id: myOrcid,
                 latest_tweeted_badge: badgeName
             })
+        }
+
+        $scope.showBadge = function(badge){
+            $location.url("u/" + Person.d.orcid_id + "/a/" + badgeUrlName(badge))
+
         }
 
 
@@ -1337,10 +1347,6 @@ angular.module('personPage', [
             }
         }
 
-        //$scope.showBadgeDialog = function(displayName){
-        //    console.log("show badge dialog!", displayName)
-        //    $location.url("u/" + Person.d.orcid_id + "/a/" + displayName.toLowerCase().replace(" ", "-"))
-        //}
 
 
 
@@ -3436,8 +3442,18 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "            <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>\n" +
     "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
     "        </md-dialog-content>\n" +
-    "        <md-dialog-actions>\n" +
-    "            <md-button ng-click=\"cancel()\">Dismiss</md-button>\n" +
+    "        <md-dialog-actions class=\"dialog-actions\">\n" +
+    "            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:\"\n" +
+    "               target=\"_blank\"\n" +
+    "               class=\"btn btn-default\"\n" +
+    "               ng-click=\"shareBadge()\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                <span class=\"text\">Share</span>\n" +
+    "            </a>\n" +
+    "            <span ng-click=\"cancel()\" class=\"btn btn-default\">\n" +
+    "                <i class=\"fa fa-times\"></i>\n" +
+    "                <span class=\"text\">Dismiss</span>\n" +
+    "            </span>\n" +
     "        </md-dialog-actions>\n" +
     "    </md-dialog>\n" +
     "</script>\n" +

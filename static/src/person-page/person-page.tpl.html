@@ -641,8 +641,18 @@
             <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>
             <div class="badge-container" ng-include="'badge-item.tpl.html'"></div>
         </md-dialog-content>
-        <md-dialog-actions>
-            <md-button ng-click="cancel()">Dismiss</md-button>
+        <md-dialog-actions class="dialog-actions">
+            <a href="https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:"
+               target="_blank"
+               class="btn btn-default"
+               ng-click="shareBadge()">
+                <i class="fa fa-twitter"></i>
+                <span class="text">Share</span>
+            </a>
+            <span ng-click="cancel()" class="btn btn-default">
+                <i class="fa fa-times"></i>
+                <span class="text">Dismiss</span>
+            </span>
         </md-dialog-actions>
     </md-dialog>
 </script>
