@@ -11,6 +11,8 @@ import re
 import string
 import collections
 import csv
+from functools import wraps
+
 
 def read_csv_file(filename):
     print filename
@@ -55,11 +57,26 @@ def calculate_percentile(refset, value):
 
     return percentile
 
+# from http://code.activestate.com/recipes/576563-cached-property/
+def cached_property(property_name):
+    """A memoize decorator for class properties."""
+    @wraps(property_name)
+    def cached_propery_get(self):
+        try:
+            return self._cache[property_name]
+        except AttributeError:
+            self._cache = {}
+        except KeyError:
+            pass
+        ret = self._cache[property_name] = property_name(self)
+        return ret
+    return property(cached_propery_get)
+
+
 # good for deduping strings.  output removes spaces so isn't readable.
 def normalize(text):
-    # remove all white space
-    response = re.sub(u"\s+", u"", text)
-    response = remove_punctuation(response.lower())
+    response = text.lower()
+    response = u''.join(c for c in response if c.isalpha())
     return response
 
 def remove_punctuation(input_string):
