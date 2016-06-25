@@ -1321,6 +1321,13 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "        <md-dialog-content>\n" +
     "            <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>\n" +
     "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
+    "            <div class=\"video-container\">\n" +
+    "                <iframe class=\"big-in-japan video youtube\"\n" +
+    "                        src=\"https://www.youtube.com/embed/tl6u2NASUzU\"\n" +
+    "                        frameborder=\"0\">\n" +
+    "\n" +
+    "                </iframe>\n" +
+    "            </div>\n" +
     "        </md-dialog-content>\n" +
     "        <md-dialog-actions class=\"dialog-actions\">\n" +
     "            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:\"\n" +
