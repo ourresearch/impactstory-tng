@@ -640,7 +640,7 @@
         <md-dialog-content>
             <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>
             <div class="badge-container" ng-include="'badge-item.tpl.html'"></div>
-            <div class="video-container">
+            <div class="video-container" ng-show="badge.name=='big_in_japan'">
                 <iframe class="big-in-japan video youtube"
                         src="https://www.youtube.com/embed/tl6u2NASUzU"
                         frameborder="0">
