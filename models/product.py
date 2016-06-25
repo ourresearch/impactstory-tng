@@ -23,6 +23,7 @@ from util import days_between
 from util import normalize
 from util import as_proportion
 from util import elapsed
+from util import cached_property
 
 from models.source import sources_metadata
 from models.source import Source
@@ -702,7 +703,7 @@ class Product(db.Model):
             events_last_week_count += source.events_last_week_count
         return events_last_week_count
 
-    @property
+    @cached_property
     def normalized_title(self):
         return normalize(self.display_title)
 
