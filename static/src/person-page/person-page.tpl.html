@@ -640,6 +640,13 @@
         <md-dialog-content>
             <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>
             <div class="badge-container" ng-include="'badge-item.tpl.html'"></div>
+            <div class="video-container" ng-show="badge.name=='big_in_japan'">
+                <iframe class="big-in-japan video youtube"
+                        src="https://www.youtube.com/embed/tl6u2NASUzU"
+                        frameborder="0">
+
+                </iframe>
+            </div>
         </md-dialog-content>
         <md-dialog-actions class="dialog-actions">
             <a href="https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:"

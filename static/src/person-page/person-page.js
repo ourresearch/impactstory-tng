@@ -72,7 +72,7 @@ angular.module('personPage', [
 
         var ownsThisProfile = $auth.isAuthenticated() && $auth.getPayload().sub == Person.d.orcid_id
         var badgeUrlName = function(badge){
-           return badge.display_name.toLowerCase().replace(" ", "-")
+           return badge.display_name.toLowerCase().replace(/\s/g, "-")
         }
         $scope.badgeUrlName = badgeUrlName
 
