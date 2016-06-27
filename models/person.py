@@ -637,9 +637,13 @@ class Person(db.Model):
         )
 
     def set_fresh_orcid(self):
-        orcid_created_date_timestamp = self.orcid_api_raw_json["orcid-history"]["submission-date"]["value"]
-        orcid_created_date = datetime.datetime.fromtimestamp(orcid_created_date_timestamp/1000)
-        self.fresh_orcid = (self.created - orcid_created_date).total_seconds() < (60*60)  # 1 hour
+        try:
+            orcid_created_date_timestamp = self.orcid_api_raw_json["orcid-history"]["submission-date"]["value"]
+            orcid_created_date = datetime.datetime.fromtimestamp(orcid_created_date_timestamp/1000)
+            self.fresh_orcid = (self.created - orcid_created_date).total_seconds() < (60*60)  # 1 hour
+        # orcid is blank
+        except TypeError:
+            pass
 
     def set_from_orcid(self):
         total_start_time = time()
