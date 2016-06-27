@@ -21,6 +21,7 @@ def read_csv_file(filename):
         rows = [row for row in my_reader]
     return rows
 
+
 class NoDoiException(Exception):
     pass
 
