@@ -1211,7 +1211,7 @@ class Person(db.Model):
             "depsy_id": self.depsy_id,
             "campaign": self.campaign,
             "percent_fulltext": self.openness_proportion,
-
+            "fresh_orcid": self.fresh_orcid,
             "num_posts": self.num_posts,
             "num_mentions": self.num_mentions,
             "num_orcid_products": len(self.all_products),

@@ -120,6 +120,7 @@ angular.module('app').run(function($route,
             num_badges: resp.badges.length,
             num_twitter_followers: resp.num_twitter_followers,
             campaign: resp.campaign,
+            fresh_orcid: resp.fresh_orcid,
 
             // we don't send person responses for deleted users (just 404s).
             // so if we have a person response, this user isn't deleted.
