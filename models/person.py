@@ -177,11 +177,12 @@ class Person(db.Model):
     claimed_at = db.Column(db.DateTime)
 
     orcid_api_raw_json = deferred(db.Column(JSONB))
+    fresh_orcid = db.Column(db.Boolean)
     invalid_orcid = db.Column(db.Boolean)
-    twitter_creds = db.Column(MutableDict.as_mutable(JSONB))
 
     email = db.Column(db.Text)
     twitter = db.Column(db.Text)
+    twitter_creds = db.Column(MutableDict.as_mutable(JSONB))
     campaign = db.Column(db.Text)
     depsy_id = db.Column(db.Text)
     depsy_percentile = db.Column(db.Float)
@@ -189,9 +190,7 @@ class Person(db.Model):
     affiliation_role_title = db.Column(db.Text)
 
     post_counts = db.Column(MutableDict.as_mutable(JSONB))
-    # mendeley_sums = deferred(db.Column(MutableDict.as_mutable(JSONB)))
-    # not deferred for now
-    mendeley_sums = db.Column(MutableDict.as_mutable(JSONB))
+    mendeley_sums = db.Column(MutableDict.as_mutable(JSONB)) # not deferred for now
     num_products = db.Column(db.Integer)
     num_posts = db.Column(db.Integer)
     num_mentions = db.Column(db.Integer)
@@ -637,6 +636,10 @@ class Person(db.Model):
             sec = elapsed(start_time, 2)
         )
 
+    def set_fresh_orcid(self):
+        orcid_created_date_timestamp = self.orcid_api_raw_json["orcid-history"]["submission-date"]["value"]
+        orcid_created_date = datetime.datetime.fromtimestamp(orcid_created_date_timestamp/1000)
+        self.fresh_orcid = (self.created - orcid_created_date).total_seconds() < (60*60)  # 1 hour
 
     def set_from_orcid(self):
         total_start_time = time()
@@ -650,6 +653,7 @@ class Person(db.Model):
 
         self.given_names = orcid_data.given_names
         self.family_name = orcid_data.family_name
+        self.set_fresh_orcid()
         if orcid_data.best_affiliation:
             self.affiliation_name = orcid_data.best_affiliation["name"]
             self.affiliation_role_title = orcid_data.best_affiliation["role_title"]
