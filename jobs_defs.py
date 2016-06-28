@@ -25,12 +25,6 @@ update_registry.register(Update(
     query=q,
 ))
 
-q = db.session.query(Person.id)
-update_registry.register(Update(
-    job=Person.set_fresh_orcid,
-    query=q,
-    queue_id=1
-))
 
 q = db.session.query(Person.id)
 update_registry.register(Update(
