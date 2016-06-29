@@ -17,10 +17,11 @@
 
 <body ng-cloak>
 
-   <div class="ti-nav">
+   <div class="ti-nav landing-page-{{ global.isLandingPage }}">
       <h1>
          <a href="/">
-            <img src="static/img/impactstory-logo-white.png" alt="Impactstory">
+            <img src="static/img/impactstory-logo-white.png" alt="Impactstory" ng-show="!global.isLandingPage">
+            <img src="static/img/impactstory-logo-sideways.png" alt="Impactstory" ng-show="global.isLandingPage">
          </a>
       </h1>
 

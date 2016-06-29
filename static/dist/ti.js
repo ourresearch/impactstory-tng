@@ -300,7 +300,7 @@ angular.module('app').run(function($route,
             num_twitter_followers: resp.num_twitter_followers,
             campaign: resp.campaign,
             fresh_orcid: resp.fresh_orcid,
-            
+
             // we don't send person responses for deleted users (just 404s).
             // so if we have a person response, this user isn't deleted.
             // useful for when users deleted profile, then re-created later.
@@ -371,6 +371,7 @@ angular.module('app').controller('AppCtrl', function(
         $scope.global.showBottomStuff = true
         $scope.global.loggingIn = false
         $scope.global.title = null
+        $scope.global.isLandingPage = false
         $location.search("source", null)
     })
 
@@ -2077,6 +2078,7 @@ angular.module('staticPages', [
                                              $timeout) {
         $scope.global.showBottomStuff = false;
         console.log("landing page!", $scope.global)
+        $scope.global.isLandingPage = true
 
         var orcidModalCtrl = function($scope){
             console.log("IHaveNoOrcidCtrl ran" )
