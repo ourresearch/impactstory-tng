@@ -3794,7 +3794,7 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "    <div class=\"above-the-fold\">\n" +
     "        <div class=\"tagline\">\n" +
     "            <h1>\n" +
-    "                Find the online impact of your research\n" +
+    "                Discover the online impact of your research.\n" +
     "            </h1>\n" +
     "            <div class=\"sub\">\n" +
     "                Track buzz on Twitter, blogs, news outlets and more:\n" +
@@ -3804,7 +3804,9 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "\n" +
     "        <div class=\"join-button\">\n" +
-    "            <md-button class=\"md-accent md-raised\" ng-click=\"authenticate()\">Join for free with ORCID</md-button>\n" +
+    "            <md-button class=\"md-accent md-raised\" ng-click=\"authenticate()\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                Join free with Twitter</md-button>\n" +
     "            <span class=\"no-orcid\" ng-click=\"noOrcid($event)\">\n" +
     "                <i class=\"fa fa-question-circle\"></i>\n" +
     "                I don't have an ORCID\n" +
