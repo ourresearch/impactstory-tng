@@ -93,6 +93,7 @@ angular.module('staticPages', [
                                              $timeout) {
         $scope.global.showBottomStuff = false;
         console.log("landing page!", $scope.global)
+        $scope.global.isLandingPage = true
 
         var orcidModalCtrl = function($scope){
             console.log("IHaveNoOrcidCtrl ran" )

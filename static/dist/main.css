@@ -38,6 +38,15 @@ html body tr:focus {
   position: relative;
   padding: 10px;
 }
+.ti-nav.landing-page-true {
+  background: #fff;
+}
+.ti-nav.landing-page-true .controls {
+  color: #999;
+}
+.ti-nav.landing-page-true .controls a {
+  color: #999;
+}
 .ti-nav h1 {
   padding: 0;
   margin: 0;

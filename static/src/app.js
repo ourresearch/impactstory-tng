@@ -192,6 +192,7 @@ angular.module('app').controller('AppCtrl', function(
         $scope.global.showBottomStuff = true
         $scope.global.loggingIn = false
         $scope.global.title = null
+        $scope.global.isLandingPage = false
         $location.search("source", null)
     })
 
