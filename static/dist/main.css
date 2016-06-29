@@ -1478,16 +1478,30 @@ div.page.settings-page div.setting-panel div.second-q h4 {
 .page.about-badges div.intro {
   font-size: 18px;
 }
-.page.about-badges div.intro .badge-row {
-  padding: 5px 0;
+.page.about-badges div.intro p {
+  margin-bottom: 40px;
 }
-.page.about-badges div.intro .badge-row .badge-container .ti-badge {
-  margin-left: 80px;
+.page.about-badges div.intro table {
+  margin-left: 30px;
+  margin-top: -30px;
+  font-size: 16px;
 }
-@media only screen and (max-width: 992px) {
-  .page.about-badges div.intro .badge-row .badge-container .ti-badge {
-    margin-left: 20px;
-  }
+.page.about-badges div.intro table td.badge-name {
+  font-weight: bold;
+  padding: 5px 10px 5px 0;
+  font-size: 18px;
+}
+.page.about-badges div.intro table td.badge-name i {
+  width: 20px;
+}
+.page.about-badges div.intro table td.badge-name.gold {
+  color: gold;
+}
+.page.about-badges div.intro table td.badge-name.silver {
+  color: #999;
+}
+.page.about-badges div.intro table td.badge-name.bronze {
+  color: #CD7F32;
 }
 .page.about-badges div.main div.badge-group {
   padding-top: 70px;
