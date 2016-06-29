@@ -8,8 +8,37 @@ angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", f
     "        <p>Achievements are a way of looking beyond the numbers to find stories that matter:\n" +
     "            stories the buzz your research is generating, the level of engagement with your work,\n" +
     "            your openness, and some lighthearted fun from time to time.\n" +
-    "\n" +
     "        </p>\n" +
+    "        <p>\n" +
+    "            Most achievements have levels\n" +
+    "            based on how hard they are to get, based on our sample of thirty thousand researchers\n" +
+    "            with an <a href=\"orcid.org\">ORCID</a> profile:\n" +
+    "        </p>\n" +
+    "\n" +
+    "\n" +
+    "        <table>\n" +
+    "            <tr>\n" +
+    "                <td class=\"gold badge-name\">\n" +
+    "                    <i class=\"fa fa-trophy\"></i>\n" +
+    "                    Gold level\n" +
+    "                </td>\n" +
+    "                <td>Top 10% of researchers</td>\n" +
+    "            </tr>\n" +
+    "            <tr>\n" +
+    "                <td class=\"silver badge-name\">\n" +
+    "                    <i class=\"fa fa-bookmark\"></i>\n" +
+    "                    Silver level\n" +
+    "                </td>\n" +
+    "                <td>Top 25% of researchers</td>\n" +
+    "            </tr>\n" +
+    "            <tr>\n" +
+    "                <td class=\"bronze badge-name\">\n" +
+    "                    <i class=\"fa fa-certificate\"></i>\n" +
+    "                    Bronze level\n" +
+    "                </td>\n" +
+    "                <td>Top half of researchers</td>\n" +
+    "            </tr>\n" +
+    "        </table>\n" +
     "    </div>\n" +
     "    <div class=\"main\">\n" +
     "\n" +

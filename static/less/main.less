@@ -1675,16 +1675,23 @@ div.page.settings-page {
   }
   div.intro {
     font-size: 18px;
-    .badge-row {
-      padding: 5px 0;
-      .badge-container {
-        //text-align: right;
-        .ti-badge {
-          @media @mobile {
-            margin-left: 20px;
-          }
-          margin-left: 80px;
+    p {
+      margin-bottom: 40px;
+    }
+    table {
+      margin-left: 30px;
+      margin-top: -30px;
+      font-size: 16px;
+      td.badge-name {
+        font-weight: bold;
+        padding: 5px 10px 5px 0;
+        font-size: 18px;
+        i {
+          width: 20px;
         }
+        &.gold {color: @goldBadge;}
+        &.silver {color: @silverBadge;}
+        &.bronze {color: @bronzeBadge;}
       }
     }
   }
