@@ -1271,14 +1271,31 @@ div.page.person, div.page.product-page {
   // achievement list item
   &.achievement {
     padding: 20px;
-    .badge-level {
-      display: none;
-      &.bronze-badge {color: @bronzeBadge;}
-      &.silver-badge {color: @silverBadge;}
-      &.gold-badge {color: @goldBadge;}
-      vertical-align: middle;
-      font-weight: bold;
-      margin-left: 5px;
+    .content {
+      .title {
+        .extra.badge-level {
+          font-size: 16px;
+          //display: none;
+          &.bronze-badge {
+            color: @bronzeBadge;
+            i.fa {
+              font-size: 75%;
+            }
+          }
+          &.silver-badge {color: @silverBadge;}
+          &.gold-badge {color: @goldBadge;}
+          //color: #777 !important;
+          float: right;
+          vertical-align: bottom;
+          font-weight: bold;
+          margin-left: 5px;
+          margin-top: 4px;
+          margin-right: 20px;
+          .text {
+            font-size: 12px;
+          }
+        }
+      }
     }
     @media @mobile {
       display: block;
@@ -1290,7 +1307,10 @@ div.page.person, div.page.product-page {
           min-height: 64px;
           margin-top: 15px;
           margin-left: 65px;
-
+          .extra.badge-level {
+            //float: left;
+            display: block;
+          }
         }
       }
     }

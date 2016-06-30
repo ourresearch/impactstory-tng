@@ -2149,14 +2149,14 @@ angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", f
     "            </tr>\n" +
     "            <tr>\n" +
     "                <td class=\"silver badge-name\">\n" +
-    "                    <i class=\"fa fa-bookmark\"></i>\n" +
+    "                    <i class=\"fa fa-certificate\"></i>\n" +
     "                    Silver level\n" +
     "                </td>\n" +
     "                <td>Top 25% of researchers</td>\n" +
     "            </tr>\n" +
     "            <tr>\n" +
     "                <td class=\"bronze badge-name\">\n" +
-    "                    <i class=\"fa fa-certificate\"></i>\n" +
+    "                    <i class=\"fa fa-bookmark\"></i>\n" +
     "                    Bronze level\n" +
     "                </td>\n" +
     "                <td>Top half of researchers</td>\n" +
