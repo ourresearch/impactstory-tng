@@ -292,7 +292,6 @@ img.channel-icon {
         font-size: 3.2em;
         font-weight: 100;
         color: @primaryColor;
-        // comment
         margin:0;
         line-height: 1;
       }
@@ -1283,12 +1282,20 @@ div.page.person, div.page.product-page {
               font-size: 75%;
             }
           }
-          &.silver-badge {color: @silverBadge;}
-          &.gold-badge {color: @goldBadge;}
+          &.silver-badge {
+            color: @silverBadge;
+            i.fa {
+              font-size: 85%;
+            }
+          }
+          &.gold-badge {
+            color: @goldBadge;
+            font-weight: bold;
+          }
           //color: #777 !important;
           float: right;
           vertical-align: bottom;
-          font-weight: bold;
+          //font-weight: bold;
           margin-left: 5px;
           margin-top: 4px;
           margin-right: 20px;

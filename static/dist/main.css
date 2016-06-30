@@ -1203,7 +1203,6 @@ div.page.product-page .row.person-footer .buttons a.btn {
   font-size: 16px;
   float: right;
   vertical-align: bottom;
-  font-weight: bold;
   margin-left: 5px;
   margin-top: 4px;
   margin-right: 20px;
@@ -1217,8 +1216,12 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.achievement .content .title .extra.badge-level.silver-badge {
   color: #999;
 }
+.view-item.achievement .content .title .extra.badge-level.silver-badge i.fa {
+  font-size: 85%;
+}
 .view-item.achievement .content .title .extra.badge-level.gold-badge {
   color: gold;
+  font-weight: bold;
 }
 .view-item.achievement .content .title .extra.badge-level .text {
   font-size: 12px;
