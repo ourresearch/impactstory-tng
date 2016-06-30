@@ -21,7 +21,7 @@
 @goldBadge: gold;
 //@goldBadge: goldenrod;
 @silverBadge: #999;
-@bronzeBadge: #CD7F32;
+@bronzeBadge: #f29f51;
 
 // generated from http://tools.medialab.sciences-po.fr/iwanthue/
 //@engagement: #40B6FC;
@@ -1271,9 +1271,14 @@ div.page.person, div.page.product-page {
   // achievement list item
   &.achievement {
     padding: 20px;
-    //&:hover {
-    //  background: #eee;
-    //}
+    .badge-level {
+      &.bronze-badge {color: @bronzeBadge;}
+      &.silver-badge {color: @silverBadge;}
+      &.gold-badge {color: @goldBadge;}
+      vertical-align: middle;
+      font-weight: bold;
+      margin-left: 5px;
+    }
     @media @mobile {
       display: block;
       .icon {
@@ -1284,10 +1289,7 @@ div.page.person, div.page.product-page {
           min-height: 64px;
           margin-top: 15px;
           margin-left: 65px;
-          //.badge-actions {
-          //  display: block;
-          //  padding-top: 5px !important;
-          //}
+
         }
       }
     }

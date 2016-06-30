@@ -167,6 +167,21 @@
                         {{ numFormat.decimalToPerc(badge.percentile) }}
                     </span>
                     -->
+                    <span class="extra badge-level bronze-badge" ng-show="badge.percentile > .5 && badge.percentile < .75">
+                        <i class="fa fa-certificate"></i>
+                        <md-tooltip md-direction="top">Top half of all researchers</md-tooltip>
+                        bronze
+                    </span>
+                    <span class="extra badge-level silver-badge" ng-show="badge.percentile >= .75 && badge.percentile < .9">
+                        <i class="fa fa-bookmark"></i>
+                        <md-tooltip md-direction="top">Top quarter of all researchers</md-tooltip>
+                        silver
+                    </span>
+                    <span class="extra badge-level gold-badge" ng-show="badge.percentile >= .9">
+                        <i class="fa fa-trophy"></i>
+                        <md-tooltip md-direction="top">Top 10% of all researchers</md-tooltip>
+                        gold
+                    </span>
 
                 </div>
                 <div class="under">

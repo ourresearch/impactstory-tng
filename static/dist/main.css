@@ -1199,6 +1199,20 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.achievement {
   padding: 20px;
 }
+.view-item.achievement .badge-level {
+  vertical-align: middle;
+  font-weight: bold;
+  margin-left: 5px;
+}
+.view-item.achievement .badge-level.bronze-badge {
+  color: #f29f51;
+}
+.view-item.achievement .badge-level.silver-badge {
+  color: #999;
+}
+.view-item.achievement .badge-level.gold-badge {
+  color: gold;
+}
 @media only screen and (max-width: 992px) {
   .view-item.achievement {
     display: block;
@@ -1501,7 +1515,7 @@ div.page.settings-page div.setting-panel div.second-q h4 {
   color: #999;
 }
 .page.about-badges div.intro table td.badge-name.bronze {
-  color: #CD7F32;
+  color: #f29f51;
 }
 .page.about-badges div.main div.badge-group {
   padding-top: 70px;
