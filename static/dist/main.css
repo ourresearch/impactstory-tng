@@ -1200,6 +1200,7 @@ div.page.product-page .row.person-footer .buttons a.btn {
   padding: 20px;
 }
 .view-item.achievement .badge-level {
+  display: none;
   vertical-align: middle;
   font-weight: bold;
   margin-left: 5px;
