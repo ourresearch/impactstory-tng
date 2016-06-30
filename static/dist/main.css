@@ -1199,19 +1199,29 @@ div.page.product-page .row.person-footer .buttons a.btn {
 .view-item.achievement {
   padding: 20px;
 }
-.view-item.achievement .badge-level {
-  vertical-align: middle;
+.view-item.achievement .content .title .extra.badge-level {
+  font-size: 16px;
+  float: right;
+  vertical-align: bottom;
   font-weight: bold;
   margin-left: 5px;
+  margin-top: 4px;
+  margin-right: 20px;
 }
-.view-item.achievement .badge-level.bronze-badge {
+.view-item.achievement .content .title .extra.badge-level.bronze-badge {
   color: #f29f51;
 }
-.view-item.achievement .badge-level.silver-badge {
+.view-item.achievement .content .title .extra.badge-level.bronze-badge i.fa {
+  font-size: 75%;
+}
+.view-item.achievement .content .title .extra.badge-level.silver-badge {
   color: #999;
 }
-.view-item.achievement .badge-level.gold-badge {
+.view-item.achievement .content .title .extra.badge-level.gold-badge {
   color: gold;
+}
+.view-item.achievement .content .title .extra.badge-level .text {
+  font-size: 12px;
 }
 @media only screen and (max-width: 992px) {
   .view-item.achievement {
@@ -1224,6 +1234,9 @@ div.page.product-page .row.person-footer .buttons a.btn {
     min-height: 64px;
     margin-top: 15px;
     margin-left: 65px;
+  }
+  .view-item.achievement .content .title .extra.badge-level {
+    display: block;
   }
 }
 .view-item.achievement .group-engagement {
