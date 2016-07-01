@@ -2075,14 +2075,48 @@ angular.module('staticPages', [
         })
     })
 
-    .controller("TwitterLoginCtrl", function($scope){
+    .controller("TwitterLoginCtrl", function($scope, $location, $http, $auth){
         console.log("twitter page controller is running!")
+
+        var searchObject = $location.search();
+        var token = searchObject.oauth_token
+        var verifier = searchObject.oauth_verifier
+
+        if (!token || !verifier){
+            console.log("twitter didn't give oauth_verifier and a oauth_token")
+            $location.url("/")
+            return false
+        }
+
+        var requestObj = {
+            token: token,
+            verifier: verifier
+        }
+
+        $http.post("/auth/twitter/register", requestObj)
+            .success(function(resp){
+                console.log("logged in a twitter user", resp)
+                //$auth.setToken(resp.token)
+                //var payload = $auth.getPayload()
+                //
+                //$rootScope.sendCurrentUserToIntercom()
+                //$location.url("u/" + payload.sub)
+            })
+            .error(function(resp){
+              //console.log("problem getting token back from server!", resp)
+              //  $location.url("/")
+            })
+
+
 
     })
 
 
     .controller("LoginCtrl", function ($scope, $location, $http, $auth, $rootScope, Person) {
         console.log("kenny loggins page controller is running!")
+
+
+
 
 
         var searchObject = $location.search();
