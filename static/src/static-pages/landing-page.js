@@ -65,11 +65,11 @@ angular.module('staticPages', [
         $http.post("/auth/twitter/register", requestObj)
             .success(function(resp){
                 console.log("logged in a twitter user", resp)
-                //$auth.setToken(resp.token)
-                //var payload = $auth.getPayload()
-                //
-                //$rootScope.sendCurrentUserToIntercom()
-                //$location.url("u/" + payload.sub)
+                $auth.setToken(resp.token)
+                var payload = $auth.getPayload()
+
+                $rootScope.sendCurrentUserToIntercom()
+                $location.url("u/" + payload.sub)
             })
             .error(function(resp){
               //console.log("problem getting token back from server!", resp)
