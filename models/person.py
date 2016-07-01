@@ -101,21 +101,29 @@ def make_person(twitter_creds, high_priority=False):
 
     my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
     my_person.created = datetime.datetime.utcnow().isoformat()
-    my_person.twitter_creds = twitter_creds
 
     full_twitter_profile = get_full_twitter_profile(twitter_creds)
+    full_twitter_profile.update(twitter_creds)
+    my_person.twitter_creds = full_twitter_profile
     my_person.email = full_twitter_profile["email"]
     my_person.twitter = full_twitter_profile["screen_name"]
+    twitter_full_name = full_twitter_profile["name"]
 
-    # @todo
-    # save picture and names here
+    try:
+        parsed_name = HumanName(twitter_full_name)
+        my_person.family_name = parsed_name["last"]
+        my_person.given_names = parsed_name["first"]
+        if my_person.given_names and len(my_person.given_names) <= 2 and parsed_name["middle"]:
+            my_person.given_names = parsed_name["middle"]
+    except KeyError:
+        my_person.first_name = twitter_full_name
 
-    print u"\nin make_person: made new person for {}".format(my_person.id)
+    print u"\nin make_person: made new person for {}".format(my_person)
 
     db.session.add(my_person)
     commit_success = safe_commit(db)
     if not commit_success:
-        print u"COMMIT fail on {}".format(orcid_id)
+        print u"COMMIT fail on {}".format(my_person.id)
 
     return my_person
 
