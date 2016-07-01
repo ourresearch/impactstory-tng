@@ -22,7 +22,7 @@ angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", f
     "                    <i class=\"fa fa-trophy\"></i>\n" +
     "                    Gold level\n" +
     "                </td>\n" +
-    "                <td>Top 10% of researchers</td>\n" +
+    "                <td>Top 10% of researchers </td>\n" +
     "            </tr>\n" +
     "            <tr>\n" +
     "                <td class=\"silver badge-name\">\n" +
@@ -1710,12 +1710,10 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "\n" +
     "        <div class=\"join-button\">\n" +
-    "            <md-button class=\"md-accent md-raised\" ng-click=\"authenticate()\">\n" +
-    "                Join for free with ORCID</md-button>\n" +
-    "            <span class=\"no-orcid\" ng-click=\"noOrcid($event)\">\n" +
-    "                <i class=\"fa fa-question-circle\"></i>\n" +
-    "                I don't have an ORCID\n" +
-    "            </span>\n" +
+    "            <md-button class=\"md-accent md-raised\" ng-click=\"twitterAuthenticate()\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                Join for free with Twitter\n" +
+    "            </md-button>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "\n" +

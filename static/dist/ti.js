@@ -438,6 +438,52 @@ angular.module('app').controller('AppCtrl', function(
 
 
 
+    var twitterRedirectUri = window.location.origin + "/login"
+    var twitterAuthUrl = "https://orcid.org/oauth/authorize" +
+        "?client_id=APP-PF0PDMP7P297AU8S" +
+        "&response_type=code" +
+        "&scope=/authenticate" +
+        "&redirect_uri=" + redirectUri
+
+    // used in the nav bar, also for signup on the landing page.
+    var twitterAuthenticate = function (showLogin) {
+        console.log("authenticate with twitters!");
+
+
+
+        // first get the OAuth token that we use to create the twitter URL
+        // we will redirect the user too.
+        var redirectUri = window.location.origin + "/twitter-login";
+        var baseUrlToGetOauthTokenFromOurServer = "/auth/twitter/request-token?redirectUri=";
+        var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
+
+        $http.get(baseUrlToGetOauthTokenFromOurServer + redirectUri).success(
+            function(resp){
+                console.log("twitter request token", resp)
+                var twitterLoginPageUrl = baseTwitterLoginPageUrl + resp.oauth_token
+                window.location = twitterLoginPageUrl
+            }
+        )
+
+
+
+
+        //if (showLogin == "signin"){
+        //    // will show the signup screen
+        //}
+        //else {
+        //    // show the login screen (defaults to this)
+        //    orcidAuthUrl += "&show_login=true"
+        //}
+        //
+        //window.location = orcidAuthUrl
+        //return true
+
+    };
+
+    $rootScope.twitterAuthenticate = twitterAuthenticate
+    $scope.twitterAuthenticate = twitterAuthenticate
+
 
 
 
@@ -2145,7 +2191,7 @@ angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", f
     "                    <i class=\"fa fa-trophy\"></i>\n" +
     "                    Gold level\n" +
     "                </td>\n" +
-    "                <td>Top 10% of researchers</td>\n" +
+    "                <td>Top 10% of researchers </td>\n" +
     "            </tr>\n" +
     "            <tr>\n" +
     "                <td class=\"silver badge-name\">\n" +
@@ -3833,12 +3879,10 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "\n" +
     "        <div class=\"join-button\">\n" +
-    "            <md-button class=\"md-accent md-raised\" ng-click=\"authenticate()\">\n" +
-    "                Join for free with ORCID</md-button>\n" +
-    "            <span class=\"no-orcid\" ng-click=\"noOrcid($event)\">\n" +
-    "                <i class=\"fa fa-question-circle\"></i>\n" +
-    "                I don't have an ORCID\n" +
-    "            </span>\n" +
+    "            <md-button class=\"md-accent md-raised\" ng-click=\"twitterAuthenticate()\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                Join for free with Twitter\n" +
+    "            </md-button>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "\n" +
