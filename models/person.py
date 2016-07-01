@@ -82,35 +82,7 @@ def set_person_claimed_at(my_person):
     if not commit_success:
         print u"COMMIT fail on {}".format(my_person.orcid_id)
 
-def make_person(dirty_orcid_id, high_priority=False):
-    orcid_id = clean_orcid(dirty_orcid_id)
-    my_person = Person(orcid_id=orcid_id)
-    db.session.add(my_person)
-    print u"\nin make_person: made new person for {}".format(orcid_id)
-    my_person.refresh(high_priority=high_priority)
-    commit_success = safe_commit(db)
-    if not commit_success:
-        print u"COMMIT fail on {}".format(orcid_id)
-
-    if my_person.invalid_orcid:
-        raise OrcidDoesNotExist
-
-    return my_person
-
-def refresh_profile(orcid_id, high_priority=False):
-    my_person = Person.query.filter_by(orcid_id=orcid_id).first()
-    my_person.refresh(high_priority=high_priority)
-    db.session.merge(my_person)
-    commit_success = safe_commit(db)
-    if not commit_success:
-        print u"COMMIT fail on {}".format(orcid_id)
-    return my_person
-
-def link_twitter(orcid_id, twitter_creds):
-    my_person = Person.query.filter_by(orcid_id=orcid_id).first()
-    my_person.twitter_creds = twitter_creds
-
-
+def get_full_twitter_profile(twitter_creds):
     oauth = OAuth1Session(
         os.getenv('TWITTER_CONSUMER_KEY'),
         client_secret=os.getenv('TWITTER_CONSUMER_SECRET'),
@@ -121,46 +93,40 @@ def link_twitter(orcid_id, twitter_creds):
 
     r = oauth.get(url)
     full_twitter_profile = r.json()
-    # print "we got this back from Twitter!", full_twitter_profile
+    return full_twitter_profile
 
-    full_twitter_profile.update(twitter_creds)
-    my_person.twitter_creds = full_twitter_profile
-    if my_person.email is None:
-        my_person.email = full_twitter_profile["email"]
 
+def make_person(twitter_creds, high_priority=False):
+    my_person = Person()
+
+    my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
+    my_person.created = datetime.datetime.utcnow().isoformat()
+    my_person.twitter_creds = twitter_creds
+
+    full_twitter_profile = get_full_twitter_profile(twitter_creds)
+    my_person.email = full_twitter_profile["email"]
     my_person.twitter = full_twitter_profile["screen_name"]
 
+    # @todo
+    # save picture and names here
+
+    print u"\nin make_person: made new person for {}".format(my_person.id)
+
+    db.session.add(my_person)
     commit_success = safe_commit(db)
     if not commit_success:
         print u"COMMIT fail on {}".format(orcid_id)
+
     return my_person
 
 
-
-
-
-
-# @todo refactor this to use the above functions
-def add_or_overwrite_person_from_orcid_id(orcid_id,
-                                          high_priority=False):
-
-    # if one already there, use it and overwrite.  else make a new one.
+def refresh_profile(orcid_id, high_priority=False):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
-    if my_person:
-        db.session.merge(my_person)
-        print u"\nusing already made person for {}".format(orcid_id)
-    else:
-        # make a person with this orcid_id
-        my_person = Person(orcid_id=orcid_id)
-        db.session.add(my_person)
-        print u"\nmade new person for {}".format(orcid_id)
-
     my_person.refresh(high_priority=high_priority)
-
-    # now write to the db
+    db.session.merge(my_person)
     commit_success = safe_commit(db)
     if not commit_success:
-        print u"COMMIT fail on {}".format(my_person.orcid_id)
+        print u"COMMIT fail on {}".format(orcid_id)
     return my_person
 
 
@@ -221,13 +187,6 @@ class Person(db.Model):
         backref=db.backref("person", lazy="subquery"),
         foreign_keys="Badge.orcid_id"
     )
-
-
-    def __init__(self, orcid_id):
-        self.id = orcid_id
-        self.orcid_id = orcid_id
-        self.invalid_orcid = False
-        self.created = datetime.datetime.utcnow().isoformat()
 
 
     # doesn't have error handling; called by refresh when you want it to be robust
@@ -938,7 +897,9 @@ class Person(db.Model):
 
     def get_token(self):
         payload = {
-            'sub': self.orcid_id,
+            'email': self.email,
+            'orcid_id': self.orcid_id,
+            'twitter_screen_name': self.twitter,
             'first_name': self.first_name,
             'family_name': self.family_name,
             'given_names': self.given_names,
