@@ -424,6 +424,26 @@ def twitter():
 
 
 
+
+
+
+
+@app.route("/auth/twitter/request-token")
+def get_twitter_request_token():
+    request_token_url = 'https://api.twitter.com/oauth/request_token'
+
+    oauth = OAuth1(
+        os.getenv('TWITTER_CONSUMER_KEY'),
+        client_secret=os.getenv('TWITTER_CONSUMER_SECRET'),
+        callback_uri=request.args.get('redirectUri')
+    )
+
+    r = requests.post(request_token_url, auth=oauth)
+    oauth_token_dict = dict(parse_qsl(r.text))
+    return jsonify(oauth_token_dict)
+
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True, threaded=True)
