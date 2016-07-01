@@ -4,7 +4,6 @@ from util import elapsed
 from util import safe_commit
 import argparse
 
-from models.person import add_or_overwrite_person_from_orcid_id
 from models.orcid import clean_orcid
 from models.orcid import NoOrcidException
 
@@ -26,7 +25,8 @@ def create_person(dirty_orcid, campaign=None):
         print u"\n\nWARNING: no valid orcid_id in {}; skipping\n\n".format(dirty_orcid)
         raise
 
-    my_person = add_or_overwrite_person_from_orcid_id(orcid_id, high_priority=False)
+    ### @todo need to rewrite this in light of new ways we make a person
+    # my_person = make_person()
 
     if campaign:
         my_person.campaign = campaign
