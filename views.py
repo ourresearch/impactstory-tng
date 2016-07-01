@@ -424,8 +424,29 @@ def twitter():
 
 
 
+@app.route("/auth/twitter/register", methods=["POST"])
+def get_twitter_user():
+    access_token_url = 'https://api.twitter.com/oauth/access_token'
+
+    auth = OAuth1(os.getenv('TWITTER_CONSUMER_KEY'),
+                  client_secret=os.getenv('TWITTER_CONSUMER_SECRET'),
+                  resource_owner_key=request.json.get('token'),
+                  verifier=request.json.get('verifier'))
+
+    r = requests.post(access_token_url, auth=auth)
+
+    twitter_creds = dict(parse_qsl(r.text))
+    print "got back twitter_creds from twitter", twitter_creds
+    # my_person = link_twitter(g.me_orcid_id, twitter_creds)
 
 
+
+
+
+
+    # return a token because satellizer like it
+    # token = my_person.get_token()
+    return jsonify({"hello": twitter_creds})
 
 
 @app.route("/auth/twitter/request-token")
