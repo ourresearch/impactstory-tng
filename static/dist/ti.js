@@ -2246,8 +2246,10 @@ angular.module('wizard', [
         console.log("LinkYourOrcidPageCtrl is running!")
 
 
+        $scope.hasOrcid = null
         $scope.doYouHaveAnOrcid = function(answer){
             console.log("setting doYouHaveAnOrcid", answer)
+            $scope.hasOrcid = answer
             if (answer == 'yes'){
 
             }
@@ -4069,7 +4071,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "    <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>\n" +
     "    <p>here's ORCID and here's what it is</p>\n" +
     "    <p>do you have an ORCID?</p>\n" +
-    "    <div class=\"do-you-have-an-orcid\">\n" +
+    "    <div class=\"do-you-have-an-orcid\" ng-show=\"!hasOrcid\">\n" +
     "        <span class=\"have-orcid-yes btn btn-lg btn-success\"\n" +
     "              ng-click=\"doYouHaveAnOrcid('yes')\">\n" +
     "            <i class=\"fa fa-check\"></i>\n" +
@@ -4087,8 +4089,39 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "            <i class=\"fa fa-question\"></i>\n" +
     "            Maybe\n" +
     "        </span>\n" +
-    "\n" +
-    "\n" +
+    "    </div>\n" +
+    "    <div id=\"orcid-register-instr\">\n" +
+    "        <div class=\"have-orcid-yes\" ng-show=\"hasOrcid=='yes'\">\n" +
+    "            <div class=\"text\">\n" +
+    "                Great, just go sign in and you're all good.\n" +
+    "                When you're done, you'll be redirected back here, and will be\n" +
+    "                nearly done creating your profile.\n" +
+    "            </div>\n" +
+    "            <span class=\"btn btn-primary btn-lg\">\n" +
+    "                Sign in to my ORCID\n" +
+    "            </span>\n" +
+    "        </div>\n" +
+    "        <div class=\"have-orcid-no\" ng-show=\"hasOrcid=='no'\">\n" +
+    "            <div class=\"text\">\n" +
+    "                No problem, it'll take you less than 20 seconds to make an ORCID.\n" +
+    "                When you're done, you'll be redirected back here, and will be\n" +
+    "                nearly done creating your profile.\n" +
+    "            </div>\n" +
+    "            <span class=\"btn btn-primary btn-lg\">\n" +
+    "                Create my ORCID\n" +
+    "            </span>\n" +
+    "        </div>\n" +
+    "        <div class=\"have-orcid-yes\" ng-show=\"hasOrcid=='maybe'\">\n" +
+    "            <div class=\"text\">\n" +
+    "                No problem, just go register for an ORCID. If you've already made one,\n" +
+    "                it'll redirect you there automatically once you enter your email.\n" +
+    "                When you're done, you'll be redirected back here, and will be\n" +
+    "                nearly done creating your profile.\n" +
+    "            </div>\n" +
+    "            <span class=\"btn btn-primary btn-lg\">\n" +
+    "                Try registering for an ORCID\n" +
+    "            </span>\n" +
+    "        </div>\n" +
     "\n" +
     "    </div>\n" +
     "\n" +

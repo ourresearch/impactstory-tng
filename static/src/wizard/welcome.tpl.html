@@ -2,7 +2,7 @@
     <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>
     <p>here's ORCID and here's what it is</p>
     <p>do you have an ORCID?</p>
-    <div class="do-you-have-an-orcid">
+    <div class="do-you-have-an-orcid" ng-show="!hasOrcid">
         <span class="have-orcid-yes btn btn-lg btn-success"
               ng-click="doYouHaveAnOrcid('yes')">
             <i class="fa fa-check"></i>
@@ -20,8 +20,39 @@
             <i class="fa fa-question"></i>
             Maybe
         </span>
-
-
+    </div>
+    <div id="orcid-register-instr">
+        <div class="have-orcid-yes" ng-show="hasOrcid=='yes'">
+            <div class="text">
+                Great, just go sign in and you're all good.
+                When you're done, you'll be redirected back here, and will be
+                nearly done creating your profile.
+            </div>
+            <span class="btn btn-primary btn-lg">
+                Sign in to my ORCID
+            </span>
+        </div>
+        <div class="have-orcid-no" ng-show="hasOrcid=='no'">
+            <div class="text">
+                No problem, it'll take you less than 20 seconds to make an ORCID.
+                When you're done, you'll be redirected back here, and will be
+                nearly done creating your profile.
+            </div>
+            <span class="btn btn-primary btn-lg">
+                Create my ORCID
+            </span>
+        </div>
+        <div class="have-orcid-yes" ng-show="hasOrcid=='maybe'">
+            <div class="text">
+                No problem, just go register for an ORCID. If you've already made one,
+                it'll redirect you there automatically once you enter your email.
+                When you're done, you'll be redirected back here, and will be
+                nearly done creating your profile.
+            </div>
+            <span class="btn btn-primary btn-lg">
+                Try registering for an ORCID
+            </span>
+        </div>
 
     </div>
 
