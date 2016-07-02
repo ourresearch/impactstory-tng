@@ -458,16 +458,14 @@ angular.module('app').controller('AppCtrl', function(
 
 
 
-    // used in the nav bar, also for signup on the landing page.
+    // TWITTER AUTH
     var twitterAuthenticate = function (showLogin) {
         console.log("authenticate with twitters!");
-
-
 
         // first get the OAuth token that we use to create the twitter URL
         // we will redirect the user too.
         var redirectUri = window.location.origin + "/twitter-login";
-        var baseUrlToGetOauthTokenFromOurServer = "/auth/twitter/request-token?redirectUri=";
+        var baseUrlToGetOauthTokenFromOurServer = "/api/auth/twitter/request-token?redirectUri=";
         var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
 
         $http.get(baseUrlToGetOauthTokenFromOurServer + redirectUri).success(
@@ -478,35 +476,20 @@ angular.module('app').controller('AppCtrl', function(
             }
         )
 
-
-
-
-        //if (showLogin == "signin"){
-        //    // will show the signup screen
-        //}
-        //else {
-        //    // show the login screen (defaults to this)
-        //    orcidAuthUrl += "&show_login=true"
-        //}
-        //
-        //window.location = orcidAuthUrl
-        //return true
-
     };
-
     $rootScope.twitterAuthenticate = twitterAuthenticate
     $scope.twitterAuthenticate = twitterAuthenticate
 
 
 
 
-
-    var redirectUri = window.location.origin + "/orcid-login"
+    // ORCID AUTH
+    $rootScope.orcidRedirectUri = window.location.origin + "/orcid-login"
     var orcidAuthUrl = "https://orcid.org/oauth/authorize" +
         "?client_id=APP-PF0PDMP7P297AU8S" +
         "&response_type=code" +
         "&scope=/authenticate" +
-        "&redirect_uri=" + redirectUri
+        "&redirect_uri=" + $rootScope.orcidRedirectUri
 
     // used in the nav bar, also for signup on the landing page.
     var orcidAuthenticate = function (showLogin) {
@@ -523,7 +506,6 @@ angular.module('app').controller('AppCtrl', function(
         window.location = orcidAuthUrl
         return true
     }
-
     $rootScope.orcidAuthenticate = orcidAuthenticate
     $scope.orcidAuthenticate = orcidAuthenticate
 
@@ -727,7 +709,7 @@ angular.module('auth', [
             verifier: verifier
         }
 
-        $http.post("/auth/twitter/register", requestObj)
+        $http.post("api/auth/twitter/register", requestObj)
             .success(function(resp){
                 console.log("logged in a twitter user", resp)
                 $auth.setToken(resp.token)
@@ -759,9 +741,34 @@ angular.module('auth', [
         }
 
         var requestObj = {
-            code: code
+            code: code,
+            redirectUri: $rootScope.orcidRedirectUri
         }
         console.log("POSTing the request code to the server", requestObj)
+
+        if ($auth.isAuthenticated()){
+            // set an orcid for the current user
+            $http.post("api/me/orcid_id", requestObj)
+                .success(function(resp){
+                    console.log("we successfully added an ORCID!", resp)
+                    var payload = $auth.getPayload()
+
+                    //$rootScope.sendCurrentUserToIntercom()
+                    //$location.url("u/" + payload.sub)
+                })
+                .error(function(resp){
+                  console.log("problem getting token back from server!", resp)
+                    //$location.url("/")
+                })
+
+
+
+        }
+        else{
+            // log a user in based on their ownership of this orcid
+        }
+
+
 
         //$http.post("api/auth/orcid", requestObj)
         //    .success(function(resp){

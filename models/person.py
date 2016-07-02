@@ -75,6 +75,7 @@ def set_person_email(orcid_id, email, high_priority=False):
     if not commit_success:
         print u"COMMIT fail on {}".format(orcid_id)
 
+
 def set_person_claimed_at(my_person):
     my_person.claimed_at = datetime.datetime.utcnow().isoformat()
     db.session.merge(my_person)
@@ -126,6 +127,18 @@ def make_person(twitter_creds, high_priority=False):
         print u"COMMIT fail on {}".format(my_person.id)
 
     return my_person
+
+
+
+def set_person_orcid(my_person, orcid_id):
+    print u"we are setting an orcid_id for a person", my_person.full_name, orcid_id
+    my_person.orcid_id = orcid_id
+    db.session.merge(my_person)
+    commit_success = safe_commit(db)
+    if not commit_success:
+        print u"COMMIT fail on {}".format(orcid_id)
+    return my_person
+
 
 
 def refresh_profile(orcid_id, high_priority=False):
