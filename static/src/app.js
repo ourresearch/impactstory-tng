@@ -279,16 +279,14 @@ angular.module('app').controller('AppCtrl', function(
 
 
 
-    // used in the nav bar, also for signup on the landing page.
+    // TWITTER AUTH
     var twitterAuthenticate = function (showLogin) {
         console.log("authenticate with twitters!");
-
-
 
         // first get the OAuth token that we use to create the twitter URL
         // we will redirect the user too.
         var redirectUri = window.location.origin + "/twitter-login";
-        var baseUrlToGetOauthTokenFromOurServer = "/auth/twitter/request-token?redirectUri=";
+        var baseUrlToGetOauthTokenFromOurServer = "/api/auth/twitter/request-token?redirectUri=";
         var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
 
         $http.get(baseUrlToGetOauthTokenFromOurServer + redirectUri).success(
@@ -299,35 +297,20 @@ angular.module('app').controller('AppCtrl', function(
             }
         )
 
-
-
-
-        //if (showLogin == "signin"){
-        //    // will show the signup screen
-        //}
-        //else {
-        //    // show the login screen (defaults to this)
-        //    orcidAuthUrl += "&show_login=true"
-        //}
-        //
-        //window.location = orcidAuthUrl
-        //return true
-
     };
-
     $rootScope.twitterAuthenticate = twitterAuthenticate
     $scope.twitterAuthenticate = twitterAuthenticate
 
 
 
 
-
-    var redirectUri = window.location.origin + "/orcid-login"
+    // ORCID AUTH
+    $rootScope.orcidRedirectUri = window.location.origin + "/orcid-login"
     var orcidAuthUrl = "https://orcid.org/oauth/authorize" +
         "?client_id=APP-PF0PDMP7P297AU8S" +
         "&response_type=code" +
         "&scope=/authenticate" +
-        "&redirect_uri=" + redirectUri
+        "&redirect_uri=" + $rootScope.orcidRedirectUri
 
     // used in the nav bar, also for signup on the landing page.
     var orcidAuthenticate = function (showLogin) {
@@ -344,7 +327,6 @@ angular.module('app').controller('AppCtrl', function(
         window.location = orcidAuthUrl
         return true
     }
-
     $rootScope.orcidAuthenticate = orcidAuthenticate
     $scope.orcidAuthenticate = orcidAuthenticate
 

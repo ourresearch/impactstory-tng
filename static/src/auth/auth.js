@@ -36,7 +36,7 @@ angular.module('auth', [
             verifier: verifier
         }
 
-        $http.post("/auth/twitter/register", requestObj)
+        $http.post("api/auth/twitter/register", requestObj)
             .success(function(resp){
                 console.log("logged in a twitter user", resp)
                 $auth.setToken(resp.token)
@@ -68,9 +68,34 @@ angular.module('auth', [
         }
 
         var requestObj = {
-            code: code
+            code: code,
+            redirectUri: $rootScope.orcidRedirectUri
         }
         console.log("POSTing the request code to the server", requestObj)
+
+        if ($auth.isAuthenticated()){
+            // set an orcid for the current user
+            $http.post("api/me/orcid_id", requestObj)
+                .success(function(resp){
+                    console.log("we successfully added an ORCID!", resp)
+                    var payload = $auth.getPayload()
+
+                    //$rootScope.sendCurrentUserToIntercom()
+                    //$location.url("u/" + payload.sub)
+                })
+                .error(function(resp){
+                  console.log("problem getting token back from server!", resp)
+                    //$location.url("/")
+                })
+
+
+
+        }
+        else{
+            // log a user in based on their ownership of this orcid
+        }
+
+
 
         //$http.post("api/auth/orcid", requestObj)
         //    .success(function(resp){
