@@ -198,6 +198,7 @@ angular.module('app', [
     'settingsPage',
     'badgePage',
     'aboutPages',
+    'wizard',
 
     'numFormat'
 
@@ -222,13 +223,17 @@ angular.module('app').config(function ($routeProvider,
         .accentPalette("blue")
 
 
-    $authProvider.twitter({
-      url: '/auth/twitter',
-      authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
-      redirectUri: window.location.origin + "/twitter-login",
-      type: '1.0',
-      popupOptions: { width: 495, height: 645 }
-    });
+
+
+
+
+    //$authProvider.twitter({
+    //  url: '/auth/twitter',
+    //  authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
+    //  redirectUri: window.location.origin + "/twitter-login",
+    //  type: '1.0',
+    //  popupOptions: { width: 495, height: 645 }
+    //});
 
 
 
@@ -237,6 +242,7 @@ angular.module('app').config(function ($routeProvider,
 
 angular.module('app').run(function($route,
                                    $rootScope,
+                                   $q,
                                    $timeout,
                                    $auth,
                                    $http,
@@ -252,6 +258,7 @@ angular.module('app').run(function($route,
     ga('create', 'UA-23384030-1', 'auto');
 
 
+
     $rootScope.$on('$routeChangeStart', function(next, current){
     })
     $rootScope.$on('$routeChangeSuccess', function(next, current){
@@ -260,6 +267,18 @@ angular.module('app').run(function($route,
         window.Intercom('update')
 
     })
+
+    $rootScope.isAuthenticatedPromise = function(){
+        var deferred = $q.defer()
+        if ($auth.isAuthenticated()) {
+            deferred.resolve()
+        }
+        else {
+            console.log("user isn't logged in, so isAuthenticatedPromise() is rejecting promise.")
+            deferred.reject()
+        }
+        return deferred.promise
+    }
 
     $rootScope.sendCurrentUserToIntercom = function(){
         if (!$auth.isAuthenticated()){
@@ -311,7 +330,7 @@ angular.module('app').run(function($route,
         window.Intercom("boot", intercomInfo)
     }
 
-    $rootScope.sendCurrentUserToIntercom()
+    //$rootScope.sendCurrentUserToIntercom()
     
 
 
@@ -322,9 +341,9 @@ angular.module('app').run(function($route,
 
 
     $rootScope.$on('$routeChangeError', function(event, current, previous, rejection){
-        console.log("$routeChangeError")
+        console.log("$routeChangeError, redirecting to /")
         $rootScope.setPersonIsLoading(false)
-        $location.path("/")
+        $location.url("/")
         window.scrollTo(0, 0)
     });
 
@@ -1779,6 +1798,7 @@ angular.module('person', [
         }
 
         function load(orcidId, force){
+            console.log("loading the Person")
 
 
             // if the data for this profile is already loaded, just return it
@@ -2038,23 +2058,23 @@ angular.module('staticPages', [
     .config(function ($routeProvider) {
         $routeProvider.when('/', {
             templateUrl: "static-pages/landing.tpl.html",
-            controller: "LandingPageCtrl",
-            resolve: {
-                isLoggedIn: function($auth, $q, $location){
-                    var deferred = $q.defer()
-                    if ($auth.isAuthenticated()){
-                        var url = "/u/" + $auth.getPayload().sub
-                        $location.path(url)
-                    }
-                    else {
-                        return $q.when(true)
-
-                        deferred.resolve()
-                    }
-
-                    return deferred.promise
-                }
-            }
+            controller: "LandingPageCtrl"
+            //,resolve: {
+            //    isLoggedIn: function($auth, $q, $location){
+            //        var deferred = $q.defer()
+            //        if ($auth.isAuthenticated()){
+            //            var url = "/u/" + $auth.getPayload().sub
+            //            $location.path(url)
+            //        }
+            //        else {
+            //            return $q.when(true)
+            //
+            //            deferred.resolve()
+            //        }
+            //
+            //        return deferred.promise
+            //    }
+            //}
         })
     })
 
@@ -2097,10 +2117,11 @@ angular.module('staticPages', [
             .success(function(resp){
                 console.log("logged in a twitter user", resp)
                 $auth.setToken(resp.token)
-                var payload = $auth.getPayload()
-
-                $rootScope.sendCurrentUserToIntercom()
-                $location.url("u/" + payload.sub)
+                $location.url("wizard/welcome")
+                //var payload = $auth.getPayload()
+                //
+                //$rootScope.sendCurrentUserToIntercom()
+                //$location.url("u/" + payload.sub)
             })
             .error(function(resp){
               //console.log("problem getting token back from server!", resp)
@@ -2201,7 +2222,57 @@ angular.module('staticPages', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/login.tpl.html', 'static-pages/twitter-login.tpl.html', 'workspace.tpl.html']);
+angular.module('wizard', [
+    'ngRoute',
+    'satellizer',
+    'ngMessages'
+])
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/wizard/welcome', {
+            templateUrl: "wizard/welcome.tpl.html",
+            controller: "LinkYourOrcidPageCtrl",
+            resolve: {
+                isLoggedIn: function($rootScope){
+                    return $rootScope.isAuthenticatedPromise()
+                }
+            }
+        })
+    })
+
+
+
+    .controller("LinkYourOrcidPageCtrl", function($scope, $location, $http, $auth){
+        console.log("LinkYourOrcidPageCtrl is running!")
+
+
+        $scope.doYouHaveAnOrcid = function(answer){
+            console.log("setting doYouHaveAnOrcid", answer)
+            if (answer == 'yes'){
+
+            }
+            else if (answer == 'no'){
+
+            }
+            else if (answer == 'maybe'){
+
+            }
+        }
+
+
+    })
+
+
+
+
+
+
+
+
+
+
+
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/login.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -3990,6 +4061,39 @@ angular.module("static-pages/twitter-login.tpl.html", []).run(["$templateCache",
     "     <img src=\"static/img/impactstory-logo-sideways.png\">\n" +
     "  </div>\n" +
     "</div>");
+}]);
+
+angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/welcome.tpl.html",
+    "<div class=\"page wizard link-your-orcid\">\n" +
+    "    <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>\n" +
+    "    <p>here's ORCID and here's what it is</p>\n" +
+    "    <p>do you have an ORCID?</p>\n" +
+    "    <div class=\"do-you-have-an-orcid\">\n" +
+    "        <span class=\"have-orcid-yes btn btn-lg btn-success\"\n" +
+    "              ng-click=\"doYouHaveAnOrcid('yes')\">\n" +
+    "            <i class=\"fa fa-check\"></i>\n" +
+    "            Yes\n" +
+    "        </span>\n" +
+    "\n" +
+    "        <span class=\"have-orcid-no btn btn-lg btn-danger\"\n" +
+    "              ng-click=\"doYouHaveAnOrcid('no')\">\n" +
+    "            <i class=\"fa fa-times\"></i>\n" +
+    "            No\n" +
+    "        </span>\n" +
+    "\n" +
+    "        <span class=\"have-orcid-maybe btn btn-lg btn-info\"\n" +
+    "              ng-click=\"doYouHaveAnOrcid('maybe')\">\n" +
+    "            <i class=\"fa fa-question\"></i>\n" +
+    "            Maybe\n" +
+    "        </span>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
+    "    </div>\n" +
+    "\n" +
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("workspace.tpl.html", []).run(["$templateCache", function($templateCache) {

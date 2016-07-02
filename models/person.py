@@ -905,16 +905,23 @@ class Person(db.Model):
 
     def get_token(self):
         payload = {
+            'id': self.id,
             'email': self.email,
+            'num_works': len(self.products),
             'orcid_id': self.orcid_id,
             'twitter_screen_name': self.twitter,
             'first_name': self.first_name,
-            'family_name': self.family_name,
-            'given_names': self.given_names,
             'claimed_at': date_as_iso_utc(self.claimed_at),
             'iat': datetime.datetime.utcnow(),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(days=999),
         }
+
+        # for testing
+        # payload["orcid_id"] = None
+        # payload["num_works"] = 0
+
+
+
         token = jwt.encode(payload, os.getenv("JWT_KEY"))
         return token.decode('unicode_escape')
 

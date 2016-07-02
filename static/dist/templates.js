@@ -1,4 +1,4 @@
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/login.tpl.html', 'static-pages/twitter-login.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/login.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -1787,6 +1787,39 @@ angular.module("static-pages/twitter-login.tpl.html", []).run(["$templateCache",
     "     <img src=\"static/img/impactstory-logo-sideways.png\">\n" +
     "  </div>\n" +
     "</div>");
+}]);
+
+angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/welcome.tpl.html",
+    "<div class=\"page wizard link-your-orcid\">\n" +
+    "    <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>\n" +
+    "    <p>here's ORCID and here's what it is</p>\n" +
+    "    <p>do you have an ORCID?</p>\n" +
+    "    <div class=\"do-you-have-an-orcid\">\n" +
+    "        <span class=\"have-orcid-yes btn btn-lg btn-success\"\n" +
+    "              ng-click=\"doYouHaveAnOrcid('yes')\">\n" +
+    "            <i class=\"fa fa-check\"></i>\n" +
+    "            Yes\n" +
+    "        </span>\n" +
+    "\n" +
+    "        <span class=\"have-orcid-no btn btn-lg btn-danger\"\n" +
+    "              ng-click=\"doYouHaveAnOrcid('no')\">\n" +
+    "            <i class=\"fa fa-times\"></i>\n" +
+    "            No\n" +
+    "        </span>\n" +
+    "\n" +
+    "        <span class=\"have-orcid-maybe btn btn-lg btn-info\"\n" +
+    "              ng-click=\"doYouHaveAnOrcid('maybe')\">\n" +
+    "            <i class=\"fa fa-question\"></i>\n" +
+    "            Maybe\n" +
+    "        </span>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
+    "    </div>\n" +
+    "\n" +
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("workspace.tpl.html", []).run(["$templateCache", function($templateCache) {

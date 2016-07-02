@@ -7,23 +7,23 @@ angular.module('staticPages', [
     .config(function ($routeProvider) {
         $routeProvider.when('/', {
             templateUrl: "static-pages/landing.tpl.html",
-            controller: "LandingPageCtrl",
-            resolve: {
-                isLoggedIn: function($auth, $q, $location){
-                    var deferred = $q.defer()
-                    if ($auth.isAuthenticated()){
-                        var url = "/u/" + $auth.getPayload().sub
-                        $location.path(url)
-                    }
-                    else {
-                        return $q.when(true)
-
-                        deferred.resolve()
-                    }
-
-                    return deferred.promise
-                }
-            }
+            controller: "LandingPageCtrl"
+            //,resolve: {
+            //    isLoggedIn: function($auth, $q, $location){
+            //        var deferred = $q.defer()
+            //        if ($auth.isAuthenticated()){
+            //            var url = "/u/" + $auth.getPayload().sub
+            //            $location.path(url)
+            //        }
+            //        else {
+            //            return $q.when(true)
+            //
+            //            deferred.resolve()
+            //        }
+            //
+            //        return deferred.promise
+            //    }
+            //}
         })
     })
 
@@ -66,10 +66,11 @@ angular.module('staticPages', [
             .success(function(resp){
                 console.log("logged in a twitter user", resp)
                 $auth.setToken(resp.token)
-                var payload = $auth.getPayload()
-
-                $rootScope.sendCurrentUserToIntercom()
-                $location.url("u/" + payload.sub)
+                $location.url("wizard/welcome")
+                //var payload = $auth.getPayload()
+                //
+                //$rootScope.sendCurrentUserToIntercom()
+                //$location.url("u/" + payload.sub)
             })
             .error(function(resp){
               //console.log("problem getting token back from server!", resp)
