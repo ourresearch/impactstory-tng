@@ -22,8 +22,10 @@ angular.module('wizard', [
         console.log("LinkYourOrcidPageCtrl is running!")
 
 
+        $scope.hasOrcid = null
         $scope.doYouHaveAnOrcid = function(answer){
             console.log("setting doYouHaveAnOrcid", answer)
+            $scope.hasOrcid = answer
             if (answer == 'yes'){
 
             }
