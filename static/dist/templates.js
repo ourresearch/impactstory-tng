@@ -1,4 +1,4 @@
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/login.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -382,6 +382,24 @@ angular.module("about-pages/search.tpl.html", []).run(["$templateCache", functio
     "            Impactstory profiles.\n" +
     "        </p>\n" +
     "    </div>\n" +
+    "</div>");
+}]);
+
+angular.module("auth/orcid-login.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("auth/orcid-login.tpl.html",
+    "<h2>orcid is loading!</h2>");
+}]);
+
+angular.module("auth/twitter-login.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("auth/twitter-login.tpl.html",
+    "<div class=\"login-loading main\">\n" +
+    "  <div class=\"content\">\n" +
+    "     <md-progress-circular class=\"md-primary\"\n" +
+    "                           md-diameter=\"100\">\n" +
+    "     </md-progress-circular>\n" +
+    "     <h2>Getting your profile...</h2>\n" +
+    "     <img src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "  </div>\n" +
     "</div>");
 }]);
 
@@ -1763,19 +1781,6 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "");
 }]);
 
-angular.module("static-pages/login.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("static-pages/login.tpl.html",
-    "<div class=\"login-loading main\">\n" +
-    "  <div class=\"content\">\n" +
-    "     <md-progress-circular class=\"md-primary\"\n" +
-    "                           md-diameter=\"100\">\n" +
-    "     </md-progress-circular>\n" +
-    "     <h2>Getting your profile...</h2>\n" +
-    "     <img src=\"static/img/impactstory-logo-sideways.png\">\n" +
-    "  </div>\n" +
-    "</div>");
-}]);
-
 angular.module("static-pages/twitter-login.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("static-pages/twitter-login.tpl.html",
     "<div class=\"login-loading twitter\">\n" +
@@ -1821,7 +1826,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('login')\">\n" +
     "                Sign in to my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -1831,7 +1836,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register')\">\n" +
     "                Create my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -1842,7 +1847,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register')\">\n" +
     "                Try registering for an ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +

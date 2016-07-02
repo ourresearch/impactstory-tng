@@ -20,6 +20,7 @@ angular.module('app', [
     'badgePage',
     'aboutPages',
     'wizard',
+    'auth',
 
     'numFormat'
 
@@ -278,13 +279,6 @@ angular.module('app').controller('AppCtrl', function(
 
 
 
-    var twitterRedirectUri = window.location.origin + "/login"
-    var twitterAuthUrl = "https://orcid.org/oauth/authorize" +
-        "?client_id=APP-PF0PDMP7P297AU8S" +
-        "&response_type=code" +
-        "&scope=/authenticate" +
-        "&redirect_uri=" + redirectUri
-
     // used in the nav bar, also for signup on the landing page.
     var twitterAuthenticate = function (showLogin) {
         console.log("authenticate with twitters!");
@@ -328,7 +322,7 @@ angular.module('app').controller('AppCtrl', function(
 
 
 
-    var redirectUri = window.location.origin + "/login"
+    var redirectUri = window.location.origin + "/orcid-login"
     var orcidAuthUrl = "https://orcid.org/oauth/authorize" +
         "?client_id=APP-PF0PDMP7P297AU8S" +
         "&response_type=code" +
@@ -336,24 +330,23 @@ angular.module('app').controller('AppCtrl', function(
         "&redirect_uri=" + redirectUri
 
     // used in the nav bar, also for signup on the landing page.
-    var authenticate = function (showLogin) {
-        console.log("authenticate!")
+    var orcidAuthenticate = function (showLogin) {
+        console.log("ORCID authenticate!", showLogin)
 
-        if (showLogin == "signin"){
+        if (showLogin == "register"){
             // will show the signup screen
         }
-        else {
+        else if (showLogin == "login") {
             // show the login screen (defaults to this)
             orcidAuthUrl += "&show_login=true"
         }
 
         window.location = orcidAuthUrl
         return true
-
     }
 
-    $rootScope.authenticate = authenticate
-    $scope.authenticate = authenticate
+    $rootScope.orcidAuthenticate = orcidAuthenticate
+    $scope.orcidAuthenticate = orcidAuthenticate
 
 
 
