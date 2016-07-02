@@ -19,6 +19,7 @@ angular.module('app', [
     'settingsPage',
     'badgePage',
     'aboutPages',
+    'wizard',
 
     'numFormat'
 
@@ -43,13 +44,17 @@ angular.module('app').config(function ($routeProvider,
         .accentPalette("blue")
 
 
-    $authProvider.twitter({
-      url: '/auth/twitter',
-      authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
-      redirectUri: window.location.origin + "/twitter-login",
-      type: '1.0',
-      popupOptions: { width: 495, height: 645 }
-    });
+
+
+
+
+    //$authProvider.twitter({
+    //  url: '/auth/twitter',
+    //  authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
+    //  redirectUri: window.location.origin + "/twitter-login",
+    //  type: '1.0',
+    //  popupOptions: { width: 495, height: 645 }
+    //});
 
 
 
@@ -58,6 +63,7 @@ angular.module('app').config(function ($routeProvider,
 
 angular.module('app').run(function($route,
                                    $rootScope,
+                                   $q,
                                    $timeout,
                                    $auth,
                                    $http,
@@ -73,6 +79,7 @@ angular.module('app').run(function($route,
     ga('create', 'UA-23384030-1', 'auto');
 
 
+
     $rootScope.$on('$routeChangeStart', function(next, current){
     })
     $rootScope.$on('$routeChangeSuccess', function(next, current){
@@ -81,6 +88,18 @@ angular.module('app').run(function($route,
         window.Intercom('update')
 
     })
+
+    $rootScope.isAuthenticatedPromise = function(){
+        var deferred = $q.defer()
+        if ($auth.isAuthenticated()) {
+            deferred.resolve()
+        }
+        else {
+            console.log("user isn't logged in, so isAuthenticatedPromise() is rejecting promise.")
+            deferred.reject()
+        }
+        return deferred.promise
+    }
 
     $rootScope.sendCurrentUserToIntercom = function(){
         if (!$auth.isAuthenticated()){
@@ -132,7 +151,7 @@ angular.module('app').run(function($route,
         window.Intercom("boot", intercomInfo)
     }
 
-    $rootScope.sendCurrentUserToIntercom()
+    //$rootScope.sendCurrentUserToIntercom()
     
 
 
@@ -143,9 +162,9 @@ angular.module('app').run(function($route,
 
 
     $rootScope.$on('$routeChangeError', function(event, current, previous, rejection){
-        console.log("$routeChangeError")
+        console.log("$routeChangeError, redirecting to /")
         $rootScope.setPersonIsLoading(false)
-        $location.path("/")
+        $location.url("/")
         window.scrollTo(0, 0)
     });
 

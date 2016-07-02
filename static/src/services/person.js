@@ -20,6 +20,7 @@ angular.module('person', [
         }
 
         function load(orcidId, force){
+            console.log("loading the Person")
 
 
             // if the data for this profile is already loaded, just return it

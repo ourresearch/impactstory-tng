@@ -1,0 +1,28 @@
+<div class="page wizard link-your-orcid">
+    <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>
+    <p>here's ORCID and here's what it is</p>
+    <p>do you have an ORCID?</p>
+    <div class="do-you-have-an-orcid">
+        <span class="have-orcid-yes btn btn-lg btn-success"
+              ng-click="doYouHaveAnOrcid('yes')">
+            <i class="fa fa-check"></i>
+            Yes
+        </span>
+
+        <span class="have-orcid-no btn btn-lg btn-danger"
+              ng-click="doYouHaveAnOrcid('no')">
+            <i class="fa fa-times"></i>
+            No
+        </span>
+
+        <span class="have-orcid-maybe btn btn-lg btn-info"
+              ng-click="doYouHaveAnOrcid('maybe')">
+            <i class="fa fa-question"></i>
+            Maybe
+        </span>
+
+
+
+    </div>
+
+</div>
