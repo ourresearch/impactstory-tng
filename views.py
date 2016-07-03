@@ -333,8 +333,8 @@ def donation_endpoint():
 @login_required
 def me():
     if request.method == "GET":
-        # @todo i'm pretty sure we don't use this anymore?
         my_person = Person.query.filter_by(id=g.my_id).first()
+        # @todo should return a token
         return jsonify(my_person.to_dict())
     elif request.method == "DELETE":
 
@@ -342,9 +342,9 @@ def me():
         return jsonify({"msg": "Alas, poor Yorick! I knew him, Horatio"})
 
     elif request.method == "POST":
-        # @todo don't use this endpoint, use the POST /api/person/whatever_id to refresh instead
         if request.json.get("action", None) == "pull_from_orcid":
             refresh_profile_from_id(g.my_id)
+            # @todo should return a token
             return jsonify({"msg": "pull successful"})
 
 
