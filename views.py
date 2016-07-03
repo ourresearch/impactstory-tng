@@ -209,16 +209,21 @@ def test0():
 
 
 
+@app.route("/api/person/<orcid_id>/polling")
+@app.route("/api/person/<orcid_id>/polling.json")
+def profile_endpoint_polling(orcid_id):
+    my_person = Person.query.filter_by(orcid_id=orcid_id).first()
+
+    return json_resp(my_person.to_dict())
+
+
 @app.route("/api/person/<orcid_id>")
 @app.route("/api/person/<orcid_id>.json")
 def profile_endpoint(orcid_id):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
     if not my_person:
-        try:
-            my_person.link_orcid(orcid_id, high_priority=True)
-        except (OrcidDoesNotExist, NoOrcidException):
-            print u"returning 404: orcid profile {} does not exist".format(orcid_id)
-            abort_json(404, "That ORCID profile doesn't exist")
+        print u"returning 404: orcid profile {} does not exist".format(orcid_id)
+        abort_json(404, "That ORCID profile doesn't exist")
     return json_resp(my_person.to_dict())
 
 
@@ -341,6 +346,11 @@ def me():
             return jsonify({"msg": "pull successful"})
 
 
+@app.route("/api/auth/orcid/login", methods=["POST"])
+def orcid_login():
+    pass
+
+
 @app.route("/api/me/orcid_id", methods=["POST"])
 @login_required
 def set_my_orcid():
@@ -363,52 +373,19 @@ def set_my_orcid():
     # now we get the person and set the orcid id for them
     my_person = Person.query.filter_by(id=g.my_id).first()
     modified_person = set_person_orcid(my_person, my_orcid_id)
-    return jsonify({
-        "orcid_id": modified_person.orcid_id,
-        "num_products": modified_person.num_products
-    })
+
+    token = my_person.get_token()
+    return jsonify({"token": token})
 
 
 
 
-
-# @app.route("/api/auth/orcid", methods=["POST"])
-# def orcid_auth():
-#     access_token_url = 'https://pub.orcid.org/oauth/token'
-#
-#     payload = dict(client_id="APP-PF0PDMP7P297AU8S",
-#                    redirect_uri=request.json['redirectUri'],
-#                    client_secret=os.getenv('ORCID_CLIENT_SECRET'),
-#                    code=request.json['code'],
-#                    grant_type='authorization_code')
-#
-#     # Exchange authorization code for access token
-#     # The access token has the ORCID ID, which is actually all we need here.
-#     r = requests.post(access_token_url, data=payload)
-#     try:
-#         my_orcid_id = r.json()["orcid"]
-#     except KeyError:
-#         print u"Aborting /api/auth/orcid " \
-#               u"with 500 because didn't get back orcid in oauth json. got this instead: {}".format(r.json())
-#         abort_json(500, "Invalid JSON return from ORCID during OAuth.")
-#
-#     my_person = Person.query.filter_by(orcid_id=my_orcid_id).first()
-#
-#     try:
-#         token = my_person.get_token()
-#     except AttributeError:  # my_person is None. So make a new user
-#
-#         # @todo fix this
-#         my_person.link_orcid(my_orcid_id, high_priority=True)
-#         token = my_person.get_token()
-#
-#     set_person_claimed_at(my_person)
-#
-#     return jsonify(token=token)
-
+@app.route("/api/auth/twitter/login", methods=["POST"])
+def login_twitter_user():
+    pass
 
 @app.route("/api/auth/twitter/register", methods=["POST"])
-def get_twitter_user():
+def register_twitter_user():
     access_token_url = 'https://api.twitter.com/oauth/access_token'
 
     auth = OAuth1(os.getenv('TWITTER_CONSUMER_KEY'),
@@ -419,17 +396,17 @@ def get_twitter_user():
     r = requests.post(access_token_url, auth=auth)
 
     twitter_creds = dict(parse_qsl(r.text))
-    print "got back twitter_creds from twitter", twitter_creds
+    print u"got back twitter_creds from twitter {}".format(twitter_creds)
 
     my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
     if my_person is None:
         my_person = make_person(twitter_creds)
 
-    # return a token because satellizer like it
     token = my_person.get_token()
     return jsonify({"token": token})
 
 
+# doesn't save anything in database, just proxy for calling twitter.com
 @app.route("/api/auth/twitter/request-token")
 def get_twitter_request_token():
     request_token_url = 'https://api.twitter.com/oauth/request_token'
