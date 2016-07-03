@@ -143,6 +143,15 @@ def set_person_orcid(my_person, orcid_id):
         print u"COMMIT fail on {}".format(orcid_id)
     return my_person
 
+# this should be refactored with refresh_profile().  doing it this way is dumb.
+def refresh_profile_from_id(id, high_priority=False):
+    my_person = Person.query.filter_by(id=id).first()
+    my_person.refresh(high_priority=high_priority)
+    db.session.merge(my_person)
+    commit_success = safe_commit(db)
+    if not commit_success:
+        print u"COMMIT fail on {}".format(orcid_id)
+    return my_person
 
 
 def refresh_profile(orcid_id, high_priority=False):
