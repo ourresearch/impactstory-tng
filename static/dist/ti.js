@@ -746,12 +746,21 @@ angular.module('auth', [
         }
         console.log("POSTing the request code to the server", requestObj)
 
+        // set an orcid for the current user
         if ($auth.isAuthenticated()){
-            // set an orcid for the current user
             $http.post("api/me/orcid_id", requestObj)
                 .success(function(resp){
                     console.log("we successfully added an ORCID!", resp)
                     var payload = $auth.getPayload()
+                    if ($auth.getPayload().num_works > 0) {
+                        console.log("they have some works, good! redirect to your-publications")
+                        $location.url("wizard/your-publications")
+                    }
+                    else {
+                        console.log("they have no works. redirect to page to add-publications")
+                        $location.url("wizard/add-publications")
+
+                    }
 
                     //$rootScope.sendCurrentUserToIntercom()
                     //$location.url("u/" + payload.sub)
@@ -762,10 +771,11 @@ angular.module('auth', [
                 })
 
 
-
         }
-        else{
-            // log a user in based on their ownership of this orcid
+
+        // log a user in based on their ownership of this orcid
+        else {
+
         }
 
 
@@ -1226,61 +1236,6 @@ angular.module('personPage', [
                     console.log("bad! Person.reload() died in finishing the profile.", resp)
                 }
             )
-        }
-
-        $scope.submitEmail = function(){
-            console.log("setting the email!", $scope.userForm.email)
-            $rootScope.setPersonIsLoading(true)
-            $scope.profileStatus = "blank"
-            $http.post("/api/me", {email: $scope.userForm.email})
-                .success(function(resp){
-                    reloadWithNewEmail()
-                })
-        }
-
-        $scope.linkTwitter = function(){
-            console.log("link twitter!")
-            $scope.profileStatus = "blank"
-            $rootScope.setPersonIsLoading(true)
-
-            // on the server, when we link twitter we also set the email
-            $auth.authenticate('twitter').then(
-                function(resp){
-                    console.log("authenticate successful.", resp)
-                    reloadWithNewEmail()
-                },
-                function(resp){
-                    console.log("linking twitter didn't work!", resp)
-                }
-            )
-        }
-
-
-        $scope.pullFromOrcid = function(){
-            console.log("ah, refreshing!")
-            $scope.d.syncing = true
-            $http.post("/api/person/" + Person.d.orcid_id)
-                .success(function(resp){
-                    // jason or heather might be refreshing this profile
-                    // for admin/debug reasons using Secret Button.
-                    // don't send event for that.
-                    if (ownsThisProfile){
-                        $rootScope.sendToIntercom(resp)
-                        Intercom('trackEvent', 'synced');
-                        Intercom('trackEvent', 'synced-to-signup');
-                    }
-
-                    // force the Person to reload. without this
-                    // the newly-synced data never gets displayed.
-                    console.log("reloading the Person")
-                    Person.reload().then(
-                        function(resp){
-                            $scope.profileStatus = "all_good"
-                            console.log("success, reloading page.")
-                            $route.reload()
-                        }
-                    )
-                })
         }
 
 
@@ -2233,7 +2188,31 @@ angular.module('wizard', [
     .config(function ($routeProvider) {
         $routeProvider.when('/wizard/welcome', {
             templateUrl: "wizard/welcome.tpl.html",
-            controller: "LinkYourOrcidPageCtrl",
+            controller: "WelcomePageCtrl",
+            resolve: {
+                isLoggedIn: function($rootScope){
+                    return $rootScope.isAuthenticatedPromise()
+                }
+            }
+        })
+    })
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/wizard/your-publications', {
+            templateUrl: "wizard/your-publications.tpl.html",
+            controller: "YourPublicationsCtrl",
+            resolve: {
+                isLoggedIn: function($rootScope){
+                    return $rootScope.isAuthenticatedPromise()
+                }
+            }
+        })
+    })
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/wizard/add-publications', {
+            templateUrl: "wizard/add-publications.tpl.html",
+            controller: "AddPublicationsCtrl",
             resolve: {
                 isLoggedIn: function($rootScope){
                     return $rootScope.isAuthenticatedPromise()
@@ -2244,26 +2223,38 @@ angular.module('wizard', [
 
 
 
-    .controller("LinkYourOrcidPageCtrl", function($scope, $location, $http, $auth){
-        console.log("LinkYourOrcidPageCtrl is running!")
+    .controller("WelcomePageCtrl", function($scope, $location, $http, $auth){
 
-
-        $scope.hasOrcid = null
-        $scope.doYouHaveAnOrcid = function(answer){
-            console.log("setting doYouHaveAnOrcid", answer)
-            $scope.hasOrcid = answer
-            if (answer == 'yes'){
-
+        // @todo put this in the route def  so it's not ugly while it loads, or do a better profile-loading thingy
+        if ($auth.getPayload().orcid_id){
+            console.log("we've got their ORCID already")
+            if ($auth.getPayload().num_works){
+                console.log("they are all set, redirecting to their profile")
+                $location.url("u/" + $auth.getPayload().orcid_id)
             }
-            else if (answer == 'no'){
-
-            }
-            else if (answer == 'maybe'){
-
+            else {
+                console.log("no products! redirecting to add-products")
+                $location.url("wizard/add-products")
             }
         }
 
 
+        console.log("WelcomePageCtrl is running!")
+        $scope.hasOrcid = null
+        $scope.doYouHaveAnOrcid = function(answer){
+            console.log("setting doYouHaveAnOrcid", answer)
+            $scope.hasOrcid = answer
+        }
+
+    })
+
+
+    .controller("YourPublicationsCtrl", function($scope, $location, $http, $auth){
+        console.log("YourPublicationsCtrl is running!")
+    })
+
+    .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth){
+        console.log("AddPublicationsCtrl is running!")
     })
 
 
@@ -2276,7 +2267,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/welcome.tpl.html', 'wizard/your-publications.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -3004,110 +2995,9 @@ angular.module("person-page/person-page-text.tpl.html", []).run(["$templateCache
 
 angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("person-page/person-page.tpl.html",
-    "<div ng-show=\"profileStatus=='blank'\" class=\"page person-incomplete blank\">\n" +
-    "</div>\n" +
-    "<div ng-show=\"profileStatus=='no_email'\" class=\"page person-incomplete set-email\">\n" +
-    "    <div class=\"content\">\n" +
-    "        <div class=\"encouragement\" ng-show=\"setEmailMethod=='twitter'\">\n" +
-    "            <h2>\n" +
-    "                <i class=\"fa fa-check\"></i>\n" +
-    "                Nice work, you're nearly there!\n" +
-    "            </h2>\n" +
-    "            <p class=\"instructions twitter\">\n" +
-    "                Once you've connected your Twitter account, your profile is complete.\n" +
-    "            </p>\n" +
-    "\n" +
-    "        </div>\n" +
-    "        <div class=\"encouragement\" ng-show=\"setEmailMethod=='direct'\">\n" +
-    "            <h2  ng-show=\"setEmailMethod=='direct'\">\n" +
-    "                No Twitter? No problem!\n" +
-    "            </h2>\n" +
-    "            <p class=\"instructions twitter\">\n" +
-    "                Email is great, too. Enter it below and <em>poof</em>, your profile's ready.\n" +
-    "            </p>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"action twitter\"\n" +
-    "             ng-show=\"setEmailMethod=='twitter'\">\n" +
-    "            <div class=\"btn btn-primary btn-lg\"\n" +
-    "             ng-click=\"linkTwitter()\">\n" +
-    "                <i class=\"fa fa-twitter\"></i>\n" +
-    "                Connect my Twitter\n" +
-    "            </div>\n" +
-    "            <div class=\"btn btn-default btn-lg\" ng-click=\"setEmailMethod='direct'\">\n" +
-    "                <i class=\"fa fa-times\"></i>\n" +
-    "                I'm not on Twitter\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "\n" +
-    "        <div class=\"action direct\" ng-show=\"setEmailMethod=='direct'\">\n" +
-    "            <form class=\"user-input\" ng-submit=\"submitEmail()\">\n" +
-    "                <div class=\"input-group\">\n" +
-    "                    <span class=\"input-group-addon\">\n" +
-    "                        <i class=\"fa fa-envelope-o\"></i>\n" +
-    "                    </span>\n" +
-    "                    <input ng-model=\"userForm.email\"\n" +
-    "                           type=\"email\"\n" +
-    "                           class=\"form-control input-lg\"\n" +
-    "                           id=\"user-email\"\n" +
-    "                           required\n" +
-    "                           placeholder=\"Email\">\n" +
-    "\n" +
-    "                </div>\n" +
-    "                <button type=\"submit\" class=\"btn btn-primary btn-lg\">Make my profile!</button>\n" +
-    "            </form>\n" +
-    "        </div>\n" +
     "\n" +
     "\n" +
-    "\n" +
-    "    </div>\n" +
-    "\n" +
-    "</div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "<div ng-show=\"profileStatus=='no_products'\" class=\"page person-incomplete add-products\">\n" +
-    "    <div class=\"content\">\n" +
-    "\n" +
-    "        <h2>Uh-oh, we couldn't find any publications in your ORCID!</h2>\n" +
-    "        <p>\n" +
-    "            But don't worry, there's a solution! Go to\n" +
-    "            <a href=\"http://orcid.org/{{ person.orcid_id }}\">your ORCID profile</a>\n" +
-    "            and add some works using the Scopus importer. When you're done, make sure the\n" +
-    "            works' visibility is set to \"Public,\"\n" +
-    "\n" +
-    "            <img class=\"inline\" src=\"static/img/gif/orcid-set-public-small.gif\">\n" +
-    "\n" +
-    "            then come back here and sync with ORCID.\n" +
-    "            You'll be good to go in no time!\n" +
-    "        </p>\n" +
-    "        <div class=\"refresh\">\n" +
-    "            <div class=\"btn btn-lg btn-primary\"  ng-show=\"!d.syncing\" ng-click=\"pullFromOrcid()\">\n" +
-    "                <i class=\"fa fa-refresh\"></i>\n" +
-    "                Did it, now sync me up!\n" +
-    "            </div>\n" +
-    "            <a href=\"/about/data#publications\" target=\"_blank\" ng-show=\"!d.syncing\">\n" +
-    "                <i class=\"fa fa-question-circle-o\"></i>\n" +
-    "                Nope, still not working\n" +
-    "            </a>\n" +
-    "            <div class=\"alert alert-info\" ng-show=\"d.syncing\">\n" +
-    "                <i class=\"fa fa-refresh fa-spin\"></i>\n" +
-    "                Syncing now...\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"screencast\">\n" +
-    "            <img src=\"static/img/gif/orcid-import-scopus-from-nothing.gif\">\n" +
-    "\n" +
-    "        </div>\n" +
-    "\n" +
-    "\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "\n" +
-    "\n" +
-    "<div ng-show=\"profileStatus=='all_good'\" class=\"page person\">\n" +
+    "<div class=\"page person\">\n" +
     "    <div class=\"autogenerated\" ng-show=\"!person.claimed_at\">\n" +
     "        <span class=\"this-is\">\n" +
     "            This is an <a href=\"about/orcid\">auto-generated profile</a> and may be missing some data.\n" +
@@ -4072,6 +3962,20 @@ angular.module("static-pages/twitter-login.tpl.html", []).run(["$templateCache",
     "</div>");
 }]);
 
+angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/add-publications.tpl.html",
+    "<div class=\"page wizard add-publications\">\n" +
+    "    <h2>add publications</h2>\n" +
+    "    <div>\n" +
+    "        OK, here's how you add publications. blah blah blah.\n" +
+    "    </div>\n" +
+    "    <div class=\"actions\">\n" +
+    "        <a href=\"http://google.com\" class=\"btn btn-lg btn-primary\">Ok let's do it!</a>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
+}]);
+
 angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/welcome.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
@@ -4134,6 +4038,34 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "</div>\n" +
     "");
+}]);
+
+angular.module("wizard/your-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/your-publications.tpl.html",
+    "<div class=\"page wizard add-publications\">\n" +
+    "\n" +
+    "    <h2>your publications</h2>\n" +
+    "    <div>\n" +
+    "        Nice job, we found {{ auth.getPayload().num_works }} publications for you.\n" +
+    "        Does that look good?\n" +
+    "    </div>\n" +
+    "    <div class=\"actions\">\n" +
+    "        <a href=\"u/{{ auth.getPayload().orcid_id }}\" class=\"btn btn-lg btn-success\">\n" +
+    "            <i class=\"fa fa-check\"></i>\n" +
+    "            <span class=\"text\">\n" +
+    "                <span class=\"main\">Close enough</span>\n" +
+    "                <span class=\"extra\">I can always add more later</span>\n" +
+    "            </span>\n" +
+    "        </a>\n" +
+    "        <a href=\"wizard/add-publications\" class=\"btn btn-lg btn-danger\">\n" +
+    "            <i class=\"fa fa-times\"></i>\n" +
+    "            <span class=\"text\">\n" +
+    "                <span class=\"main\">Nope</span>\n" +
+    "                <span class=\"extra\">Let's fix this now.</span>\n" +
+    "            </span>\n" +
+    "        </a>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("workspace.tpl.html", []).run(["$templateCache", function($templateCache) {

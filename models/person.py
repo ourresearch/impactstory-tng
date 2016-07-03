@@ -130,9 +130,11 @@ def make_person(twitter_creds, high_priority=False):
 
 
 
-def set_person_orcid(my_person, orcid_id):
+def set_person_orcid(my_person, orcid_id, check_num_works=True):
     print u"we are setting an orcid_id for a person", my_person.full_name, orcid_id
     my_person.orcid_id = orcid_id
+
+
     db.session.merge(my_person)
     commit_success = safe_commit(db)
     if not commit_success:

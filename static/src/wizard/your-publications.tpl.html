@@ -1,0 +1,24 @@
+<div class="page wizard add-publications">
+
+    <h2>your publications</h2>
+    <div>
+        Nice job, we found {{ auth.getPayload().num_works }} publications for you.
+        Does that look good?
+    </div>
+    <div class="actions">
+        <a href="u/{{ auth.getPayload().orcid_id }}" class="btn btn-lg btn-success">
+            <i class="fa fa-check"></i>
+            <span class="text">
+                <span class="main">Close enough</span>
+                <span class="extra">I can always add more later</span>
+            </span>
+        </a>
+        <a href="wizard/add-publications" class="btn btn-lg btn-danger">
+            <i class="fa fa-times"></i>
+            <span class="text">
+                <span class="main">Nope</span>
+                <span class="extra">Let's fix this now.</span>
+            </span>
+        </a>
+    </div>
+</div>
