@@ -751,8 +751,8 @@ angular.module('auth', [
             $http.post("api/me/orcid_id", requestObj)
                 .success(function(resp){
                     console.log("we successfully added an ORCID!", resp)
-                    var payload = $auth.getPayload()
-                    if ($auth.getPayload().num_works > 0) {
+                    $auth.setToken(resp.token)
+                    if ($auth.getPayload().num_products > 0) {
                         console.log("they have some works, good! redirect to your-publications")
                         $location.url("wizard/your-publications")
                     }
@@ -2228,7 +2228,7 @@ angular.module('wizard', [
         // @todo put this in the route def  so it's not ugly while it loads, or do a better profile-loading thingy
         if ($auth.getPayload().orcid_id){
             console.log("we've got their ORCID already")
-            if ($auth.getPayload().num_works){
+            if ($auth.getPayload().num_products){
                 console.log("they are all set, redirecting to their profile")
                 $location.url("u/" + $auth.getPayload().orcid_id)
             }
@@ -4046,7 +4046,7 @@ angular.module("wizard/your-publications.tpl.html", []).run(["$templateCache", f
     "\n" +
     "    <h2>your publications</h2>\n" +
     "    <div>\n" +
-    "        Nice job, we found {{ auth.getPayload().num_works }} publications for you.\n" +
+    "        Nice job, we found {{ auth.getPayload().num_products }} publications for you.\n" +
     "        Does that look good?\n" +
     "    </div>\n" +
     "    <div class=\"actions\">\n" +
