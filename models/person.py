@@ -130,10 +130,12 @@ def make_person(twitter_creds, high_priority=False):
 
 
 
-def set_person_orcid(my_person, orcid_id, check_num_works=True):
+def set_person_orcid(my_person, orcid_id):
     print u"we are setting an orcid_id for a person", my_person.full_name, orcid_id
     my_person.orcid_id = orcid_id
-
+    my_person.set_api_raw_from_orcid()
+    my_person.set_from_orcid()
+    my_person.set_num_products()
 
     db.session.merge(my_person)
     commit_success = safe_commit(db)
@@ -922,7 +924,7 @@ class Person(db.Model):
         payload = {
             'id': self.id,
             'email': self.email,
-            'num_works': len(self.products),
+            'num_products': len(self.products),
             'orcid_id': self.orcid_id,
             'twitter_screen_name': self.twitter,
             'first_name': self.first_name,
