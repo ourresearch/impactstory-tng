@@ -754,7 +754,7 @@ angular.module('auth', [
                     $auth.setToken(resp.token)
                     if ($auth.getPayload().num_products > 0) {
                         console.log("they have some works, good! redirect to your-publications")
-                        $location.url("wizard/your-publications")
+                        $location.url("wizard/my-publications")
                     }
                     else {
                         console.log("they have no works. redirect to page to add-publications")
@@ -2198,9 +2198,9 @@ angular.module('wizard', [
     })
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/wizard/your-publications', {
-            templateUrl: "wizard/your-publications.tpl.html",
-            controller: "YourPublicationsCtrl",
+        $routeProvider.when('/wizard/my-publications', {
+            templateUrl: "wizard/my-publications.tpl.html",
+            controller: "MyPublicationsCtrl",
             resolve: {
                 isLoggedIn: function($rootScope){
                     return $rootScope.isAuthenticatedPromise()
@@ -2249,8 +2249,22 @@ angular.module('wizard', [
     })
 
 
-    .controller("YourPublicationsCtrl", function($scope, $location, $http, $auth){
-        console.log("YourPublicationsCtrl is running!")
+    .controller("MyPublicationsCtrl", function($scope, $location, $http, $auth){
+        console.log("MyPublicationsCtrl is running!")
+        $scope.finishProfile = function(){
+            console.log("finishProfile()")
+            $scope.actionSelected = "finish-profile"
+            $http.post("api/me", {})
+                .success(function(resp){
+                    console.log("successfully refreshed everything, redirecting to profile page ", resp)
+                    $auth.setToken(resp.token)
+                    $location.url("u/" + $auth.getPayload().orcid_id)
+                })
+                .error(function(resp){
+                    console.log("we tried to refresh profile, but somethign went wrong :(", resp)
+                    $scope.actionSelected = null
+                })
+        }
     })
 
     .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth){
@@ -2267,7 +2281,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/welcome.tpl.html', 'wizard/your-publications.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -3976,6 +3990,39 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
     "");
 }]);
 
+angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/my-publications.tpl.html",
+    "<div class=\"page wizard add-publications\">\n" +
+    "\n" +
+    "    <h2>my publications</h2>\n" +
+    "    <div>\n" +
+    "        Nice job, we found {{ auth.getPayload().num_products }} publications for you.\n" +
+    "        Does that look good?\n" +
+    "    </div>\n" +
+    "    <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
+    "        <span ng-click=\"finishProfile()\" class=\"btn btn-lg btn-success\">\n" +
+    "            <i class=\"fa fa-check\"></i>\n" +
+    "            <span class=\"text\">\n" +
+    "                <span class=\"main\">Close enough</span>\n" +
+    "                <span class=\"extra\">I can always add more later</span>\n" +
+    "            </span>\n" +
+    "        </span>\n" +
+    "        <a href=\"wizard/add-publications\" class=\"btn btn-lg btn-danger\">\n" +
+    "            <i class=\"fa fa-times\"></i>\n" +
+    "            <span class=\"text\">\n" +
+    "                <span class=\"main\">Nope</span>\n" +
+    "                <span class=\"extra\">Let's fix this now.</span>\n" +
+    "            </span>\n" +
+    "        </a>\n" +
+    "    </div>\n" +
+    "    <div class=\"loading\" ng-show=\"actionSelected\">\n" +
+    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
+    "        <span class=\"text\">Great! Then we'll build your profile right now.\n" +
+    "            It'll take a few seconds&hellip;</span>\n" +
+    "    </div>\n" +
+    "</div>");
+}]);
+
 angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/welcome.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
@@ -4038,34 +4085,6 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "</div>\n" +
     "");
-}]);
-
-angular.module("wizard/your-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("wizard/your-publications.tpl.html",
-    "<div class=\"page wizard add-publications\">\n" +
-    "\n" +
-    "    <h2>your publications</h2>\n" +
-    "    <div>\n" +
-    "        Nice job, we found {{ auth.getPayload().num_products }} publications for you.\n" +
-    "        Does that look good?\n" +
-    "    </div>\n" +
-    "    <div class=\"actions\">\n" +
-    "        <a href=\"u/{{ auth.getPayload().orcid_id }}\" class=\"btn btn-lg btn-success\">\n" +
-    "            <i class=\"fa fa-check\"></i>\n" +
-    "            <span class=\"text\">\n" +
-    "                <span class=\"main\">Close enough</span>\n" +
-    "                <span class=\"extra\">I can always add more later</span>\n" +
-    "            </span>\n" +
-    "        </a>\n" +
-    "        <a href=\"wizard/add-publications\" class=\"btn btn-lg btn-danger\">\n" +
-    "            <i class=\"fa fa-times\"></i>\n" +
-    "            <span class=\"text\">\n" +
-    "                <span class=\"main\">Nope</span>\n" +
-    "                <span class=\"extra\">Let's fix this now.</span>\n" +
-    "            </span>\n" +
-    "        </a>\n" +
-    "    </div>\n" +
-    "</div>");
 }]);
 
 angular.module("workspace.tpl.html", []).run(["$templateCache", function($templateCache) {

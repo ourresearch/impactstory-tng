@@ -81,7 +81,7 @@ angular.module('auth', [
                     $auth.setToken(resp.token)
                     if ($auth.getPayload().num_products > 0) {
                         console.log("they have some works, good! redirect to your-publications")
-                        $location.url("wizard/your-publications")
+                        $location.url("wizard/my-publications")
                     }
                     else {
                         console.log("they have no works. redirect to page to add-publications")
