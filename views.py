@@ -109,6 +109,8 @@ def add_crossdomain_header(resp):
     resp.headers['Access-Control-Allow-Origin'] = "*"
     resp.headers['Access-Control-Allow-Methods'] = "POST, GET, OPTIONS, PUT, DELETE, PATCH, HEAD"
     resp.headers['Access-Control-Allow-Headers'] = "origin, content-type, accept, x-requested-with, authorization"
+
+    # jason needs this to be able to see print() output in heroku local
     sys.stdout.flush()
     return resp
 
@@ -361,45 +363,48 @@ def set_my_orcid():
     # now we get the person and set the orcid id for them
     my_person = Person.query.filter_by(id=g.my_id).first()
     modified_person = set_person_orcid(my_person, my_orcid_id)
-    return jsonify({"orcid_id": modified_person.orcid_id})
+    return jsonify({
+        "orcid_id": modified_person.orcid_id,
+        "num_works": modified_person.num_works
+    })
 
 
 
 
 
-@app.route("/api/auth/orcid", methods=["POST"])
-def orcid_auth():
-    access_token_url = 'https://pub.orcid.org/oauth/token'
-
-    payload = dict(client_id="APP-PF0PDMP7P297AU8S",
-                   redirect_uri=request.json['redirectUri'],
-                   client_secret=os.getenv('ORCID_CLIENT_SECRET'),
-                   code=request.json['code'],
-                   grant_type='authorization_code')
-
-    # Exchange authorization code for access token
-    # The access token has the ORCID ID, which is actually all we need here.
-    r = requests.post(access_token_url, data=payload)
-    try:
-        my_orcid_id = r.json()["orcid"]
-    except KeyError:
-        print u"Aborting /api/auth/orcid " \
-              u"with 500 because didn't get back orcid in oauth json. got this instead: {}".format(r.json())
-        abort_json(500, "Invalid JSON return from ORCID during OAuth.")
-
-    my_person = Person.query.filter_by(orcid_id=my_orcid_id).first()
-
-    try:
-        token = my_person.get_token()
-    except AttributeError:  # my_person is None. So make a new user
-
-        # @todo fix this
-        my_person.link_orcid(my_orcid_id, high_priority=True)
-        token = my_person.get_token()
-
-    set_person_claimed_at(my_person)
-
-    return jsonify(token=token)
+# @app.route("/api/auth/orcid", methods=["POST"])
+# def orcid_auth():
+#     access_token_url = 'https://pub.orcid.org/oauth/token'
+#
+#     payload = dict(client_id="APP-PF0PDMP7P297AU8S",
+#                    redirect_uri=request.json['redirectUri'],
+#                    client_secret=os.getenv('ORCID_CLIENT_SECRET'),
+#                    code=request.json['code'],
+#                    grant_type='authorization_code')
+#
+#     # Exchange authorization code for access token
+#     # The access token has the ORCID ID, which is actually all we need here.
+#     r = requests.post(access_token_url, data=payload)
+#     try:
+#         my_orcid_id = r.json()["orcid"]
+#     except KeyError:
+#         print u"Aborting /api/auth/orcid " \
+#               u"with 500 because didn't get back orcid in oauth json. got this instead: {}".format(r.json())
+#         abort_json(500, "Invalid JSON return from ORCID during OAuth.")
+#
+#     my_person = Person.query.filter_by(orcid_id=my_orcid_id).first()
+#
+#     try:
+#         token = my_person.get_token()
+#     except AttributeError:  # my_person is None. So make a new user
+#
+#         # @todo fix this
+#         my_person.link_orcid(my_orcid_id, high_priority=True)
+#         token = my_person.get_token()
+#
+#     set_person_claimed_at(my_person)
+#
+#     return jsonify(token=token)
 
 
 @app.route("/api/auth/twitter/register", methods=["POST"])

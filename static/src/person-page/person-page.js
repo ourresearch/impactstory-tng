@@ -180,61 +180,6 @@ angular.module('personPage', [
             )
         }
 
-        $scope.submitEmail = function(){
-            console.log("setting the email!", $scope.userForm.email)
-            $rootScope.setPersonIsLoading(true)
-            $scope.profileStatus = "blank"
-            $http.post("/api/me", {email: $scope.userForm.email})
-                .success(function(resp){
-                    reloadWithNewEmail()
-                })
-        }
-
-        $scope.linkTwitter = function(){
-            console.log("link twitter!")
-            $scope.profileStatus = "blank"
-            $rootScope.setPersonIsLoading(true)
-
-            // on the server, when we link twitter we also set the email
-            $auth.authenticate('twitter').then(
-                function(resp){
-                    console.log("authenticate successful.", resp)
-                    reloadWithNewEmail()
-                },
-                function(resp){
-                    console.log("linking twitter didn't work!", resp)
-                }
-            )
-        }
-
-
-        $scope.pullFromOrcid = function(){
-            console.log("ah, refreshing!")
-            $scope.d.syncing = true
-            $http.post("/api/person/" + Person.d.orcid_id)
-                .success(function(resp){
-                    // jason or heather might be refreshing this profile
-                    // for admin/debug reasons using Secret Button.
-                    // don't send event for that.
-                    if (ownsThisProfile){
-                        $rootScope.sendToIntercom(resp)
-                        Intercom('trackEvent', 'synced');
-                        Intercom('trackEvent', 'synced-to-signup');
-                    }
-
-                    // force the Person to reload. without this
-                    // the newly-synced data never gets displayed.
-                    console.log("reloading the Person")
-                    Person.reload().then(
-                        function(resp){
-                            $scope.profileStatus = "all_good"
-                            console.log("success, reloading page.")
-                            $route.reload()
-                        }
-                    )
-                })
-        }
-
 
 
         $scope.shareProfile = function(){

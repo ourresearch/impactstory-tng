@@ -73,12 +73,21 @@ angular.module('auth', [
         }
         console.log("POSTing the request code to the server", requestObj)
 
+        // set an orcid for the current user
         if ($auth.isAuthenticated()){
-            // set an orcid for the current user
             $http.post("api/me/orcid_id", requestObj)
                 .success(function(resp){
                     console.log("we successfully added an ORCID!", resp)
                     var payload = $auth.getPayload()
+                    if ($auth.getPayload().num_works > 0) {
+                        console.log("they have some works, good! redirect to your-publications")
+                        $location.url("wizard/your-publications")
+                    }
+                    else {
+                        console.log("they have no works. redirect to page to add-publications")
+                        $location.url("wizard/add-publications")
+
+                    }
 
                     //$rootScope.sendCurrentUserToIntercom()
                     //$location.url("u/" + payload.sub)
@@ -89,10 +98,11 @@ angular.module('auth', [
                 })
 
 
-
         }
-        else{
-            // log a user in based on their ownership of this orcid
+
+        // log a user in based on their ownership of this orcid
+        else {
+
         }
 
 
