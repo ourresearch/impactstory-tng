@@ -365,7 +365,7 @@ def set_my_orcid():
     modified_person = set_person_orcid(my_person, my_orcid_id)
     return jsonify({
         "orcid_id": modified_person.orcid_id,
-        "num_works": modified_person.num_works
+        "num_products": modified_person.num_products
     })
 
 
