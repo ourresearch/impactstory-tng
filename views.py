@@ -6,7 +6,7 @@ from models.person import make_person
 from models.person import set_person_orcid
 from models.person import set_person_claimed_at
 from models.person import refresh_profile
-from models.person import refresh_profile_from_id
+from models.person import refresh_person
 from models.person import delete_person
 from models.product import get_all_products
 from models.refset import num_people_in_db
@@ -332,20 +332,20 @@ def donation_endpoint():
 @app.route('/api/me', methods=["GET", "DELETE", "POST"])
 @login_required
 def me():
+    my_person = Person.query.filter_by(id=g.my_id).first()
+
     if request.method == "GET":
         # @todo i'm pretty sure we don't use this anymore?
-        my_person = Person.query.filter_by(id=g.my_id).first()
-        return jsonify(my_person.to_dict())
-    elif request.method == "DELETE":
+        return jsonify({"token": my_person.get_token()})
 
+    elif request.method == "POST":
+        refreshed_person = refresh_person(my_person)
+        return jsonify({"token": refreshed_person.get_token()})
+
+    elif request.method == "DELETE":
         delete_person(id=g.my_id)
         return jsonify({"msg": "Alas, poor Yorick! I knew him, Horatio"})
 
-    elif request.method == "POST":
-        # @todo don't use this endpoint, use the POST /api/person/whatever_id to refresh instead
-        if request.json.get("action", None) == "pull_from_orcid":
-            refresh_profile_from_id(g.my_id)
-            return jsonify({"msg": "pull successful"})
 
 
 @app.route("/api/auth/orcid/login", methods=["POST"])

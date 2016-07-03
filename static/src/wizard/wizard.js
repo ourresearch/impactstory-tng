@@ -17,9 +17,9 @@ angular.module('wizard', [
     })
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/wizard/your-publications', {
-            templateUrl: "wizard/your-publications.tpl.html",
-            controller: "YourPublicationsCtrl",
+        $routeProvider.when('/wizard/my-publications', {
+            templateUrl: "wizard/my-publications.tpl.html",
+            controller: "MyPublicationsCtrl",
             resolve: {
                 isLoggedIn: function($rootScope){
                     return $rootScope.isAuthenticatedPromise()
@@ -68,8 +68,22 @@ angular.module('wizard', [
     })
 
 
-    .controller("YourPublicationsCtrl", function($scope, $location, $http, $auth){
-        console.log("YourPublicationsCtrl is running!")
+    .controller("MyPublicationsCtrl", function($scope, $location, $http, $auth){
+        console.log("MyPublicationsCtrl is running!")
+        $scope.finishProfile = function(){
+            console.log("finishProfile()")
+            $scope.actionSelected = "finish-profile"
+            $http.post("api/me", {})
+                .success(function(resp){
+                    console.log("successfully refreshed everything, redirecting to profile page ", resp)
+                    $auth.setToken(resp.token)
+                    $location.url("u/" + $auth.getPayload().orcid_id)
+                })
+                .error(function(resp){
+                    console.log("we tried to refresh profile, but somethign went wrong :(", resp)
+                    $scope.actionSelected = null
+                })
+        }
     })
 
     .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth){
