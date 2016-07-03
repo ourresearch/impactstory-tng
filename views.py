@@ -6,6 +6,7 @@ from models.person import make_person
 from models.person import set_person_orcid
 from models.person import set_person_claimed_at
 from models.person import refresh_profile
+from models.person import refresh_profile_from_id
 from models.person import delete_person
 from models.product import get_all_products
 from models.refset import num_people_in_db
@@ -237,6 +238,7 @@ def profile_endpoint_twitter(screen_name):
     return json_resp({"id": res[0]})
 
 
+# need to call it with https for it to work
 @app.route("/api/person/<orcid_id>", methods=["POST"])
 @app.route("/api/person/<orcid_id>.json", methods=["POST"])
 def refresh_profile_endpoint(orcid_id):
@@ -340,9 +342,9 @@ def me():
         return jsonify({"msg": "Alas, poor Yorick! I knew him, Horatio"})
 
     elif request.method == "POST":
-
+        # @todo don't use this endpoint, use the POST /api/person/whatever_id to refresh instead
         if request.json.get("action", None) == "pull_from_orcid":
-            refresh_profile(g.my_id)  # @todo this will probably break
+            refresh_profile_from_id(g.my_id)
             return jsonify({"msg": "pull successful"})
 
 
