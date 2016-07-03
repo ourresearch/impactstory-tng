@@ -47,7 +47,7 @@ angular.module('wizard', [
         // @todo put this in the route def  so it's not ugly while it loads, or do a better profile-loading thingy
         if ($auth.getPayload().orcid_id){
             console.log("we've got their ORCID already")
-            if ($auth.getPayload().num_works){
+            if ($auth.getPayload().num_products){
                 console.log("they are all set, redirecting to their profile")
                 $location.url("u/" + $auth.getPayload().orcid_id)
             }

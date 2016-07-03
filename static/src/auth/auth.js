@@ -78,8 +78,8 @@ angular.module('auth', [
             $http.post("api/me/orcid_id", requestObj)
                 .success(function(resp){
                     console.log("we successfully added an ORCID!", resp)
-                    var payload = $auth.getPayload()
-                    if ($auth.getPayload().num_works > 0) {
+                    $auth.setToken(resp.token)
+                    if ($auth.getPayload().num_products > 0) {
                         console.log("they have some works, good! redirect to your-publications")
                         $location.url("wizard/your-publications")
                     }

@@ -1777,7 +1777,7 @@ angular.module("wizard/your-publications.tpl.html", []).run(["$templateCache", f
     "\n" +
     "    <h2>your publications</h2>\n" +
     "    <div>\n" +
-    "        Nice job, we found {{ auth.getPayload().num_works }} publications for you.\n" +
+    "        Nice job, we found {{ auth.getPayload().num_products }} publications for you.\n" +
     "        Does that look good?\n" +
     "    </div>\n" +
     "    <div class=\"actions\">\n" +
