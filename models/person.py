@@ -924,7 +924,7 @@ class Person(db.Model):
         payload = {
             'id': self.id,
             'email': self.email,
-            'num_products': len(self.products),
+            'num_products': self.num_products,
             'orcid_id': self.orcid_id,
             'twitter_screen_name': self.twitter,
             'first_name': self.first_name,
