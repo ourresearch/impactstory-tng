@@ -757,7 +757,7 @@ angular.module('auth', [
 
         // set an orcid for the current user
         if ($auth.isAuthenticated()){
-            $http.post("api/me/orcid_id", requestObj)
+            $http.post("api/me/orcid", requestObj)
                 .success(function(resp){
                     console.log("we successfully added an ORCID!", resp)
                     $auth.setToken(resp.token)
@@ -2278,9 +2278,20 @@ angular.module('wizard', [
 
     .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth){
         console.log("AddPublicationsCtrl is running!")
+
+        function checkForNewProducts(){
+            console.log("checking for new products")
+            $http.post("api/me/orcid", {}).success(function(resp){
+                console.log("got stuff back from refresh() endpoint", resp)
+                return checkForNewProducts()
+            })
+        }
+
+
         $scope.start = function(){
             console.log("start!")
             $scope.polling = true
+            checkForNewProducts()
         }
     })
 
