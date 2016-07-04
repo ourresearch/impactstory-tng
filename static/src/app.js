@@ -79,6 +79,15 @@ angular.module('app').run(function($route,
 
     ga('create', 'UA-23384030-1', 'auto');
 
+    // if the user is logged in, get the most up-to-date token
+    if ($auth.isAuthenticated()){
+        $http.get("api/me").success(function(resp){
+            console.log("refreshing the current user's token", $auth.getPayload())
+            $auth.setToken(resp.token)
+        })
+    }
+
+
 
 
     $rootScope.$on('$routeChangeStart', function(next, current){

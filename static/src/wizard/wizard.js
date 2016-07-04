@@ -88,6 +88,10 @@ angular.module('wizard', [
 
     .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth){
         console.log("AddPublicationsCtrl is running!")
+        $scope.start = function(){
+            console.log("start!")
+            $scope.polling = true
+        }
     })
 
 

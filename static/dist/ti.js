@@ -258,6 +258,15 @@ angular.module('app').run(function($route,
 
     ga('create', 'UA-23384030-1', 'auto');
 
+    // if the user is logged in, get the most up-to-date token
+    if ($auth.isAuthenticated()){
+        $http.get("api/me").success(function(resp){
+            console.log("refreshing the current user's token", $auth.getPayload())
+            $auth.setToken(resp.token)
+        })
+    }
+
+
 
 
     $rootScope.$on('$routeChangeStart', function(next, current){
@@ -2269,6 +2278,10 @@ angular.module('wizard', [
 
     .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth){
         console.log("AddPublicationsCtrl is running!")
+        $scope.start = function(){
+            console.log("start!")
+            $scope.polling = true
+        }
     })
 
 
@@ -3980,11 +3993,38 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
   $templateCache.put("wizard/add-publications.tpl.html",
     "<div class=\"page wizard add-publications\">\n" +
     "    <h2>add publications</h2>\n" +
-    "    <div>\n" +
-    "        OK, here's how you add publications. blah blah blah.\n" +
+    "    <div class=\"intro\">\n" +
+    "        <span class=\"no-products\" ng-show=\"!auth.getPayload().num_products\">\n" +
+    "            Looks like there are no publications associated with your\n" +
+    "            ORCID. We'll need to fix that. But no worries&mdash;it'll take less\n" +
+    "            than five minutes.\n" +
+    "        </span>\n" +
+    "        <span class=\"some-products\" ng-show=\"auth.getPayload().num_products\">\n" +
+    "            Looks like your ORCID doesn't have all your publications associated with\n" +
+    "            it yet. But there's good news&mdash;fixing that will take less than\n" +
+    "            five minutes.\n" +
+    "        </span>\n" +
+    "        <span>\n" +
+    "            Once you're done, we'll automatically import your publications\n" +
+    "            into Impactstory and you'll be ready to roll!\n" +
+    "        </span>\n" +
     "    </div>\n" +
-    "    <div class=\"actions\">\n" +
-    "        <a href=\"http://google.com\" class=\"btn btn-lg btn-primary\">Ok let's do it!</a>\n" +
+    "\n" +
+    "    <div>\n" +
+    "        Here's how it works: we'll send you to the Scopus ORCID importer wizard\n" +
+    "        in a new tab. You just follow the steps in the wizard. When you're done,\n" +
+    "        close that tab and come back here and check out your newly-complete\n" +
+    "        Impactstory profile!\n" +
+    "    </div>\n" +
+    "    <div class=\"actions\" ng-show=\"!polling\">\n" +
+    "        <a href=\"http://orcid.scopusfeedback.com/\"\n" +
+    "           target=\"_blank\"\n" +
+    "           ng-click=\"start()\"\n" +
+    "           class=\"btn btn-lg btn-primary\">Ok let's do it!</a>\n" +
+    "    </div>\n" +
+    "    <div class=\"working\" ng-show=\"polling\">\n" +
+    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
+    "        <span class=\"text\">Checking for new products in your ORCID now&hellip;</span>\n" +
     "    </div>\n" +
     "</div>\n" +
     "");
@@ -4027,8 +4067,11 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
   $templateCache.put("wizard/welcome.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
     "    <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>\n" +
-    "    <p>here's ORCID and here's what it is</p>\n" +
-    "    <p>do you have an ORCID?</p>\n" +
+    "    <p>\n" +
+    "        Impactstory is built on <a href=\"http://orcid.org\">ORCID</a>,\n" +
+    "        a global nonprofit registry of researchers and their publications.\n" +
+    "    </p>\n" +
+    "    <p>Do you have an ORCID ID?</p>\n" +
     "    <div class=\"do-you-have-an-orcid\" ng-show=\"!hasOrcid\">\n" +
     "        <span class=\"have-orcid-yes btn btn-lg btn-success\"\n" +
     "              ng-click=\"doYouHaveAnOrcid('yes')\">\n" +
