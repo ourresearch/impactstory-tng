@@ -338,7 +338,6 @@ def me():
     my_person = Person.query.filter_by(id=g.my_id).first()
 
     if request.method == "GET":
-        # @todo i'm pretty sure we don't use this anymore?
         return jsonify({"token": my_person.get_token()})
 
     elif request.method == "POST":

@@ -1697,38 +1697,49 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
   $templateCache.put("wizard/add-publications.tpl.html",
     "<div class=\"page wizard add-publications\">\n" +
     "    <h2>add publications</h2>\n" +
-    "    <div class=\"intro\">\n" +
-    "        <span class=\"no-products\" ng-show=\"!auth.getPayload().num_products\">\n" +
-    "            Looks like there are no publications associated with your\n" +
-    "            ORCID. We'll need to fix that. But no worries&mdash;it'll take less\n" +
-    "            than five minutes.\n" +
-    "        </span>\n" +
-    "        <span class=\"some-products\" ng-show=\"auth.getPayload().num_products\">\n" +
-    "            Looks like your ORCID doesn't have all your publications associated with\n" +
-    "            it yet. But there's good news&mdash;fixing that will take less than\n" +
-    "            five minutes.\n" +
-    "        </span>\n" +
-    "        <span>\n" +
-    "            Once you're done, we'll automatically import your publications\n" +
-    "            into Impactstory and you'll be ready to roll!\n" +
-    "        </span>\n" +
-    "    </div>\n" +
+    "    <div class=\"prompting\" ng-show=\"state=='prompting'\">\n" +
+    "        <div class=\"intro\">\n" +
+    "            <span class=\"no-products\" ng-show=\"!auth.getPayload().num_products\">\n" +
+    "                Looks like there are no publications associated with your\n" +
+    "                ORCID. We'll need to fix that. But no worries&mdash;it'll take less\n" +
+    "                than five minutes.\n" +
+    "            </span>\n" +
+    "            <span class=\"some-products\" ng-show=\"auth.getPayload().num_products\">\n" +
+    "                Looks like your ORCID doesn't have all your publications associated with\n" +
+    "                it yet. But there's good news&mdash;fixing that will take less than\n" +
+    "                five minutes.\n" +
+    "            </span>\n" +
+    "            <span>\n" +
+    "                Once you're done, we'll automatically import your publications\n" +
+    "                into Impactstory and you'll be ready to roll!\n" +
+    "            </span>\n" +
+    "        </div>\n" +
     "\n" +
-    "    <div>\n" +
-    "        Here's how it works: we'll send you to the Scopus ORCID importer wizard\n" +
-    "        in a new tab. You just follow the steps in the wizard. When you're done,\n" +
-    "        close that tab and come back here and check out your newly-complete\n" +
-    "        Impactstory profile!\n" +
+    "        <div>\n" +
+    "            Here's how it works: we'll send you to the Scopus ORCID importer wizard\n" +
+    "            in a new tab. You just follow the steps in the wizard. When you're done,\n" +
+    "            close that tab and come back here and check out your newly-complete\n" +
+    "            Impactstory profile!\n" +
+    "        </div>\n" +
+    "        <div class=\"actions\">\n" +
+    "            <a href=\"http://orcid.scopusfeedback.com/\"\n" +
+    "               target=\"_blank\"\n" +
+    "               ng-click=\"start()\"\n" +
+    "               class=\"btn btn-lg btn-primary\">Ok let's do it!</a>\n" +
+    "        </div>\n" +
+    "\n" +
     "    </div>\n" +
-    "    <div class=\"actions\" ng-show=\"!polling\">\n" +
-    "        <a href=\"http://orcid.scopusfeedback.com/\"\n" +
-    "           target=\"_blank\"\n" +
-    "           ng-click=\"start()\"\n" +
-    "           class=\"btn btn-lg btn-primary\">Ok let's do it!</a>\n" +
-    "    </div>\n" +
-    "    <div class=\"working\" ng-show=\"polling\">\n" +
+    "    <div class=\"working polling\" ng-show=\"state=='polling'\">\n" +
     "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
     "        <span class=\"text\">Checking for new products in your ORCID now&hellip;</span>\n" +
+    "    </div>\n" +
+    "    <div class=\"working making-profile\" ng-show=\"state=='making-profile'\">\n" +
+    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
+    "        <span class=\"text\">\n" +
+    "            Great, we just imported the  {{ num_products_added }} new products\n" +
+    "            you added to your ORCID. Now we're building your profile...it'll be ready\n" +
+    "            in a few seconds!\n" +
+    "        </span>\n" +
     "    </div>\n" +
     "</div>\n" +
     "");

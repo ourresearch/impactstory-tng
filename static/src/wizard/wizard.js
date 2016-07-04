@@ -80,7 +80,7 @@ angular.module('wizard', [
                     $location.url("u/" + $auth.getPayload().orcid_id)
                 })
                 .error(function(resp){
-                    console.log("we tried to refresh profile, but somethign went wrong :(", resp)
+                    console.log("we tried to refresh profile, but something went wrong :(", resp)
                     $scope.actionSelected = null
                 })
         }
@@ -89,11 +89,29 @@ angular.module('wizard', [
     .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth){
         console.log("AddPublicationsCtrl is running!")
 
+        $scope.state = "prompting"
         function checkForNewProducts(){
+            $scope.state = "polling"
             console.log("checking for new products")
             $http.post("api/me/orcid", {}).success(function(resp){
-                console.log("got stuff back from refresh() endpoint", resp)
-                return checkForNewProducts()
+                console.log("got stuff back from api/me/orcid", resp)
+                if (resp.num_products != $auth.getPayload().num_products){
+
+                    console.log("found the new products! assuming we're done getting products now.")
+                    $scope.state = "making-profile"
+                    $scope.num_products_added = resp.num_products - $auth.getPayload().num_products
+                    $auth.setToken(resp.token)
+
+                    // profile has all products now, but we need to get metrics. refresh it.
+                    $http.post("api/me", {}).success(function(resp){
+                        console.log("successfully refreshed the profile. redirecting.")
+                        $location.url("u/" + $auth.getPayload().orcid_id)
+                    })
+                }
+                else {
+                    // no change, let's keep checking.
+                    return checkForNewProducts()
+                }
             })
         }
 

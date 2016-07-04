@@ -153,7 +153,7 @@ def refresh_person(my_person, high_priority=False):
     print u"refreshing {}".format(my_person.orcid_id)
 
     # for testing on jason's local, so it doesn't have to do a real refresh
-    # sleep(10)
+    # sleep(5)
     # return my_person
 
     my_person.refresh(high_priority=high_priority)
