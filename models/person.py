@@ -950,7 +950,7 @@ class Person(db.Model):
 
         # for testing
         # payload["orcid_id"] = None
-        # payload["num_works"] = 0
+        # payload["num_products"] = 0
 
 
 
