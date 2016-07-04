@@ -18,6 +18,21 @@ angular.module('auth', [
         })
     })
 
+    .config(function ($routeProvider) {
+        $routeProvider.when('/login', {
+            templateUrl: "auth/login.tpl.html",
+            controller: "LoginCtrl"
+        })
+    })
+
+
+    .controller("LoginCtrl", function($scope, $location, $http, $auth){
+        console.log("LoginCtrl is running!")
+
+
+    })
+
+
     .controller("TwitterLoginCtrl", function($scope, $location, $http, $auth){
         console.log("twitter page controller is running!")
 
@@ -50,9 +65,6 @@ angular.module('auth', [
               //console.log("problem getting token back from server!", resp)
               //  $location.url("/")
             })
-
-
-
     })
 
 
@@ -104,22 +116,6 @@ angular.module('auth', [
         else {
 
         }
-
-
-
-        //$http.post("api/auth/orcid", requestObj)
-        //    .success(function(resp){
-        //        console.log("got a token back from ye server", resp)
-        //        $auth.setToken(resp.token)
-        //        var payload = $auth.getPayload()
-        //
-        //        $rootScope.sendCurrentUserToIntercom()
-        //        $location.url("u/" + payload.sub)
-        //    })
-        //    .error(function(resp){
-        //      console.log("problem getting token back from server!", resp)
-        //        $location.url("/")
-        //    })
 
     })
 
