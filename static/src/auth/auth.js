@@ -75,7 +75,7 @@ angular.module('auth', [
 
         // set an orcid for the current user
         if ($auth.isAuthenticated()){
-            $http.post("api/me/orcid_id", requestObj)
+            $http.post("api/me/orcid", requestObj)
                 .success(function(resp){
                     console.log("we successfully added an ORCID!", resp)
                     $auth.setToken(resp.token)

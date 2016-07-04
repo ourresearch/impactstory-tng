@@ -3,7 +3,8 @@ from app import db
 
 from models.person import Person
 from models.person import make_person
-from models.person import set_person_orcid
+from models.person import refresh_orcid_info
+from models.person import connect_orcid
 from models.person import set_person_claimed_at
 from models.person import refresh_profile
 from models.person import refresh_person
@@ -228,6 +229,8 @@ def profile_endpoint(orcid_id):
     return json_resp(my_person.to_dict())
 
 
+
+
 @app.route("/api/person/twitter_screen_name/<screen_name>")
 @app.route("/api/person/twitter_screen_name/<screen_name>.json")
 def profile_endpoint_twitter(screen_name):
@@ -353,31 +356,36 @@ def orcid_login():
     pass
 
 
-@app.route("/api/me/orcid_id", methods=["POST"])
+@app.route("/api/me/orcid", methods=["POST"])
 @login_required
-def set_my_orcid():
-    access_token_url = 'https://pub.orcid.org/oauth/token'
-    payload = dict(client_id="APP-PF0PDMP7P297AU8S",
-                   redirect_uri=request.json['redirectUri'],
-                   client_secret=os.getenv('ORCID_CLIENT_SECRET'),
-                   code=request.json['code'],
-                   grant_type='authorization_code')
-
-    # First we exchange authorization code for access token;
-    # the access token has the ORCID ID, which is actually all we need here.
-    r = requests.post(access_token_url, data=payload)
-    try:
-        my_orcid_id = r.json()["orcid"]
-    except KeyError:
-        print u"Aborting api/me/orcid_id; got no 'orcid' key back from ORCID! Got this: {}".format(r.json())
-        abort_json(500, "Invalid JSON return from ORCID during OAuth.")
-
-    # now we get the person and set the orcid id for them
+def manage_my_orcid():
     my_person = Person.query.filter_by(id=g.my_id).first()
-    modified_person = set_person_orcid(my_person, my_orcid_id)
 
-    token = my_person.get_token()
-    return jsonify({"token": token})
+    # this person already has an orcid id, so we're just going to refresh all their orcid info
+    if my_person.orcid_id:
+        modified_person = refresh_orcid_info(my_person)
+
+    # they are trying to connect a brand new orcid id
+    else:
+        access_token_url = 'https://pub.orcid.org/oauth/token'
+        payload = dict(client_id="APP-PF0PDMP7P297AU8S",
+                       redirect_uri=request.json['redirectUri'],
+                       client_secret=os.getenv('ORCID_CLIENT_SECRET'),
+                       code=request.json['code'],
+                       grant_type='authorization_code')
+
+        # First we exchange authorization code for access token;
+        # the access token has the ORCID ID, which is actually all we need here.
+        r = requests.post(access_token_url, data=payload)
+        try:
+            modified_person = connect_orcid(my_person, r.json()["orcid"])
+        except KeyError:
+            print u"Aborting api/me/orcid; got no 'orcid' key back from ORCID! Got this: {}".format(r.json())
+            abort_json(500, "Invalid JSON return from ORCID during OAuth.")
+
+    token = modified_person.get_token()
+    return jsonify({"token": token, "num_products": modified_person.num_products})
+
 
 
 
