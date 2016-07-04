@@ -700,6 +700,21 @@ angular.module('auth', [
         })
     })
 
+    .config(function ($routeProvider) {
+        $routeProvider.when('/login', {
+            templateUrl: "auth/login.tpl.html",
+            controller: "LoginCtrl"
+        })
+    })
+
+
+    .controller("LoginCtrl", function($scope, $location, $http, $auth){
+        console.log("LoginCtrl is running!")
+
+
+    })
+
+
     .controller("TwitterLoginCtrl", function($scope, $location, $http, $auth){
         console.log("twitter page controller is running!")
 
@@ -732,9 +747,6 @@ angular.module('auth', [
               //console.log("problem getting token back from server!", resp)
               //  $location.url("/")
             })
-
-
-
     })
 
 
@@ -786,22 +798,6 @@ angular.module('auth', [
         else {
 
         }
-
-
-
-        //$http.post("api/auth/orcid", requestObj)
-        //    .success(function(resp){
-        //        console.log("got a token back from ye server", resp)
-        //        $auth.setToken(resp.token)
-        //        var payload = $auth.getPayload()
-        //
-        //        $rootScope.sendCurrentUserToIntercom()
-        //        $location.url("u/" + payload.sub)
-        //    })
-        //    .error(function(resp){
-        //      console.log("problem getting token back from server!", resp)
-        //        $location.url("/")
-        //    })
 
     })
 
@@ -2323,7 +2319,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -2706,6 +2702,22 @@ angular.module("about-pages/search.tpl.html", []).run(["$templateCache", functio
     "            <span class=\"count\">{{ numProfiles }}</span>\n" +
     "            Impactstory profiles.\n" +
     "        </p>\n" +
+    "    </div>\n" +
+    "</div>");
+}]);
+
+angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("auth/login.tpl.html",
+    "<div class=\"page login-page\">\n" +
+    "    <h2>Log in</h2>\n" +
+    "    <div class=\"actions\">\n" +
+    "        <div class=\"btn btn-lg btn-default\">\n" +
+    "            <i class=\"fa fa-twitter\"></i>\n" +
+    "            Log in with Twitter\n" +
+    "        </div>\n" +
+    "        <div class=\"btn btn-lg btn-default\">\n" +
+    "            Log in with ORCID\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>");
 }]);
