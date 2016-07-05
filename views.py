@@ -180,9 +180,9 @@ def login_required(f):
             response.status_code = 401
             return response
 
-        g.my_orcid_id = payload['orcid_id']
-        g.my_twitter_screen_name = payload['twitter_screen_name']
-        g.my_id = payload["id"]
+        g.my_orcid_id = payload.get('orcid_id', None)
+        g.my_twitter_screen_name = payload.get('twitter_screen_name', None)
+        g.my_id = payload.get("id", None)
 
         return f(*args, **kwargs)
 
@@ -350,9 +350,40 @@ def me():
 
 
 
-@app.route("/api/auth/orcid/login", methods=["POST"])
-def orcid_login():
-    pass
+
+def get_orcid_id_this_user_owns(auth_code, redirect_uri):
+    access_token_url = 'https://pub.orcid.org/oauth/token'
+    payload = dict(client_id="APP-PF0PDMP7P297AU8S",
+                   redirect_uri=redirect_uri,
+                   client_secret=os.getenv('ORCID_CLIENT_SECRET'),
+                   code=auth_code,
+                   grant_type='authorization_code')
+
+    # First we exchange authorization code for access token;
+    # the access token has the ORCID ID, which is actually all we need here.
+    r = requests.post(access_token_url, data=payload)
+    try:
+        return r.json()["orcid"]
+    except KeyError:
+        print u"bad news: got no 'orcid' key back from ORCID! Got this: {}".format(r.json())
+        return None
+
+
+
+
+@app.route("/api/auth/login/orcid", methods=["POST"])
+def login_with_orcid():
+    my_orcid_id = get_orcid_id_this_user_owns(
+        request.json['code'],
+        request.json['redirectUri']
+    )
+    if not my_orcid_id:
+        abort_json(401, "Bad ORCID response; the auth code you sent is probably expired.")
+
+    my_person = Person.query.filter_by(orcid_id=my_orcid_id).first()
+    return jsonify({"token": my_person.get_token()})
+
+
 
 
 @app.route("/api/me/orcid", methods=["POST"])
@@ -364,23 +395,16 @@ def manage_my_orcid():
     if my_person.orcid_id:
         modified_person = refresh_orcid_info(my_person)
 
-    # they are trying to connect a brand new orcid id
+    # connect orcid
     else:
-        access_token_url = 'https://pub.orcid.org/oauth/token'
-        payload = dict(client_id="APP-PF0PDMP7P297AU8S",
-                       redirect_uri=request.json['redirectUri'],
-                       client_secret=os.getenv('ORCID_CLIENT_SECRET'),
-                       code=request.json['code'],
-                       grant_type='authorization_code')
-
-        # First we exchange authorization code for access token;
-        # the access token has the ORCID ID, which is actually all we need here.
-        r = requests.post(access_token_url, data=payload)
-        try:
-            modified_person = connect_orcid(my_person, r.json()["orcid"])
-        except KeyError:
-            print u"Aborting api/me/orcid; got no 'orcid' key back from ORCID! Got this: {}".format(r.json())
+        orcid_id = get_orcid_id_this_user_owns(
+            request.json['code'],
+            request.json['redirectUri']
+        )
+        if not orcid_id:
             abort_json(500, "Invalid JSON return from ORCID during OAuth.")
+
+        modified_person = connect_orcid(my_person, orcid_id)
 
     token = modified_person.get_token()
     return jsonify({"token": token, "num_products": modified_person.num_products})
@@ -389,11 +413,30 @@ def manage_my_orcid():
 
 
 
-@app.route("/api/auth/twitter/login", methods=["POST"])
-def login_twitter_user():
+
+@app.route("/api/me/orcid/oauth_code/<oauth_code>", methods=["POST"])
+@login_required
+def connect_orcid_using_oauth_code(oauth_code):
+    my_person = Person.query.filter_by(id=g.my_id).first()
+    orcid_id = get_orcid_id_this_user_owns(oauth_code, request.json['redirectUri'])
+    if not orcid_id:
+        abort_json(500, "Invalid JSON return from ORCID during OAuth.")
+
+    modified_person = connect_orcid(my_person, orcid_id)
+    token = modified_person.get_token()
+    return jsonify({"token": token, "num_products": modified_person.num_products})
+
+
+
+
+
+@app.route("/api/auth/login/twitter", methods=["POST"])
+def login_with_twitter():
     pass
 
-@app.route("/api/auth/twitter/register", methods=["POST"])
+
+
+@app.route("/api/auth/register/twitter", methods=["POST"])
 def register_twitter_user():
     access_token_url = 'https://api.twitter.com/oauth/access_token'
 
@@ -408,11 +451,15 @@ def register_twitter_user():
     print u"got back twitter_creds from twitter {}".format(twitter_creds)
 
     my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
+    is_new_profile = False
+
     if my_person is None:
         my_person = make_person(twitter_creds)
+        is_new_profile = True
 
     token = my_person.get_token()
-    return jsonify({"token": token})
+    return jsonify({"token": token, "is_new_profile": is_new_profile})
+
 
 
 # doesn't save anything in database, just proxy for calling twitter.com
