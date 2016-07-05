@@ -28,7 +28,13 @@ angular.module('auth', [
 
     .controller("LoginCtrl", function($scope, $location, $http, $auth){
         console.log("LoginCtrl is running!")
-
+        $scope.loginTwitter = function(){
+            console.log("login twitter")
+        }
+        $scope.loginOrcid = function(){
+            console.log("login orcid")
+            $http.post("api/auth/login/orcid")
+        }
 
     })
 
@@ -51,9 +57,9 @@ angular.module('auth', [
             verifier: verifier
         }
 
-        $http.post("api/auth/twitter/register", requestObj)
+        $http.post("api/auth/register/twitter", requestObj)
             .success(function(resp){
-                console.log("logged in a twitter user", resp)
+                console.log("registered a new user with twitter", resp)
                 $auth.setToken(resp.token)
                 $location.url("wizard/welcome")
                 //var payload = $auth.getPayload()

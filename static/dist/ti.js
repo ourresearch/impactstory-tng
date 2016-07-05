@@ -466,14 +466,18 @@ angular.module('app').controller('AppCtrl', function(
     }
 
 
+    $rootScope.twitterRedirectUri = {
+        register: window.location.origin + "/twitter-register",
+        login: window.location.origin + "/twitter-login"
+    }
 
     // TWITTER AUTH
-    var twitterAuthenticate = function (showLogin) {
+    var twitterAuthenticate = function (registerOrLogin) {
         console.log("authenticate with twitters!");
 
         // first get the OAuth token that we use to create the twitter URL
         // we will redirect the user too.
-        var redirectUri = window.location.origin + "/twitter-login";
+        var redirectUri = $rootScope.twitterRedirectUri[registerOrLogin]
         var baseUrlToGetOauthTokenFromOurServer = "/api/auth/twitter/request-token?redirectUri=";
         var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
 
@@ -492,27 +496,34 @@ angular.module('app').controller('AppCtrl', function(
 
 
 
+
     // ORCID AUTH
-    $rootScope.orcidRedirectUri = window.location.origin + "/orcid-login"
-    var orcidAuthUrl = "https://orcid.org/oauth/authorize" +
-        "?client_id=APP-PF0PDMP7P297AU8S" +
-        "&response_type=code" +
-        "&scope=/authenticate" +
-        "&redirect_uri=" + $rootScope.orcidRedirectUri
+
+    $rootScope.orcidRedirectUri = {
+        connect: window.location.origin + "/orcid-connect",
+        login: window.location.origin + "/orcid-login"
+    }
 
     // used in the nav bar, also for signup on the landing page.
-    var orcidAuthenticate = function (showLogin) {
+    var orcidAuthenticate = function (showLogin, connectOrLogin) {
         console.log("ORCID authenticate!", showLogin)
+
+
+        var authUrl = "https://orcid.org/oauth/authorize" +
+            "?client_id=APP-PF0PDMP7P297AU8S" +
+            "&response_type=code" +
+            "&scope=/authenticate" +
+            "&redirect_uri=" + $rootScope.orcidRedirectUri[connectOrLogin]
 
         if (showLogin == "register"){
             // will show the signup screen
         }
         else if (showLogin == "login") {
             // show the login screen (defaults to this)
-            orcidAuthUrl += "&show_login=true"
+            authUrl += "&show_login=true"
         }
 
-        window.location = orcidAuthUrl
+        window.location = authUrl
         return true
     }
     $rootScope.orcidAuthenticate = orcidAuthenticate
@@ -710,7 +721,13 @@ angular.module('auth', [
 
     .controller("LoginCtrl", function($scope, $location, $http, $auth){
         console.log("LoginCtrl is running!")
-
+        $scope.loginTwitter = function(){
+            console.log("login twitter")
+        }
+        $scope.loginOrcid = function(){
+            console.log("login orcid")
+            $http.post("api/auth/login/orcid")
+        }
 
     })
 
@@ -733,9 +750,9 @@ angular.module('auth', [
             verifier: verifier
         }
 
-        $http.post("api/auth/twitter/register", requestObj)
+        $http.post("api/auth/register/twitter", requestObj)
             .success(function(resp){
-                console.log("logged in a twitter user", resp)
+                console.log("registered a new user with twitter", resp)
                 $auth.setToken(resp.token)
                 $location.url("wizard/welcome")
                 //var payload = $auth.getPayload()
@@ -2203,6 +2220,25 @@ angular.module('wizard', [
     })
 
     .config(function ($routeProvider) {
+        $routeProvider.when('/orcid-connect', {
+            templateUrl: "wizard/orcid-connect.tpl.html",
+            controller: "OrcidConnectCtrl",
+            resolve: {
+                isLoggedIn: function($rootScope){
+                    return $rootScope.isAuthenticatedPromise()
+                }
+            }
+        })
+    })
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/twitter-register', {
+            templateUrl: "wizard/twitter-register.tpl.html",
+            controller: "TwitterRegisterCtrl"
+        })
+    })
+
+    .config(function ($routeProvider) {
         $routeProvider.when('/wizard/my-publications', {
             templateUrl: "wizard/my-publications.tpl.html",
             controller: "MyPublicationsCtrl",
@@ -2230,6 +2266,7 @@ angular.module('wizard', [
 
     .controller("WelcomePageCtrl", function($scope, $location, $http, $auth){
 
+
         // @todo put this in the route def  so it's not ugly while it loads, or do a better profile-loading thingy
         if ($auth.getPayload().orcid_id){
             console.log("we've got their ORCID already")
@@ -2250,6 +2287,105 @@ angular.module('wizard', [
             console.log("setting doYouHaveAnOrcid", answer)
             $scope.hasOrcid = answer
         }
+
+    })
+
+
+
+    .controller("OrcidConnectCtrl", function($scope, $location, $http, $auth, $rootScope){
+        console.log("OrcidConnectCtrl running")
+        var searchObject = $location.search();
+        var code = searchObject.code
+
+        if (!code){
+            console.log("there is no oauth code in the url. quitting.")
+            $location.path("/")
+            return false
+        }
+
+        var requestObj = {
+            redirectUri: $rootScope.orcidRedirectUri.connect
+        }
+
+        console.log("POSTing the request code to the server", requestObj)
+        $http.post("api/me/orcid/oauth_code/" + code, requestObj)
+            .success(function(resp){
+                console.log("we successfully added an ORCID!", resp)
+                $auth.setToken(resp.token)
+                if ($auth.getPayload().num_products > 0) {
+                    console.log("they have some works, good! redirect to your-publications")
+                    $location.url("wizard/my-publications")
+                }
+                else {
+                    console.log("they have no works. redirect to page to add-publications")
+                    $location.url("wizard/add-publications")
+
+                }
+
+                //$rootScope.sendCurrentUserToIntercom()
+                //$location.url("u/" + payload.sub)
+            })
+            .error(function(resp){
+              console.log("problem getting token back from server!", resp)
+                //$location.url("/")
+            })
+
+
+
+    })
+
+
+
+    .controller("TwitterRegisterCtrl", function($scope, $location, $http, $auth, $rootScope){
+        console.log("TwitterRegisterCtrl running")
+
+
+        var searchObject = $location.search();
+        var token = searchObject.oauth_token
+        var verifier = searchObject.oauth_verifier
+
+        if (!token || !verifier){
+            console.log("twitter didn't give oauth_verifier and a oauth_token")
+            $location.url("/")
+            return false
+        }
+
+        var requestObj = {
+            token: token,
+            verifier: verifier
+        }
+
+        $http.post("api/auth/register/twitter", requestObj)
+            .success(function(resp){
+                $auth.setToken(resp.token)
+                if (resp.is_new_profile){
+                    console.log("registered a new user with twitter", resp)
+                    $location.url("wizard/welcome")
+                    //$rootScope.sendCurrentUserToIntercom()
+                }
+                else {
+                    console.log("an existing impactstory user logged in with twitter, using the register button", resp)
+                    if ($auth.getPayload().orcid_id){
+                        console.log("they've got a orcid in their profile. sending them to profile page.")
+                        $location.url("u/" + $auth.getPayload().orcid_id)
+                    }
+                    else {
+                        console.log("they are logged in with twitter, but no orcid yet.")
+                        $location.url("wizard/welcome")
+                    }
+                }
+
+
+
+            })
+            .error(function(resp){
+              //console.log("problem getting token back from server!", resp)
+              //  $location.url("/")
+            })
+
+
+
+
 
     })
 
@@ -2319,7 +2455,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/orcid-connect.tpl.html', 'wizard/twitter-register.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -2711,11 +2847,11 @@ angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templ
     "<div class=\"page login-page\">\n" +
     "    <h2>Log in</h2>\n" +
     "    <div class=\"actions\">\n" +
-    "        <div class=\"btn btn-lg btn-default\">\n" +
+    "        <div class=\"btn btn-lg btn-default\" ng-click=\"loginTwitter()\">\n" +
     "            <i class=\"fa fa-twitter\"></i>\n" +
     "            Log in with Twitter\n" +
     "        </div>\n" +
-    "        <div class=\"btn btn-lg btn-default\">\n" +
+    "        <div class=\"btn btn-lg btn-default\" ng-click=\"loginOrcid()\">\n" +
     "            Log in with ORCID\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -3964,7 +4100,7 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "\n" +
     "        <div class=\"join-button\">\n" +
-    "            <md-button class=\"md-accent md-raised\" ng-click=\"twitterAuthenticate()\">\n" +
+    "            <md-button class=\"md-accent md-raised\" ng-click=\"twitterAuthenticate('register')\">\n" +
     "                <i class=\"fa fa-twitter\"></i>\n" +
     "                Join for free with Twitter\n" +
     "            </md-button>\n" +
@@ -4115,6 +4251,26 @@ angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", fun
     "</div>");
 }]);
 
+angular.module("wizard/orcid-connect.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/orcid-connect.tpl.html",
+    "<div class=\"page wizard orcid-connect\">\n" +
+    "    <h2>\n" +
+    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
+    "        We're connecting your ORCID now\n" +
+    "    </h2>\n" +
+    "</div>");
+}]);
+
+angular.module("wizard/twitter-register.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/twitter-register.tpl.html",
+    "<div class=\"page wizard twitter-register\">\n" +
+    "    <h2>\n" +
+    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
+    "        We're registering your Twitter now\n" +
+    "    </h2>\n" +
+    "</div>");
+}]);
+
 angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/welcome.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
@@ -4150,7 +4306,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('login')\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('login', 'connect')\">\n" +
     "                Sign in to my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -4160,7 +4316,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register')\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register', 'connect')\">\n" +
     "                Create my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -4171,7 +4327,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register')\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register', 'connect')\">\n" +
     "                Try registering for an ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +

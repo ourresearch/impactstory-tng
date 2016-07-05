@@ -1,4 +1,4 @@
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/orcid-connect.tpl.html', 'wizard/twitter-register.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -390,11 +390,11 @@ angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templ
     "<div class=\"page login-page\">\n" +
     "    <h2>Log in</h2>\n" +
     "    <div class=\"actions\">\n" +
-    "        <div class=\"btn btn-lg btn-default\">\n" +
+    "        <div class=\"btn btn-lg btn-default\" ng-click=\"loginTwitter()\">\n" +
     "            <i class=\"fa fa-twitter\"></i>\n" +
     "            Log in with Twitter\n" +
     "        </div>\n" +
-    "        <div class=\"btn btn-lg btn-default\">\n" +
+    "        <div class=\"btn btn-lg btn-default\" ng-click=\"loginOrcid()\">\n" +
     "            Log in with ORCID\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -1643,7 +1643,7 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "\n" +
     "        <div class=\"join-button\">\n" +
-    "            <md-button class=\"md-accent md-raised\" ng-click=\"twitterAuthenticate()\">\n" +
+    "            <md-button class=\"md-accent md-raised\" ng-click=\"twitterAuthenticate('register')\">\n" +
     "                <i class=\"fa fa-twitter\"></i>\n" +
     "                Join for free with Twitter\n" +
     "            </md-button>\n" +
@@ -1794,6 +1794,26 @@ angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", fun
     "</div>");
 }]);
 
+angular.module("wizard/orcid-connect.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/orcid-connect.tpl.html",
+    "<div class=\"page wizard orcid-connect\">\n" +
+    "    <h2>\n" +
+    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
+    "        We're connecting your ORCID now\n" +
+    "    </h2>\n" +
+    "</div>");
+}]);
+
+angular.module("wizard/twitter-register.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/twitter-register.tpl.html",
+    "<div class=\"page wizard twitter-register\">\n" +
+    "    <h2>\n" +
+    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
+    "        We're registering your Twitter now\n" +
+    "    </h2>\n" +
+    "</div>");
+}]);
+
 angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/welcome.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
@@ -1829,7 +1849,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('login')\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('login', 'connect')\">\n" +
     "                Sign in to my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -1839,7 +1859,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register')\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register', 'connect')\">\n" +
     "                Create my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -1850,7 +1870,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register')\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register', 'connect')\">\n" +
     "                Try registering for an ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +

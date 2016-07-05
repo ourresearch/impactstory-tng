@@ -287,14 +287,18 @@ angular.module('app').controller('AppCtrl', function(
     }
 
 
+    $rootScope.twitterRedirectUri = {
+        register: window.location.origin + "/twitter-register",
+        login: window.location.origin + "/twitter-login"
+    }
 
     // TWITTER AUTH
-    var twitterAuthenticate = function (showLogin) {
+    var twitterAuthenticate = function (registerOrLogin) {
         console.log("authenticate with twitters!");
 
         // first get the OAuth token that we use to create the twitter URL
         // we will redirect the user too.
-        var redirectUri = window.location.origin + "/twitter-login";
+        var redirectUri = $rootScope.twitterRedirectUri[registerOrLogin]
         var baseUrlToGetOauthTokenFromOurServer = "/api/auth/twitter/request-token?redirectUri=";
         var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
 
@@ -313,27 +317,34 @@ angular.module('app').controller('AppCtrl', function(
 
 
 
+
     // ORCID AUTH
-    $rootScope.orcidRedirectUri = window.location.origin + "/orcid-login"
-    var orcidAuthUrl = "https://orcid.org/oauth/authorize" +
-        "?client_id=APP-PF0PDMP7P297AU8S" +
-        "&response_type=code" +
-        "&scope=/authenticate" +
-        "&redirect_uri=" + $rootScope.orcidRedirectUri
+
+    $rootScope.orcidRedirectUri = {
+        connect: window.location.origin + "/orcid-connect",
+        login: window.location.origin + "/orcid-login"
+    }
 
     // used in the nav bar, also for signup on the landing page.
-    var orcidAuthenticate = function (showLogin) {
+    var orcidAuthenticate = function (showLogin, connectOrLogin) {
         console.log("ORCID authenticate!", showLogin)
+
+
+        var authUrl = "https://orcid.org/oauth/authorize" +
+            "?client_id=APP-PF0PDMP7P297AU8S" +
+            "&response_type=code" +
+            "&scope=/authenticate" +
+            "&redirect_uri=" + $rootScope.orcidRedirectUri[connectOrLogin]
 
         if (showLogin == "register"){
             // will show the signup screen
         }
         else if (showLogin == "login") {
             // show the login screen (defaults to this)
-            orcidAuthUrl += "&show_login=true"
+            authUrl += "&show_login=true"
         }
 
-        window.location = orcidAuthUrl
+        window.location = authUrl
         return true
     }
     $rootScope.orcidAuthenticate = orcidAuthenticate
