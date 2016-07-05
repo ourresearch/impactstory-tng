@@ -5,7 +5,9 @@ from models.person import Person
 from models.person import make_person
 from models.person import set_person_email
 from models.person import set_person_claimed_at
+from models.person import link_twitter
 from models.person import refresh_profile
+from models.person import add_or_overwrite_person_from_orcid_id
 from models.person import delete_person
 from models.product import get_all_products
 from models.refset import num_people_in_db
@@ -201,15 +203,13 @@ def api_test():
 def test0():
     return jsonify({"test": True})
 
-
-
 @app.route("/api/person/<orcid_id>")
 @app.route("/api/person/<orcid_id>.json")
 def profile_endpoint(orcid_id):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
     if not my_person:
         try:
-            my_person.link_orcid(orcid_id, high_priority=True)
+            my_person = make_person(orcid_id, high_priority=True)
         except (OrcidDoesNotExist, NoOrcidException):
             print u"returning 404: orcid profile {} does not exist".format(orcid_id)
             abort_json(404, "That ORCID profile doesn't exist")
@@ -368,8 +368,7 @@ def orcid_auth():
         token = my_person.get_token()
     except AttributeError:  # my_person is None. So make a new user
 
-        # @todo fix this
-        my_person.link_orcid(my_orcid_id, high_priority=True)
+        my_person = make_person(my_orcid_id, high_priority=True)
         token = my_person.get_token()
 
     set_person_claimed_at(my_person)
@@ -382,41 +381,46 @@ def orcid_auth():
 
 
 
+@app.route('/auth/twitter', methods=['POST'])
+@login_required
+def twitter():
 
-@app.route("/auth/twitter/register", methods=["POST"])
-def get_twitter_user():
+    print u"calling /auth/twitter"
+
+    request_token_url = 'https://api.twitter.com/oauth/request_token'
     access_token_url = 'https://api.twitter.com/oauth/access_token'
 
-    auth = OAuth1(os.getenv('TWITTER_CONSUMER_KEY'),
-                  client_secret=os.getenv('TWITTER_CONSUMER_SECRET'),
-                  resource_owner_key=request.json.get('token'),
-                  verifier=request.json.get('verifier'))
+    if request.json.get('oauth_token') and request.json.get('oauth_verifier'):
+        # the user already has some creds from signing in to twitter.
+        # now get the users's twitter login info.
 
-    r = requests.post(access_token_url, auth=auth)
+        auth = OAuth1(os.getenv('TWITTER_CONSUMER_KEY'),
+                      client_secret=os.getenv('TWITTER_CONSUMER_SECRET'),
+                      resource_owner_key=request.json.get('oauth_token'),
+                      verifier=request.json.get('oauth_verifier'))
 
-    twitter_creds = dict(parse_qsl(r.text))
-    print "got back twitter_creds from twitter", twitter_creds
+        r = requests.post(access_token_url, auth=auth)
 
-    my_person = make_person(twitter_creds)
+        twitter_creds = dict(parse_qsl(r.text))
+        # print "got back creds from twitter", twitter_creds
+        my_person = link_twitter(g.me_orcid_id, twitter_creds)
 
-    # return a token because satellizer like it
-    token = my_person.get_token()
-    return jsonify({"token": token})
+        # return a token because satellizer like it
+        token = my_person.get_token()
+        return jsonify(token=token)
 
+    else:
+        # we are just starting the whole process. give them the info to
+        # help them sign in on the redirect twitter window.
+        oauth = OAuth1(
+            os.getenv('TWITTER_CONSUMER_KEY'),
+            client_secret=os.getenv('TWITTER_CONSUMER_SECRET'),
+            callback_uri=request.json.get('redirectUri', 'https://impactstory.org') #sometimes no redirectUri
+        )
 
-@app.route("/auth/twitter/request-token")
-def get_twitter_request_token():
-    request_token_url = 'https://api.twitter.com/oauth/request_token'
-
-    oauth = OAuth1(
-        os.getenv('TWITTER_CONSUMER_KEY'),
-        client_secret=os.getenv('TWITTER_CONSUMER_SECRET'),
-        callback_uri=request.args.get('redirectUri')
-    )
-
-    r = requests.post(request_token_url, auth=oauth)
-    oauth_token_dict = dict(parse_qsl(r.text))
-    return jsonify(oauth_token_dict)
+        r = requests.post(request_token_url, auth=oauth)
+        oauth_token = dict(parse_qsl(r.text))
+        return jsonify(oauth_token)
 
 
 
