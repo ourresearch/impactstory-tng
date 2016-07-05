@@ -1607,6 +1607,9 @@ div.page.settings-page div.setting-panel div.second-q h4 {
   width: 150px;
   margin-top: 20px;
 }
+.login-loading.twitter .content {
+  display: none;
+}
 .page.search .main md-autocomplete {
   height: auto;
 }
