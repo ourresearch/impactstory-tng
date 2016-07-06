@@ -1,12 +1,11 @@
-import mandrill
 import os
-import logging
 import jinja2
+import sendgrid
+from sendgrid.helpers.mail.mail import Email
+from sendgrid.helpers.mail.mail import Content
+from sendgrid.helpers.mail.mail import Mail
 
-
-logger = logging.getLogger("emailer")
-
-def send(address, subject, template_name, context):
+def send(address, subject, template_name, context, for_real=False):
 
     templateLoader = jinja2.FileSystemLoader(searchpath="templates")
     templateEnv = jinja2.Environment(loader=templateLoader)
@@ -14,33 +13,20 @@ def send(address, subject, template_name, context):
 
     html_to_send = html_template.render(context)
 
-    mailer = mandrill.Mandrill(os.getenv("MANDRILL_APIKEY"))
+    sg = sendgrid.SendGridAPIClient(apikey=os.environ.get('SENDGRID_API_KEY'))
+    from_email = Email("team@impactstory.org")
+    to_email = Email(address)
+    content = Content("text/html", html_to_send)
+    mail = Mail(from_email, subject, to_email, content)
 
-    addressee = {"email": address}
-    try:
-        addressee["name"] = context["name"]
-    except KeyError:
-        pass
+    if for_real:
+        response = sg.client.mail.send.post(request_body=mail.get())
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+        print u"Sent an email to {}".format(address)
+    else:
+        print u"Didn't really send"
 
-
-    msg = {
-        "html": html_to_send,
-        "subject": subject,
-        "from_email": "team@impactstory.org",
-        "from_name": "The Impactstory team",
-        "to": [addressee],  # must be a list
-        "track_opens": True,
-        "track_clicks": True
-    }
-
-    try:
-        msg["tags"] = context["tags"]
-    except KeyError:
-        pass
-
-    mailer.messages.send(msg)
-    logger.info(u"Sent an email to " + address)
-
-    return msg
 
 

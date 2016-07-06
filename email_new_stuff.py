@@ -1,13 +1,13 @@
 from time import time
+from datetime import date
+import calendar
 from util import elapsed
 from util import safe_commit
 import argparse
 
 from models import emailer
 from collections import defaultdict
-
-
-emails_sent = "".split()
+import update
 
 
 def email_everyone(filename):
@@ -97,12 +97,25 @@ def send_tng_email(email, addressee_dict, now=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run stuff.")
 
-    # just for updating lots
-    parser.add_argument('filename', type=str, help="filename to import")
-    parsed = parser.parse_args()
+    parser.add_argument('--now', action="store_true", default=False, help="send the emails now even if not specified day")
+    parsed_args = update.parse_update_optional_args(parser)
+    parsed_args.fn = "Person.email_new_stuff"
 
-    start = time()
-    email_everyone(parsed.filename)
-    print "finished update in {}sec".format(elapsed(start))
+    run_now = False
+
+    if parsed_args.now:
+        print u"emailing because run_now override"
+        run_now = True
+    else:
+        my_date = date.today()
+        my_day_of_week = calendar.day_name[my_date.weekday()]
+        day_of_week_for_emails = "Thursday"
+        if my_day_of_week != day_of_week_for_emails:
+            run_now = False
+
+    if run_now:
+        update.run_update(parsed_args)
+    else:
+        print u"not {} today so not emailing".format(day_of_week_for_emails)
 
 

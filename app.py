@@ -107,6 +107,7 @@ with open("data/doaj_titles.json", "r") as fh:
 # from models import product
 # from models import badge
 # from models import refset
+# from models import email
 #
 # db.create_all()
 # commit_success = safe_commit(db)

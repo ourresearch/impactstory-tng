@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Impactstory</title>
+   <!--style type="text/css">
+      {{ css }}
+   </style-->
+   <!--link rel="stylesheet" href="https://impactstory.org/static/less.emails/css/new-metrics.css"/-->
+</head>
+<body>
+
+   <div class="body">
+    <p>
+        Congrats, your research has new impact!
+
+       <div class="new-metrics">
+          {% for source, count in profile.post_count_to_email %}
+              {{ count }} new {{ source }} events
+          {% endfor %}
+        </div>
+
+       <p>Check out your Impactstory profile to see the details and the boosts they've given your Achievements:
+       <p><a href='https://impactstory.org/u/{{ profile.orcid_id }}'>https://impactstory.org/u/{{ profile.orcid_id }}</a></p>
+        <p></p>
+
+       <p>You can also check out a few new features:
+           <ul>
+            <li>it's easy to share a link to one of your Achievements -- see the new "link" and "share" buttons under each badge.
+            <li>see how unique your Achievements are: Top 50%, Top 25%, and Top 10% trophies are proudly displayed beside each rare achievement</li>
+            </ul>
+       </p>
+       <p>Best,
+           <br>Jason and Heather</br>
+           <br><a href="http://twitter.com/impactstory">@impactstory</a></br>
+           <br>team@impactstory.org</br>
+        </p>
+
+   </div>
+</body>
+</html>
+
