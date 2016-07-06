@@ -20,6 +20,14 @@ update_registry.register(Update(
 ))
 
 q = db.session.query(Person.id)
+q = q.filter(Person.claimed_at != None)
+update_registry.register(Update(
+    job=Person.email_new_stuff,
+    query=q,
+))
+
+
+q = db.session.query(Person.id)
 update_registry.register(Update(
     job=Person.calculate,
     query=q,

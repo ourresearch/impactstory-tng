@@ -23,6 +23,7 @@ pytz==2013b0
 requests==2.9.1
 requests-oauthlib==0.6.1
 rq==0.5.6
+sendgrid==3.0.1
 shortuuid==0.4.3
 SQLAlchemy==1.0.11
 stripe==1.31.0

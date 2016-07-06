@@ -20,6 +20,8 @@ from models.orcid import make_and_populate_orcid_profile
 from models.source import sources_metadata
 from models.source import Source
 from models.refset import Refset
+from models.emailer import send
+from models.email import save_email
 from models.country import country_info
 from models.top_news import top_news_titles
 from util import elapsed
@@ -197,6 +199,8 @@ class Person(db.Model):
     num_badges = db.Column(db.Integer)
 
     openness = db.Column(db.Float)
+
+    events_emailed = db.Column(MutableDict.as_mutable(JSONB))
     weekly_event_count = db.Column(db.Float)
     monthly_event_count = db.Column(db.Float)
     tweeted_quickly = db.Column(db.Boolean)
@@ -384,6 +388,56 @@ class Person(db.Model):
         self.set_openness()
         self.assign_badges(limit_to_badges=["percent_fulltext"])
         self.set_badge_percentiles(limit_to_badges=["percent_fulltext"])
+
+    def email_new_stuff(self):
+        if not self.claimed_at:
+            return
+        if not self.email:
+            return
+
+        # fake it for now
+        # DATE_NOTIFICATION_EMAILS_STARTED = "2015-07-05"
+        # self.events_emailed = {"emailed": []}
+
+        DATE_NOTIFICATION_EMAILS_STARTED = "2016-07-01"
+
+        if not self.events_emailed:
+            self.events_emailed = {"emailed": []}
+
+        print u"looking for new stuff to email for {}".format(self.email)
+        posts = self.get_posts()
+        posts_to_email = []
+        for post in posts:
+            post_date_iso = post["posted_on"]
+            if post_date_iso > date_as_iso_utc(self.created):
+                if post_date_iso > DATE_NOTIFICATION_EMAILS_STARTED:
+                    if post["url"] not in self.events_emailed["emailed"]:
+                        posts_to_email.append(post)
+
+        post_ids = [post["url"] for post in posts_to_email]
+        self.events_emailed["emailed"] += post_ids
+        post_count_by_source = {}
+
+        for post in posts_to_email:
+            source = post["source"]
+            try:
+                post_count_by_source[source] += 1
+            except KeyError:
+                post_count_by_source[source] = 1
+
+        if post_count_by_source:
+            print u"have things to email!"
+            new_event_counts = post_count_by_source.iteritems()
+            details_dict = self.to_dict()
+            details_dict["post_count_to_email"] = new_event_counts
+
+            # send(self.email, "New impact on your research", "notification", {"profile": details_dict}, for_real=True)
+            send(self.email, "New impact on your research", "notification", {"profile": details_dict}, for_real=False)
+            save_email(self.orcid_id, new_event_counts)
+        else:
+            print u"have nothing to email"
+
+
 
 
     def calculate(self):
