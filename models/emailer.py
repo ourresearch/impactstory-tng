@@ -21,9 +21,6 @@ def send(address, subject, template_name, context, for_real=False):
 
     if for_real:
         response = sg.client.mail.send.post(request_body=mail.get())
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
         print u"Sent an email to {}".format(address)
     else:
         print u"Didn't really send"
