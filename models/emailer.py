@@ -14,7 +14,7 @@ def send(address, subject, template_name, context, for_real=False):
     html_to_send = html_template.render(context)
 
     sg = sendgrid.SendGridAPIClient(apikey=os.environ.get('SENDGRID_API_KEY'))
-    from_email = Email("team@impactstory.org")
+    from_email = Email("team@impactstory.org", "Impactstory team")
     to_email = Email(address)
     content = Content("text/html", html_to_send)
     mail = Mail(from_email, subject, to_email, content)
