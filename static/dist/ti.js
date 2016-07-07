@@ -1199,7 +1199,7 @@ angular.module('personPage', [
             }
             var currentRollup = makeRollupPost()
             _.each(sortedPosts, function(post){
-                if (post.source == 'twitter'){
+                if (post.source == 'twitter'){ // this post is a tween
 
                     // we keep tweets as regular posts too
                     postsWithRollups.push(post)
@@ -1208,9 +1208,7 @@ angular.module('personPage', [
                     currentRollup.tweets.push(post)
 
                     // rollup posted_on date will be date of *first* tweet in group
-                    if (!currentRollup.posted_on){
-                        currentRollup.posted_on = post.posted_on
-                    }
+                    currentRollup.posted_on = post.posted_on
                 }
                 else {
                     postsWithRollups.push(post)
