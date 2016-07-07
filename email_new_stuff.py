@@ -109,7 +109,7 @@ if __name__ == "__main__":
     else:
         my_date = date.today()
         my_day_of_week = calendar.day_name[my_date.weekday()]
-        day_of_week_for_emails = "Thursday"
+        day_of_week_for_emails = "Tuesday"
         if my_day_of_week != day_of_week_for_emails:
             run_now = False
 

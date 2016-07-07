@@ -414,10 +414,15 @@ class Person(db.Model):
                     if post["url"] not in self.events_emailed["emailed"]:
                         posts_to_email.append(post)
 
-        post_ids = [post["url"] for post in posts_to_email]
-        self.events_emailed["emailed"] += post_ids
-        post_count_by_source = {}
+        if not posts_to_email:
+            print u"nothing to email."
+            return
 
+        print u"have things to email!"
+        post_urls = [post["url"] for post in posts_to_email]
+        self.events_emailed["emailed"] += post_urls
+
+        post_count_by_source = {}
         for post in posts_to_email:
             source = post["source"]
             try:
@@ -425,18 +430,13 @@ class Person(db.Model):
             except KeyError:
                 post_count_by_source[source] = 1
 
-        if post_count_by_source:
-            print u"have things to email!"
-            new_event_counts = post_count_by_source.items()
-            details_dict = self.to_dict()
-            details_dict["post_count_to_email"] = new_event_counts
+        new_event_counts = post_count_by_source.items()
+        details_dict = self.to_dict()
+        details_dict["post_count_to_email"] = new_event_counts
 
-            # send(self.email, "New impact on your research", "notification", {"profile": details_dict}, for_real=True)
-            send(self.email, "New impact on your research", "notification", {"profile": details_dict}, for_real=False)
-
-            save_email(self.orcid_id, new_event_counts)
-        else:
-            print u"have nothing to email"
+        send(self.email, "Your research is getting new attention online", "notification", {"profile": details_dict}, for_real=True)
+        # send(self.email, "Your research is getting new attention online", "notification", {"profile": details_dict}, for_real=False)
+        save_email(self.orcid_id, new_event_counts)
 
 
 
