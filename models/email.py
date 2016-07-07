@@ -12,6 +12,7 @@ def save_email(orcid_id, contents):
     email.sent = datetime.datetime.utcnow().isoformat()
     email.orcid_id = orcid_id
     email.contents = dict(contents)
+    db.session.add(email)
     commit_success = safe_commit(db)
     if not commit_success:
         print u"COMMIT fail on email {}".format(email.orcid_id)
