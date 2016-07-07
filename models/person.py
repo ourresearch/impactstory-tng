@@ -427,12 +427,13 @@ class Person(db.Model):
 
         if post_count_by_source:
             print u"have things to email!"
-            new_event_counts = post_count_by_source.iteritems()
+            new_event_counts = post_count_by_source.items()
             details_dict = self.to_dict()
             details_dict["post_count_to_email"] = new_event_counts
 
             # send(self.email, "New impact on your research", "notification", {"profile": details_dict}, for_real=True)
             send(self.email, "New impact on your research", "notification", {"profile": details_dict}, for_real=False)
+
             save_email(self.orcid_id, new_event_counts)
         else:
             print u"have nothing to email"
