@@ -178,8 +178,8 @@ angular.module('aboutPages', [])
 
 
 angular.module('app', [
-    // external libs
 
+    // external libs
     'ngRoute',
     'ngMessages',
     'satellizer',
@@ -188,20 +188,23 @@ angular.module('app', [
     'ngSanitize',
     'ngMaterial',
 
-    'templates.app',  // this is how it accesses the cached templates in ti.js
+    // this is how it accesses the cached templates in ti.js
+    'templates.app',
 
-    'staticPages',
-
+    // services
+    'currentUser',
     'badgeDefs',
+    'numFormat',
+    'person',
+
+    // pages
+    'staticPages',
     'productPage', // MUST be above personPage because personPage route is greedy for /p/
     'personPage',
     'settingsPage',
     'badgePage',
-    'aboutPages',
-    'wizard',
-    'auth',
+    'aboutPages'
 
-    'numFormat'
 
 ]);
 
@@ -1692,33 +1695,6 @@ angular.module('resourcesModule', [])
   .factory('PackageResource', function($resource) {
     return $resource('/api/package/:namespace/:name')
   })
-angular.module('articleService', [
-  ])
-
-
-
-  .factory("ArticleService", function($http,
-                                      $timeout,
-                                      $location){
-
-    var data = {}
-
-    function getArticle(pmid){
-      var url = "api/article/" + pmid
-      console.log("getting article", pmid)
-      return $http.get(url).success(function(resp){
-        console.log("got response for api/article/" + pmid, resp)
-        data.article = resp
-      })
-    }
-
-    return {
-      data: data,
-      getArticle: getArticle
-    }
-
-
-  })
 angular.module('badgeDefs', [
 ])
 
@@ -1746,6 +1722,17 @@ angular.module('badgeDefs', [
         d: data,
         load: load
       }
+    })
+angular.module('currentUser', [
+])
+
+
+
+    .factory("CurrentUser", function($http, $q, $route){
+
+
+        return {
+        }
     })
 angular.module("numFormat", [])
 
@@ -1826,30 +1813,6 @@ angular.module("numFormat", [])
 
         }
     });
-angular.module('pageService', [
-  ])
-
-
-
-  .factory("PageService", function(){
-
-    var data = {}
-    var defaultData = {}
-
-    function reset(){
-      console.log("resetting the page service data")
-      _.each(defaultData, function(v, k){
-        data[k] = v
-      })
-    }
-
-    return {
-      d: data,
-      reset: reset
-    }
-
-
-  })
 angular.module('person', [
 ])
 
@@ -1975,68 +1938,6 @@ angular.module('person', [
             }
         }
     })
-angular.module('profileService', [
-  ])
-
-
-
-  .factory("ProfileService", function($http,
-                                      $timeout,
-                                      $location){
-
-    var data = {
-      profile: {
-        articles:[]
-      }
-    }
-
-    function profileStillLoading(){
-      console.log("testing if profile still loading", data.profile.articles)
-      return _.any(data.profile.articles, function(article){
-        return _.isNull(article.percentile)
-      })
-    }
-
-    function getProfile(slug){
-      var url = "/profile/" + slug
-      console.log("getting profile for", slug)
-      return $http.get(url).success(function(resp){
-        data.profile = resp
-
-        if (profileStillLoading()){
-          $timeout(function(){
-            getProfile(slug)
-          }, 1000)
-        }
-
-      })
-    }
-
-    return {
-      data: data,
-      foo: function(){
-        return "i am in the profile service"
-      },
-
-      createProfile: function(name, pmids, coreJournals) {
-        console.log("i am making a profile:", name, pmids)
-        var postData = {
-          name: name,
-          pmids: pmids,
-          core_journals: coreJournals
-        }
-        $http.post("/profile",postData)
-          .success(function(resp, status, headers){
-            console.log("yay got a resp from /profile!", resp)
-            $location.path("/u/" + resp.slug)
-          })
-      },
-
-      getProfile: getProfile
-    }
-
-
-  })
 angular.module('settingsPage', [
     'ngRoute'
 ])

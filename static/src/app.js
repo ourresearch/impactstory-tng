@@ -1,6 +1,6 @@
 angular.module('app', [
-    // external libs
 
+    // external libs
     'ngRoute',
     'ngMessages',
     'satellizer',
@@ -9,20 +9,23 @@ angular.module('app', [
     'ngSanitize',
     'ngMaterial',
 
-    'templates.app',  // this is how it accesses the cached templates in ti.js
+    // this is how it accesses the cached templates in ti.js
+    'templates.app',
 
-    'staticPages',
-
+    // services
+    'currentUser',
     'badgeDefs',
+    'numFormat',
+    'person',
+
+    // pages
+    'staticPages',
     'productPage', // MUST be above personPage because personPage route is greedy for /p/
     'personPage',
     'settingsPage',
     'badgePage',
-    'aboutPages',
-    'wizard',
-    'auth',
+    'aboutPages'
 
-    'numFormat'
 
 ]);
 
