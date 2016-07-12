@@ -14,6 +14,7 @@ angular.module('app', [
 
     // services
     'currentUser',
+    'auth',
     'badgeDefs',
     'numFormat',
     'person',
