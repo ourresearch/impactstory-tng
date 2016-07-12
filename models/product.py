@@ -363,6 +363,7 @@ class Product(db.Model):
                     if "author" in post:
                         if "id_on_source" in post["author"]:
                             post_dict["twitter_handle"] = post["author"]["id_on_source"]
+                            post_dict["attribution"] = post["author"]["id_on_source"]
                         if "followers" in post["author"]:
                             post_dict["followers"] = post["author"]["followers"]
 
@@ -843,23 +844,6 @@ class Product(db.Model):
             except (KeyError, TypeError):
                 pass
         return names
-
-    @property
-    def follower_count_for_each_tweet(self):
-        follower_counts = []
-        try:
-            twitter_posts = self.altmetric_api_raw["posts"]["twitter"]
-        except (KeyError, TypeError):
-            return {}
-
-        for post in twitter_posts:
-            try:
-                poster = post["author"]["id_on_source"]
-                followers = post["author"]["followers"]
-                follower_counts.append(followers)
-            except (KeyError, TypeError):
-                pass
-        return follower_counts
 
     @property
     def twitter_posters_with_followers(self):
