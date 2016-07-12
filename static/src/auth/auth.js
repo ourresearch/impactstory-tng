@@ -1,8 +1,16 @@
+console.log("loading")
 angular.module('auth', [
     'ngRoute',
     'satellizer',
     'ngMessages'
 ])
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/oauth/:intent/:source', {
+            templateUrl: "auth/oauth.tpl.html",
+            controller: "OauthCtrl"
+        })
+    })
 
     .config(function ($routeProvider) {
         $routeProvider.when('/orcid-login', {
@@ -17,6 +25,53 @@ angular.module('auth', [
             controller: "TwitterLoginCtrl"
         })
     })
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/login', {
+            templateUrl: "auth/login.tpl.html",
+            controller: "LoginCtrl"
+        })
+    })
+
+
+    .controller("LoginCtrl", function($scope, $location, $http, $auth){
+        console.log("LoginCtrl is running!")
+        $scope.loginTwitter = function(){
+            console.log("login twitter")
+        }
+        $scope.loginOrcid = function(){
+            console.log("login orcid")
+        }
+
+    })
+
+    .controller("OauthCtrl", function($scope, $routeParams, $location, $http, $auth){
+
+
+        // REGISTER WITH TWITTER
+        if ($routeParams.intent=='register' && $routeParams.source=='twitter'){
+            console.log("register with twitter")
+        }
+
+
+        // CONNECT ORCID
+        if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
+            console.log("connect orcid")
+        }
+
+        // LOG IN WITH TWITTER
+        if ($routeParams.intent=='login' && $routeParams.source=='twitter'){
+            console.log("log in with twitter")
+        }
+
+
+        // LOG IN WITH ORCID
+        if ($routeParams.intent=='login' && $routeParams.source=='orcid'){
+            console.log("log in with orcid")
+        }
+
+    })
+
 
     .controller("TwitterLoginCtrl", function($scope, $location, $http, $auth){
         console.log("twitter page controller is running!")
@@ -36,9 +91,9 @@ angular.module('auth', [
             verifier: verifier
         }
 
-        $http.post("api/auth/twitter/register", requestObj)
+        $http.post("api/auth/register/twitter", requestObj)
             .success(function(resp){
-                console.log("logged in a twitter user", resp)
+                console.log("registered a new user with twitter", resp)
                 $auth.setToken(resp.token)
                 $location.url("wizard/welcome")
                 //var payload = $auth.getPayload()
@@ -50,9 +105,6 @@ angular.module('auth', [
               //console.log("problem getting token back from server!", resp)
               //  $location.url("/")
             })
-
-
-
     })
 
 
@@ -75,13 +127,13 @@ angular.module('auth', [
 
         // set an orcid for the current user
         if ($auth.isAuthenticated()){
-            $http.post("api/me/orcid_id", requestObj)
+            $http.post("api/me/orcid", requestObj)
                 .success(function(resp){
                     console.log("we successfully added an ORCID!", resp)
-                    var payload = $auth.getPayload()
-                    if ($auth.getPayload().num_works > 0) {
+                    $auth.setToken(resp.token)
+                    if ($auth.getPayload().num_products > 0) {
                         console.log("they have some works, good! redirect to your-publications")
-                        $location.url("wizard/your-publications")
+                        $location.url("wizard/my-publications")
                     }
                     else {
                         console.log("they have no works. redirect to page to add-publications")
@@ -104,22 +156,6 @@ angular.module('auth', [
         else {
 
         }
-
-
-
-        //$http.post("api/auth/orcid", requestObj)
-        //    .success(function(resp){
-        //        console.log("got a token back from ye server", resp)
-        //        $auth.setToken(resp.token)
-        //        var payload = $auth.getPayload()
-        //
-        //        $rootScope.sendCurrentUserToIntercom()
-        //        $location.url("u/" + payload.sub)
-        //    })
-        //    .error(function(resp){
-        //      console.log("problem getting token back from server!", resp)
-        //        $location.url("/")
-        //    })
 
     })
 

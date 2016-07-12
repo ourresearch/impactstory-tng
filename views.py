@@ -3,10 +3,11 @@ from app import db
 
 from models.person import Person
 from models.person import make_person
-from models.person import set_person_orcid
+from models.person import refresh_orcid_info
+from models.person import connect_orcid
 from models.person import set_person_claimed_at
 from models.person import refresh_profile
-from models.person import refresh_profile_from_id
+from models.person import refresh_person
 from models.person import delete_person
 from models.product import get_all_products
 from models.refset import num_people_in_db
@@ -179,9 +180,9 @@ def login_required(f):
             response.status_code = 401
             return response
 
-        g.my_orcid_id = payload['orcid_id']
-        g.my_twitter_screen_name = payload['twitter_screen_name']
-        g.my_id = payload["id"]
+        g.my_orcid_id = payload.get('orcid_id', None)
+        g.my_twitter_screen_name = payload.get('twitter_screen_name', None)
+        g.my_id = payload.get("id", None)
 
         return f(*args, **kwargs)
 
@@ -226,6 +227,8 @@ def profile_endpoint(orcid_id):
         print u"returning 404: orcid profile {} does not exist".format(orcid_id)
         abort_json(404, "That ORCID profile doesn't exist")
     return json_resp(my_person.to_dict())
+
+
 
 
 @app.route("/api/person/twitter_screen_name/<screen_name>")
@@ -332,61 +335,108 @@ def donation_endpoint():
 @app.route('/api/me', methods=["GET", "DELETE", "POST"])
 @login_required
 def me():
-    if request.method == "GET":
-        my_person = Person.query.filter_by(id=g.my_id).first()
-        # @todo should return a token
-        return jsonify(my_person.to_dict())
-    elif request.method == "DELETE":
+    my_person = Person.query.filter_by(id=g.my_id).first()
 
+    if request.method == "GET":
+        return jsonify({"token": my_person.get_token()})
+
+    elif request.method == "POST":
+        refreshed_person = refresh_person(my_person)
+        return jsonify({"token": refreshed_person.get_token()})
+
+    elif request.method == "DELETE":
         delete_person(id=g.my_id)
         return jsonify({"msg": "Alas, poor Yorick! I knew him, Horatio"})
 
-    elif request.method == "POST":
-        if request.json.get("action", None) == "pull_from_orcid":
-            refresh_profile_from_id(g.my_id)
-            # @todo should return a token
-            return jsonify({"msg": "pull successful"})
 
 
-@app.route("/api/auth/orcid/login", methods=["POST"])
-def orcid_login():
-    pass
 
-
-@app.route("/api/me/orcid_id", methods=["POST"])
-@login_required
-def set_my_orcid():
+def get_orcid_id_this_user_owns(auth_code, redirect_uri):
     access_token_url = 'https://pub.orcid.org/oauth/token'
     payload = dict(client_id="APP-PF0PDMP7P297AU8S",
-                   redirect_uri=request.json['redirectUri'],
+                   redirect_uri=redirect_uri,
                    client_secret=os.getenv('ORCID_CLIENT_SECRET'),
-                   code=request.json['code'],
+                   code=auth_code,
                    grant_type='authorization_code')
 
     # First we exchange authorization code for access token;
     # the access token has the ORCID ID, which is actually all we need here.
     r = requests.post(access_token_url, data=payload)
     try:
-        my_orcid_id = r.json()["orcid"]
+        return r.json()["orcid"]
     except KeyError:
-        print u"Aborting api/me/orcid_id; got no 'orcid' key back from ORCID! Got this: {}".format(r.json())
+        print u"bad news: got no 'orcid' key back from ORCID! Got this: {}".format(r.json())
+        return None
+
+
+
+
+@app.route("/api/auth/login/orcid", methods=["POST"])
+def login_with_orcid():
+    my_orcid_id = get_orcid_id_this_user_owns(
+        request.json['code'],
+        request.json['redirectUri']
+    )
+    if not my_orcid_id:
+        abort_json(401, "Bad ORCID response; the auth code you sent is probably expired.")
+
+    my_person = Person.query.filter_by(orcid_id=my_orcid_id).first()
+    return jsonify({"token": my_person.get_token()})
+
+
+
+
+@app.route("/api/me/orcid", methods=["POST"])
+@login_required
+def manage_my_orcid():
+    my_person = Person.query.filter_by(id=g.my_id).first()
+
+    # this person already has an orcid id, so we're just going to refresh all their orcid info
+    if my_person.orcid_id:
+        modified_person = refresh_orcid_info(my_person)
+
+    # connect orcid
+    else:
+        orcid_id = get_orcid_id_this_user_owns(
+            request.json['code'],
+            request.json['redirectUri']
+        )
+        if not orcid_id:
+            abort_json(500, "Invalid JSON return from ORCID during OAuth.")
+
+        modified_person = connect_orcid(my_person, orcid_id)
+
+    token = modified_person.get_token()
+    return jsonify({"token": token, "num_products": modified_person.num_products})
+
+
+
+
+
+
+@app.route("/api/me/orcid/oauth_code/<oauth_code>", methods=["POST"])
+@login_required
+def connect_orcid_using_oauth_code(oauth_code):
+    my_person = Person.query.filter_by(id=g.my_id).first()
+    orcid_id = get_orcid_id_this_user_owns(oauth_code, request.json['redirectUri'])
+    if not orcid_id:
         abort_json(500, "Invalid JSON return from ORCID during OAuth.")
 
-    # now we get the person and set the orcid id for them
-    my_person = Person.query.filter_by(id=g.my_id).first()
-    modified_person = set_person_orcid(my_person, my_orcid_id)
-
-    token = my_person.get_token()
-    return jsonify({"token": token})
+    modified_person = connect_orcid(my_person, orcid_id)
+    token = modified_person.get_token()
+    return jsonify({"token": token, "num_products": modified_person.num_products})
 
 
 
 
-@app.route("/api/auth/twitter/login", methods=["POST"])
-def login_twitter_user():
+
+@app.route("/api/auth/login/twitter", methods=["POST"])
+def login_with_twitter():
     pass
 
-@app.route("/api/auth/twitter/register", methods=["POST"])
+
+
+@app.route("/api/auth/register/twitter", methods=["POST"])
 def register_twitter_user():
     access_token_url = 'https://api.twitter.com/oauth/access_token'
 
@@ -401,11 +451,15 @@ def register_twitter_user():
     print u"got back twitter_creds from twitter {}".format(twitter_creds)
 
     my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
+    is_new_profile = False
+
     if my_person is None:
         my_person = make_person(twitter_creds)
+        is_new_profile = True
 
     token = my_person.get_token()
-    return jsonify({"token": token})
+    return jsonify({"token": token, "is_new_profile": is_new_profile})
+
 
 
 # doesn't save anything in database, just proxy for calling twitter.com
