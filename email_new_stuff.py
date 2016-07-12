@@ -107,11 +107,10 @@ if __name__ == "__main__":
         print u"emailing because run_now override"
         run_now = True
     else:
+        day_of_week_for_emails = "Tuesday"
         my_date = date.today()
         my_day_of_week = calendar.day_name[my_date.weekday()]
-        day_of_week_for_emails = "Tuesday"
-        if my_day_of_week != day_of_week_for_emails:
-            run_now = False
+        run_now = (my_day_of_week == day_of_week_for_emails)
 
     if run_now:
         update.run_update(parsed_args)
