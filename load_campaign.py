@@ -4,6 +4,7 @@ from util import elapsed
 from util import safe_commit
 import argparse
 
+from models.person import add_or_overwrite_person_from_orcid_id
 from models.person import make_person
 from models.person import Person
 from models.orcid import clean_orcid

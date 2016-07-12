@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Impactstory</title>
+    <!--style type="text/css">
+      {{ css }}
+   </style-->
+    <!--link rel="stylesheet" href="https://impactstory.org/static/less.emails/css/new-metrics.css"/-->
+</head>
+<body>
+
+<p>
+    Congrats, your research has attracted new online attention this week!
+</p>
+
+<ul class="new-metrics">
+    {% for source, count in profile.post_count_to_email %}
+        <li>
+            <strong>{{ count }}</strong> new {{ source }} events
+        </li>
+    {% endfor %}
+</ul>
+
+<p>
+    Check out your Impactstory profile to see details,
+    along with the boosts they've given your Achievements:
+</p>
+<p>
+    <strong>
+        <a href='https://impactstory.org/u/{{ profile.orcid_id }}/activity'>View my profile</a>
+    </strong>
+</p>
+</body>
+</html>
+

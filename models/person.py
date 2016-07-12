@@ -20,6 +20,8 @@ from models.orcid import make_and_populate_orcid_profile
 from models.source import sources_metadata
 from models.source import Source
 from models.refset import Refset
+from models.emailer import send
+from models.email import save_email
 from models.country import country_info
 from models.top_news import top_news_titles
 from util import elapsed
