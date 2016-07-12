@@ -193,6 +193,7 @@ angular.module('app', [
 
     // services
     'currentUser',
+    'auth',
     'badgeDefs',
     'numFormat',
     'person',
@@ -694,11 +695,19 @@ angular.module('app').controller('AppCtrl', function(
 
 
 
+console.log("loading")
 angular.module('auth', [
     'ngRoute',
     'satellizer',
     'ngMessages'
 ])
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/oauth/:intent/:source', {
+            templateUrl: "auth/oauth.tpl.html",
+            controller: "OauthCtrl"
+        })
+    })
 
     .config(function ($routeProvider) {
         $routeProvider.when('/orcid-login', {
@@ -729,7 +738,33 @@ angular.module('auth', [
         }
         $scope.loginOrcid = function(){
             console.log("login orcid")
-            $http.post("api/auth/login/orcid")
+        }
+
+    })
+
+    .controller("OauthCtrl", function($scope, $routeParams, $location, $http, $auth){
+
+
+        // REGISTER WITH TWITTER
+        if ($routeParams.intent=='register' && $routeParams.source=='twitter'){
+            console.log("register with twitter")
+        }
+
+
+        // CONNECT ORCID
+        if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
+            console.log("connect orcid")
+        }
+
+        // LOG IN WITH TWITTER
+        if ($routeParams.intent=='login' && $routeParams.source=='twitter'){
+            console.log("log in with twitter")
+        }
+
+
+        // LOG IN WITH ORCID
+        if ($routeParams.intent=='login' && $routeParams.source=='orcid'){
+            console.log("log in with orcid")
         }
 
     })
@@ -1728,9 +1763,7 @@ angular.module('currentUser', [
 
 
 
-    .factory("CurrentUser", function($http, $q, $route){
-
-
+    .factory("CurrentUser", function($auth, $http, $q, $route){
         return {
         }
     })
@@ -2356,7 +2389,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/orcid-connect.tpl.html', 'wizard/twitter-register.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/orcid-connect.tpl.html', 'wizard/twitter-register.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -2756,6 +2789,15 @@ angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templ
     "            Log in with ORCID\n" +
     "        </div>\n" +
     "    </div>\n" +
+    "</div>");
+}]);
+
+angular.module("auth/oauth.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("auth/oauth.tpl.html",
+    "<div class=\"page oauth-page\">\n" +
+    "    <h2>OAuth page!</h2>\n" +
+    "    <p>doing login stuff now....</p>\n" +
+    "\n" +
     "</div>");
 }]);
 

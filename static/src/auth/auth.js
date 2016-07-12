@@ -1,8 +1,16 @@
+console.log("loading")
 angular.module('auth', [
     'ngRoute',
     'satellizer',
     'ngMessages'
 ])
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/oauth/:intent/:source', {
+            templateUrl: "auth/oauth.tpl.html",
+            controller: "OauthCtrl"
+        })
+    })
 
     .config(function ($routeProvider) {
         $routeProvider.when('/orcid-login', {
@@ -33,7 +41,33 @@ angular.module('auth', [
         }
         $scope.loginOrcid = function(){
             console.log("login orcid")
-            $http.post("api/auth/login/orcid")
+        }
+
+    })
+
+    .controller("OauthCtrl", function($scope, $routeParams, $location, $http, $auth){
+
+
+        // REGISTER WITH TWITTER
+        if ($routeParams.intent=='register' && $routeParams.source=='twitter'){
+            console.log("register with twitter")
+        }
+
+
+        // CONNECT ORCID
+        if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
+            console.log("connect orcid")
+        }
+
+        // LOG IN WITH TWITTER
+        if ($routeParams.intent=='login' && $routeParams.source=='twitter'){
+            console.log("log in with twitter")
+        }
+
+
+        // LOG IN WITH ORCID
+        if ($routeParams.intent=='login' && $routeParams.source=='orcid'){
+            console.log("log in with orcid")
         }
 
     })
