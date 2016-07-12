@@ -2703,7 +2703,6 @@ angular.module("helps.tpl.html", []).run(["$templateCache", function($templateCa
     "</p>\n" +
     "<p class=\"def fun\" ng-show=\"subscoreName=='fun'\">\n" +
     "    <strong>Fun</strong> achievements are Not So Serious.\n" +
-    "\n" +
     "</p>");
 }]);
 
