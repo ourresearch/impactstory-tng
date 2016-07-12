@@ -276,9 +276,9 @@
                                <a  href="{{ tweet.url }}" class="post-date">
                                    {{ moment(tweet.posted_on).format('MMM Do') }}
                                </a>
-                               <span class="by">by</span>
-                               <span class="name">{{ tweet.attribution }}</span>
-                               <span class="followers">
+                               <span class="by"> by</span>
+                               <span class="name">{{ tweet.twitter_handle }}</span>
+                               <span class="followers" ng-if="tweet.followers">
                                    <span class="val">{{ numFormat.short(tweet.followers) }}</span> followers
                                </span>
                            </div>

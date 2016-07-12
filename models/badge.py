@@ -631,7 +631,7 @@ class hot_streak(BadgeAssigner):
     levels = [
         BadgeLevel(1, threshold=1),
     ]
-    context = u"That's an sharing streak matched by only {in_the_top_percentile}% of scholars."
+    context = u"That's a sharing streak matched by only {in_the_top_percentile}% of scholars."
 
     def decide_if_assigned_threshold(self, person, threshold):
         streak = True
