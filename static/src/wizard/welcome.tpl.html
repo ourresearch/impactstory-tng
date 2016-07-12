@@ -1,7 +1,10 @@
 <div class="page wizard link-your-orcid">
     <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>
-    <p>here's ORCID and here's what it is</p>
-    <p>do you have an ORCID?</p>
+    <p>
+        Impactstory is built on <a href="http://orcid.org">ORCID</a>,
+        a global nonprofit registry of researchers and their publications.
+    </p>
+    <p>Do you have an ORCID ID?</p>
     <div class="do-you-have-an-orcid" ng-show="!hasOrcid">
         <span class="have-orcid-yes btn btn-lg btn-success"
               ng-click="doYouHaveAnOrcid('yes')">
@@ -28,7 +31,7 @@
                 When you're done, you'll be redirected back here, and will be
                 nearly done creating your profile.
             </div>
-            <span class="btn btn-primary btn-lg" ng-click="orcidAuthenticate('login')">
+            <span class="btn btn-primary btn-lg" ng-click="orcidAuthenticate('login', 'connect')">
                 Sign in to my ORCID
             </span>
         </div>
@@ -38,7 +41,7 @@
                 When you're done, you'll be redirected back here, and will be
                 nearly done creating your profile.
             </div>
-            <span class="btn btn-primary btn-lg" ng-click="orcidAuthenticate('register')">
+            <span class="btn btn-primary btn-lg" ng-click="orcidAuthenticate('register', 'connect')">
                 Create my ORCID
             </span>
         </div>
@@ -49,7 +52,7 @@
                 When you're done, you'll be redirected back here, and will be
                 nearly done creating your profile.
             </div>
-            <span class="btn btn-primary btn-lg" ng-click="orcidAuthenticate('register')">
+            <span class="btn btn-primary btn-lg" ng-click="orcidAuthenticate('register', 'connect')">
                 Try registering for an ORCID
             </span>
         </div>

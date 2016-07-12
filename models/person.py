@@ -129,10 +129,14 @@ def make_person(twitter_creds, high_priority=False):
     return my_person
 
 
-
-def set_person_orcid(my_person, orcid_id):
-    print u"we are setting an orcid_id for a person", my_person.full_name, orcid_id
+def connect_orcid(my_person, orcid_id):
+    print u"adding a brand new orcid_id for {}: {}".format(my_person.full_name, orcid_id)
     my_person.orcid_id = orcid_id
+    return refresh_orcid_info(my_person)
+
+def refresh_orcid_info(my_person):
+    print u"refreshing all orcid info for {}".format(my_person.orcid_id)
+
     my_person.set_api_raw_from_orcid()
     my_person.set_from_orcid()
     my_person.set_num_products()
@@ -140,22 +144,35 @@ def set_person_orcid(my_person, orcid_id):
     db.session.merge(my_person)
     commit_success = safe_commit(db)
     if not commit_success:
-        print u"COMMIT fail on {}".format(orcid_id)
+        print u"COMMIT fail on {}".format(my_person.orcid_id)
     return my_person
 
+
 # this should be refactored with refresh_profile().  doing it this way is dumb.
-def refresh_profile_from_id(id, high_priority=False):
-    my_person = Person.query.filter_by(id=id).first()
+def refresh_person(my_person, high_priority=False):
+    print u"refreshing {}".format(my_person.orcid_id)
+
+    # for testing on jason's local, so it doesn't have to do a real refresh
+    # sleep(5)
+    # return my_person
+
     my_person.refresh(high_priority=high_priority)
     db.session.merge(my_person)
     commit_success = safe_commit(db)
     if not commit_success:
-        print u"COMMIT fail on {}".format(orcid_id)
+        print u"COMMIT fail on {}".format(my_person.orcid_id)
     return my_person
 
 
 def refresh_profile(orcid_id, high_priority=False):
+    print u"refreshing {}".format(orcid_id)
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
+
+    # for testing on jason's local, so it doesn't have to do a real refresh
+    # sleep(5)
+    # return my_person
+
+
     my_person.refresh(high_priority=high_priority)
     db.session.merge(my_person)
     commit_success = safe_commit(db)
@@ -944,7 +961,7 @@ class Person(db.Model):
 
         # for testing
         # payload["orcid_id"] = None
-        # payload["num_works"] = 0
+        # payload["num_products"] = 0
 
 
 

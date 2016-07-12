@@ -1,18 +1,18 @@
 <div class="page wizard add-publications">
 
-    <h2>your publications</h2>
+    <h2>my publications</h2>
     <div>
-        Nice job, we found {{ auth.getPayload().num_works }} publications for you.
+        Nice job, we found {{ auth.getPayload().num_products }} publications for you.
         Does that look good?
     </div>
-    <div class="actions">
-        <a href="u/{{ auth.getPayload().orcid_id }}" class="btn btn-lg btn-success">
+    <div class="actions" ng-hide="actionSelected">
+        <span ng-click="finishProfile()" class="btn btn-lg btn-success">
             <i class="fa fa-check"></i>
             <span class="text">
                 <span class="main">Close enough</span>
                 <span class="extra">I can always add more later</span>
             </span>
-        </a>
+        </span>
         <a href="wizard/add-publications" class="btn btn-lg btn-danger">
             <i class="fa fa-times"></i>
             <span class="text">
@@ -20,5 +20,10 @@
                 <span class="extra">Let's fix this now.</span>
             </span>
         </a>
+    </div>
+    <div class="loading" ng-show="actionSelected">
+        <i class="fa fa-refresh fa-spin"></i>
+        <span class="text">Great! Then we'll build your profile right now.
+            It'll take a few seconds&hellip;</span>
     </div>
 </div>
