@@ -64,7 +64,7 @@ def load_campaign(filename, campaign=None, limit=None):
             print u"row {}, already have person {}, skipping".format(row_num, orcid_id)
         else:
             print u"row {}, making person {}".format(row_num, orcid_id)
-            my_person = make_person(orcid_id, high_priority=False)
+            my_person = make_person(orcid_id, store_in_db=True)
             my_person.campaign = campaign
             my_person.email = email
             my_person.twitter = twitter

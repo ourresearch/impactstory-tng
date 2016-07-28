@@ -209,7 +209,7 @@ def profile_endpoint(orcid_id):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
     if not my_person:
         try:
-            my_person = make_person(orcid_id, high_priority=True)
+            my_person = make_person(orcid_id, store_in_db=False)
         except (OrcidDoesNotExist, NoOrcidException):
             print u"returning 404: orcid profile {} does not exist".format(orcid_id)
             abort_json(404, "That ORCID profile doesn't exist")
@@ -368,7 +368,7 @@ def orcid_auth():
         token = my_person.get_token()
     except AttributeError:  # my_person is None. So make a new user
 
-        my_person = make_person(my_orcid_id, high_priority=True)
+        my_person = make_person(my_orcid_id, store_in_db=True)
         token = my_person.get_token()
 
     set_person_claimed_at(my_person)

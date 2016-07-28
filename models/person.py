@@ -84,15 +84,17 @@ def set_person_claimed_at(my_person):
     if not commit_success:
         print u"COMMIT fail on {}".format(my_person.orcid_id)
 
-def make_person(dirty_orcid_id, high_priority=False):
+def make_person(dirty_orcid_id, store_in_db=True):
     orcid_id = clean_orcid(dirty_orcid_id)
     my_person = Person(orcid_id=orcid_id)
-    db.session.add(my_person)
     print u"\nin make_person: made new person for {}".format(orcid_id)
-    my_person.refresh(high_priority=high_priority)
-    commit_success = safe_commit(db)
-    if not commit_success:
-        print u"COMMIT fail on {}".format(orcid_id)
+    my_person.refresh(high_priority=True)
+
+    if store_in_db:
+        db.session.add(my_person)
+        commit_success = safe_commit(db)
+        if not commit_success:
+            print u"COMMIT fail on {}".format(orcid_id)
 
     if my_person.invalid_orcid:
         raise OrcidDoesNotExist
