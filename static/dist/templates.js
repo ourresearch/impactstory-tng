@@ -22,7 +22,7 @@ angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", f
     "                    <i class=\"fa fa-trophy\"></i>\n" +
     "                    Gold level\n" +
     "                </td>\n" +
-    "                <td>Top 10% of researchers </td>\n" +
+    "                <td>Top 10% of researchers</td>\n" +
     "            </tr>\n" +
     "            <tr>\n" +
     "                <td class=\"silver badge-name\">\n" +
@@ -726,7 +726,6 @@ angular.module("helps.tpl.html", []).run(["$templateCache", function($templateCa
     "</p>\n" +
     "<p class=\"def fun\" ng-show=\"subscoreName=='fun'\">\n" +
     "    <strong>Fun</strong> achievements are Not So Serious.\n" +
-    "\n" +
     "</p>");
 }]);
 

@@ -709,19 +709,6 @@ angular.module('auth', [
         })
     })
 
-    .config(function ($routeProvider) {
-        $routeProvider.when('/orcid-login', {
-            templateUrl: "auth/orcid-login.tpl.html",
-            controller: "OrcidLoginCtrl"
-        })
-    })
-
-    .config(function ($routeProvider) {
-        $routeProvider.when('/twitter-login', {
-            templateUrl: "auth/twitter-login.tpl.html",
-            controller: "TwitterLoginCtrl"
-        })
-    })
 
     .config(function ($routeProvider) {
         $routeProvider.when('/login', {
@@ -742,24 +729,55 @@ angular.module('auth', [
 
     })
 
-    .controller("OauthCtrl", function($scope, $routeParams, $location, $http, $auth){
+    .controller("OauthCtrl", function($scope, $routeParams, $location, $http, CurrentUser){
+        var requestObj = $location.search()
+        if (_.isEmpty(requestObj)){
+            console.log("we didn't get any codes or verifiers in the URL. aborting.")
+            $location.url("/")
+            return false
+        }
+
 
 
         // REGISTER WITH TWITTER
         if ($routeParams.intent=='register' && $routeParams.source=='twitter'){
             console.log("register with twitter")
+            $http.post("api/auth/register/twitter", requestObj)
+                .success(function(resp){
+                    console.log("registered a new user with twitter", resp)
+                    CurrentUser.load(resp.token)
+                })
+                .error(function(resp){
+                  //console.log("problem getting token back from server!", resp)
+                  //  $location.url("/")
+                })
         }
+
 
 
         // CONNECT ORCID
         if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
             console.log("connect orcid")
+            requestObj.redirectUri = $rootScope.orcidRedirectUri
+            $http.post("api/me/orcid", requestObj)
+                .success(function(resp){
+                    console.log("we successfully added an ORCID!", resp)
+                    CurrentUser.load(resp.token)
+                })
+                .error(function(resp){
+                  console.log("problem getting token back from server!", resp)
+                    //$location.url("/")
+                })
         }
+
+
 
         // LOG IN WITH TWITTER
         if ($routeParams.intent=='login' && $routeParams.source=='twitter'){
             console.log("log in with twitter")
+
         }
+
 
 
         // LOG IN WITH ORCID
@@ -770,91 +788,7 @@ angular.module('auth', [
     })
 
 
-    .controller("TwitterLoginCtrl", function($scope, $location, $http, $auth){
-        console.log("twitter page controller is running!")
 
-        var searchObject = $location.search();
-        var token = searchObject.oauth_token
-        var verifier = searchObject.oauth_verifier
-
-        if (!token || !verifier){
-            console.log("twitter didn't give oauth_verifier and a oauth_token")
-            $location.url("/")
-            return false
-        }
-
-        var requestObj = {
-            token: token,
-            verifier: verifier
-        }
-
-        $http.post("api/auth/register/twitter", requestObj)
-            .success(function(resp){
-                console.log("registered a new user with twitter", resp)
-                $auth.setToken(resp.token)
-                $location.url("wizard/welcome")
-                //var payload = $auth.getPayload()
-                //
-                //$rootScope.sendCurrentUserToIntercom()
-                //$location.url("u/" + payload.sub)
-            })
-            .error(function(resp){
-              //console.log("problem getting token back from server!", resp)
-              //  $location.url("/")
-            })
-    })
-
-
-    .controller("OrcidLoginCtrl", function ($scope, $location, $http, $auth, $rootScope, Person) {
-        console.log("ORCID login page controller is running!")
-
-
-        var searchObject = $location.search();
-        var code = searchObject.code
-        if (!code){
-            $location.path("/")
-            return false
-        }
-
-        var requestObj = {
-            code: code,
-            redirectUri: $rootScope.orcidRedirectUri
-        }
-        console.log("POSTing the request code to the server", requestObj)
-
-        // set an orcid for the current user
-        if ($auth.isAuthenticated()){
-            $http.post("api/me/orcid", requestObj)
-                .success(function(resp){
-                    console.log("we successfully added an ORCID!", resp)
-                    $auth.setToken(resp.token)
-                    if ($auth.getPayload().num_products > 0) {
-                        console.log("they have some works, good! redirect to your-publications")
-                        $location.url("wizard/my-publications")
-                    }
-                    else {
-                        console.log("they have no works. redirect to page to add-publications")
-                        $location.url("wizard/add-publications")
-
-                    }
-
-                    //$rootScope.sendCurrentUserToIntercom()
-                    //$location.url("u/" + payload.sub)
-                })
-                .error(function(resp){
-                  console.log("problem getting token back from server!", resp)
-                    //$location.url("/")
-                })
-
-
-        }
-
-        // log a user in based on their ownership of this orcid
-        else {
-
-        }
-
-    })
 
 
 
@@ -1376,7 +1310,7 @@ angular.module('personPage', [
             }
             var currentRollup = makeRollupPost()
             _.each(sortedPosts, function(post){
-                if (post.source == 'twitter'){
+                if (post.source == 'twitter'){ // this post is a tween
 
                     // we keep tweets as regular posts too
                     postsWithRollups.push(post)
@@ -1385,9 +1319,7 @@ angular.module('personPage', [
                     currentRollup.tweets.push(post)
 
                     // rollup posted_on date will be date of *first* tweet in group
-                    if (!currentRollup.posted_on){
-                        currentRollup.posted_on = post.posted_on
-                    }
+                    currentRollup.posted_on = post.posted_on
                 }
                 else {
                     postsWithRollups.push(post)
@@ -1764,7 +1696,24 @@ angular.module('currentUser', [
 
 
     .factory("CurrentUser", function($auth, $http, $q, $route){
+
+
+        var sendTokenToIntercom = function(){
+            // do send to intercom stuff
+        }
+
+        var load = function(token){
+            if (token){
+                $auth.setToken(token)
+                sendTokenToIntercom()
+            }
+            else {
+                // load the current user from the server.
+            }
+        }
+
         return {
+            load: load
         }
     })
 angular.module("numFormat", [])
@@ -2153,24 +2102,6 @@ angular.module('wizard', [
         })
     })
 
-    .config(function ($routeProvider) {
-        $routeProvider.when('/orcid-connect', {
-            templateUrl: "wizard/orcid-connect.tpl.html",
-            controller: "OrcidConnectCtrl",
-            resolve: {
-                isLoggedIn: function($rootScope){
-                    return $rootScope.isAuthenticatedPromise()
-                }
-            }
-        })
-    })
-
-    .config(function ($routeProvider) {
-        $routeProvider.when('/twitter-register', {
-            templateUrl: "wizard/twitter-register.tpl.html",
-            controller: "TwitterRegisterCtrl"
-        })
-    })
 
     .config(function ($routeProvider) {
         $routeProvider.when('/wizard/my-publications', {
@@ -2224,104 +2155,6 @@ angular.module('wizard', [
 
     })
 
-
-
-    .controller("OrcidConnectCtrl", function($scope, $location, $http, $auth, $rootScope){
-        console.log("OrcidConnectCtrl running")
-        var searchObject = $location.search();
-        var code = searchObject.code
-
-        if (!code){
-            console.log("there is no oauth code in the url. quitting.")
-            $location.path("/")
-            return false
-        }
-
-        var requestObj = {
-            redirectUri: $rootScope.orcidRedirectUri.connect
-        }
-
-        console.log("POSTing the request code to the server", requestObj)
-        $http.post("api/me/orcid/oauth_code/" + code, requestObj)
-            .success(function(resp){
-                console.log("we successfully added an ORCID!", resp)
-                $auth.setToken(resp.token)
-                if ($auth.getPayload().num_products > 0) {
-                    console.log("they have some works, good! redirect to your-publications")
-                    $location.url("wizard/my-publications")
-                }
-                else {
-                    console.log("they have no works. redirect to page to add-publications")
-                    $location.url("wizard/add-publications")
-
-                }
-
-                //$rootScope.sendCurrentUserToIntercom()
-                //$location.url("u/" + payload.sub)
-            })
-            .error(function(resp){
-              console.log("problem getting token back from server!", resp)
-                //$location.url("/")
-            })
-
-
-
-    })
-
-
-
-    .controller("TwitterRegisterCtrl", function($scope, $location, $http, $auth, $rootScope){
-        console.log("TwitterRegisterCtrl running")
-
-
-        var searchObject = $location.search();
-        var token = searchObject.oauth_token
-        var verifier = searchObject.oauth_verifier
-
-        if (!token || !verifier){
-            console.log("twitter didn't give oauth_verifier and a oauth_token")
-            $location.url("/")
-            return false
-        }
-
-        var requestObj = {
-            token: token,
-            verifier: verifier
-        }
-
-        $http.post("api/auth/register/twitter", requestObj)
-            .success(function(resp){
-                $auth.setToken(resp.token)
-                if (resp.is_new_profile){
-                    console.log("registered a new user with twitter", resp)
-                    $location.url("wizard/welcome")
-                    //$rootScope.sendCurrentUserToIntercom()
-                }
-                else {
-                    console.log("an existing impactstory user logged in with twitter, using the register button", resp)
-                    if ($auth.getPayload().orcid_id){
-                        console.log("they've got a orcid in their profile. sending them to profile page.")
-                        $location.url("u/" + $auth.getPayload().orcid_id)
-                    }
-                    else {
-                        console.log("they are logged in with twitter, but no orcid yet.")
-                        $location.url("wizard/welcome")
-                    }
-                }
-
-
-
-            })
-            .error(function(resp){
-              //console.log("problem getting token back from server!", resp)
-              //  $location.url("/")
-            })
-
-
-
-
-
-    })
 
 
     .controller("MyPublicationsCtrl", function($scope, $location, $http, $auth){
@@ -2413,7 +2246,7 @@ angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", f
     "                    <i class=\"fa fa-trophy\"></i>\n" +
     "                    Gold level\n" +
     "                </td>\n" +
-    "                <td>Top 10% of researchers </td>\n" +
+    "                <td>Top 10% of researchers</td>\n" +
     "            </tr>\n" +
     "            <tr>\n" +
     "                <td class=\"silver badge-name\">\n" +
@@ -3117,7 +2950,6 @@ angular.module("helps.tpl.html", []).run(["$templateCache", function($templateCa
     "</p>\n" +
     "<p class=\"def fun\" ng-show=\"subscoreName=='fun'\">\n" +
     "    <strong>Fun</strong> achievements are Not So Serious.\n" +
-    "\n" +
     "</p>");
 }]);
 
