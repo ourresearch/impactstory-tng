@@ -105,11 +105,6 @@ angular.module('staticPages', [
                 $location.url("/")
             })
 
-
-
-
-
-
     })
 
     .controller("LandingPageCtrl", function ($scope,
@@ -119,7 +114,10 @@ angular.module('staticPages', [
                                              $timeout) {
 
         if (customLandingPage == "opencon") {
-            console.log("customLandingPage",customLandingPage)
+            console.log("this is a custom landing page: ",customLandingPage)
+            $scope.customPageName = "opencon"
+            $rootScope.sawOpenconLandingPage = true
+
         }
 
 
