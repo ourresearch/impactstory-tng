@@ -17,11 +17,36 @@ angular.module('staticPages', [
                     }
                     else {
                         return $q.when(true)
-
                         deferred.resolve()
                     }
-
                     return deferred.promise
+                },
+                customLandingPage: function($q){
+                    return $q.when("default")
+                }
+            }
+        })
+    })
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/opencon', {
+            templateUrl: "static-pages/landing.tpl.html",
+            controller: "LandingPageCtrl",
+            resolve: {
+                isLoggedIn: function($auth, $q, $location){
+                    var deferred = $q.defer()
+                    if ($auth.isAuthenticated()){
+                        var url = "/u/" + $auth.getPayload().sub
+                        $location.path(url)
+                    }
+                    else {
+                        return $q.when(true)
+                        deferred.resolve()
+                    }
+                    return deferred.promise
+                },
+                customLandingPage: function($q){
+                    return $q.when("opencon")
                 }
             }
         })
@@ -90,7 +115,14 @@ angular.module('staticPages', [
     .controller("LandingPageCtrl", function ($scope,
                                              $mdDialog,
                                              $rootScope,
+                                             customLandingPage,
                                              $timeout) {
+
+        if (customLandingPage == "opencon") {
+            console.log("customLandingPage",customLandingPage)
+        }
+
+
         $scope.global.showBottomStuff = false;
         console.log("landing page!", $scope.global)
         $scope.global.isLandingPage = true
