@@ -315,11 +315,12 @@ angular.module('app').run(function($route,
 
         // this it temporary till we do the twitter-based signup
         if ($rootScope.sawOpenconLandingPage) {
-            intercomInfo.sawOpenconLandingPage = true
+            intercomInfo.saw_opencon_landing_page = true
         }
 
 
         console.log("sending to intercom", intercomInfo)
+
         window.Intercom("boot", intercomInfo)
     }
 
@@ -2007,6 +2008,8 @@ angular.module('staticPages', [
             console.log("this is a custom landing page: ",customLandingPage)
             $scope.customPageName = "opencon"
             $rootScope.sawOpenconLandingPage = true
+
+            //
 
         }
 
