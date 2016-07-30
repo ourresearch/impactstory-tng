@@ -118,6 +118,8 @@ angular.module('staticPages', [
             $scope.customPageName = "opencon"
             $rootScope.sawOpenconLandingPage = true
 
+            //
+
         }
 
 
