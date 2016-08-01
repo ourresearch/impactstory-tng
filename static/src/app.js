@@ -3,6 +3,7 @@ angular.module('app', [
     // external libs
     'ngRoute',
     'ngMessages',
+    'ngCookies',
     'satellizer',
 
     'ngResource',
@@ -64,6 +65,7 @@ angular.module('app').config(function ($routeProvider,
 angular.module('app').run(function($route,
                                    $rootScope,
                                    $timeout,
+                                   $cookies,
                                    $auth,
                                    $http,
                                    $location,
@@ -135,7 +137,7 @@ angular.module('app').run(function($route,
         }
 
         // this it temporary till we do the twitter-based signup
-        if ($rootScope.sawOpenconLandingPage) {
+        if ($cookies.get("sawOpenconLandingPage")) {
             intercomInfo.saw_opencon_landing_page = true
         }
 

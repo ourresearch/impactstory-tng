@@ -75,7 +75,7 @@ angular.module('staticPages', [
     })
 
 
-    .controller("LoginCtrl", function ($scope, $location, $http, $auth, $rootScope, Person) {
+    .controller("LoginCtrl", function ($scope, $cookies, $location, $http, $auth, $rootScope, Person) {
         console.log("kenny loggins page controller is running!")
 
 
@@ -91,6 +91,13 @@ angular.module('staticPages', [
             redirectUri: window.location.origin + "/login"
         }
 
+        // this it temporary till we do the twitter-based signup
+        if ($cookies.get("sawOpenconLandingPage")) {
+
+            // it's important this never gets set to false,
+            // the user user may be on a new machine. this is a gross hack.
+            requestObj.sawOpenconLandingPage = true
+        }
         $http.post("api/auth/orcid", requestObj)
             .success(function(resp){
                 console.log("got a token back from ye server", resp)
@@ -109,6 +116,7 @@ angular.module('staticPages', [
 
     .controller("LandingPageCtrl", function ($scope,
                                              $mdDialog,
+                                             $cookies,
                                              $rootScope,
                                              customLandingPage,
                                              $timeout) {
@@ -116,9 +124,7 @@ angular.module('staticPages', [
         if (customLandingPage == "opencon") {
             console.log("this is a custom landing page: ",customLandingPage)
             $scope.customPageName = "opencon"
-            $rootScope.sawOpenconLandingPage = true
-
-            //
+            $cookies.put("sawOpenconLandingPage", true)
 
         }
 
