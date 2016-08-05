@@ -103,17 +103,7 @@ angular.module('app').run(function($route,
 
     })
 
-    $rootScope.isAuthenticatedPromise = function(){
-        var deferred = $q.defer()
-        if ($auth.isAuthenticated()) {
-            deferred.resolve()
-        }
-        else {
-            console.log("user isn't logged in, so isAuthenticatedPromise() is rejecting promise.")
-            deferred.reject()
-        }
-        return deferred.promise
-    }
+
 
     $rootScope.sendCurrentUserToIntercom = function(){
         if (!$auth.isAuthenticated()){
@@ -289,74 +279,6 @@ angular.module('app').controller('AppCtrl', function(
             return genreIcons.unknown
         }
     }
-
-
-    $rootScope.twitterRedirectUri = {
-        register: window.location.origin + "/twitter-register",
-        login: window.location.origin + "/twitter-login"
-    }
-
-    // TWITTER AUTH
-    var twitterAuthenticate = function (registerOrLogin) {
-        // send the user to twitter.com to authenticate
-        // twitter will send them back to us from there.
-
-        console.log("authenticate with twitters!");
-
-        // first get the OAuth token that we use to create the twitter URL
-        // we will redirect the user too.
-        var redirectUri = $rootScope.twitterRedirectUri[registerOrLogin]
-        var baseUrlToGetOauthTokenFromOurServer = "/api/auth/twitter/request-token?redirectUri=";
-        var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
-
-        $http.get(baseUrlToGetOauthTokenFromOurServer + redirectUri).success(
-            function(resp){
-                console.log("twitter request token", resp)
-                var twitterLoginPageUrl = baseTwitterLoginPageUrl + resp.oauth_token
-                window.location = twitterLoginPageUrl
-            }
-        )
-
-    };
-    $rootScope.twitterAuthenticate = twitterAuthenticate
-    $scope.twitterAuthenticate = twitterAuthenticate
-
-
-
-
-
-    // ORCID AUTH
-
-    $rootScope.orcidRedirectUri = {
-        connect: window.location.origin + "/orcid-connect",
-        login: window.location.origin + "/orcid-login"
-    }
-
-    var orcidAuthenticate = function (showLogin, connectOrLogin) {
-        // send the user to orcid.org to authenticate
-        // twitter will send them back to us from there.
-
-        console.log("ORCID authenticate!", showLogin)
-
-        var authUrl = "https://orcid.org/oauth/authorize" +
-            "?client_id=APP-PF0PDMP7P297AU8S" +
-            "&response_type=code" +
-            "&scope=/authenticate" +
-            "&redirect_uri=" + $rootScope.orcidRedirectUri[connectOrLogin]
-
-        if (showLogin == "register"){
-            // will show the signup screen
-        }
-        else if (showLogin == "login") {
-            // show the login screen (defaults to this)
-            authUrl += "&show_login=true"
-        }
-
-        window.location = authUrl
-        return true
-    }
-    $rootScope.orcidAuthenticate = orcidAuthenticate
-    $scope.orcidAuthenticate = orcidAuthenticate
 
 
 

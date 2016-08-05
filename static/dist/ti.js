@@ -282,17 +282,7 @@ angular.module('app').run(function($route,
 
     })
 
-    $rootScope.isAuthenticatedPromise = function(){
-        var deferred = $q.defer()
-        if ($auth.isAuthenticated()) {
-            deferred.resolve()
-        }
-        else {
-            console.log("user isn't logged in, so isAuthenticatedPromise() is rejecting promise.")
-            deferred.reject()
-        }
-        return deferred.promise
-    }
+
 
     $rootScope.sendCurrentUserToIntercom = function(){
         if (!$auth.isAuthenticated()){
@@ -470,74 +460,6 @@ angular.module('app').controller('AppCtrl', function(
     }
 
 
-    $rootScope.twitterRedirectUri = {
-        register: window.location.origin + "/twitter-register",
-        login: window.location.origin + "/twitter-login"
-    }
-
-    // TWITTER AUTH
-    var twitterAuthenticate = function (registerOrLogin) {
-        // send the user to twitter.com to authenticate
-        // twitter will send them back to us from there.
-
-        console.log("authenticate with twitters!");
-
-        // first get the OAuth token that we use to create the twitter URL
-        // we will redirect the user too.
-        var redirectUri = $rootScope.twitterRedirectUri[registerOrLogin]
-        var baseUrlToGetOauthTokenFromOurServer = "/api/auth/twitter/request-token?redirectUri=";
-        var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
-
-        $http.get(baseUrlToGetOauthTokenFromOurServer + redirectUri).success(
-            function(resp){
-                console.log("twitter request token", resp)
-                var twitterLoginPageUrl = baseTwitterLoginPageUrl + resp.oauth_token
-                window.location = twitterLoginPageUrl
-            }
-        )
-
-    };
-    $rootScope.twitterAuthenticate = twitterAuthenticate
-    $scope.twitterAuthenticate = twitterAuthenticate
-
-
-
-
-
-    // ORCID AUTH
-
-    $rootScope.orcidRedirectUri = {
-        connect: window.location.origin + "/orcid-connect",
-        login: window.location.origin + "/orcid-login"
-    }
-
-    var orcidAuthenticate = function (showLogin, connectOrLogin) {
-        // send the user to orcid.org to authenticate
-        // twitter will send them back to us from there.
-
-        console.log("ORCID authenticate!", showLogin)
-
-        var authUrl = "https://orcid.org/oauth/authorize" +
-            "?client_id=APP-PF0PDMP7P297AU8S" +
-            "&response_type=code" +
-            "&scope=/authenticate" +
-            "&redirect_uri=" + $rootScope.orcidRedirectUri[connectOrLogin]
-
-        if (showLogin == "register"){
-            // will show the signup screen
-        }
-        else if (showLogin == "login") {
-            // show the login screen (defaults to this)
-            authUrl += "&show_login=true"
-        }
-
-        window.location = authUrl
-        return true
-    }
-    $rootScope.orcidAuthenticate = orcidAuthenticate
-    $scope.orcidAuthenticate = orcidAuthenticate
-
-
 
     var showAlert = function(msgText, titleText, okText){
         if (!okText){
@@ -619,7 +541,7 @@ angular.module('app').controller('AppCtrl', function(
         stripeHandler.open({
           name: 'Impactstory donation',
           description: "We're a US 501(c)3",
-          amount: cents 
+          amount: cents
         });
     }
 
@@ -741,9 +663,10 @@ angular.module('auth', [
             return false
         }
 
+        // todo i think we need to delete the twitter-register.tpl.html stuff in /wizard
 
 
-        // REGISTER WITH TWITTER
+        // REGISTERING WITH TWITTER
         if ($routeParams.intent=='register' && $routeParams.source=='twitter'){
             console.log("register with twitter")
             $http.post("api/auth/register/twitter", requestObj)
@@ -759,7 +682,7 @@ angular.module('auth', [
 
 
 
-        // CONNECT ORCID
+        // CONNECTING ORCID
         if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
             console.log("connect orcid")
             requestObj.redirectUri = $rootScope.orcidRedirectUri
@@ -776,7 +699,7 @@ angular.module('auth', [
 
 
 
-        // LOG IN WITH TWITTER
+        // LOGGING IN WITH TWITTER
         if ($routeParams.intent=='login' && $routeParams.source=='twitter'){
             console.log("log in with twitter")
 
@@ -784,7 +707,7 @@ angular.module('auth', [
 
 
 
-        // LOG IN WITH ORCID
+        // LOGGING IN WITH ORCID
         if ($routeParams.intent=='login' && $routeParams.source=='orcid'){
             console.log("log in with orcid")
         }
@@ -1701,10 +1624,80 @@ angular.module('currentUser', [
 
     .factory("CurrentUser", function($auth, $http, $q, $route){
 
+        var oauthRedirectUri = {
+            orcid: {
+                connect: window.location.origin + "/orcid-connect",
+                login: window.location.origin + "/orcid-login"
+            },
+            twitter: {
+                register: window.location.origin + "/twitter-register",
+                login: window.location.origin + "/twitter-login"
+            }
+        }
 
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
+
+        var isAuthenticatedPromise = function(){
+            var deferred = $q.defer()
+            if ($auth.isAuthenticated()) {
+                deferred.resolve()
+            }
+            else {
+                console.log("user isn't logged in, so isAuthenticatedPromise() is rejecting promise.")
+                deferred.reject()
+            }
+            return deferred.promise
+        }
+
+
+        var twitterAuthenticate = function (registerOrLogin) {
+            // send the user to twitter.com to authenticate
+            // twitter will send them back to us from there.
+
+            console.log("authenticate with twitters!");
+
+            // first ask our server to get the OAuth token that we use to create the
+            // twitter URL that we will redirect the user too.
+            var redirectUri = oauthRedirectUri.twitter[registerOrLogin]
+            var baseUrlToGetOauthTokenFromOurServer = "/api/auth/twitter/request-token?redirectUri=";
+            var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
+
+            $http.get(baseUrlToGetOauthTokenFromOurServer + redirectUri).success(
+                function(resp){
+                    console.log("twitter request token", resp)
+                    var twitterLoginPageUrl = baseTwitterLoginPageUrl + resp.oauth_token
+                    window.location = twitterLoginPageUrl
+                }
+            )
+
+        };
+
+        var orcidAuthenticate = function (showLogin, connectOrLogin) {
+            // send the user to orcid.org to authenticate
+            // twitter will send them back to us from there.
+
+            console.log("ORCID authenticate!", showLogin)
+
+            var authUrl = "https://orcid.org/oauth/authorize" +
+                "?client_id=APP-PF0PDMP7P297AU8S" +
+                "&response_type=code" +
+                "&scope=/authenticate" +
+                "&redirect_uri=" + oauthRedirectUri.orcid[connectOrLogin]
+
+            if (showLogin == "register"){
+                // will show the signup screen
+            }
+            else if (showLogin == "login") {
+                // show the login screen (defaults to this)
+                authUrl += "&show_login=true"
+            }
+
+            window.location = authUrl
+            return true
+        }
+
 
         var load = function(token){
             if (token){
@@ -1717,7 +1710,10 @@ angular.module('currentUser', [
         }
 
         return {
-            load: load
+            load: load,
+            isAuthenticatedPromise: isAuthenticatedPromise,
+            twitterAuthenticate: twitterAuthenticate,
+            orcidAuthenticate: orcidAuthenticate
         }
     })
 angular.module("numFormat", [])
@@ -2099,8 +2095,8 @@ angular.module('wizard', [
             templateUrl: "wizard/welcome.tpl.html",
             controller: "WelcomePageCtrl",
             resolve: {
-                isLoggedIn: function($rootScope){
-                    return $rootScope.isAuthenticatedPromise()
+                isLoggedIn: function(CurrentUser){
+                    return CurrentUser.isAuthenticatedPromise()
                 }
             }
         })
@@ -2112,8 +2108,8 @@ angular.module('wizard', [
             templateUrl: "wizard/my-publications.tpl.html",
             controller: "MyPublicationsCtrl",
             resolve: {
-                isLoggedIn: function($rootScope){
-                    return $rootScope.isAuthenticatedPromise()
+                isLoggedIn: function(CurrentUser){
+                    return CurrentUser.isAuthenticatedPromise()
                 }
             }
         })
@@ -2124,8 +2120,8 @@ angular.module('wizard', [
             templateUrl: "wizard/add-publications.tpl.html",
             controller: "AddPublicationsCtrl",
             resolve: {
-                isLoggedIn: function($rootScope){
-                    return $rootScope.isAuthenticatedPromise()
+                isLoggedIn: function(CurrentUser){
+                    return CurrentUser.isAuthenticatedPromise()
                 }
             }
         })
@@ -2136,7 +2132,7 @@ angular.module('wizard', [
     .controller("WelcomePageCtrl", function($scope, $location, $http, $auth){
 
 
-        // @todo put this in the route def  so it's not ugly while it loads, or do a better profile-loading thingy
+        // @todo this probably should all go in CurrentUser
         if ($auth.getPayload().orcid_id){
             console.log("we've got their ORCID already")
             if ($auth.getPayload().num_products){
@@ -2170,6 +2166,8 @@ angular.module('wizard', [
                 .success(function(resp){
                     console.log("successfully refreshed everything, redirecting to profile page ", resp)
                     $auth.setToken(resp.token)
+
+                    // todo this might should be a method on CurrentUser
                     $location.url("u/" + $auth.getPayload().orcid_id)
                 })
                 .error(function(resp){

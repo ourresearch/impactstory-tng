@@ -350,7 +350,7 @@ def me():
 
 
 
-
+# @todo change this function name
 def get_orcid_id_this_user_owns(auth_code, redirect_uri):
     access_token_url = 'https://pub.orcid.org/oauth/token'
     payload = dict(client_id="APP-PF0PDMP7P297AU8S",
@@ -370,7 +370,7 @@ def get_orcid_id_this_user_owns(auth_code, redirect_uri):
 
 
 
-
+# todo this returns a token. zo the endpoint should be /token maybe?
 @app.route("/api/auth/login/orcid", methods=["POST"])
 def login_with_orcid():
     my_orcid_id = get_orcid_id_this_user_owns(
@@ -413,7 +413,7 @@ def manage_my_orcid():
 
 
 
-
+# todo is this the same as the endpoin above, /api/me/orcid ?
 @app.route("/api/me/orcid/oauth_code/<oauth_code>", methods=["POST"])
 @login_required
 def connect_orcid_using_oauth_code(oauth_code):
@@ -435,7 +435,7 @@ def login_with_twitter():
     pass
 
 
-
+# todo maybe this should return error if the user already exists?
 @app.route("/api/auth/register/twitter", methods=["POST"])
 def register_twitter_user():
     access_token_url = 'https://api.twitter.com/oauth/access_token'

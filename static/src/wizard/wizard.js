@@ -9,8 +9,8 @@ angular.module('wizard', [
             templateUrl: "wizard/welcome.tpl.html",
             controller: "WelcomePageCtrl",
             resolve: {
-                isLoggedIn: function($rootScope){
-                    return $rootScope.isAuthenticatedPromise()
+                isLoggedIn: function(CurrentUser){
+                    return CurrentUser.isAuthenticatedPromise()
                 }
             }
         })
@@ -22,8 +22,8 @@ angular.module('wizard', [
             templateUrl: "wizard/my-publications.tpl.html",
             controller: "MyPublicationsCtrl",
             resolve: {
-                isLoggedIn: function($rootScope){
-                    return $rootScope.isAuthenticatedPromise()
+                isLoggedIn: function(CurrentUser){
+                    return CurrentUser.isAuthenticatedPromise()
                 }
             }
         })
@@ -34,8 +34,8 @@ angular.module('wizard', [
             templateUrl: "wizard/add-publications.tpl.html",
             controller: "AddPublicationsCtrl",
             resolve: {
-                isLoggedIn: function($rootScope){
-                    return $rootScope.isAuthenticatedPromise()
+                isLoggedIn: function(CurrentUser){
+                    return CurrentUser.isAuthenticatedPromise()
                 }
             }
         })
@@ -46,7 +46,7 @@ angular.module('wizard', [
     .controller("WelcomePageCtrl", function($scope, $location, $http, $auth){
 
 
-        // @todo put this in the route def  so it's not ugly while it loads, or do a better profile-loading thingy
+        // @todo this probably should all go in CurrentUser
         if ($auth.getPayload().orcid_id){
             console.log("we've got their ORCID already")
             if ($auth.getPayload().num_products){
@@ -80,6 +80,8 @@ angular.module('wizard', [
                 .success(function(resp){
                     console.log("successfully refreshed everything, redirecting to profile page ", resp)
                     $auth.setToken(resp.token)
+
+                    // todo this might should be a method on CurrentUser
                     $location.url("u/" + $auth.getPayload().orcid_id)
                 })
                 .error(function(resp){

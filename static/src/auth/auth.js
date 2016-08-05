@@ -40,9 +40,10 @@ angular.module('auth', [
             return false
         }
 
+        // todo i think we need to delete the twitter-register.tpl.html stuff in /wizard
 
 
-        // REGISTER WITH TWITTER
+        // REGISTERING WITH TWITTER
         if ($routeParams.intent=='register' && $routeParams.source=='twitter'){
             console.log("register with twitter")
             $http.post("api/auth/register/twitter", requestObj)
@@ -58,7 +59,7 @@ angular.module('auth', [
 
 
 
-        // CONNECT ORCID
+        // CONNECTING ORCID
         if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
             console.log("connect orcid")
             requestObj.redirectUri = $rootScope.orcidRedirectUri
@@ -75,7 +76,7 @@ angular.module('auth', [
 
 
 
-        // LOG IN WITH TWITTER
+        // LOGGING IN WITH TWITTER
         if ($routeParams.intent=='login' && $routeParams.source=='twitter'){
             console.log("log in with twitter")
 
@@ -83,7 +84,7 @@ angular.module('auth', [
 
 
 
-        // LOG IN WITH ORCID
+        // LOGGING IN WITH ORCID
         if ($routeParams.intent=='login' && $routeParams.source=='orcid'){
             console.log("log in with orcid")
         }
