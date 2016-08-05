@@ -298,6 +298,9 @@ angular.module('app').controller('AppCtrl', function(
 
     // TWITTER AUTH
     var twitterAuthenticate = function (registerOrLogin) {
+        // send the user to twitter.com to authenticate
+        // twitter will send them back to us from there.
+
         console.log("authenticate with twitters!");
 
         // first get the OAuth token that we use to create the twitter URL
@@ -329,10 +332,11 @@ angular.module('app').controller('AppCtrl', function(
         login: window.location.origin + "/orcid-login"
     }
 
-    // used in the nav bar, also for signup on the landing page.
     var orcidAuthenticate = function (showLogin, connectOrLogin) {
-        console.log("ORCID authenticate!", showLogin)
+        // send the user to orcid.org to authenticate
+        // twitter will send them back to us from there.
 
+        console.log("ORCID authenticate!", showLogin)
 
         var authUrl = "https://orcid.org/oauth/authorize" +
             "?client_id=APP-PF0PDMP7P297AU8S" +
