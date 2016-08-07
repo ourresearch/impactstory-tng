@@ -663,53 +663,17 @@ angular.module('auth', [
             return false
         }
 
-        // todo i think we need to delete the twitter-register.tpl.html stuff in /wizard
-
-
-        // REGISTERING WITH TWITTER
         if ($routeParams.intent=='register' && $routeParams.source=='twitter'){
-            console.log("register with twitter")
-            $http.post("api/auth/register/twitter", requestObj)
-                .success(function(resp){
-                    console.log("registered a new user with twitter", resp)
-                    CurrentUser.load(resp.token)
-                })
-                .error(function(resp){
-                  //console.log("problem getting token back from server!", resp)
-                  //  $location.url("/")
-                })
+            CurrentUser.register(requestObj)
         }
 
-
-
-        // CONNECTING ORCID
-        if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
-            console.log("connect orcid")
-            requestObj.redirectUri = $rootScope.orcidRedirectUri
-            $http.post("api/me/orcid", requestObj)
-                .success(function(resp){
-                    console.log("we successfully added an ORCID!", resp)
-                    CurrentUser.load(resp.token)
-                })
-                .error(function(resp){
-                  console.log("problem getting token back from server!", resp)
-                    //$location.url("/")
-                })
+        else if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
+            CurrentUser.connectOrcid(requestObj)
         }
 
-
-
-        // LOGGING IN WITH TWITTER
-        if ($routeParams.intent=='login' && $routeParams.source=='twitter'){
-            console.log("log in with twitter")
-
-        }
-
-
-
-        // LOGGING IN WITH ORCID
-        if ($routeParams.intent=='login' && $routeParams.source=='orcid'){
-            console.log("log in with orcid")
+        // LOGGING IN WITH TWITTER OR ORCID
+        else if ($routeParams.intent=='login'){
+            CurrentUser.login($routeParams.source, requestObj)
         }
 
     })
@@ -1698,22 +1662,58 @@ angular.module('currentUser', [
             return true
         }
 
+        var register = function(args){
+            console.log("registering with twitter")
+            $http.post("api/me/twitter/login?on_failure=register", args)
+                .success(function(resp){
+                    console.log("registered or logged in a user with twitter", resp)
+                    setToken(resp.token)
+                })
+                .error(function(resp){
+                  console.log("problem getting token back from server!", resp)
+                    $location.url("/")
+                })
+        }
 
-        var load = function(token){
-            if (token){
-                $auth.setToken(token)
-                sendTokenToIntercom()
-            }
-            else {
-                // load the current user from the server.
-            }
+        var connectOrcid = function(args){
+            console.log("connect orcid")
+            args.redirectUri = oauthRedirectUri.orcid.connect
+            $http.post("api/me/orcid", args)
+                .success(function(resp){
+                    console.log("we successfully added an ORCID!", resp)
+                    setToken(resp.token)
+                })
+                .error(function(resp){
+                  console.log("problem getting token back from server!", resp)
+                    //$location.url("/")
+                })
+        }
+
+        var login = function(source, args){
+
+
+
+
+        }
+
+
+
+
+        function setToken(token){
+            $auth.setToken(token)
+            // make a bunch of decisions here later.
+
+            sendTokenToIntercom()
+
         }
 
         return {
-            load: load,
             isAuthenticatedPromise: isAuthenticatedPromise,
             twitterAuthenticate: twitterAuthenticate,
-            orcidAuthenticate: orcidAuthenticate
+            orcidAuthenticate: orcidAuthenticate,
+            register: register,
+            connectOrcid: connectOrcid,
+            login: login
         }
     })
 angular.module("numFormat", [])
@@ -2224,7 +2224,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/twitter-login.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/orcid-connect.tpl.html', 'wizard/twitter-register.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -3930,19 +3930,6 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "");
 }]);
 
-angular.module("static-pages/twitter-login.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("static-pages/twitter-login.tpl.html",
-    "<div class=\"login-loading twitter\">\n" +
-    "  <div class=\"content\">\n" +
-    "     <md-progress-circular class=\"md-primary\"\n" +
-    "                           md-diameter=\"100\">\n" +
-    "     </md-progress-circular>\n" +
-    "     <h2>Setting your Twitter...</h2>\n" +
-    "     <img src=\"static/img/impactstory-logo-sideways.png\">\n" +
-    "  </div>\n" +
-    "</div>");
-}]);
-
 angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/add-publications.tpl.html",
     "<div class=\"page wizard add-publications\">\n" +
@@ -4025,26 +4012,6 @@ angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", fun
     "        <span class=\"text\">Great! Then we'll build your profile right now.\n" +
     "            It'll take a few seconds&hellip;</span>\n" +
     "    </div>\n" +
-    "</div>");
-}]);
-
-angular.module("wizard/orcid-connect.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("wizard/orcid-connect.tpl.html",
-    "<div class=\"page wizard orcid-connect\">\n" +
-    "    <h2>\n" +
-    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
-    "        We're connecting your ORCID now\n" +
-    "    </h2>\n" +
-    "</div>");
-}]);
-
-angular.module("wizard/twitter-register.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("wizard/twitter-register.tpl.html",
-    "<div class=\"page wizard twitter-register\">\n" +
-    "    <h2>\n" +
-    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
-    "        We're registering your Twitter now\n" +
-    "    </h2>\n" +
     "</div>");
 }]);
 

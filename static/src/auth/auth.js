@@ -40,53 +40,17 @@ angular.module('auth', [
             return false
         }
 
-        // todo i think we need to delete the twitter-register.tpl.html stuff in /wizard
-
-
-        // REGISTERING WITH TWITTER
         if ($routeParams.intent=='register' && $routeParams.source=='twitter'){
-            console.log("register with twitter")
-            $http.post("api/auth/register/twitter", requestObj)
-                .success(function(resp){
-                    console.log("registered a new user with twitter", resp)
-                    CurrentUser.load(resp.token)
-                })
-                .error(function(resp){
-                  //console.log("problem getting token back from server!", resp)
-                  //  $location.url("/")
-                })
+            CurrentUser.register(requestObj)
         }
 
-
-
-        // CONNECTING ORCID
-        if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
-            console.log("connect orcid")
-            requestObj.redirectUri = $rootScope.orcidRedirectUri
-            $http.post("api/me/orcid", requestObj)
-                .success(function(resp){
-                    console.log("we successfully added an ORCID!", resp)
-                    CurrentUser.load(resp.token)
-                })
-                .error(function(resp){
-                  console.log("problem getting token back from server!", resp)
-                    //$location.url("/")
-                })
+        else if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
+            CurrentUser.connectOrcid(requestObj)
         }
 
-
-
-        // LOGGING IN WITH TWITTER
-        if ($routeParams.intent=='login' && $routeParams.source=='twitter'){
-            console.log("log in with twitter")
-
-        }
-
-
-
-        // LOGGING IN WITH ORCID
-        if ($routeParams.intent=='login' && $routeParams.source=='orcid'){
-            console.log("log in with orcid")
+        // LOGGING IN WITH TWITTER OR ORCID
+        else if ($routeParams.intent=='login'){
+            CurrentUser.login($routeParams.source, requestObj)
         }
 
     })
