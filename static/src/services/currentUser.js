@@ -79,25 +79,10 @@ angular.module('currentUser', [
             return true
         }
 
-        var register = function(args){
-            console.log("registering with twitter")
-            $http.post("api/me/twitter/login?on_failure=register", args)
+        var callMeEndpoint = function(url, args){
+            $http.post(url, args)
                 .success(function(resp){
-                    console.log("registered or logged in a user with twitter", resp)
-                    setToken(resp.token)
-                })
-                .error(function(resp){
-                  console.log("problem getting token back from server!", resp)
-                    $location.url("/")
-                })
-        }
-
-        var connectOrcid = function(args){
-            console.log("connect orcid")
-            args.redirectUri = oauthRedirectUri.orcid.connect
-            $http.post("api/me/orcid", args)
-                .success(function(resp){
-                    console.log("we successfully added an ORCID!", resp)
+                    console.log("we successfully called the endpoint!", resp)
                     setToken(resp.token)
                 })
                 .error(function(resp){
@@ -106,12 +91,29 @@ angular.module('currentUser', [
                 })
         }
 
-        var login = function(source, args){
-
-
-
-
+        var register = function(args){
+            console.log("registering with twitter")
+            var url = "api/me/twitter/register"
+            callMeEndpoint(url, args)
         }
+
+        var connectOrcid = function(args){
+            console.log("connect orcid")
+            args.redirectUri = oauthRedirectUri.orcid.connect
+            var url = "api/me/orcid"
+            callMeEndpoint(url, args)
+        }
+
+        var loginWithTwitter = function(args){
+            var url = "api/me/twitter/login"
+            callMeEndpoint(url, args)
+        }
+
+        var loginWithOrcid = function(args){
+            var url = "api/me/orcid/login"
+            callMeEndpoint(url, args)
+        }
+
 
 
 
@@ -130,6 +132,7 @@ angular.module('currentUser', [
             orcidAuthenticate: orcidAuthenticate,
             register: register,
             connectOrcid: connectOrcid,
-            login: login
+            loginWithTwitter: loginWithTwitter,
+            loginWithOrcid: loginWithOrcid
         }
     })
