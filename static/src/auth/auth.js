@@ -48,10 +48,16 @@ angular.module('auth', [
             CurrentUser.connectOrcid(requestObj)
         }
 
-        // LOGGING IN WITH TWITTER OR ORCID
-        else if ($routeParams.intent=='login'){
-            CurrentUser.login($routeParams.source, requestObj)
+        // LOGGING IN WITH TWITTER
+        else if ($routeParams.intent=='login' && $routeParams.source=='twitter'){
+            CurrentUser.loginWithTwitter(requestObj)
         }
+
+        // LOGGING IN WITH ORCID
+        else if ($routeParams.intent=='login' && $routeParams.source=='orcid'){
+            CurrentUser.loginWithOrcid(requestObj)
+        }
+
 
     })
 
