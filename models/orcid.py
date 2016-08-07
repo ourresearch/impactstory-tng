@@ -1,14 +1,15 @@
 from time import time
-from collections import defaultdict
 import requests
-import json
 import re
+import os
+
 from threading import Thread
 from util import NoDoiException
 from util import remove_nonprinting_characters
 from util import is_doi_url
 from util import clean_doi
-from util import elapsed
+
+
 
 from models.bibtex import parse
 
@@ -35,6 +36,27 @@ def clean_orcid(dirty_orcid):
         raise NoOrcidException("There's no valid orcid.")
 
     return matches[0]
+
+
+
+
+def get_orcid_id_from_oauth(auth_code, redirect_uri):
+    access_token_url = 'https://pub.orcid.org/oauth/token'
+    payload = dict(client_id="APP-PF0PDMP7P297AU8S",
+                   redirect_uri=redirect_uri,
+                   client_secret=os.getenv('ORCID_CLIENT_SECRET'),
+                   code=auth_code,
+                   grant_type='authorization_code')
+
+    # First we exchange authorization code for access token;
+    # the access token has the ORCID ID, which is actually all we need here.
+    r = requests.post(access_token_url, data=payload)
+    try:
+        return r.json()["orcid"]
+    except KeyError:
+        print u"bad news: got no 'orcid' key back from ORCID! Got this: {}".format(r.json())
+        return None
+
 
 
 def call_orcid_api(url):

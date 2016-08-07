@@ -1,21 +1,21 @@
 from app import app
 from app import db
 
+from models.orcid import get_orcid_id_from_oauth
 from models.person import Person
+from models.person import PersonExistsException
 from models.person import make_person
 from models.person import refresh_orcid_info
 from models.person import connect_orcid
-from models.person import set_person_claimed_at
 from models.person import refresh_profile
 from models.person import refresh_person
 from models.person import delete_person
 from models.product import get_all_products
 from models.refset import num_people_in_db
-from models.orcid import OrcidDoesNotExist
-from models.orcid import NoOrcidException
 from models.badge import badge_configs
 from models.search import autocomplete
 from models.url_slugs_to_redirect import url_slugs_to_redirect
+from models.twitter import get_twitter_creds
 from util import safe_commit
 
 from flask import make_response
@@ -35,7 +35,6 @@ import requests
 import stripe
 from requests_oauthlib import OAuth1
 import os
-import time
 import sys
 import json
 import logging
@@ -328,6 +327,17 @@ def donation_endpoint():
     return jsonify({"message": "well done!"})
 
 
+
+
+
+
+
+
+
+
+
+
+
 # user management
 ##############################################################################
 
@@ -349,31 +359,9 @@ def me():
         return jsonify({"msg": "Alas, poor Yorick! I knew him, Horatio"})
 
 
-
-# @todo change this function name
-def get_orcid_id_this_user_owns(auth_code, redirect_uri):
-    access_token_url = 'https://pub.orcid.org/oauth/token'
-    payload = dict(client_id="APP-PF0PDMP7P297AU8S",
-                   redirect_uri=redirect_uri,
-                   client_secret=os.getenv('ORCID_CLIENT_SECRET'),
-                   code=auth_code,
-                   grant_type='authorization_code')
-
-    # First we exchange authorization code for access token;
-    # the access token has the ORCID ID, which is actually all we need here.
-    r = requests.post(access_token_url, data=payload)
-    try:
-        return r.json()["orcid"]
-    except KeyError:
-        print u"bad news: got no 'orcid' key back from ORCID! Got this: {}".format(r.json())
-        return None
-
-
-
-# todo this returns a token. zo the endpoint should be /token maybe?
-@app.route("/api/auth/login/orcid", methods=["POST"])
-def login_with_orcid():
-    my_orcid_id = get_orcid_id_this_user_owns(
+@app.route("/api/me/orcid/login", methods=["POST"])
+def login_endpoint():
+    my_orcid_id = get_orcid_id_from_oauth(
         request.json['code'],
         request.json['redirectUri']
     )
@@ -381,84 +369,57 @@ def login_with_orcid():
         abort_json(401, "Bad ORCID response; the auth code you sent is probably expired.")
 
     my_person = Person.query.filter_by(orcid_id=my_orcid_id).first()
+    return jsonify({"token":  my_person.get_token()})
+
+
+@app.route("/api/me/orcid/connect", methods=["POST"])
+@login_required
+def connect_my_orcid():
+    my_person = Person.query.filter_by(id=g.my_id).first()
+
+    orcid_id = get_orcid_id_from_oauth(
+        request.json['code'],
+        request.json['redirectUri']
+    )
+    if not orcid_id:
+        abort_json(500, "Invalid JSON return from ORCID during OAuth.")
+
+    my_person = connect_orcid(my_person, orcid_id)
+    return jsonify({"token":  my_person.get_token()})
+
+
+
+@app.route("/api/me/orcid/refresh", methods=["POST"])
+@login_required
+def refresh_my_orcid():
+    my_person = Person.query.filter_by(id=g.my_id).first()
+    my_person = refresh_orcid_info(my_person)
+    return jsonify({"token":  my_person.get_token()})
+
+
+
+@app.route("/api/me/twitter/login", methods=["POST"])
+def twitter_login_with_fallback_to_register():
+    twitter_creds = get_twitter_creds(request.json.get('token'), request.json.get('verifier'))
+
+    my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
+    if not my_person:
+        abort_json(404, "we have no impactstory user with this twitter screen name")
+
     return jsonify({"token": my_person.get_token()})
 
 
 
+@app.route("/api/me/twitter/register", methods=["POST"])
+def twitter_register():
+    twitter_creds = get_twitter_creds(request.json.get('token'), request.json.get('verifier'))
 
-@app.route("/api/me/orcid", methods=["POST"])
-@login_required
-def manage_my_orcid():
-    my_person = Person.query.filter_by(id=g.my_id).first()
-
-    # this person already has an orcid id, so we're just going to refresh all their orcid info
-    if my_person.orcid_id:
-        modified_person = refresh_orcid_info(my_person)
-
-    # connect orcid
-    else:
-        orcid_id = get_orcid_id_this_user_owns(
-            request.json['code'],
-            request.json['redirectUri']
-        )
-        if not orcid_id:
-            abort_json(500, "Invalid JSON return from ORCID during OAuth.")
-
-        modified_person = connect_orcid(my_person, orcid_id)
-
-    token = modified_person.get_token()
-    return jsonify({"token": token, "num_products": modified_person.num_products})
-
-
-
-
-
-# todo is this the same as the endpoin above, /api/me/orcid ?
-@app.route("/api/me/orcid/oauth_code/<oauth_code>", methods=["POST"])
-@login_required
-def connect_orcid_using_oauth_code(oauth_code):
-    my_person = Person.query.filter_by(id=g.my_id).first()
-    orcid_id = get_orcid_id_this_user_owns(oauth_code, request.json['redirectUri'])
-    if not orcid_id:
-        abort_json(500, "Invalid JSON return from ORCID during OAuth.")
-
-    modified_person = connect_orcid(my_person, orcid_id)
-    token = modified_person.get_token()
-    return jsonify({"token": token, "num_products": modified_person.num_products})
-
-
-
-
-
-@app.route("/api/auth/login/twitter", methods=["POST"])
-def login_with_twitter():
-    pass
-
-
-# todo maybe this should return error if the user already exists?
-@app.route("/api/auth/register/twitter", methods=["POST"])
-def register_twitter_user():
-    access_token_url = 'https://api.twitter.com/oauth/access_token'
-
-    auth = OAuth1(os.getenv('TWITTER_CONSUMER_KEY'),
-                  client_secret=os.getenv('TWITTER_CONSUMER_SECRET'),
-                  resource_owner_key=request.json.get('token'),
-                  verifier=request.json.get('verifier'))
-
-    r = requests.post(access_token_url, auth=auth)
-
-    twitter_creds = dict(parse_qsl(r.text))
-    print u"got back twitter_creds from twitter {}".format(twitter_creds)
-
-    my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
-    is_new_profile = False
-
-    if my_person is None:
+    try:
         my_person = make_person(twitter_creds)
-        is_new_profile = True
+    except PersonExistsException:
+        my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
 
-    token = my_person.get_token()
-    return jsonify({"token": token, "is_new_profile": is_new_profile})
+    return jsonify({"token": my_person.get_token()})
 
 
 

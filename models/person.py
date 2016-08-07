@@ -57,6 +57,9 @@ from requests_oauthlib import OAuth1Session
 from util import update_recursive_sum
 
 
+class PersonExistsException(Exception):
+    pass
+
 def delete_person(orcid_id):
     # also need delete all the badges, products
     product.Product.query.filter_by(orcid_id=orcid_id).delete()
@@ -100,6 +103,9 @@ def get_full_twitter_profile(twitter_creds):
 
 
 def make_person(twitter_creds, high_priority=False):
+    if Person.query.filter_by(twitter=twitter_creds["screen_name"]).first():
+        raise PersonExistsException
+
     my_person = Person()
 
     my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
@@ -132,6 +138,7 @@ def make_person(twitter_creds, high_priority=False):
 
 
 def connect_orcid(my_person, orcid_id):
+    # todo check to make sure this orcid id isn't already in the db
     print u"adding a brand new orcid_id for {}: {}".format(my_person.full_name, orcid_id)
     my_person.orcid_id = orcid_id
     return refresh_orcid_info(my_person)

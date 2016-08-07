@@ -79,21 +79,57 @@ angular.module('currentUser', [
             return true
         }
 
+        var register = function(args){
+            console.log("registering with twitter")
+            $http.post("api/me/twitter/login?on_failure=register", args)
+                .success(function(resp){
+                    console.log("registered or logged in a user with twitter", resp)
+                    setToken(resp.token)
+                })
+                .error(function(resp){
+                  console.log("problem getting token back from server!", resp)
+                    $location.url("/")
+                })
+        }
 
-        var load = function(token){
-            if (token){
-                $auth.setToken(token)
-                sendTokenToIntercom()
-            }
-            else {
-                // load the current user from the server.
-            }
+        var connectOrcid = function(args){
+            console.log("connect orcid")
+            args.redirectUri = oauthRedirectUri.orcid.connect
+            $http.post("api/me/orcid", args)
+                .success(function(resp){
+                    console.log("we successfully added an ORCID!", resp)
+                    setToken(resp.token)
+                })
+                .error(function(resp){
+                  console.log("problem getting token back from server!", resp)
+                    //$location.url("/")
+                })
+        }
+
+        var login = function(source, args){
+
+
+
+
+        }
+
+
+
+
+        function setToken(token){
+            $auth.setToken(token)
+            // make a bunch of decisions here later.
+
+            sendTokenToIntercom()
+
         }
 
         return {
-            load: load,
             isAuthenticatedPromise: isAuthenticatedPromise,
             twitterAuthenticate: twitterAuthenticate,
-            orcidAuthenticate: orcidAuthenticate
+            orcidAuthenticate: orcidAuthenticate,
+            register: register,
+            connectOrcid: connectOrcid,
+            login: login
         }
     })
