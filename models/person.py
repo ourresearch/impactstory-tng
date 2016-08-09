@@ -233,7 +233,7 @@ class Person(db.Model):
         self.id = orcid_id
         self.orcid_id = orcid_id
         self.invalid_orcid = False
-        self.created = datetime.datetime.utcnow().isoformat()
+        self.created = datetime.datetime.utcnow()
 
 
     # doesn't have error handling; called by refresh when you want it to be robust
@@ -700,7 +700,7 @@ class Person(db.Model):
             profile_created_date = self.created
             if not profile_created_date:
                 # because just made and not set yet
-                profile_created_date = datetime.datetime.utcnow().isoformat()
+                profile_created_date = datetime.datetime.utcnow()
             self.fresh_orcid = (profile_created_date - orcid_created_date).total_seconds() < (60*60)  # 1 hour
         # orcid is blank
         except TypeError:
