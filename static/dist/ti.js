@@ -629,7 +629,7 @@ angular.module('auth', [
 ])
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/oauth/:intent/:source', {
+        $routeProvider.when('/oauth/:intent/:identityProvider', {
             templateUrl: "auth/oauth.tpl.html",
             controller: "OauthCtrl"
         })
@@ -663,18 +663,9 @@ angular.module('auth', [
             return false
         }
 
-        if ($routeParams.intent=='register' && $routeParams.source=='twitter'){
-            CurrentUser.register(requestObj)
-        }
+        requestObj.redirectUri = $location.path()
+        CurrentUser.callMeEndpoint($routeParams.identityProvider, $routeParams.intent, requestObj)
 
-        else if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
-            CurrentUser.connectOrcid(requestObj)
-        }
-
-        // LOGGING IN WITH TWITTER OR ORCID
-        else if ($routeParams.intent=='login'){
-            CurrentUser.login($routeParams.source, requestObj)
-        }
 
     })
 
@@ -1588,6 +1579,7 @@ angular.module('currentUser', [
 
     .factory("CurrentUser", function($auth, $http, $q, $route){
 
+
         var oauthRedirectUri = {
             orcid: {
                 connect: window.location.origin + "/orcid-connect",
@@ -1640,7 +1632,7 @@ angular.module('currentUser', [
 
         var orcidAuthenticate = function (showLogin, connectOrLogin) {
             // send the user to orcid.org to authenticate
-            // twitter will send them back to us from there.
+            // orcid will send them back to us from there.
 
             console.log("ORCID authenticate!", showLogin)
 
@@ -1662,25 +1654,14 @@ angular.module('currentUser', [
             return true
         }
 
-        var register = function(args){
-            console.log("registering with twitter")
-            $http.post("api/me/twitter/login?on_failure=register", args)
-                .success(function(resp){
-                    console.log("registered or logged in a user with twitter", resp)
-                    setToken(resp.token)
-                })
-                .error(function(resp){
-                  console.log("problem getting token back from server!", resp)
-                    $location.url("/")
-                })
-        }
+        var callMeEndpoint = function(identityProvider, intent, secretOauthCodes){
 
-        var connectOrcid = function(args){
-            console.log("connect orcid")
-            args.redirectUri = oauthRedirectUri.orcid.connect
-            $http.post("api/me/orcid", args)
+            var urlBase = "api/me/"
+            var url = urlBase + identityProvider + "/" + intent
+
+            $http.post(url, secretOauthCodes)
                 .success(function(resp){
-                    console.log("we successfully added an ORCID!", resp)
+                    console.log("we successfully called the endpoint!", resp)
                     setToken(resp.token)
                 })
                 .error(function(resp){
@@ -1688,15 +1669,6 @@ angular.module('currentUser', [
                     //$location.url("/")
                 })
         }
-
-        var login = function(source, args){
-
-
-
-
-        }
-
-
 
 
         function setToken(token){
@@ -1711,9 +1683,7 @@ angular.module('currentUser', [
             isAuthenticatedPromise: isAuthenticatedPromise,
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
-            register: register,
-            connectOrcid: connectOrcid,
-            login: login
+            callMeEndpoint:callMeEndpoint
         }
     })
 angular.module("numFormat", [])

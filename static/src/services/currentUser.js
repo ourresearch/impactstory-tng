@@ -5,6 +5,7 @@ angular.module('currentUser', [
 
     .factory("CurrentUser", function($auth, $http, $q, $route){
 
+
         var oauthRedirectUri = {
             orcid: {
                 connect: window.location.origin + "/orcid-connect",
@@ -57,7 +58,7 @@ angular.module('currentUser', [
 
         var orcidAuthenticate = function (showLogin, connectOrLogin) {
             // send the user to orcid.org to authenticate
-            // twitter will send them back to us from there.
+            // orcid will send them back to us from there.
 
             console.log("ORCID authenticate!", showLogin)
 
@@ -79,8 +80,12 @@ angular.module('currentUser', [
             return true
         }
 
-        var callMeEndpoint = function(url, args){
-            $http.post(url, args)
+        var callMeEndpoint = function(identityProvider, intent, secretOauthCodes){
+
+            var urlBase = "api/me/"
+            var url = urlBase + identityProvider + "/" + intent
+
+            $http.post(url, secretOauthCodes)
                 .success(function(resp){
                     console.log("we successfully called the endpoint!", resp)
                     setToken(resp.token)
@@ -90,32 +95,6 @@ angular.module('currentUser', [
                     //$location.url("/")
                 })
         }
-
-        var register = function(args){
-            console.log("registering with twitter")
-            var url = "api/me/twitter/register"
-            callMeEndpoint(url, args)
-        }
-
-        var connectOrcid = function(args){
-            console.log("connect orcid")
-            args.redirectUri = oauthRedirectUri.orcid.connect
-            var url = "api/me/orcid"
-            callMeEndpoint(url, args)
-        }
-
-        var loginWithTwitter = function(args){
-            var url = "api/me/twitter/login"
-            callMeEndpoint(url, args)
-        }
-
-        var loginWithOrcid = function(args){
-            var url = "api/me/orcid/login"
-            callMeEndpoint(url, args)
-        }
-
-
-
 
 
         function setToken(token){
@@ -130,9 +109,6 @@ angular.module('currentUser', [
             isAuthenticatedPromise: isAuthenticatedPromise,
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
-            register: register,
-            connectOrcid: connectOrcid,
-            loginWithTwitter: loginWithTwitter,
-            loginWithOrcid: loginWithOrcid
+            callMeEndpoint:callMeEndpoint
         }
     })
