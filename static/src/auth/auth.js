@@ -6,7 +6,7 @@ angular.module('auth', [
 ])
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/oauth/:intent/:source', {
+        $routeProvider.when('/oauth/:intent/:identityProvider', {
             templateUrl: "auth/oauth.tpl.html",
             controller: "OauthCtrl"
         })
@@ -40,23 +40,8 @@ angular.module('auth', [
             return false
         }
 
-        if ($routeParams.intent=='register' && $routeParams.source=='twitter'){
-            CurrentUser.register(requestObj)
-        }
-
-        else if ($routeParams.intent=='connect' && $routeParams.source=='orcid'){
-            CurrentUser.connectOrcid(requestObj)
-        }
-
-        // LOGGING IN WITH TWITTER
-        else if ($routeParams.intent=='login' && $routeParams.source=='twitter'){
-            CurrentUser.loginWithTwitter(requestObj)
-        }
-
-        // LOGGING IN WITH ORCID
-        else if ($routeParams.intent=='login' && $routeParams.source=='orcid'){
-            CurrentUser.loginWithOrcid(requestObj)
-        }
+        requestObj.redirectUri = $location.path()
+        CurrentUser.callMeEndpoint($routeParams.identityProvider, $routeParams.intent, requestObj)
 
 
     })
