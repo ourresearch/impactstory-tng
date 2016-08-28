@@ -1824,7 +1824,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('login', 'connect')\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', true)\">\n" +
     "                Sign in to my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -1834,7 +1834,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register', 'connect')\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', false)\">\n" +
     "                Create my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -1845,7 +1845,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('register', 'connect')\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', false)\">\n" +
     "                Try registering for an ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +

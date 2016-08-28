@@ -5,18 +5,6 @@ angular.module('currentUser', [
 
     .factory("CurrentUser", function($auth, $http, $q, $route){
 
-
-        var oauthRedirectUri = {
-            orcid: {
-                connect: window.location.origin + "/orcid-connect",
-                login: window.location.origin + "/orcid-login"
-            },
-            twitter: {
-                register: window.location.origin + "/twitter-register",
-                login: window.location.origin + "/twitter-login"
-            }
-        }
-
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
@@ -34,18 +22,19 @@ angular.module('currentUser', [
         }
 
 
-        var twitterAuthenticate = function (registerOrLogin) {
+        var twitterAuthenticate = function (intent) {
             // send the user to twitter.com to authenticate
             // twitter will send them back to us from there.
+            // @intent should be either "register" or "login"
+
+            var redirectUri = window.location.origin + "/oath/" + intent + "/twitter"
 
             console.log("authenticate with twitters!");
 
             // first ask our server to get the OAuth token that we use to create the
             // twitter URL that we will redirect the user too.
-            var redirectUri = oauthRedirectUri.twitter[registerOrLogin]
             var baseUrlToGetOauthTokenFromOurServer = "/api/auth/twitter/request-token?redirectUri=";
             var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
-
             $http.get(baseUrlToGetOauthTokenFromOurServer + redirectUri).success(
                 function(resp){
                     console.log("twitter request token", resp)
@@ -56,9 +45,12 @@ angular.module('currentUser', [
 
         };
 
-        var orcidAuthenticate = function (showLogin, connectOrLogin) {
+        var orcidAuthenticate = function (intent, orcidAlreadyExists) {
             // send the user to orcid.org to authenticate
             // orcid will send them back to us from there.
+            // @intent should be either "register" or "login"
+
+            var redirectUri = window.location.origin + "/oath/" + intent + "/orcid"
 
             console.log("ORCID authenticate!", showLogin)
 
@@ -66,13 +58,9 @@ angular.module('currentUser', [
                 "?client_id=APP-PF0PDMP7P297AU8S" +
                 "&response_type=code" +
                 "&scope=/authenticate" +
-                "&redirect_uri=" + oauthRedirectUri.orcid[connectOrLogin]
+                "&redirect_uri=" + redirectUri
 
-            if (showLogin == "register"){
-                // will show the signup screen
-            }
-            else if (showLogin == "login") {
-                // show the login screen (defaults to this)
+            if (orcidAlreadyExists){
                 authUrl += "&show_login=true"
             }
 
@@ -80,7 +68,7 @@ angular.module('currentUser', [
             return true
         }
 
-        var callMeEndpoint = function(identityProvider, intent, secretOauthCodes){
+        var callMeEndpoint = function(intent, identityProvider, secretOauthCodes){
 
             var urlBase = "api/me/"
             var url = urlBase + identityProvider + "/" + intent
