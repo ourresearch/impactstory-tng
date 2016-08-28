@@ -360,7 +360,7 @@ def me():
 
 
 @app.route("/api/me/orcid/login", methods=["POST"])
-def login_endpoint():
+def orcid_login():
     my_orcid_id = get_orcid_id_from_oauth(
         request.json['code'],
         request.json['redirectUri']
@@ -374,7 +374,7 @@ def login_endpoint():
 
 @app.route("/api/me/orcid/connect", methods=["POST"])
 @login_required
-def connect_my_orcid():
+def orcid_connect():
     my_person = Person.query.filter_by(id=g.my_id).first()
 
     orcid_id = get_orcid_id_from_oauth(
@@ -399,7 +399,7 @@ def refresh_my_orcid():
 
 
 @app.route("/api/me/twitter/login", methods=["POST"])
-def twitter_login_with_fallback_to_register():
+def twitter_login():
     twitter_creds = get_twitter_creds(request.json.get('token'), request.json.get('verifier'))
 
     my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
@@ -411,7 +411,7 @@ def twitter_login_with_fallback_to_register():
 
 
 @app.route("/api/me/twitter/register", methods=["POST"])
-def twitter_register():
+def twitter_register_but_login_if_they_are_already_registered():
     twitter_creds = get_twitter_creds(request.json.get('token'), request.json.get('verifier'))
 
     try:

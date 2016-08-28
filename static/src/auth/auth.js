@@ -41,7 +41,7 @@ angular.module('auth', [
         }
 
         requestObj.redirectUri = $location.path()
-        CurrentUser.callMeEndpoint($routeParams.identityProvider, $routeParams.intent, requestObj)
+        CurrentUser.callMeEndpoint($routeParams.intent, $routeParams.identityProvider, requestObj)
 
 
     })
