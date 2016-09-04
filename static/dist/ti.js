@@ -1579,11 +1579,19 @@ angular.module('currentUser', [
 
     .factory("CurrentUser", function($auth, $http, $q, $route){
 
+
+        function directMe(){
+            // checks the server to figure out where this user is in
+            // the signup flow
+        }
+
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
 
         var isAuthenticatedPromise = function(){
+            // this is actually a synchronous method, it just returns
+            //      a promise so it can be used in route definitions.
             var deferred = $q.defer()
             if ($auth.isAuthenticated()) {
                 deferred.resolve()
@@ -1596,10 +1604,17 @@ angular.module('currentUser', [
         }
 
 
+        var doTheyHaveProducts = function(){
+            $http.get("/api/me").success(function(resp){
+
+            })
+        }
+
+
         var twitterAuthenticate = function (intent) {
             // send the user to twitter.com to authenticate
             // twitter will send them back to us from there.
-            // @intent should be either "register" or "login"
+            // @intent should be either "register" or "login".
 
             var redirectUri = window.location.origin + "/oath/" + intent + "/twitter"
 
@@ -1622,7 +1637,9 @@ angular.module('currentUser', [
         var orcidAuthenticate = function (intent, orcidAlreadyExists) {
             // send the user to orcid.org to authenticate
             // orcid will send them back to us from there.
-            // @intent should be either "register" or "login"
+            // @intent should be either "register" or "login".
+            // @orcidAlreadyExists (bool) lets us know whether to send you to
+            //      the ORCID login screen or signup screen.
 
             var redirectUri = window.location.origin + "/oath/" + intent + "/orcid"
 
@@ -1643,6 +1660,7 @@ angular.module('currentUser', [
         }
 
         var callMeEndpoint = function(intent, identityProvider, secretOauthCodes){
+            // todo better name
 
             var urlBase = "api/me/"
             var url = urlBase + identityProvider + "/" + intent
