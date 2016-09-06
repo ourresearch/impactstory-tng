@@ -441,6 +441,30 @@ class Person(db.Model):
         save_email(self.orcid_id, new_event_counts)
 
 
+    ## used to fix people's pictures if they have updated them on twitter
+    ## called from command line, ie python update.py Person.update_twitter_profile_data --id=0000-0003-3904-7546
+    def update_twitter_profile_data(self):
+        if not self.twitter or not self.twitter_creds:
+            print u"Can't update twitter, doesn't have twitter username or twitter_creds"
+            return None
+
+        oauth = OAuth1Session(
+            os.getenv('TWITTER_CONSUMER_KEY'),
+            client_secret=os.getenv('TWITTER_CONSUMER_SECRET')
+        )
+        url = "https://api.twitter.com/1.1/users/lookup.json?screen_name={}".format(self.twitter)
+        r = oauth.get(url)
+        response_data = r.json()
+        first_profile = response_data[0]
+
+        keys_to_update = ["profile_image_url", "profile_image_url_https"]
+        for k in keys_to_update:
+            self.twitter_creds[k] = first_profile[k]
+
+        print u"Updated twitter creds for @{}".format(self.twitter)
+
+        return self.twitter_creds
+
 
 
     def calculate(self):
