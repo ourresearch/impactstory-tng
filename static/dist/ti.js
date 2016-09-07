@@ -182,6 +182,7 @@ angular.module('app', [
     // external libs
     'ngRoute',
     'ngMessages',
+    'ngCookies',
     'satellizer',
 
     'ngResource',
@@ -249,6 +250,7 @@ angular.module('app').run(function($route,
                                    $rootScope,
                                    $q,
                                    $timeout,
+                                   $cookies,
                                    $auth,
                                    $http,
                                    $location,
@@ -330,7 +332,15 @@ angular.module('app').run(function($route,
             is_deleted: false
 
         }
+
+        // this it temporary till we do the twitter-based signup
+        if ($cookies.get("sawOpenconLandingPage")) {
+            intercomInfo.saw_opencon_landing_page = true
+        }
+
+
         console.log("sending to intercom", intercomInfo)
+
         window.Intercom("boot", intercomInfo)
     }
 
@@ -377,6 +387,7 @@ angular.module('app').controller('AppCtrl', function(
     $scope.moment = moment // this will break unless moment.js loads over network...
 
     $scope.global = {}
+
     $rootScope.setPersonIsLoading = function(isLoading){
         $scope.global.personIsLoading = !!isLoading
     }
@@ -425,6 +436,7 @@ angular.module('app').controller('AppCtrl', function(
         }
     }
 
+    
     // genre config
     var genreIcons = {
         'article': "file-text-o",
@@ -662,10 +674,21 @@ angular.module('auth', [
             $location.url("/")
             return false
         }
-
         requestObj.redirectUri = $location.path()
-        CurrentUser.callMeEndpoint($routeParams.intent, $routeParams.identityProvider, requestObj)
 
+        var urlBase = "api/me/"
+        var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
+
+        $http.post(url, requestObj)
+            .success(function(resp){
+                console.log("we successfully called the endpoint!", resp)
+                CurrentUser.setFromToken(resp.token)
+                $location.path(CurrentUser.getProfileUrl())
+            })
+            .error(function(resp){
+              console.log("problem getting token back from server!", resp)
+                // todo tell the user what went wrong
+            })
 
     })
 
@@ -1580,11 +1603,6 @@ angular.module('currentUser', [
     .factory("CurrentUser", function($auth, $http, $q, $route){
 
 
-        function directMe(){
-            // checks the server to figure out where this user is in
-            // the signup flow
-        }
-
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
@@ -1616,7 +1634,7 @@ angular.module('currentUser', [
             // twitter will send them back to us from there.
             // @intent should be either "register" or "login".
 
-            var redirectUri = window.location.origin + "/oath/" + intent + "/twitter"
+            var redirectUri = window.location.origin + "/oauth/" + intent + "/twitter"
 
             console.log("authenticate with twitters!");
 
@@ -1631,7 +1649,6 @@ angular.module('currentUser', [
                     window.location = twitterLoginPageUrl
                 }
             )
-
         };
 
         var orcidAuthenticate = function (intent, orcidAlreadyExists) {
@@ -1641,7 +1658,7 @@ angular.module('currentUser', [
             // @orcidAlreadyExists (bool) lets us know whether to send you to
             //      the ORCID login screen or signup screen.
 
-            var redirectUri = window.location.origin + "/oath/" + intent + "/orcid"
+            var redirectUri = window.location.origin + "/oauth/" + intent + "/orcid"
 
             console.log("ORCID authenticate!", showLogin)
 
@@ -1659,37 +1676,44 @@ angular.module('currentUser', [
             return true
         }
 
-        var callMeEndpoint = function(intent, identityProvider, secretOauthCodes){
-            // todo better name
+        function getProfileUrl(){
+            var data = getAllDataAsObject()
 
-            var urlBase = "api/me/"
-            var url = urlBase + identityProvider + "/" + intent
+            if (data.finished_wizard){
+                return "u/" + data.orcid_id
+            }
 
-            $http.post(url, secretOauthCodes)
-                .success(function(resp){
-                    console.log("we successfully called the endpoint!", resp)
-                    setToken(resp.token)
-                })
-                .error(function(resp){
-                  console.log("problem getting token back from server!", resp)
-                    //$location.url("/")
-                })
+            if (data.num_products > 0){
+                return "wizard/confirm-products"
+
+            }
+
+            if (data.orcid_id){
+                return "wizard/add-products"
+            }
+
+            return "wizard/connect-orcid"
         }
 
 
-        function setToken(token){
-            $auth.setToken(token)
-            // make a bunch of decisions here later.
+        function getAllDataAsObject(){
+            if (!$auth.isAuthenticated){
+                return {}
+            }
+            return $auth.getPayload()
+        }
 
+        function setFromToken(token){
+            $auth.setToken(token) // synchronous
             sendTokenToIntercom()
-
         }
 
         return {
             isAuthenticatedPromise: isAuthenticatedPromise,
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
-            callMeEndpoint:callMeEndpoint
+            setFromToken: setFromToken,
+            getProfileUrl: getProfileUrl
         }
     })
 angular.module("numFormat", [])
@@ -1991,30 +2015,128 @@ angular.module('staticPages', [
     .config(function ($routeProvider) {
         $routeProvider.when('/', {
             templateUrl: "static-pages/landing.tpl.html",
-            controller: "LandingPageCtrl"
-            //,resolve: {
-            //    isLoggedIn: function($auth, $q, $location){
-            //        var deferred = $q.defer()
-            //        if ($auth.isAuthenticated()){
-            //            var url = "/u/" + $auth.getPayload().sub
-            //            $location.path(url)
-            //        }
-            //        else {
-            //            return $q.when(true)
-            //
-            //            deferred.resolve()
-            //        }
-            //
-            //        return deferred.promise
-            //    }
-            //}
+            controller: "LandingPageCtrl",
+            resolve: {
+                isLoggedIn: function($auth, $q, $location){
+                    var deferred = $q.defer()
+                    if ($auth.isAuthenticated()){
+                        var url = "/u/" + $auth.getPayload().sub
+                        $location.path(url)
+                    }
+                    else {
+                        return $q.when(true)
+                        deferred.resolve()
+                    }
+                    return deferred.promise
+                },
+                customLandingPage: function($q){
+                    return $q.when("default")
+                }
+            }
         })
+    })
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/opencon', {
+            templateUrl: "static-pages/landing.tpl.html",
+            controller: "LandingPageCtrl",
+            resolve: {
+                isLoggedIn: function($auth, $q, $location){
+                    var deferred = $q.defer()
+                    if ($auth.isAuthenticated()){
+                        var url = "/u/" + $auth.getPayload().sub
+                        $location.path(url)
+                    }
+                    else {
+                        return $q.when(true)
+                        deferred.resolve()
+                    }
+                    return deferred.promise
+                },
+                customLandingPage: function($q){
+                    return $q.when("opencon")
+                }
+            }
+        })
+    })
+
+
+
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/login', {
+            templateUrl: "static-pages/login.tpl.html",
+            controller: "LoginCtrl"
+        })
+    })
+
+    .config(function ($routeProvider) {
+        $routeProvider.when('/twitter-login', {
+            templateUrl: "static-pages/twitter-login.tpl.html",
+            controller: "TwitterLoginCtrl"
+        })
+    })
+
+    .controller("TwitterLoginCtrl", function($scope){
+        console.log("twitter page controller is running!")
+
+    })
+
+
+    .controller("LoginCtrl", function ($scope, $cookies, $location, $http, $auth, $rootScope, Person) {
+        console.log("kenny loggins page controller is running!")
+
+
+        var searchObject = $location.search();
+        var code = searchObject.code
+        if (!code){
+            $location.path("/")
+            return false
+        }
+
+        var requestObj = {
+            code: code,
+            redirectUri: window.location.origin + "/login"
+        }
+
+        // this it temporary till we do the twitter-based signup
+        if ($cookies.get("sawOpenconLandingPage")) {
+
+            // it's important this never gets set to false,
+            // the user user may be on a new machine. this is a gross hack.
+            requestObj.sawOpenconLandingPage = true
+        }
+        $http.post("api/auth/orcid", requestObj)
+            .success(function(resp){
+                console.log("got a token back from ye server", resp)
+                $auth.setToken(resp.token)
+                var payload = $auth.getPayload()
+
+                $rootScope.sendCurrentUserToIntercom()
+                $location.url("u/" + payload.sub)
+            })
+            .error(function(resp){
+              console.log("problem getting token back from server!", resp)
+                $location.url("/")
+            })
+
     })
 
     .controller("LandingPageCtrl", function ($scope,
                                              $mdDialog,
+                                             $cookies,
                                              $rootScope,
+                                             customLandingPage,
                                              $timeout) {
+
+        if (customLandingPage == "opencon") {
+            console.log("this is a custom landing page: ",customLandingPage)
+            $scope.customPageName = "opencon"
+            $cookies.put("sawOpenconLandingPage", true)
+
+        }
+
+
         $scope.global.showBottomStuff = false;
         console.log("landing page!", $scope.global)
         $scope.global.isLandingPage = true

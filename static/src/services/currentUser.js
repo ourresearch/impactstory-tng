@@ -6,11 +6,6 @@ angular.module('currentUser', [
     .factory("CurrentUser", function($auth, $http, $q, $route){
 
 
-        function directMe(){
-            // checks the server to figure out where this user is in
-            // the signup flow
-        }
-
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
@@ -42,7 +37,7 @@ angular.module('currentUser', [
             // twitter will send them back to us from there.
             // @intent should be either "register" or "login".
 
-            var redirectUri = window.location.origin + "/oath/" + intent + "/twitter"
+            var redirectUri = window.location.origin + "/oauth/" + intent + "/twitter"
 
             console.log("authenticate with twitters!");
 
@@ -57,7 +52,6 @@ angular.module('currentUser', [
                     window.location = twitterLoginPageUrl
                 }
             )
-
         };
 
         var orcidAuthenticate = function (intent, orcidAlreadyExists) {
@@ -67,7 +61,7 @@ angular.module('currentUser', [
             // @orcidAlreadyExists (bool) lets us know whether to send you to
             //      the ORCID login screen or signup screen.
 
-            var redirectUri = window.location.origin + "/oath/" + intent + "/orcid"
+            var redirectUri = window.location.origin + "/oauth/" + intent + "/orcid"
 
             console.log("ORCID authenticate!", showLogin)
 
@@ -85,36 +79,43 @@ angular.module('currentUser', [
             return true
         }
 
-        var callMeEndpoint = function(intent, identityProvider, secretOauthCodes){
-            // todo better name
+        function getProfileUrl(){
+            var data = getAllDataAsObject()
 
-            var urlBase = "api/me/"
-            var url = urlBase + identityProvider + "/" + intent
+            if (data.finished_wizard){
+                return "u/" + data.orcid_id
+            }
 
-            $http.post(url, secretOauthCodes)
-                .success(function(resp){
-                    console.log("we successfully called the endpoint!", resp)
-                    setToken(resp.token)
-                })
-                .error(function(resp){
-                  console.log("problem getting token back from server!", resp)
-                    //$location.url("/")
-                })
+            if (data.num_products > 0){
+                return "wizard/confirm-products"
+
+            }
+
+            if (data.orcid_id){
+                return "wizard/add-products"
+            }
+
+            return "wizard/connect-orcid"
         }
 
 
-        function setToken(token){
-            $auth.setToken(token)
-            // make a bunch of decisions here later.
+        function getAllDataAsObject(){
+            if (!$auth.isAuthenticated){
+                return {}
+            }
+            return $auth.getPayload()
+        }
 
+        function setFromToken(token){
+            $auth.setToken(token) // synchronous
             sendTokenToIntercom()
-
         }
 
         return {
             isAuthenticatedPromise: isAuthenticatedPromise,
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
-            callMeEndpoint:callMeEndpoint
+            setFromToken: setFromToken,
+            getProfileUrl: getProfileUrl
         }
     })
