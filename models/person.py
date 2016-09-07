@@ -102,6 +102,18 @@ def get_full_twitter_profile(twitter_creds):
     return full_twitter_profile
 
 
+def make_temporary_person_from_orcid(orcid_id):
+    my_person = Person()
+
+    my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
+    my_person.created = datetime.datetime.utcnow().isoformat()
+    print u"\nin make_person: made new person for {}".format(my_person)
+
+    my_person.orcid_id = orcid_id
+    my_person.refresh_orcid_info()
+    return my_person
+
+
 def make_person(twitter_creds, high_priority=False):
     if Person.query.filter_by(twitter=twitter_creds["screen_name"]).first():
         raise PersonExistsException
@@ -140,18 +152,16 @@ def make_person(twitter_creds, high_priority=False):
 
 
 def connect_orcid(my_person, orcid_id):
-    # todo check to make sure this orcid id isn't already in the db
     print u"adding a brand new orcid_id for {}: {}".format(my_person.full_name, orcid_id)
     my_person.orcid_id = orcid_id
-    return refresh_orcid_info(my_person)
+    return refresh_orcid_info_and_save(my_person)
 
-def refresh_orcid_info(my_person):
+
+def refresh_orcid_info_and_save(my_person):
     print u"refreshing all orcid info for {}".format(my_person.orcid_id)
+    my_person.refresh_orcid_info()
 
-    my_person.set_api_raw_from_orcid()
-    my_person.set_from_orcid()
-    my_person.set_num_products()
-
+    print u"storing refreshed person in db"
     db.session.merge(my_person)
     commit_success = safe_commit(db)
     if not commit_success:
@@ -253,11 +263,8 @@ class Person(db.Model):
     )
 
 
-    def __init__(self, orcid_id):
-        self.id = orcid_id
-        self.orcid_id = orcid_id
+    def __init__(self):
         self.invalid_orcid = False
-        self.created = datetime.datetime.utcnow().isoformat()
 
 
     # doesn't have error handling; called by refresh when you want it to be robust
@@ -489,6 +496,10 @@ class Person(db.Model):
 
         return self.twitter_creds
 
+    def refresh_orcid_info(self):
+        self.set_api_raw_from_orcid()
+        self.set_from_orcid()
+        self.set_num_products()
 
 
     def calculate(self):

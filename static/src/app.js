@@ -257,6 +257,7 @@ angular.module('app').controller('AppCtrl', function(
         }
     }
 
+    
     // genre config
     var genreIcons = {
         'article': "file-text-o",
