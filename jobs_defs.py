@@ -103,6 +103,12 @@ update_registry.register(Update(
     query=q
 ))
 
+q = db.session.query(Person.id)
+q = q.filter(Person.twitter != None)
+update_registry.register(Update(
+    job=Person.update_twitter_profile_data,
+    query=q
+))
 
 q = db.session.query(Person.id)
 update_registry.register(Update(

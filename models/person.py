@@ -114,7 +114,9 @@ def make_person(twitter_creds, high_priority=False):
     full_twitter_profile = get_full_twitter_profile(twitter_creds)
     full_twitter_profile.update(twitter_creds)
     my_person.twitter_creds = full_twitter_profile
-    my_person.email = full_twitter_profile["email"]
+    if my_person.email is None:
+        my_person.email = full_twitter_profile["email"]
+
     my_person.twitter = full_twitter_profile["screen_name"]
     twitter_full_name = full_twitter_profile["name"]
 
@@ -223,6 +225,8 @@ class Person(db.Model):
     num_badges = db.Column(db.Integer)
 
     openness = db.Column(db.Float)
+
+    events_emailed = db.Column(MutableDict.as_mutable(JSONB))
     weekly_event_count = db.Column(db.Float)
     monthly_event_count = db.Column(db.Float)
     tweeted_quickly = db.Column(db.Boolean)
@@ -247,6 +251,13 @@ class Person(db.Model):
         backref=db.backref("person", lazy="subquery"),
         foreign_keys="Badge.orcid_id"
     )
+
+
+    def __init__(self, orcid_id):
+        self.id = orcid_id
+        self.orcid_id = orcid_id
+        self.invalid_orcid = False
+        self.created = datetime.datetime.utcnow().isoformat()
 
 
     # doesn't have error handling; called by refresh when you want it to be robust
@@ -403,6 +414,81 @@ class Person(db.Model):
         self.set_openness()
         self.assign_badges(limit_to_badges=["percent_fulltext"])
         self.set_badge_percentiles(limit_to_badges=["percent_fulltext"])
+
+    def email_new_stuff(self):
+        if not self.claimed_at:
+            return
+        if not self.email:
+            return
+
+        # fake it for now
+        # DATE_NOTIFICATION_EMAILS_STARTED = "2015-07-05"
+        # self.events_emailed = {"emailed": []}
+
+        DATE_NOTIFICATION_EMAILS_STARTED = "2016-07-01"
+
+        if not self.events_emailed:
+            self.events_emailed = {"emailed": []}
+
+        print u"looking for new stuff to email for {}".format(self.email)
+        posts = self.get_posts()
+        posts_to_email = []
+        for post in posts:
+            post_date_iso = post["posted_on"]
+            if post_date_iso > date_as_iso_utc(self.created):
+                if post_date_iso > DATE_NOTIFICATION_EMAILS_STARTED:
+                    if post["url"] not in self.events_emailed["emailed"]:
+                        posts_to_email.append(post)
+
+        if not posts_to_email:
+            print u"nothing to email."
+            return
+
+        print u"have things to email!"
+        post_urls = [post["url"] for post in posts_to_email]
+        self.events_emailed["emailed"] += post_urls
+
+        post_count_by_source = {}
+        for post in posts_to_email:
+            source = post["source"]
+            try:
+                post_count_by_source[source] += 1
+            except KeyError:
+                post_count_by_source[source] = 1
+
+        new_event_counts = post_count_by_source.items()
+        details_dict = self.to_dict()
+        details_dict["post_count_to_email"] = new_event_counts
+
+        send(self.email, "Your research is getting new attention online", "notification", {"profile": details_dict}, for_real=True)
+        # send(self.email, "Your research is getting new attention online", "notification", {"profile": details_dict}, for_real=False)
+        save_email(self.orcid_id, new_event_counts)
+
+
+    ## used to fix people's pictures if they have updated them on twitter
+    ## called from command line, ie python update.py Person.update_twitter_profile_data --id=0000-0003-3904-7546
+    def update_twitter_profile_data(self):
+        if not self.twitter or not self.twitter_creds:
+            print u"Can't update twitter, doesn't have twitter username or twitter_creds"
+            return None
+
+        oauth = OAuth1Session(
+            os.getenv('TWITTER_CONSUMER_KEY'),
+            client_secret=os.getenv('TWITTER_CONSUMER_SECRET')
+        )
+        url = "https://api.twitter.com/1.1/users/lookup.json?screen_name={}".format(self.twitter)
+        r = oauth.get(url)
+        response_data = r.json()
+        first_profile = response_data[0]
+
+        keys_to_update = ["profile_image_url", "profile_image_url_https"]
+        for k in keys_to_update:
+            self.twitter_creds[k] = first_profile[k]
+
+        print u"Updated twitter creds for @{}".format(self.twitter)
+
+        return self.twitter_creds
+
 
 
     def calculate(self):
