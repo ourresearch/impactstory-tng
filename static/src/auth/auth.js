@@ -39,10 +39,21 @@ angular.module('auth', [
             $location.url("/")
             return false
         }
-
         requestObj.redirectUri = $location.path()
-        CurrentUser.callMeEndpoint($routeParams.intent, $routeParams.identityProvider, requestObj)
 
+        var urlBase = "api/me/"
+        var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
+
+        $http.post(url, requestObj)
+            .success(function(resp){
+                console.log("we successfully called the endpoint!", resp)
+                CurrentUser.setFromToken(resp.token)
+                $location.path(CurrentUser.getProfileUrl())
+            })
+            .error(function(resp){
+              console.log("problem getting token back from server!", resp)
+                // todo tell the user what went wrong
+            })
 
     })
 
