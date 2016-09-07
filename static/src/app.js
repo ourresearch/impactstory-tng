@@ -3,6 +3,7 @@ angular.module('app', [
     // external libs
     'ngRoute',
     'ngMessages',
+    'ngCookies',
     'satellizer',
 
     'ngResource',
@@ -70,6 +71,7 @@ angular.module('app').run(function($route,
                                    $rootScope,
                                    $q,
                                    $timeout,
+                                   $cookies,
                                    $auth,
                                    $http,
                                    $location,
@@ -151,7 +153,15 @@ angular.module('app').run(function($route,
             is_deleted: false
 
         }
+
+        // this it temporary till we do the twitter-based signup
+        if ($cookies.get("sawOpenconLandingPage")) {
+            intercomInfo.saw_opencon_landing_page = true
+        }
+
+
         console.log("sending to intercom", intercomInfo)
+
         window.Intercom("boot", intercomInfo)
     }
 
@@ -198,6 +208,7 @@ angular.module('app').controller('AppCtrl', function(
     $scope.moment = moment // this will break unless moment.js loads over network...
 
     $scope.global = {}
+
     $rootScope.setPersonIsLoading = function(isLoading){
         $scope.global.personIsLoading = !!isLoading
     }
