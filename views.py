@@ -5,11 +5,12 @@ from models.orcid import get_orcid_id_from_oauth
 from models.person import Person
 from models.person import PersonExistsException
 from models.person import make_person
-from models.person import refresh_orcid_info
+from models.person import refresh_orcid_info_and_save
 from models.person import connect_orcid
 from models.person import refresh_profile
 from models.person import refresh_person
 from models.person import delete_person
+from models.person import make_temporary_person_from_orcid
 from models.product import get_all_products
 from models.refset import num_people_in_db
 from models.badge import badge_configs
@@ -223,8 +224,7 @@ def profile_endpoint_polling(orcid_id):
 def profile_endpoint(orcid_id):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
     if not my_person:
-        print u"returning 404: orcid profile {} does not exist".format(orcid_id)
-        abort_json(404, "That ORCID profile doesn't exist")
+       my_person = make_temporary_person_from_orcid(orcid_id)
     return json_resp(my_person.to_dict())
 
 
@@ -393,7 +393,7 @@ def orcid_connect():
 @login_required
 def refresh_my_orcid():
     my_person = Person.query.filter_by(id=g.my_id).first()
-    my_person = refresh_orcid_info(my_person)
+    my_person = refresh_orcid_info_and_save(my_person)
     return jsonify({"token":  my_person.get_token()})
 
 
