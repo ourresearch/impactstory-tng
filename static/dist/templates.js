@@ -1,4 +1,4 @@
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/connect-orcid.tpl.html', 'wizard/my-publications.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -574,132 +574,6 @@ angular.module("footer/footer.tpl.html", []).run(["$templateCache", function($te
     "    </div>\n" +
     "\n" +
     "</div>");
-}]);
-
-angular.module("header/header.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("header/header.tpl.html",
-    "<div class=\"ti-header\" ng-controller=\"headerCtrl\">\n" +
-    "   <h1>\n" +
-    "      <a href=\"/\">\n" +
-    "         <img src=\"static/img/logo-circle.png\" alt=\"\"/>\n" +
-    "      </a>\n" +
-    "   </h1>\n" +
-    "\n" +
-    "   <div class=\"ti-menu\">\n" +
-    "      <a href=\"leaderboard?type=people\"\n" +
-    "         popover=\"Top authors\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\"\n" +
-    "         class=\"menu-link\" id=\"leaders-menu-link\">\n" +
-    "         <i class=\"fa fa-user\"></i>\n" +
-    "      </a>\n" +
-    "      <a href=\"leaderboard?type=packages\"\n" +
-    "         popover=\"Top projects\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\"\n" +
-    "         class=\"menu-link\" id=\"leaders-menu-link\">\n" +
-    "         <i class=\"fa fa-archive\"></i>\n" +
-    "      </a>\n" +
-    "      <a href=\"leaderboard?type=tags\"\n" +
-    "         popover=\"Top topics\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\"\n" +
-    "         class=\"menu-link\" id=\"leaders-menu-link\">\n" +
-    "         <i class=\"fa fa-tag\"></i>\n" +
-    "      </a>\n" +
-    "\n" +
-    "      <!-- needs weird style hacks -->\n" +
-    "      <a href=\"about\"\n" +
-    "         class=\"menu-link about\" id=\"leaders-menu-link\">\n" +
-    "         <i\n" +
-    "         popover=\"Learn more about Depsy\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\" class=\"fa fa-question-circle\"></i>\n" +
-    "      </a>\n" +
-    "\n" +
-    "\n" +
-    "   </div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "   <div class=\"search-box\">\n" +
-    "    <input type=\"text\"\n" +
-    "           id=\"search-box\"\n" +
-    "           ng-model=\"searchResultSelected\"\n" +
-    "           placeholder=\"Search packages, authors, and topics\"\n" +
-    "           typeahead=\"result as result.name for result in doSearch($viewValue)\"\n" +
-    "           typeahead-loading=\"loadingLocations\"\n" +
-    "           typeahead-no-results=\"noResults\"\n" +
-    "           typeahead-template-url=\"header/search-result.tpl.html\"\n" +
-    "           typeahead-focus-first=\"false\"\n" +
-    "           typeahead-on-select=\"onSelect($item)\"\n" +
-    "           class=\"form-control input-lg\">\n" +
-    "   </div>\n" +
-    "\n" +
-    "\n" +
-    "</div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "");
-}]);
-
-angular.module("header/search-result.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("header/search-result.tpl.html",
-    "\n" +
-    "<div class=\"typeahead-group-header\" ng-if=\"match.model.is_first\">\n" +
-    "   <span class=\"group-header-type pypy-package\" ng-if=\"match.model.type=='pypi_project'\">\n" +
-    "      <img src=\"static/img/python.png\" alt=\"\"/>\n" +
-    "      Python packages <span class=\"where\">on <a href=\"https://pypi.python.org/pypi\">PyPI</a></span>\n" +
-    "   </span>\n" +
-    "   <span class=\"group-header-type cran-package\" ng-if=\"match.model.type=='cran_project'\">\n" +
-    "      <img src=\"static/img/r-logo.png\" alt=\"\"/>\n" +
-    "      R packages <span class=\"where\">on <a href=\"https://cran.r-project.org/\">CRAN</a></span>\n" +
-    "   </span>\n" +
-    "   <span class=\"group-header-type people\" ng-if=\"match.model.type=='person'\">\n" +
-    "      <i class=\"fa fa-user\"></i>\n" +
-    "      People\n" +
-    "   </span>\n" +
-    "   <span class=\"group-header-type tags\" ng-if=\"match.model.type=='tag'\">\n" +
-    "      <i class=\"fa fa-tag\"></i>\n" +
-    "      Tags\n" +
-    "   </span>\n" +
-    "\n" +
-    "</div>\n" +
-    "<a ng-href=\"package/python/{{ match.model.name }}\" ng-if=\"match.model.type=='pypi_project'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "   <span  class=\"summary\">\n" +
-    "      {{ match.model.summary }}\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "<a ng-href=\"package/r/{{ match.model.name }}\" ng-if=\"match.model.type=='cran_project'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "   <span  class=\"summary\">\n" +
-    "      {{ match.model.summary }}\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "<a ng-href=\"person/{{ match.model.id }}\" ng-if=\"match.model.type=='person'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "<a ng-href=\"tag/{{ match.model.urlName }}\" ng-if=\"match.model.type=='tag'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "   <span class=\"tag summary\">\n" +
-    "      {{ match.model.impact }} packages\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "\n" +
-    "\n" +
-    "");
 }]);
 
 angular.module("helps.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -1756,41 +1630,8 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
     "");
 }]);
 
-angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("wizard/my-publications.tpl.html",
-    "<div class=\"page wizard add-publications\">\n" +
-    "\n" +
-    "    <h2>my publications</h2>\n" +
-    "    <div>\n" +
-    "        Nice job, we found {{ auth.getPayload().num_products }} publications for you.\n" +
-    "        Does that look good?\n" +
-    "    </div>\n" +
-    "    <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
-    "        <span ng-click=\"finishProfile()\" class=\"btn btn-lg btn-success\">\n" +
-    "            <i class=\"fa fa-check\"></i>\n" +
-    "            <span class=\"text\">\n" +
-    "                <span class=\"main\">Close enough</span>\n" +
-    "                <span class=\"extra\">I can always add more later</span>\n" +
-    "            </span>\n" +
-    "        </span>\n" +
-    "        <a href=\"wizard/add-publications\" class=\"btn btn-lg btn-danger\">\n" +
-    "            <i class=\"fa fa-times\"></i>\n" +
-    "            <span class=\"text\">\n" +
-    "                <span class=\"main\">Nope</span>\n" +
-    "                <span class=\"extra\">Let's fix this now.</span>\n" +
-    "            </span>\n" +
-    "        </a>\n" +
-    "    </div>\n" +
-    "    <div class=\"loading\" ng-show=\"actionSelected\">\n" +
-    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
-    "        <span class=\"text\">Great! Then we'll build your profile right now.\n" +
-    "            It'll take a few seconds&hellip;</span>\n" +
-    "    </div>\n" +
-    "</div>");
-}]);
-
-angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("wizard/welcome.tpl.html",
+angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/connect-orcid.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
     "    <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>\n" +
     "    <p>\n" +
@@ -1854,6 +1695,39 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "\n" +
     "</div>\n" +
     "");
+}]);
+
+angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/my-publications.tpl.html",
+    "<div class=\"page wizard add-publications\">\n" +
+    "\n" +
+    "    <h2>my publications</h2>\n" +
+    "    <div>\n" +
+    "        Nice job, we found {{ auth.getPayload().num_products }} publications for you.\n" +
+    "        Does that look good?\n" +
+    "    </div>\n" +
+    "    <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
+    "        <span ng-click=\"finishProfile()\" class=\"btn btn-lg btn-success\">\n" +
+    "            <i class=\"fa fa-check\"></i>\n" +
+    "            <span class=\"text\">\n" +
+    "                <span class=\"main\">Close enough</span>\n" +
+    "                <span class=\"extra\">I can always add more later</span>\n" +
+    "            </span>\n" +
+    "        </span>\n" +
+    "        <a href=\"wizard/add-publications\" class=\"btn btn-lg btn-danger\">\n" +
+    "            <i class=\"fa fa-times\"></i>\n" +
+    "            <span class=\"text\">\n" +
+    "                <span class=\"main\">Nope</span>\n" +
+    "                <span class=\"extra\">Let's fix this now.</span>\n" +
+    "            </span>\n" +
+    "        </a>\n" +
+    "    </div>\n" +
+    "    <div class=\"loading\" ng-show=\"actionSelected\">\n" +
+    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
+    "        <span class=\"text\">Great! Then we'll build your profile right now.\n" +
+    "            It'll take a few seconds&hellip;</span>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("workspace.tpl.html", []).run(["$templateCache", function($templateCache) {

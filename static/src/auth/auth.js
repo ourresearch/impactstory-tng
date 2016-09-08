@@ -30,9 +30,13 @@ angular.module('auth', [
             console.log("login orcid")
         }
 
+
+
+
+
     })
 
-    .controller("OauthCtrl", function($scope, $routeParams, $location, $http, CurrentUser){
+    .controller("OauthCtrl", function($scope, $cookies, $routeParams, $location, $http, CurrentUser){
         var requestObj = $location.search()
         if (_.isEmpty(requestObj)){
             console.log("we didn't get any codes or verifiers in the URL. aborting.")
@@ -40,6 +44,11 @@ angular.module('auth', [
             return false
         }
         requestObj.redirectUri = $location.path()
+
+        // track signups that started at the opencon landing page
+        if ($cookies.get("sawOpenconLandingPage")) {
+            requestObj.sawOpenconLandingPage = true
+        }
 
         var urlBase = "api/me/"
         var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent

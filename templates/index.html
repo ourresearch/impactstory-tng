@@ -17,6 +17,7 @@
 
 <body ng-cloak>
 
+    <!-- site header -->
    <div class="ti-nav landing-page-{{ global.isLandingPage }}">
       <h1>
          <a href="/">
@@ -39,11 +40,12 @@
       </span>
 
       <span class="controls not-logged-in" ng-show="!auth.isAuthenticated()">
-         <a href="" ng-click="authenticate()" class="login-btn">Log in</a>
+         <a href="login" class="login-btn">Log in</a>
       </span>
-
    </div>
 
+
+    <!-- site content -->
    <div class="main-view container-fluid" ng-view></div>
 
 
