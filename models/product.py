@@ -224,6 +224,11 @@ class Product(db.Model):
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
             raise
+        except requests.Timeout:
+            print u"timeout from requests when getting sherlock data"
+            logging.exception("exception in set_oa_from_sherlock")
+            print u"rolling back in case it is needed"
+            db.session.rollback()
         except Exception:
             logging.exception("exception in set_oa_from_sherlock")
             print u"rolling back in case it is needed"
@@ -555,8 +560,8 @@ class Product(db.Model):
                             self.doi = doi
                             return doi
             except requests.Timeout:
+                # print u"timeout"
                 pass
-                # print "timeout"
 
         # print ".",
         return None
@@ -586,6 +591,7 @@ class Product(db.Model):
             raise
         except requests.Timeout:
             self.error = "timeout from requests when getting crossref data"
+            print self.error
         except Exception:
             logging.exception("exception in set_crossref_api_raw")
             self.error = "misc error in set_crossref_api_raw"
@@ -656,6 +662,7 @@ class Product(db.Model):
             raise
         except requests.Timeout:
             self.error = "timeout from requests when getting altmetric.com metrics"
+            print self.error
         except Exception:
             logging.exception("exception in set_altmetric_api_raw")
             self.error = "misc error in set_altmetric_api_raw"

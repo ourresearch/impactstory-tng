@@ -321,6 +321,7 @@ class Person(db.Model):
             # let these ones through, don't save anything to db
             raise
         except requests.Timeout:
+            print u"got a requests timeout"
             self.error = "requests timeout"
         except OrcidDoesNotExist:
             self.invalid_orcid = True
@@ -359,6 +360,7 @@ class Person(db.Model):
             # let these ones through, don't save anything to db
             raise
         except requests.Timeout:
+            print u"got a requests timeout"
             self.error = "requests timeout"
         except OrcidDoesNotExist:
             self.invalid_orcid = True
