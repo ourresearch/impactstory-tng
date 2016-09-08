@@ -92,11 +92,14 @@ angular.module('currentUser', [
             }
 
             if (data.orcid_id){
-                return "wizard/add-products"
+                return "wizard/add-publications"
             }
 
             return "wizard/connect-orcid"
         }
+
+
+
 
 
         function getAllDataAsObject(){

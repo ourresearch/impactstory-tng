@@ -5,9 +5,9 @@ angular.module('wizard', [
 ])
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/wizard/welcome', {
-            templateUrl: "wizard/welcome.tpl.html",
-            controller: "WelcomePageCtrl",
+        $routeProvider.when('/wizard/connect-orcid', {
+            templateUrl: "wizard/connect-orcid.tpl.html",
+            controller: "ConnectOrcidPageCtrl",
             resolve: {
                 isLoggedIn: function(CurrentUser){
                     return CurrentUser.isAuthenticatedPromise()
@@ -43,21 +43,22 @@ angular.module('wizard', [
 
 
 
-    .controller("WelcomePageCtrl", function($scope, $location, $http, $auth){
+    .controller("ConnectOrcidPageCtrl", function($scope, $location, $http, $auth){
 
 
-        // @todo this probably should all go in CurrentUser
-        if ($auth.getPayload().orcid_id){
-            console.log("we've got their ORCID already")
-            if ($auth.getPayload().num_products){
-                console.log("they are all set, redirecting to their profile")
-                $location.url("u/" + $auth.getPayload().orcid_id)
-            }
-            else {
-                console.log("no products! redirecting to add-products")
-                $location.url("wizard/add-products")
-            }
-        }
+        //if ($auth.getPayload().orcid_id){
+        //    console.log("we've got their ORCID already")
+        //    if ($auth.getPayload().num_products){
+        //        console.log("they are all set, redirecting to their profile")
+        //        $location.url("u/" + $auth.getPayload().orcid_id)
+        //    }
+        //    else {
+        //        console.log("no products! redirecting to add-products")
+        //        $location.url("wizard/add-products")
+        //    }
+        //}
+
+
 
 
         console.log("WelcomePageCtrl is running!")

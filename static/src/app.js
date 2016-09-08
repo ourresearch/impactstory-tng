@@ -26,6 +26,7 @@ angular.module('app', [
     'personPage',
     'settingsPage',
     'badgePage',
+    'wizard',
     'aboutPages'
 
 
