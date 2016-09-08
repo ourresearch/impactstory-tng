@@ -82,6 +82,11 @@ angular.module('currentUser', [
         function getProfileUrl(){
             var data = getAllDataAsObject()
 
+            console.log("getProfileUrl()", data)
+
+
+            return false
+
             if (data.finished_wizard){
                 return "u/" + data.orcid_id
             }
