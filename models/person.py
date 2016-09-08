@@ -716,7 +716,12 @@ class Person(db.Model):
             # example http://depsy.org/api/search/person?email=ethan@weecology.org
             url = "http://depsy.org/api/search/person?email={}".format(self.email)
             # might throw requests.Timeout
-            r = requests.get(url, headers=headers, timeout=10)
+            try:
+                r = requests.get(url, headers=headers, timeout=10)
+            except requests.Timeout:
+                print u"timeout in set_depsy"
+                return
+
             response_dict = r.json()
             if response_dict["count"] > 0:
                 self.depsy_id = response_dict["list"][0]["id"]
