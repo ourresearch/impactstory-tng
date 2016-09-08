@@ -240,6 +240,8 @@ class Person(db.Model):
     weekly_event_count = db.Column(db.Float)
     monthly_event_count = db.Column(db.Float)
     tweeted_quickly = db.Column(db.Boolean)
+    saw_opencon_landing_page = db.Column(db.Boolean)
+
     coauthors = db.Column(MutableDict.as_mutable(JSONB))
 
     error = db.Column(db.Text)
