@@ -1,4 +1,4 @@
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/connect-orcid.tpl.html', 'wizard/my-publications.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/connect-orcid.tpl.html', 'wizard/my-publications.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -390,11 +390,13 @@ angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templ
     "<div class=\"page login-page\">\n" +
     "    <h2>Log in</h2>\n" +
     "    <div class=\"actions\">\n" +
-    "        <div class=\"btn btn-lg btn-default\" ng-click=\"loginTwitter()\">\n" +
+    "        <div class=\"btn btn-lg btn-default\"\n" +
+    "             ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
     "            <i class=\"fa fa-twitter\"></i>\n" +
     "            Log in with Twitter\n" +
     "        </div>\n" +
-    "        <div class=\"btn btn-lg btn-default\" ng-click=\"loginOrcid()\">\n" +
+    "        <div class=\"btn btn-lg btn-default\"\n" +
+    "             ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
     "            Log in with ORCID\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -1576,6 +1578,14 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "</md-dialog>\n" +
     "</script>\n" +
     "");
+}]);
+
+angular.module("static-pages/page-not-found.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("static-pages/page-not-found.tpl.html",
+    "<div class=\"landing static-page\">\n" +
+    "    <h1>Sorry, we couldn't find that page!</h1>\n" +
+    "    \n" +
+    "</div>");
 }]);
 
 angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", function($templateCache) {

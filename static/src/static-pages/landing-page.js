@@ -57,14 +57,14 @@ angular.module('staticPages', [
 
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/twitter-login', {
-            templateUrl: "static-pages/twitter-login.tpl.html",
-            controller: "TwitterLoginCtrl"
+        $routeProvider.when('/page-not-found', {
+            templateUrl: "static-pages/page-not-found.tpl.html",
+            controller: "PageNotFoundCtrl"
         })
     })
 
-    .controller("TwitterLoginCtrl", function($scope){
-        console.log("twitter page controller is running!")
+    .controller("PageNotFoundCtrl", function($scope){
+        console.log("PageNotFound controller is running!")
 
     })
 

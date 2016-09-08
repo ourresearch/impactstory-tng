@@ -400,7 +400,7 @@ def refresh_my_orcid():
 
 @app.route("/api/me/twitter/login", methods=["POST"])
 def twitter_login():
-    twitter_creds = get_twitter_creds(request.json.get('token'), request.json.get('verifier'))
+    twitter_creds = get_twitter_creds(request.json.get('oauth_token'), request.json.get('oauth_verifier'))
 
     my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
     if not my_person:
@@ -412,7 +412,7 @@ def twitter_login():
 
 @app.route("/api/me/twitter/register", methods=["POST"])
 def twitter_register_but_login_if_they_are_already_registered():
-    twitter_creds = get_twitter_creds(request.json.get('token'), request.json.get('verifier'))
+    twitter_creds = get_twitter_creds(request.json.get('oauth_token'), request.json.get('oauth_verifier'))
 
     try:
         my_person = make_person(twitter_creds)

@@ -1,11 +1,13 @@
 <div class="page login-page">
     <h2>Log in</h2>
     <div class="actions">
-        <div class="btn btn-lg btn-default" ng-click="loginTwitter()">
+        <div class="btn btn-lg btn-default"
+             ng-click="currentUser.twitterAuthenticate('login')">
             <i class="fa fa-twitter"></i>
             Log in with Twitter
         </div>
-        <div class="btn btn-lg btn-default" ng-click="loginOrcid()">
+        <div class="btn btn-lg btn-default"
+             ng-click="currentUser.orcidAuthenticate('login', true)">
             Log in with ORCID
         </div>
     </div>

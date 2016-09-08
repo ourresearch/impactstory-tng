@@ -21,14 +21,10 @@ angular.module('auth', [
     })
 
 
-    .controller("LoginCtrl", function($scope, $location, $http, $auth){
+    .controller("LoginCtrl", function($scope, CurrentUser, $location, $http, $auth){
         console.log("LoginCtrl is running!")
-        $scope.loginTwitter = function(){
-            console.log("login twitter")
-        }
-        $scope.loginOrcid = function(){
-            console.log("login orcid")
-        }
+        $scope.currentUser = CurrentUser
+
 
 
 
@@ -53,6 +49,7 @@ angular.module('auth', [
         var urlBase = "api/me/"
         var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
 
+        console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
             .success(function(resp){
                 console.log("we successfully called the endpoint!", resp)
