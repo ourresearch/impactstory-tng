@@ -76,6 +76,7 @@ angular.module('app').run(function($route,
                                    $auth,
                                    $http,
                                    $location,
+                                   CurrentUser,
                                    Person) {
 
 
@@ -87,12 +88,9 @@ angular.module('app').run(function($route,
     ga('create', 'UA-23384030-1', 'auto');
 
     // if the user is logged in, get the most up-to-date token
-    if ($auth.isAuthenticated()){
-        $http.get("api/me").success(function(resp){
-            console.log("refreshing the current user's token", $auth.getPayload())
-            $auth.setToken(resp.token)
-        })
-    }
+    CurrentUser.boot()
+
+
 
 
 
@@ -202,10 +200,12 @@ angular.module('app').controller('AppCtrl', function(
     $auth,
     $interval,
     $http,
+    CurrentUser,
     $mdDialog,
     $sce){
 
     $scope.auth = $auth
+    $scope.currentUser = CurrentUser
     $scope.numFormat = NumFormat
     $scope.moment = moment // this will break unless moment.js loads over network...
 

@@ -6,6 +6,7 @@ angular.module('currentUser', [
     .factory("CurrentUser", function($auth, $http, $q, $route, $location){
 
 
+        var data
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
@@ -79,36 +80,53 @@ angular.module('currentUser', [
             return true
         }
 
-        function sendToCorrectPage(){
+        function sendToCorrectPage(requireLogin){
+            var deferred = $q.defer()
+            var currentPath = $location.path()
+
             if (!isLoggedIn()){
-                return null
+                if (requireLogin){
+                    $location.url("login")
+                }
+                else {
+                    deferred.resolve()
+                }
             }
 
-            var data = getAllDataAsObject()
-            console.log("calling sendToCorrectPage() with this data", data)
-            var url
-            if (data.finished_wizard){
-                url = "u/" + data.orcid_id
-            }
-
-            else if (data.num_products > 0){
-                url = "wizard/confirm-publications"
-            }
-
-            else if (data.orcid_id){
-                url = "wizard/add-publications"
-            }
             else {
-                url = "wizard/connect-orcid"
+                console.log("calling sendToCorrectPage() with this data", data)
+                var url
+
+                if (data.finished_wizard){
+                    url = "u/" + data.orcid_id
+                }
+
+                else if (data.num_products > 0){
+                    url = "wizard/confirm-publications"
+                }
+
+                else if (data.orcid_id){
+                    url = "wizard/add-publications"
+                }
+                else {
+                    url = "wizard/connect-orcid"
+                }
+
+
+                if (currentPath == url){
+                    deferred.resolve()
+                }
+                else {
+                    $location.url(url)
+                }
             }
 
-            $location.url(url)
-            return true
-
+            return deferred.promise
         }
 
+
         function isLoggedIn(){
-            return !_.isEmpty(getAllDataAsObject())
+            return $auth.isAuthenticated()
         }
 
         function setProperty(k, v){
@@ -123,15 +141,35 @@ angular.module('currentUser', [
                 })
         }
 
-        function getAllDataAsObject(){
-            if (!$auth.isAuthenticated){
-                return {}
+
+        function logout(){
+            $auth.logout()
+            _.each(data, function(v, k){
+                delete data[k]
+            })
+            return true
+        }
+
+        function boot(){
+            data = $auth.getPayload()
+            return reloadFromServer()
+        }
+
+        function reloadFromServer(){
+            if (!isLoggedIn){
+                return false
             }
-            return $auth.getPayload()
+
+            $http.get("api/me").success(function(resp){
+                console.log("refreshing data in CurrentUser", resp)
+                setFromToken(resp.token)
+            })
         }
 
         function setFromToken(token){
             $auth.setToken(token) // synchronous
+            data = $auth.getPayload()
+
             sendTokenToIntercom()
         }
 
@@ -141,6 +179,11 @@ angular.module('currentUser', [
             orcidAuthenticate: orcidAuthenticate,
             setFromToken: setFromToken,
             sendToCorrectPage: sendToCorrectPage,
-            setProperty: setProperty
+            setProperty: setProperty,
+            d: data,
+            logout: logout,
+            isLoggedIn: isLoggedIn,
+            reloadFromServer: reloadFromServer,
+            boot: boot
         }
     })

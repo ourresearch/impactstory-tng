@@ -9,16 +9,8 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                sendToCorrectPage: function(CurrentUser, $q){
-                    var deferred = $q.defer()
-                    var sendingElsewhere = CurrentUser.sendToCorrectPage()
-
-                    if (sendingElsewhere){
-                        return deferred.promise
-                    }
-                    else {
-                        return $q.when(true)
-                    }
+                sendToCorrectPage: function(CurrentUser){
+                    return CurrentUser.sendToCorrectPage(false)
                 },
                 customLandingPage: function($q){
                     return $q.when("default")
@@ -32,16 +24,8 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                sendToCorrectPage: function(CurrentUser, $q){
-                    var deferred = $q.defer()
-                    var sendingElsewhere = CurrentUser.sendToCorrectPage()
-
-                    if (sendingElsewhere){
-                        return deferred.promise
-                    }
-                    else {
-                        return $q.when(true)
-                    }
+                sendToCorrectPage: function(CurrentUser){
+                    return CurrentUser.sendToCorrectPage(false)
                 },
                 customLandingPage: function($q){
                     return $q.when("opencon")
