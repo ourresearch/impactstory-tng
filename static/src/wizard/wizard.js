@@ -18,9 +18,9 @@ angular.module('wizard', [
 
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/wizard/my-publications', {
-            templateUrl: "wizard/my-publications.tpl.html",
-            controller: "MyPublicationsCtrl",
+        $routeProvider.when('/wizard/confirm-publications', {
+            templateUrl: "wizard/confirm-publications.tpl.html",
+            controller: "ConfirmPublicationsCtrl",
             resolve: {
                 isLoggedIn: function(CurrentUser){
                     return CurrentUser.isAuthenticatedPromise()
@@ -72,8 +72,19 @@ angular.module('wizard', [
 
 
 
-    .controller("MyPublicationsCtrl", function($scope, $location, $http, $auth){
-        console.log("MyPublicationsCtrl is running!")
+    .controller("ConfirmPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser){
+        console.log("ConfirmPublicationsCtrl is running!")
+
+        // todo add this to the template.
+        $scope.confirm = function(){
+            CurrentUser.setProperty("finished_wizard", true).then(
+                function(x, y, z){
+                    console.log("finished setting finished_wizard", x, y, z)
+                    $location.url("u/" + $auth.getPayload().orcid_id) // replace with CurrentUser method
+                }
+            )
+        }
+
         $scope.finishProfile = function(){
             console.log("finishProfile()")
             $scope.actionSelected = "finish-profile"
@@ -83,7 +94,7 @@ angular.module('wizard', [
                     $auth.setToken(resp.token)
 
                     // todo this might should be a method on CurrentUser
-                    $location.url("u/" + $auth.getPayload().orcid_id)
+                    $location.path("u/" + $auth.getPayload().orcid_id)
                 })
                 .error(function(resp){
                     console.log("we tried to refresh profile, but something went wrong :(", resp)

@@ -43,8 +43,8 @@ angular.module('app').config(function ($routeProvider,
 
     $locationProvider.html5Mode(true);
 
-    // handle 404s by redirecting to landing page.
-    $routeProvider.otherwise({ redirectTo: '/' })
+    // handle 404s.
+    $routeProvider.otherwise({ redirectTo: 'page-not-found' })
 
     $mdThemingProvider.theme('default')
         .primaryPalette('deep-orange')
@@ -177,9 +177,10 @@ angular.module('app').run(function($route,
 
 
     $rootScope.$on('$routeChangeError', function(event, current, previous, rejection){
-        console.log("$routeChangeError, redirecting to /")
+        console.log("$routeChangeError! here's some things to look at: ", event, current, previous, rejection)
+
         $rootScope.setPersonIsLoading(false)
-        $location.url("/")
+        $location.url("page-not-found")
         window.scrollTo(0, 0)
     });
 

@@ -52,9 +52,9 @@ angular.module('auth', [
         console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
             .success(function(resp){
-                console.log("we successfully called the endpoint!", resp)
+                console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
-                $location.path(CurrentUser.getProfileUrl())
+                $location.url(CurrentUser.getProfileUrl())
             })
             .error(function(resp){
               console.log("problem getting token back from server!", resp)

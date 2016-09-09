@@ -81,6 +81,17 @@ def set_person_email(orcid_id, email, high_priority=False):
         print u"COMMIT fail on {}".format(orcid_id)
 
 
+def update_person(my_person, properties_to_change):
+    for k, v in properties_to_change:
+        setattr(my_person, k, v)
+
+    db.session.merge(my_person)
+    commit_success = safe_commit(db)
+    if not commit_success:
+        print u"COMMIT fail on {}".format(my_person.orcid_id)
+
+
+
 def set_person_claimed_at(my_person):
     my_person.claimed_at = datetime.datetime.utcnow().isoformat()
     db.session.merge(my_person)
