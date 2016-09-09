@@ -6,7 +6,7 @@ angular.module('currentUser', [
     .factory("CurrentUser", function($auth, $http, $q, $route, $location){
 
 
-        var data
+        var data = {}
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
@@ -25,12 +25,6 @@ angular.module('currentUser', [
             return deferred.promise
         }
 
-
-        var doTheyHaveProducts = function(){
-            $http.get("/api/me").success(function(resp){
-
-            })
-        }
 
 
         var twitterAuthenticate = function (intent) {
@@ -80,9 +74,53 @@ angular.module('currentUser', [
             return true
         }
 
-        function sendToCorrectPage(requireLogin){
-            var deferred = $q.defer()
+        function sendHome(){
+            console.log("calling sendToCorrectPage() with this data", data)
+            var url
             var currentPath = $location.path()
+
+
+            if (data.finished_wizard && isMyProfile(currentPath)){
+                url = currentPath
+            }
+
+            else if (data.finished_wizard){
+                url = "u/" + data.orcid_id
+            }
+
+            else if (data.num_products > 0){
+                url = "wizard/confirm-publications"
+            }
+
+            else if (data.orcid_id){
+                url = "wizard/add-publications"
+            }
+
+            else {
+                url = "wizard/connect-orcid"
+            }
+
+            if (currentPath == url ){
+                return false
+            }
+            else {
+                $location.url(url)
+                return true
+            }
+        }
+
+        function isMyProfile(url){
+            if (!data.orcid_id){
+                return false
+            }
+            return url.indexOf(data.orcid_id) > -1
+        }
+
+
+
+
+        function sendHomePromise(requireLogin){
+            var deferred = $q.defer()
 
             if (!isLoggedIn()){
                 if (requireLogin){
@@ -94,30 +132,9 @@ angular.module('currentUser', [
             }
 
             else {
-                console.log("calling sendToCorrectPage() with this data", data)
-                var url
-
-                if (data.finished_wizard){
-                    url = "u/" + data.orcid_id
-                }
-
-                else if (data.num_products > 0){
-                    url = "wizard/confirm-publications"
-                }
-
-                else if (data.orcid_id){
-                    url = "wizard/add-publications"
-                }
-                else {
-                    url = "wizard/connect-orcid"
-                }
-
-
-                if (currentPath == url){
+                var redirecting =  sendHome()
+                if (!redirecting){
                     deferred.resolve()
-                }
-                else {
-                    $location.url(url)
                 }
             }
 
@@ -151,12 +168,16 @@ angular.module('currentUser', [
         }
 
         function boot(){
-            data = $auth.getPayload()
+            _.each($auth.getPayload(), function(v, k){
+                data[k] = v
+            })
             return reloadFromServer()
         }
 
         function reloadFromServer(){
-            if (!isLoggedIn){
+            console.log("reloading from server")
+            if (!isLoggedIn()){
+                console.log("user is not logged in")
                 return false
             }
 
@@ -168,7 +189,9 @@ angular.module('currentUser', [
 
         function setFromToken(token){
             $auth.setToken(token) // synchronous
-            data = $auth.getPayload()
+            _.each($auth.getPayload(), function(v, k){
+                data[k] = v
+            })
 
             sendTokenToIntercom()
         }
@@ -178,12 +201,14 @@ angular.module('currentUser', [
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
             setFromToken: setFromToken,
-            sendToCorrectPage: sendToCorrectPage,
+            sendHome: sendHome,
+            sendHomePromise: sendHomePromise,
             setProperty: setProperty,
             d: data,
             logout: logout,
             isLoggedIn: isLoggedIn,
             reloadFromServer: reloadFromServer,
-            boot: boot
+            boot: boot,
+            isMyProfile: isMyProfile
         }
     })

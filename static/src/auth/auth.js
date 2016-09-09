@@ -54,7 +54,7 @@ angular.module('auth', [
             .success(function(resp){
                 console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
-                CurrentUser.sendToCorrectPage()
+                CurrentUser.sendHome()
 
             })
             .error(function(resp){

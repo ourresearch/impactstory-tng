@@ -10,7 +10,8 @@ angular.module('wizard', [
             controller: "ConnectOrcidPageCtrl",
             resolve: {
                 redirect: function(CurrentUser){
-                    return CurrentUser.sendToCorrectPage(true)
+
+                    return CurrentUser.sendHomePromise(true)
                 }
             }
         })
@@ -23,7 +24,7 @@ angular.module('wizard', [
             controller: "ConfirmPublicationsCtrl",
             resolve: {
                 redirect: function(CurrentUser){
-                    return CurrentUser.sendToCorrectPage(true)
+                    return CurrentUser.sendHomePromise(true)
                 }
             }
         })
@@ -35,7 +36,7 @@ angular.module('wizard', [
             controller: "AddPublicationsCtrl",
             resolve: {
                 redirect: function(CurrentUser){
-                    return CurrentUser.sendToCorrectPage(true)
+                    return CurrentUser.sendHomePromise(true)
                 }
             }
         })
