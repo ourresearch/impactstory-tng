@@ -23,7 +23,7 @@ angular.module('settingsPage', [
 
 
 
-    .controller("settingsPageCtrl", function($scope, $rootScope, $auth, $route, $location, $http, Person){
+    .controller("settingsPageCtrl", function($scope, $rootScope, $auth, $route, $location, $http, Person, CurrentUser){
 
         console.log("the settings page loaded")
         var myOrcidId = $auth.getPayload().sub
@@ -41,7 +41,7 @@ angular.module('settingsPage', [
                     })
 
 
-                    $auth.logout()
+                    CurrentUser.logout()
                     $location.path("/")
                     alert("Your profile has been deleted.")
                 })

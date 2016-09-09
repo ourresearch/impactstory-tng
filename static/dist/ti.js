@@ -255,6 +255,7 @@ angular.module('app').run(function($route,
                                    $auth,
                                    $http,
                                    $location,
+                                   CurrentUser,
                                    Person) {
 
 
@@ -266,12 +267,9 @@ angular.module('app').run(function($route,
     ga('create', 'UA-23384030-1', 'auto');
 
     // if the user is logged in, get the most up-to-date token
-    if ($auth.isAuthenticated()){
-        $http.get("api/me").success(function(resp){
-            console.log("refreshing the current user's token", $auth.getPayload())
-            $auth.setToken(resp.token)
-        })
-    }
+    CurrentUser.boot()
+
+
 
 
 
@@ -381,10 +379,12 @@ angular.module('app').controller('AppCtrl', function(
     $auth,
     $interval,
     $http,
+    CurrentUser,
     $mdDialog,
     $sce){
 
     $scope.auth = $auth
+    $scope.currentUser = CurrentUser
     $scope.numFormat = NumFormat
     $scope.moment = moment // this will break unless moment.js loads over network...
 
@@ -897,6 +897,13 @@ angular.module('personPage', [
                     var urlId = $route.current.params.orcid
 
                     if (urlId.indexOf("0000-") === 0){ // got an ORCID
+                        //if (urlId == CurrentUser.d.orcid_id) {
+                        //    console.log("this user owns this profile!")
+                        //}
+
+                        
+
+
                         return Person.load(urlId)
                     }
                     else { // got a twitter name
@@ -1526,6 +1533,7 @@ angular.module('currentUser', [
     .factory("CurrentUser", function($auth, $http, $q, $route, $location){
 
 
+        var data
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
@@ -1599,36 +1607,53 @@ angular.module('currentUser', [
             return true
         }
 
-        function sendToCorrectPage(){
+        function sendToCorrectPage(requireLogin){
+            var deferred = $q.defer()
+            var currentPath = $location.path()
+
             if (!isLoggedIn()){
-                return null
+                if (requireLogin){
+                    $location.url("login")
+                }
+                else {
+                    deferred.resolve()
+                }
             }
 
-            var data = getAllDataAsObject()
-            console.log("calling sendToCorrectPage() with this data", data)
-            var url
-            if (data.finished_wizard){
-                url = "u/" + data.orcid_id
-            }
-
-            else if (data.num_products > 0){
-                url = "wizard/confirm-publications"
-            }
-
-            else if (data.orcid_id){
-                url = "wizard/add-publications"
-            }
             else {
-                url = "wizard/connect-orcid"
+                console.log("calling sendToCorrectPage() with this data", data)
+                var url
+
+                if (data.finished_wizard){
+                    url = "u/" + data.orcid_id
+                }
+
+                else if (data.num_products > 0){
+                    url = "wizard/confirm-publications"
+                }
+
+                else if (data.orcid_id){
+                    url = "wizard/add-publications"
+                }
+                else {
+                    url = "wizard/connect-orcid"
+                }
+
+
+                if (currentPath == url){
+                    deferred.resolve()
+                }
+                else {
+                    $location.url(url)
+                }
             }
 
-            $location.url(url)
-            return true
-
+            return deferred.promise
         }
 
+
         function isLoggedIn(){
-            return !_.isEmpty(getAllDataAsObject())
+            return $auth.isAuthenticated()
         }
 
         function setProperty(k, v){
@@ -1643,15 +1668,35 @@ angular.module('currentUser', [
                 })
         }
 
-        function getAllDataAsObject(){
-            if (!$auth.isAuthenticated){
-                return {}
+
+        function logout(){
+            $auth.logout()
+            _.each(data, function(v, k){
+                delete data[k]
+            })
+            return true
+        }
+
+        function boot(){
+            data = $auth.getPayload()
+            return reloadFromServer()
+        }
+
+        function reloadFromServer(){
+            if (!isLoggedIn){
+                return false
             }
-            return $auth.getPayload()
+
+            $http.get("api/me").success(function(resp){
+                console.log("refreshing data in CurrentUser", resp)
+                setFromToken(resp.token)
+            })
         }
 
         function setFromToken(token){
             $auth.setToken(token) // synchronous
+            data = $auth.getPayload()
+
             sendTokenToIntercom()
         }
 
@@ -1661,7 +1706,12 @@ angular.module('currentUser', [
             orcidAuthenticate: orcidAuthenticate,
             setFromToken: setFromToken,
             sendToCorrectPage: sendToCorrectPage,
-            setProperty: setProperty
+            setProperty: setProperty,
+            d: data,
+            logout: logout,
+            isLoggedIn: isLoggedIn,
+            reloadFromServer: reloadFromServer,
+            boot: boot
         }
     })
 angular.module("numFormat", [])
@@ -1893,7 +1943,7 @@ angular.module('settingsPage', [
 
 
 
-    .controller("settingsPageCtrl", function($scope, $rootScope, $auth, $route, $location, $http, Person){
+    .controller("settingsPageCtrl", function($scope, $rootScope, $auth, $route, $location, $http, Person, CurrentUser){
 
         console.log("the settings page loaded")
         var myOrcidId = $auth.getPayload().sub
@@ -1911,7 +1961,7 @@ angular.module('settingsPage', [
                     })
 
 
-                    $auth.logout()
+                    CurrentUser.logout()
                     $location.path("/")
                     alert("Your profile has been deleted.")
                 })
@@ -1965,16 +2015,8 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                sendToCorrectPage: function(CurrentUser, $q){
-                    var deferred = $q.defer()
-                    var sendingElsewhere = CurrentUser.sendToCorrectPage()
-
-                    if (sendingElsewhere){
-                        return deferred.promise
-                    }
-                    else {
-                        return $q.when(true)
-                    }
+                sendToCorrectPage: function(CurrentUser){
+                    return CurrentUser.sendToCorrectPage(false)
                 },
                 customLandingPage: function($q){
                     return $q.when("default")
@@ -1988,17 +2030,8 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                isLoggedIn: function($auth, $q, $location){
-                    var deferred = $q.defer()
-                    if ($auth.isAuthenticated()){
-                        var url = "/u/" + $auth.getPayload().sub
-                        $location.path(url)
-                    }
-                    else {
-                        return $q.when(true)
-                        deferred.resolve()
-                    }
-                    return deferred.promise
+                sendToCorrectPage: function(CurrentUser){
+                    return CurrentUser.sendToCorrectPage(false)
                 },
                 customLandingPage: function($q){
                     return $q.when("opencon")
@@ -2096,8 +2129,8 @@ angular.module('wizard', [
             templateUrl: "wizard/connect-orcid.tpl.html",
             controller: "ConnectOrcidPageCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendToCorrectPage(true)
                 }
             }
         })
@@ -2109,8 +2142,8 @@ angular.module('wizard', [
             templateUrl: "wizard/confirm-publications.tpl.html",
             controller: "ConfirmPublicationsCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendToCorrectPage(true)
                 }
             }
         })
@@ -2121,8 +2154,8 @@ angular.module('wizard', [
             templateUrl: "wizard/add-publications.tpl.html",
             controller: "AddPublicationsCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendToCorrectPage(true)
                 }
             }
         })

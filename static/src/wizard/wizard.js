@@ -9,8 +9,8 @@ angular.module('wizard', [
             templateUrl: "wizard/connect-orcid.tpl.html",
             controller: "ConnectOrcidPageCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendToCorrectPage(true)
                 }
             }
         })
@@ -22,8 +22,8 @@ angular.module('wizard', [
             templateUrl: "wizard/confirm-publications.tpl.html",
             controller: "ConfirmPublicationsCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendToCorrectPage(true)
                 }
             }
         })
@@ -34,8 +34,8 @@ angular.module('wizard', [
             templateUrl: "wizard/add-publications.tpl.html",
             controller: "AddPublicationsCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendToCorrectPage(true)
                 }
             }
         })

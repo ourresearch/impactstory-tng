@@ -17,6 +17,13 @@ angular.module('personPage', [
                     var urlId = $route.current.params.orcid
 
                     if (urlId.indexOf("0000-") === 0){ // got an ORCID
+                        //if (urlId == CurrentUser.d.orcid_id) {
+                        //    console.log("this user owns this profile!")
+                        //}
+
+                        
+
+
                         return Person.load(urlId)
                     }
                     else { // got a twitter name
