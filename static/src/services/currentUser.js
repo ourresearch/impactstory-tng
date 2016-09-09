@@ -82,18 +82,14 @@ angular.module('currentUser', [
         function getProfileUrl(){
             var data = getAllDataAsObject()
 
-            console.log("getProfileUrl()", data)
-
-
-            return false
+            console.log("calling getProfileUrl()", data)
 
             if (data.finished_wizard){
                 return "u/" + data.orcid_id
             }
 
             if (data.num_products > 0){
-                return "wizard/confirm-products"
-
+                return "wizard/confirm-publications"
             }
 
             if (data.orcid_id){
@@ -101,6 +97,19 @@ angular.module('currentUser', [
             }
 
             return "wizard/connect-orcid"
+        }
+
+        function setProperty(k, v){
+            var data = {}
+            data[k] = v
+            return $http.post("api/me", data)
+                .success(function(resp){
+                    setFromToken(resp.token)
+                })
+                .error(function(resp){
+                    console.log("we tried to set a thing, but it didn't work", data, resp)
+                })
+
         }
 
 
@@ -124,6 +133,7 @@ angular.module('currentUser', [
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
             setFromToken: setFromToken,
-            getProfileUrl: getProfileUrl
+            getProfileUrl: getProfileUrl,
+            setProperty: setProperty
         }
     })

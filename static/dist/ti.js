@@ -222,8 +222,8 @@ angular.module('app').config(function ($routeProvider,
 
     $locationProvider.html5Mode(true);
 
-    // handle 404s by redirecting to landing page.
-    $routeProvider.otherwise({ redirectTo: '/' })
+    // handle 404s.
+    $routeProvider.otherwise({ redirectTo: 'page-not-found' })
 
     $mdThemingProvider.theme('default')
         .primaryPalette('deep-orange')
@@ -356,9 +356,10 @@ angular.module('app').run(function($route,
 
 
     $rootScope.$on('$routeChangeError', function(event, current, previous, rejection){
-        console.log("$routeChangeError, redirecting to /")
+        console.log("$routeChangeError! here's some things to look at: ", event, current, previous, rejection)
+
         $rootScope.setPersonIsLoading(false)
-        $location.url("/")
+        $location.url("page-not-found")
         window.scrollTo(0, 0)
     });
 
@@ -688,9 +689,9 @@ angular.module('auth', [
         console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
             .success(function(resp){
-                console.log("we successfully called the endpoint!", resp)
+                console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
-                $location.path(CurrentUser.getProfileUrl())
+                $location.url(CurrentUser.getProfileUrl())
             })
             .error(function(resp){
               console.log("problem getting token back from server!", resp)
@@ -1600,18 +1601,14 @@ angular.module('currentUser', [
         function getProfileUrl(){
             var data = getAllDataAsObject()
 
-            console.log("getProfileUrl()", data)
-
-
-            return false
+            console.log("calling getProfileUrl()", data)
 
             if (data.finished_wizard){
                 return "u/" + data.orcid_id
             }
 
             if (data.num_products > 0){
-                return "wizard/confirm-products"
-
+                return "wizard/confirm-publications"
             }
 
             if (data.orcid_id){
@@ -1619,6 +1616,19 @@ angular.module('currentUser', [
             }
 
             return "wizard/connect-orcid"
+        }
+
+        function setProperty(k, v){
+            var data = {}
+            data[k] = v
+            return $http.post("api/me", data)
+                .success(function(resp){
+                    setFromToken(resp.token)
+                })
+                .error(function(resp){
+                    console.log("we tried to set a thing, but it didn't work", data, resp)
+                })
+
         }
 
 
@@ -1642,7 +1652,8 @@ angular.module('currentUser', [
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
             setFromToken: setFromToken,
-            getProfileUrl: getProfileUrl
+            getProfileUrl: getProfileUrl,
+            setProperty: setProperty
         }
     })
 angular.module("numFormat", [])
@@ -2087,9 +2098,9 @@ angular.module('wizard', [
 
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/wizard/my-publications', {
-            templateUrl: "wizard/my-publications.tpl.html",
-            controller: "MyPublicationsCtrl",
+        $routeProvider.when('/wizard/confirm-publications', {
+            templateUrl: "wizard/confirm-publications.tpl.html",
+            controller: "ConfirmPublicationsCtrl",
             resolve: {
                 isLoggedIn: function(CurrentUser){
                     return CurrentUser.isAuthenticatedPromise()
@@ -2141,8 +2152,19 @@ angular.module('wizard', [
 
 
 
-    .controller("MyPublicationsCtrl", function($scope, $location, $http, $auth){
-        console.log("MyPublicationsCtrl is running!")
+    .controller("ConfirmPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser){
+        console.log("ConfirmPublicationsCtrl is running!")
+
+        // todo add this to the template.
+        $scope.confirm = function(){
+            CurrentUser.setProperty("finished_wizard", true).then(
+                function(x, y, z){
+                    console.log("finished setting finished_wizard", x, y, z)
+                    $location.url("u/" + $auth.getPayload().orcid_id) // replace with CurrentUser method
+                }
+            )
+        }
+
         $scope.finishProfile = function(){
             console.log("finishProfile()")
             $scope.actionSelected = "finish-profile"
@@ -2152,7 +2174,7 @@ angular.module('wizard', [
                     $auth.setToken(resp.token)
 
                     // todo this might should be a method on CurrentUser
-                    $location.url("u/" + $auth.getPayload().orcid_id)
+                    $location.path("u/" + $auth.getPayload().orcid_id)
                 })
                 .error(function(resp){
                     console.log("we tried to refresh profile, but something went wrong :(", resp)
@@ -2208,7 +2230,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/connect-orcid.tpl.html', 'wizard/my-publications.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/confirm-publications.tpl.html', 'wizard/connect-orcid.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -3794,7 +3816,7 @@ angular.module("static-pages/page-not-found.tpl.html", []).run(["$templateCache"
   $templateCache.put("static-pages/page-not-found.tpl.html",
     "<div class=\"landing static-page\">\n" +
     "    <h1>Sorry, we couldn't find that page!</h1>\n" +
-    "    \n" +
+    "\n" +
     "</div>");
 }]);
 
@@ -3848,6 +3870,39 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
     "    </div>\n" +
     "</div>\n" +
     "");
+}]);
+
+angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/confirm-publications.tpl.html",
+    "<div class=\"page wizard add-publications\">\n" +
+    "\n" +
+    "    <h2>my publications</h2>\n" +
+    "    <div>\n" +
+    "        Nice job, we found {{ auth.getPayload().num_products }} publications for you.\n" +
+    "        Does that look good?\n" +
+    "    </div>\n" +
+    "    <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
+    "        <span ng-click=\"finishProfile()\" class=\"btn btn-lg btn-success\">\n" +
+    "            <i class=\"fa fa-check\"></i>\n" +
+    "            <span class=\"text\">\n" +
+    "                <span class=\"main\">Close enough</span>\n" +
+    "                <span class=\"extra\">I can always add more later</span>\n" +
+    "            </span>\n" +
+    "        </span>\n" +
+    "        <a href=\"wizard/add-publications\" class=\"btn btn-lg btn-danger\">\n" +
+    "            <i class=\"fa fa-times\"></i>\n" +
+    "            <span class=\"text\">\n" +
+    "                <span class=\"main\">Nope</span>\n" +
+    "                <span class=\"extra\">Let's fix this now.</span>\n" +
+    "            </span>\n" +
+    "        </a>\n" +
+    "    </div>\n" +
+    "    <div class=\"loading\" ng-show=\"actionSelected\">\n" +
+    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
+    "        <span class=\"text\">Great! Then we'll build your profile right now.\n" +
+    "            It'll take a few seconds&hellip;</span>\n" +
+    "    </div>\n" +
+    "</div>");
 }]);
 
 angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -3915,39 +3970,6 @@ angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", funct
     "\n" +
     "</div>\n" +
     "");
-}]);
-
-angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("wizard/my-publications.tpl.html",
-    "<div class=\"page wizard add-publications\">\n" +
-    "\n" +
-    "    <h2>my publications</h2>\n" +
-    "    <div>\n" +
-    "        Nice job, we found {{ auth.getPayload().num_products }} publications for you.\n" +
-    "        Does that look good?\n" +
-    "    </div>\n" +
-    "    <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
-    "        <span ng-click=\"finishProfile()\" class=\"btn btn-lg btn-success\">\n" +
-    "            <i class=\"fa fa-check\"></i>\n" +
-    "            <span class=\"text\">\n" +
-    "                <span class=\"main\">Close enough</span>\n" +
-    "                <span class=\"extra\">I can always add more later</span>\n" +
-    "            </span>\n" +
-    "        </span>\n" +
-    "        <a href=\"wizard/add-publications\" class=\"btn btn-lg btn-danger\">\n" +
-    "            <i class=\"fa fa-times\"></i>\n" +
-    "            <span class=\"text\">\n" +
-    "                <span class=\"main\">Nope</span>\n" +
-    "                <span class=\"extra\">Let's fix this now.</span>\n" +
-    "            </span>\n" +
-    "        </a>\n" +
-    "    </div>\n" +
-    "    <div class=\"loading\" ng-show=\"actionSelected\">\n" +
-    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
-    "        <span class=\"text\">Great! Then we'll build your profile right now.\n" +
-    "            It'll take a few seconds&hellip;</span>\n" +
-    "    </div>\n" +
-    "</div>");
 }]);
 
 angular.module("workspace.tpl.html", []).run(["$templateCache", function($templateCache) {
