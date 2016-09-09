@@ -691,7 +691,8 @@ angular.module('auth', [
             .success(function(resp){
                 console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
-                $location.url(CurrentUser.getProfileUrl())
+                CurrentUser.sendToCorrectPage()
+
             })
             .error(function(resp){
               console.log("problem getting token back from server!", resp)
@@ -1522,7 +1523,7 @@ angular.module('currentUser', [
 
 
 
-    .factory("CurrentUser", function($auth, $http, $q, $route){
+    .factory("CurrentUser", function($auth, $http, $q, $route, $location){
 
 
         var sendTokenToIntercom = function(){
@@ -1598,24 +1599,36 @@ angular.module('currentUser', [
             return true
         }
 
-        function getProfileUrl(){
+        function sendToCorrectPage(){
+            if (!isLoggedIn()){
+                return null
+            }
+
             var data = getAllDataAsObject()
-
-            console.log("calling getProfileUrl()", data)
-
+            console.log("calling sendToCorrectPage() with this data", data)
+            var url
             if (data.finished_wizard){
-                return "u/" + data.orcid_id
+                url = "u/" + data.orcid_id
             }
 
-            if (data.num_products > 0){
-                return "wizard/confirm-publications"
+            else if (data.num_products > 0){
+                url = "wizard/confirm-publications"
             }
 
-            if (data.orcid_id){
-                return "wizard/add-publications"
+            else if (data.orcid_id){
+                url = "wizard/add-publications"
+            }
+            else {
+                url = "wizard/connect-orcid"
             }
 
-            return "wizard/connect-orcid"
+            $location.url(url)
+            return true
+
+        }
+
+        function isLoggedIn(){
+            return !_.isEmpty(getAllDataAsObject())
         }
 
         function setProperty(k, v){
@@ -1628,12 +1641,7 @@ angular.module('currentUser', [
                 .error(function(resp){
                     console.log("we tried to set a thing, but it didn't work", data, resp)
                 })
-
         }
-
-
-
-
 
         function getAllDataAsObject(){
             if (!$auth.isAuthenticated){
@@ -1652,7 +1660,7 @@ angular.module('currentUser', [
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
             setFromToken: setFromToken,
-            getProfileUrl: getProfileUrl,
+            sendToCorrectPage: sendToCorrectPage,
             setProperty: setProperty
         }
     })
@@ -1957,17 +1965,16 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                isLoggedIn: function($auth, $q, $location){
+                sendToCorrectPage: function(CurrentUser, $q){
                     var deferred = $q.defer()
-                    if ($auth.isAuthenticated()){
-                        var url = "/u/" + $auth.getPayload().sub
-                        $location.path(url)
+                    var sendingElsewhere = CurrentUser.sendToCorrectPage()
+
+                    if (sendingElsewhere){
+                        return deferred.promise
                     }
                     else {
                         return $q.when(true)
-                        deferred.resolve()
                     }
-                    return deferred.promise
                 },
                 customLandingPage: function($q){
                     return $q.when("default")
@@ -2147,7 +2154,6 @@ angular.module('wizard', [
             console.log("setting doYouHaveAnOrcid", answer)
             $scope.hasOrcid = answer
         }
-
     })
 
 
@@ -3882,7 +3888,7 @@ angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache"
     "        Does that look good?\n" +
     "    </div>\n" +
     "    <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
-    "        <span ng-click=\"finishProfile()\" class=\"btn btn-lg btn-success\">\n" +
+    "        <span ng-click=\"confirm()\" class=\"btn btn-lg btn-success\">\n" +
     "            <i class=\"fa fa-check\"></i>\n" +
     "            <span class=\"text\">\n" +
     "                <span class=\"main\">Close enough</span>\n" +

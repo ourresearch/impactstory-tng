@@ -82,13 +82,14 @@ def set_person_email(orcid_id, email, high_priority=False):
 
 
 def update_person(my_person, properties_to_change):
-    for k, v in properties_to_change:
+    for k, v in properties_to_change.iteritems():
         setattr(my_person, k, v)
 
     db.session.merge(my_person)
     commit_success = safe_commit(db)
     if not commit_success:
         print u"COMMIT fail on {}".format(my_person.orcid_id)
+    return my_person
 
 
 
@@ -251,6 +252,7 @@ class Person(db.Model):
     weekly_event_count = db.Column(db.Float)
     monthly_event_count = db.Column(db.Float)
     tweeted_quickly = db.Column(db.Boolean)
+    finished_wizard = db.Column(db.Boolean)
     coauthors = db.Column(MutableDict.as_mutable(JSONB))
 
     error = db.Column(db.Text)
@@ -1075,6 +1077,7 @@ class Person(db.Model):
             'id': self.id,
             'email': self.email,
             'num_products': self.num_products,
+            'finished_wizard': self.finished_wizard,
             'orcid_id': self.orcid_id,
             'twitter_screen_name': self.twitter,
             'first_name': self.first_name,

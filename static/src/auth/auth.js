@@ -54,7 +54,8 @@ angular.module('auth', [
             .success(function(resp){
                 console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
-                $location.url(CurrentUser.getProfileUrl())
+                CurrentUser.sendToCorrectPage()
+
             })
             .error(function(resp){
               console.log("problem getting token back from server!", resp)
