@@ -32,17 +32,16 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                isLoggedIn: function($auth, $q, $location){
+                sendToCorrectPage: function(CurrentUser, $q){
                     var deferred = $q.defer()
-                    if ($auth.isAuthenticated()){
-                        var url = "/u/" + $auth.getPayload().sub
-                        $location.path(url)
+                    var sendingElsewhere = CurrentUser.sendToCorrectPage()
+
+                    if (sendingElsewhere){
+                        return deferred.promise
                     }
                     else {
                         return $q.when(true)
-                        deferred.resolve()
                     }
-                    return deferred.promise
                 },
                 customLandingPage: function($q){
                     return $q.when("opencon")
