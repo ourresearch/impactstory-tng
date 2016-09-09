@@ -9,8 +9,8 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                sendToCorrectPage: function(CurrentUser){
-                    return CurrentUser.sendToCorrectPage(false)
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendHomePromise(false)
                 },
                 customLandingPage: function($q){
                     return $q.when("default")
@@ -24,8 +24,8 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                sendToCorrectPage: function(CurrentUser){
-                    return CurrentUser.sendToCorrectPage(false)
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendHomePromise(false)
                 },
                 customLandingPage: function($q){
                     return $q.when("opencon")

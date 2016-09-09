@@ -11,18 +11,21 @@ angular.module('personPage', [
             controller: 'personPageCtrl',
             reloadOnSearch: false,
             resolve: {
-                personResp: function($q, $http, $rootScope, $route, $location, Person){
+                personResp: function($q, $http, $rootScope, $route, $location, Person, CurrentUser){
                     $rootScope.setPersonIsLoading(true)
                     console.log("person is loading!", $rootScope)
                     var urlId = $route.current.params.orcid
 
                     if (urlId.indexOf("0000-") === 0){ // got an ORCID
-                        //if (urlId == CurrentUser.d.orcid_id) {
-                        //    console.log("this user owns this profile!")
-                        //}
 
-                        
-
+                        // if this is my profile
+                        if (urlId == CurrentUser.d.orcid_id) {
+                            var redirecting = CurrentUser.sendHome()
+                            if (redirecting){
+                                var deferred = $q.defer()
+                                return deferred
+                            }
+                        }
 
                         return Person.load(urlId)
                     }
