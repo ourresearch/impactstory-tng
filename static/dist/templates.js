@@ -1650,7 +1650,7 @@ angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache"
     "        Does that look good?\n" +
     "    </div>\n" +
     "    <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
-    "        <span ng-click=\"finishProfile()\" class=\"btn btn-lg btn-success\">\n" +
+    "        <span ng-click=\"confirm()\" class=\"btn btn-lg btn-success\">\n" +
     "            <i class=\"fa fa-check\"></i>\n" +
     "            <span class=\"text\">\n" +
     "                <span class=\"main\">Close enough</span>\n" +

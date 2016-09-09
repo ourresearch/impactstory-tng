@@ -67,7 +67,6 @@ angular.module('wizard', [
             console.log("setting doYouHaveAnOrcid", answer)
             $scope.hasOrcid = answer
         }
-
     })
 
 

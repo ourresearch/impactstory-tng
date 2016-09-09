@@ -3,7 +3,7 @@ angular.module('currentUser', [
 
 
 
-    .factory("CurrentUser", function($auth, $http, $q, $route){
+    .factory("CurrentUser", function($auth, $http, $q, $route, $location){
 
 
         var sendTokenToIntercom = function(){
@@ -79,24 +79,36 @@ angular.module('currentUser', [
             return true
         }
 
-        function getProfileUrl(){
+        function sendToCorrectPage(){
+            if (!isLoggedIn()){
+                return null
+            }
+
             var data = getAllDataAsObject()
-
-            console.log("calling getProfileUrl()", data)
-
+            console.log("calling sendToCorrectPage() with this data", data)
+            var url
             if (data.finished_wizard){
-                return "u/" + data.orcid_id
+                url = "u/" + data.orcid_id
             }
 
-            if (data.num_products > 0){
-                return "wizard/confirm-publications"
+            else if (data.num_products > 0){
+                url = "wizard/confirm-publications"
             }
 
-            if (data.orcid_id){
-                return "wizard/add-publications"
+            else if (data.orcid_id){
+                url = "wizard/add-publications"
+            }
+            else {
+                url = "wizard/connect-orcid"
             }
 
-            return "wizard/connect-orcid"
+            $location.url(url)
+            return true
+
+        }
+
+        function isLoggedIn(){
+            return !_.isEmpty(getAllDataAsObject())
         }
 
         function setProperty(k, v){
@@ -109,12 +121,7 @@ angular.module('currentUser', [
                 .error(function(resp){
                     console.log("we tried to set a thing, but it didn't work", data, resp)
                 })
-
         }
-
-
-
-
 
         function getAllDataAsObject(){
             if (!$auth.isAuthenticated){
@@ -133,7 +140,7 @@ angular.module('currentUser', [
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
             setFromToken: setFromToken,
-            getProfileUrl: getProfileUrl,
+            sendToCorrectPage: sendToCorrectPage,
             setProperty: setProperty
         }
     })
