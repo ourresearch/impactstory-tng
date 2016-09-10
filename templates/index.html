@@ -26,7 +26,7 @@
          </a>
       </h1>
 
-      <span class="controls logged-in" ng-show="auth.isAuthenticated()">
+      <span class="controls logged-in" ng-show="currentUser.isLoggedIn() && currentUser.d.finished_wizard">
          <a class="profile-link" href="u/{{ auth.getPayload().sub }}">
             <span class="hi">hi,</span>
             <span class="name">{{ auth.isAuthenticated && auth.getPayload().first_name }}</span>

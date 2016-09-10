@@ -58,7 +58,7 @@ angular.module('currentUser', [
 
             var redirectUri = window.location.origin + "/oauth/" + intent + "/orcid"
 
-            console.log("ORCID authenticate!", showLogin)
+            console.log("ORCID authenticate!", intent, orcidAlreadyExists)
 
             var authUrl = "https://orcid.org/oauth/authorize" +
                 "?client_id=APP-PF0PDMP7P297AU8S" +
@@ -78,6 +78,7 @@ angular.module('currentUser', [
             console.log("calling sendToCorrectPage() with this data", data)
             var url
             var currentPath = $location.path()
+            console.log("currentPath", currentPath)
 
 
             if (data.finished_wizard && isMyProfile(currentPath)){
@@ -85,19 +86,19 @@ angular.module('currentUser', [
             }
 
             else if (data.finished_wizard){
-                url = "u/" + data.orcid_id
+                url = "/u/" + data.orcid_id
             }
 
             else if (data.num_products > 0){
-                url = "wizard/confirm-publications"
+                url = "/wizard/confirm-publications"
             }
 
             else if (data.orcid_id){
-                url = "wizard/add-publications"
+                url = "/wizard/add-publications"
             }
 
             else {
-                url = "wizard/connect-orcid"
+                url = "/wizard/connect-orcid"
             }
 
             if (currentPath == url ){
@@ -132,7 +133,10 @@ angular.module('currentUser', [
             }
 
             else {
-                var redirecting =  sendHome()
+                var redirecting = sendHome()
+
+                console.log("sendHomePromise redirceing=", redirecting)
+
                 if (!redirecting){
                     deferred.resolve()
                 }
