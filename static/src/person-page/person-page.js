@@ -12,7 +12,6 @@ angular.module('personPage', [
             reloadOnSearch: false,
             resolve: {
                 personResp: function($q, $http, $rootScope, $route, $location, Person, CurrentUser){
-                    $rootScope.setPersonIsLoading(true)
                     console.log("person is loading!", $rootScope)
                     var urlId = $route.current.params.orcid
 
@@ -23,10 +22,11 @@ angular.module('personPage', [
                             var redirecting = CurrentUser.sendHome()
                             if (redirecting){
                                 var deferred = $q.defer()
-                                return deferred
+                                return deferred.promise
                             }
                         }
 
+                        $rootScope.setPersonIsLoading(true)
                         return Person.load(urlId)
                     }
                     else { // got a twitter name

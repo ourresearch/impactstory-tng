@@ -1527,7 +1527,7 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "\n" +
     "        <div class=\"join-button\">\n" +
-    "            <md-button class=\"md-accent md-raised\" ng-click=\"twitterAuthenticate('register')\">\n" +
+    "            <md-button class=\"md-accent md-raised\" ng-click=\"currentUser.twitterAuthenticate('register')\">\n" +
     "                <i class=\"fa fa-twitter\"></i>\n" +
     "                Join for free with Twitter\n" +
     "            </md-button>\n" +
@@ -1708,7 +1708,7 @@ angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", funct
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', true)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', true)\">\n" +
     "                Sign in to my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -1718,7 +1718,7 @@ angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", funct
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', false)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
     "                Create my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -1729,7 +1729,7 @@ angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", funct
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', false)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
     "                Try registering for an ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +

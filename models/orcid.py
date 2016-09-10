@@ -41,6 +41,12 @@ def clean_orcid(dirty_orcid):
 
 
 def get_orcid_id_from_oauth(auth_code, redirect_uri):
+
+    print u"adding orcid. auth_code={}, redirect_uri={}".format(
+        auth_code,
+        redirect_uri
+    )
+
     access_token_url = 'https://pub.orcid.org/oauth/token'
     payload = dict(client_id="APP-PF0PDMP7P297AU8S",
                    redirect_uri=redirect_uri,

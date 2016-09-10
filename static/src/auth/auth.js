@@ -39,7 +39,9 @@ angular.module('auth', [
             $location.url("/")
             return false
         }
-        requestObj.redirectUri = $location.path()
+        var absUrl = $location.absUrl()
+        requestObj.redirectUri = absUrl.split("?")[0] // remove the search part of URL
+        console.log("using this redirectUri", requestObj.redirectUri)
 
         // track signups that started at the opencon landing page
         if ($cookies.get("sawOpenconLandingPage")) {

@@ -676,7 +676,9 @@ angular.module('auth', [
             $location.url("/")
             return false
         }
-        requestObj.redirectUri = $location.path()
+        var absUrl = $location.absUrl()
+        requestObj.redirectUri = absUrl.split("?")[0] // remove the search part of URL
+        console.log("using this redirectUri", requestObj.redirectUri)
 
         // track signups that started at the opencon landing page
         if ($cookies.get("sawOpenconLandingPage")) {
@@ -892,7 +894,6 @@ angular.module('personPage', [
             reloadOnSearch: false,
             resolve: {
                 personResp: function($q, $http, $rootScope, $route, $location, Person, CurrentUser){
-                    $rootScope.setPersonIsLoading(true)
                     console.log("person is loading!", $rootScope)
                     var urlId = $route.current.params.orcid
 
@@ -903,10 +904,11 @@ angular.module('personPage', [
                             var redirecting = CurrentUser.sendHome()
                             if (redirecting){
                                 var deferred = $q.defer()
-                                return deferred
+                                return deferred.promise
                             }
                         }
 
+                        $rootScope.setPersonIsLoading(true)
                         return Person.load(urlId)
                     }
                     else { // got a twitter name
@@ -1588,7 +1590,7 @@ angular.module('currentUser', [
 
             var redirectUri = window.location.origin + "/oauth/" + intent + "/orcid"
 
-            console.log("ORCID authenticate!", showLogin)
+            console.log("ORCID authenticate!", intent, orcidAlreadyExists)
 
             var authUrl = "https://orcid.org/oauth/authorize" +
                 "?client_id=APP-PF0PDMP7P297AU8S" +
@@ -1608,6 +1610,7 @@ angular.module('currentUser', [
             console.log("calling sendToCorrectPage() with this data", data)
             var url
             var currentPath = $location.path()
+            console.log("currentPath", currentPath)
 
 
             if (data.finished_wizard && isMyProfile(currentPath)){
@@ -1615,19 +1618,19 @@ angular.module('currentUser', [
             }
 
             else if (data.finished_wizard){
-                url = "u/" + data.orcid_id
+                url = "/u/" + data.orcid_id
             }
 
             else if (data.num_products > 0){
-                url = "wizard/confirm-publications"
+                url = "/wizard/confirm-publications"
             }
 
             else if (data.orcid_id){
-                url = "wizard/add-publications"
+                url = "/wizard/add-publications"
             }
 
             else {
-                url = "wizard/connect-orcid"
+                url = "/wizard/connect-orcid"
             }
 
             if (currentPath == url ){
@@ -1662,7 +1665,10 @@ angular.module('currentUser', [
             }
 
             else {
-                var redirecting =  sendHome()
+                var redirecting = sendHome()
+
+                console.log("sendHomePromise redirceing=", redirecting)
+
                 if (!redirecting){
                     deferred.resolve()
                 }
@@ -3827,7 +3833,7 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "\n" +
     "        <div class=\"join-button\">\n" +
-    "            <md-button class=\"md-accent md-raised\" ng-click=\"twitterAuthenticate('register')\">\n" +
+    "            <md-button class=\"md-accent md-raised\" ng-click=\"currentUser.twitterAuthenticate('register')\">\n" +
     "                <i class=\"fa fa-twitter\"></i>\n" +
     "                Join for free with Twitter\n" +
     "            </md-button>\n" +
@@ -4008,7 +4014,7 @@ angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", funct
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', true)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', true)\">\n" +
     "                Sign in to my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -4018,7 +4024,7 @@ angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", funct
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', false)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
     "                Create my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -4029,7 +4035,7 @@ angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", funct
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', false)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
     "                Try registering for an ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
