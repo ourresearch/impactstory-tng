@@ -134,6 +134,7 @@ def make_person(twitter_creds, high_priority=False):
 
     my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
     my_person.created = datetime.datetime.utcnow().isoformat()
+    my_person.claimed_at = datetime.datetime.utcnow().isoformat()
 
     full_twitter_profile = get_full_twitter_profile(twitter_creds)
     full_twitter_profile.update(twitter_creds)
