@@ -2231,29 +2231,28 @@ angular.module('wizard', [
 
         // todo add this to the template.
         $scope.confirm = function(){
-            CurrentUser.setProperty("finished_wizard", true).then(
-                function(x, y, z){
-                    console.log("finished setting finished_wizard", x, y, z)
-                    $location.url("u/" + $auth.getPayload().orcid_id) // replace with CurrentUser method
-                }
-            )
-        }
-
-        $scope.finishProfile = function(){
             console.log("finishProfile()")
             $scope.actionSelected = "finish-profile"
-            $http.post("api/me", {})
-                .success(function(resp){
-                    console.log("successfully refreshed everything, redirecting to profile page ", resp)
-                    $auth.setToken(resp.token)
 
-                    // todo this might should be a method on CurrentUser
-                    $location.path("u/" + $auth.getPayload().orcid_id)
+            CurrentUser.setProperty("finished_wizard", true).then(
+                function(x){
+                    console.log("finished setting finished_wizard", x)
+                }
+            )
+
+            // this runs concurrently with the call to the server to set finished_wizard just above.
+            $http.post("api/me/refresh", {})
+                .success(function(resp){
+                    console.log("successfully refreshed everything ")
+                    CurrentUser.setFromToken(resp.token)
+                    CurrentUser.sendHome()
+
                 })
                 .error(function(resp){
                     console.log("we tried to refresh profile, but something went wrong :(", resp)
                     $scope.actionSelected = null
                 })
+
         }
     })
 
