@@ -39,6 +39,13 @@ angular.module('auth', [
             $location.url("/")
             return false
         }
+
+        // set scope vars
+        $scope.identityProvider = $routeParams.identityProvider
+        $scope.intent = $routeParams.intent
+
+
+
         var absUrl = $location.absUrl()
         requestObj.redirectUri = absUrl.split("?")[0] // remove the search part of URL
         console.log("using this redirectUri", requestObj.redirectUri)
@@ -51,6 +58,10 @@ angular.module('auth', [
         var urlBase = "api/me/"
         var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
 
+
+
+
+
         console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
             .success(function(resp){
@@ -59,9 +70,13 @@ angular.module('auth', [
                 CurrentUser.sendHome()
 
             })
-            .error(function(resp){
-              console.log("problem getting token back from server!", resp)
-                // todo tell the user what went wrong
+            .error(function(error, status){
+                console.log("the server returned an error", status, error)
+                if (status == 404) {
+                    $scope.error = "not-found"
+                    $scope.id = error.id
+                }
+
             })
 
     })
