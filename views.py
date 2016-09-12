@@ -80,12 +80,12 @@ def json_resp(thing):
     return resp
 
 
-def abort_json(status_code, msg):
+def abort_json(status_code, msg, **kwargs):
     body_dict = {
-        "HTTP_status_code": status_code,
-        "message": msg,
-        "error": True
+        "message": msg
     }
+    body_dict.update(kwargs)
+
     resp_string = json.dumps(body_dict, sort_keys=True, indent=4)
     resp = make_response(resp_string, status_code)
     resp.mimetype = "application/json"
@@ -387,6 +387,13 @@ def orcid_login():
         abort_json(401, "Bad ORCID response; the auth code you sent is probably expired.")
 
     my_person = Person.query.filter_by(orcid_id=my_orcid_id).first()
+    if not my_person:
+        abort_json(
+            404,
+            "We don't have that ORCID in the db.",
+            identity_provider_id=my_orcid_id
+        )
+
     return jsonify({"token":  my_person.get_token()})
 
 
@@ -422,7 +429,11 @@ def twitter_login():
 
     my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
     if not my_person:
-        abort_json(404, "we have no impactstory user with this twitter screen name")
+        abort_json(
+            404,
+            "We don't have that Twitter in the db.",
+            identity_provider_id=twitter_creds["screen_name"]
+        )
 
     return jsonify({"token": my_person.get_token()})
 

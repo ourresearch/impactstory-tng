@@ -49,10 +49,12 @@
    <div class="main-view container-fluid" ng-view></div>
 
 
+    <!--
    <div>
        <h3>For debugging: here's the user's token contents:</h3>
        <pre>{{ auth.getPayload() | json }}</pre>
    </div>
+   -->
    <div class="container-fluid" ng-show="global.showBottomStuff">
       <div id="site-footer" class="row logged-in-{{ auth.isAuthenticated() }}">
          <div class="col-md-5 links">
