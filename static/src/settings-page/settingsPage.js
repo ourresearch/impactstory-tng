@@ -9,13 +9,8 @@ angular.module('settingsPage', [
             templateUrl: 'settings-page/settings-page.tpl.html',
             controller: 'settingsPageCtrl',
             resolve: {
-                isAuth: function($q, $auth){
-                    if ($auth.isAuthenticated()){
-                        return $q.resolve()
-                    }
-                    else {
-                        return $q.reject("/settings only works if you're logged in.")
-                    }
+                isAuth: function($q, CurrentUser){
+                    return CurrentUser.isLoggedIn(true)
                 }
             }
         })

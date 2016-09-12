@@ -96,7 +96,6 @@ angular.module('aboutPages', [])
     // used for about/data
     // used for about
     .controller("aboutPageCtrl", function($scope,
-                                          $auth,
                                           $timeout,
                                            $routeParams,
                                            $anchorScroll,

@@ -21,7 +21,7 @@ angular.module('auth', [
     })
 
 
-    .controller("LoginCtrl", function($scope, CurrentUser, $location, $http, $auth){
+    .controller("LoginCtrl", function($scope, CurrentUser, $location, $http){
         console.log("LoginCtrl is running!")
         $scope.currentUser = CurrentUser
 
