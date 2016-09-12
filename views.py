@@ -244,21 +244,30 @@ def profile_endpoint_twitter(screen_name):
 # need to call it with https for it to work
 @app.route("/api/person/<orcid_id>", methods=["POST"])
 @app.route("/api/person/<orcid_id>.json", methods=["POST"])
-def refresh_profile_endpoint(orcid_id):
-    if request.json:
-        my_person = Person.query.filter_by(orcid_id=orcid_id).first()
+def modify_profile_endpoint(orcid_id):
+    my_person = Person.query.filter_by(orcid_id=orcid_id).first()
 
-        product_id = request.json["product"]["id"]
-        my_product = next(my_product for my_product in my_person.products if my_product.id==product_id)
-        url = request.json["product"]["fulltext_url"]
-        my_product.set_oa_from_user_supplied_fulltext_url(url)
+    product_id = request.json["product"]["id"]
+    my_product = next(my_product for my_product in my_person.products if my_product.id==product_id)
+    url = request.json["product"]["fulltext_url"]
+    my_product.set_oa_from_user_supplied_fulltext_url(url)
 
-        my_person.recalculate_openness()
+    my_person.recalculate_openness()
 
-        safe_commit(db)
-    else:
-        my_person = refresh_profile(orcid_id)
+    safe_commit(db)
+
     return json_resp(my_person.to_dict())
+
+
+
+@app.route("/api/person/<orcid_id>/refresh", methods=["POST"])
+@app.route("/api/person/<orcid_id>/refresh.json", methods=["POST"])
+def refresh_profile_endpoint(orcid_id):
+    my_person = refresh_profile(orcid_id)
+    return json_resp(my_person.to_dict())
+
+
+
 
 @app.route("/api/person/<orcid_id>/fulltext", methods=["POST"])
 @app.route("/api/person/<orcid_id>/fulltext.json", methods=["POST"])
