@@ -1057,6 +1057,30 @@ angular.module('personPage', [
             )
         }
 
+        $scope.refreshFromSecretButton = function(){
+            console.log("ah, refreshing!")
+
+            // for testing
+            //var url = "https://impactstory.org/api/person/" + Person.d.orcid_id
+
+            // the real one
+            var url = "/api/person/" + Person.d.orcid_id + "/refresh"
+
+            $http.post(url)
+                .success(function(resp){
+
+                    // force the Person to reload. without this
+                    // the newly-synced data never gets displayed.
+                    console.log("reloading the Person")
+                    Person.reload().then(
+                        function(resp){
+                            $scope.profileStatus = "all_good"
+                            console.log("success, reloading page", resp)
+                            $route.reload()
+                        }
+                    )
+                })
+        }
 
 
         $scope.shareProfile = function(){
@@ -3440,7 +3464,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "        <div class=\"row person-footer\">\n" +
     "            <div class=\"text col-md-8\">\n" +
     "                <span class=\"text\">\n" +
-    "                    <span class=\"secret-sync\" ng-click=\"pullFromOrcid()\">\n" +
+    "                    <span class=\"secret-sync\" ng-click=\"refreshFromSecretButton()\">\n" +
     "                        <i class=\"fa fa-unlock\"></i>\n" +
     "                    </span>\n" +
     "                    All the data you see here is open for re-use.\n" +

@@ -190,6 +190,30 @@ angular.module('personPage', [
             )
         }
 
+        $scope.refreshFromSecretButton = function(){
+            console.log("ah, refreshing!")
+
+            // for testing
+            //var url = "https://impactstory.org/api/person/" + Person.d.orcid_id
+
+            // the real one
+            var url = "/api/person/" + Person.d.orcid_id + "/refresh"
+
+            $http.post(url)
+                .success(function(resp){
+
+                    // force the Person to reload. without this
+                    // the newly-synced data never gets displayed.
+                    console.log("reloading the Person")
+                    Person.reload().then(
+                        function(resp){
+                            $scope.profileStatus = "all_good"
+                            console.log("success, reloading page", resp)
+                            $route.reload()
+                        }
+                    )
+                })
+        }
 
 
         $scope.shareProfile = function(){
