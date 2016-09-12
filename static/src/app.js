@@ -36,7 +36,6 @@ angular.module('app', [
 
 
 angular.module('app').config(function ($routeProvider,
-                                       $authProvider,
                                        $mdThemingProvider,
                                        $locationProvider) {
 
@@ -52,19 +51,6 @@ angular.module('app').config(function ($routeProvider,
 
 
 
-
-
-
-    //$authProvider.twitter({
-    //  url: '/auth/twitter',
-    //  authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
-    //  redirectUri: window.location.origin + "/twitter-login",
-    //  type: '1.0',
-    //  popupOptions: { width: 495, height: 645 }
-    //});
-
-
-
 });
 
 
@@ -73,7 +59,6 @@ angular.module('app').run(function($route,
                                    $q,
                                    $timeout,
                                    $cookies,
-                                   $auth,
                                    $http,
                                    $location,
                                    CurrentUser,
@@ -107,11 +92,13 @@ angular.module('app').run(function($route,
 
 
     $rootScope.sendCurrentUserToIntercom = function(){
-        if (!$auth.isAuthenticated()){
-            return false
-        }
+        // needs refactoring!
 
-        $http.get("api/person/" + $auth.getPayload().sub)
+        // return false here if the user is not logged in
+
+
+        // no idea if this will still work with CurrentUser approach
+        $http.get("api/person/" + CurrentUser.d.orcid_id)
             .success(function(resp){
                 $rootScope.sendToIntercom(resp)
                 console.log("sending current user to intercom")
@@ -197,14 +184,14 @@ angular.module('app').controller('AppCtrl', function(
     $route,
     $location,
     NumFormat,
-    $auth,
     $interval,
     $http,
     CurrentUser,
     $mdDialog,
+    $auth, // todo remove
     $sce){
 
-    $scope.auth = $auth
+    $scope.auth = $auth  // todo remove
     $scope.currentUser = CurrentUser
     $scope.numFormat = NumFormat
     $scope.moment = moment // this will break unless moment.js loads over network...
@@ -367,10 +354,9 @@ angular.module('app').controller('AppCtrl', function(
     $scope.donate = function(cents){
         console.log("donate", cents)
         stripeInfo.cents = cents
-        var me = $auth.getPayload() // this might break on the donate page.
-        if (me){
-            stripeInfo.fullName = me.given_names + " " + me.family_name
-            stripeInfo.orcidId = me.sub
+        if (CurrentUser.isLoggedIn()){
+            stripeInfo.fullName = CurrentUser.d.given_names + " " + CurrentUser.d.family_name
+            stripeInfo.orcidId = CurrentUser.d.orcid_id
         }
 
         stripeHandler.open({

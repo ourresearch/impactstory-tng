@@ -146,7 +146,19 @@ angular.module('currentUser', [
         }
 
 
-        function isLoggedIn(){
+        function isLoggedIn(returnPromise){
+            if (returnPromise){
+                var deferred = $q.defer()
+                if ($auth.isAuthenticated()) {
+                    deferred.resolve()
+                }
+                else {
+                    deferred.reject()
+                }
+                return deferred.promise
+            }
+
+
             return $auth.isAuthenticated()
         }
 

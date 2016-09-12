@@ -96,7 +96,6 @@ angular.module('aboutPages', [])
     // used for about/data
     // used for about
     .controller("aboutPageCtrl", function($scope,
-                                          $auth,
                                           $timeout,
                                            $routeParams,
                                            $anchorScroll,
@@ -215,7 +214,6 @@ angular.module('app', [
 
 
 angular.module('app').config(function ($routeProvider,
-                                       $authProvider,
                                        $mdThemingProvider,
                                        $locationProvider) {
 
@@ -231,19 +229,6 @@ angular.module('app').config(function ($routeProvider,
 
 
 
-
-
-
-    //$authProvider.twitter({
-    //  url: '/auth/twitter',
-    //  authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
-    //  redirectUri: window.location.origin + "/twitter-login",
-    //  type: '1.0',
-    //  popupOptions: { width: 495, height: 645 }
-    //});
-
-
-
 });
 
 
@@ -252,7 +237,6 @@ angular.module('app').run(function($route,
                                    $q,
                                    $timeout,
                                    $cookies,
-                                   $auth,
                                    $http,
                                    $location,
                                    CurrentUser,
@@ -286,11 +270,13 @@ angular.module('app').run(function($route,
 
 
     $rootScope.sendCurrentUserToIntercom = function(){
-        if (!$auth.isAuthenticated()){
-            return false
-        }
+        // needs refactoring!
 
-        $http.get("api/person/" + $auth.getPayload().sub)
+        // return false here if the user is not logged in
+
+
+        // no idea if this will still work with CurrentUser approach
+        $http.get("api/person/" + CurrentUser.d.orcid_id)
             .success(function(resp){
                 $rootScope.sendToIntercom(resp)
                 console.log("sending current user to intercom")
@@ -376,14 +362,14 @@ angular.module('app').controller('AppCtrl', function(
     $route,
     $location,
     NumFormat,
-    $auth,
     $interval,
     $http,
     CurrentUser,
     $mdDialog,
+    $auth, // todo remove
     $sce){
 
-    $scope.auth = $auth
+    $scope.auth = $auth  // todo remove
     $scope.currentUser = CurrentUser
     $scope.numFormat = NumFormat
     $scope.moment = moment // this will break unless moment.js loads over network...
@@ -546,10 +532,9 @@ angular.module('app').controller('AppCtrl', function(
     $scope.donate = function(cents){
         console.log("donate", cents)
         stripeInfo.cents = cents
-        var me = $auth.getPayload() // this might break on the donate page.
-        if (me){
-            stripeInfo.fullName = me.given_names + " " + me.family_name
-            stripeInfo.orcidId = me.sub
+        if (CurrentUser.isLoggedIn()){
+            stripeInfo.fullName = CurrentUser.d.given_names + " " + CurrentUser.d.family_name
+            stripeInfo.orcidId = CurrentUser.d.orcid_id
         }
 
         stripeHandler.open({
@@ -658,7 +643,7 @@ angular.module('auth', [
     })
 
 
-    .controller("LoginCtrl", function($scope, CurrentUser, $location, $http, $auth){
+    .controller("LoginCtrl", function($scope, CurrentUser, $location, $http){
         console.log("LoginCtrl is running!")
         $scope.currentUser = CurrentUser
 
@@ -1678,7 +1663,19 @@ angular.module('currentUser', [
         }
 
 
-        function isLoggedIn(){
+        function isLoggedIn(returnPromise){
+            if (returnPromise){
+                var deferred = $q.defer()
+                if ($auth.isAuthenticated()) {
+                    deferred.resolve()
+                }
+                else {
+                    deferred.reject()
+                }
+                return deferred.promise
+            }
+
+
             return $auth.isAuthenticated()
         }
 
@@ -1963,13 +1960,8 @@ angular.module('settingsPage', [
             templateUrl: 'settings-page/settings-page.tpl.html',
             controller: 'settingsPageCtrl',
             resolve: {
-                isAuth: function($q, $auth){
-                    if ($auth.isAuthenticated()){
-                        return $q.resolve()
-                    }
-                    else {
-                        return $q.reject("/settings only works if you're logged in.")
-                    }
+                isAuth: function($q, CurrentUser){
+                    return CurrentUser.isLoggedIn(true)
                 }
             }
         })
