@@ -5,12 +5,13 @@ angular.module('wizard', [
 ])
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/wizard/welcome', {
-            templateUrl: "wizard/welcome.tpl.html",
-            controller: "WelcomePageCtrl",
+        $routeProvider.when('/wizard/connect-orcid', {
+            templateUrl: "wizard/connect-orcid.tpl.html",
+            controller: "ConnectOrcidPageCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+
+                    return CurrentUser.sendHomePromise(true)
                 }
             }
         })
@@ -18,12 +19,12 @@ angular.module('wizard', [
 
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/wizard/my-publications', {
-            templateUrl: "wizard/my-publications.tpl.html",
-            controller: "MyPublicationsCtrl",
+        $routeProvider.when('/wizard/confirm-publications', {
+            templateUrl: "wizard/confirm-publications.tpl.html",
+            controller: "ConfirmPublicationsCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendHomePromise(true)
                 }
             }
         })
@@ -34,8 +35,8 @@ angular.module('wizard', [
             templateUrl: "wizard/add-publications.tpl.html",
             controller: "AddPublicationsCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendHomePromise(true)
                 }
             }
         })
@@ -43,21 +44,22 @@ angular.module('wizard', [
 
 
 
-    .controller("WelcomePageCtrl", function($scope, $location, $http, $auth){
+    .controller("ConnectOrcidPageCtrl", function($scope, $location, $http, $auth){
 
 
-        // @todo this probably should all go in CurrentUser
-        if ($auth.getPayload().orcid_id){
-            console.log("we've got their ORCID already")
-            if ($auth.getPayload().num_products){
-                console.log("they are all set, redirecting to their profile")
-                $location.url("u/" + $auth.getPayload().orcid_id)
-            }
-            else {
-                console.log("no products! redirecting to add-products")
-                $location.url("wizard/add-products")
-            }
-        }
+        //if ($auth.getPayload().orcid_id){
+        //    console.log("we've got their ORCID already")
+        //    if ($auth.getPayload().num_products){
+        //        console.log("they are all set, redirecting to their profile")
+        //        $location.url("u/" + $auth.getPayload().orcid_id)
+        //    }
+        //    else {
+        //        console.log("no products! redirecting to add-products")
+        //        $location.url("wizard/add-products")
+        //    }
+        //}
+
+
 
 
         console.log("WelcomePageCtrl is running!")
@@ -66,28 +68,37 @@ angular.module('wizard', [
             console.log("setting doYouHaveAnOrcid", answer)
             $scope.hasOrcid = answer
         }
-
     })
 
 
 
-    .controller("MyPublicationsCtrl", function($scope, $location, $http, $auth){
-        console.log("MyPublicationsCtrl is running!")
-        $scope.finishProfile = function(){
+    .controller("ConfirmPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser){
+        console.log("ConfirmPublicationsCtrl is running!")
+
+        // todo add this to the template.
+        $scope.confirm = function(){
             console.log("finishProfile()")
             $scope.actionSelected = "finish-profile"
-            $http.post("api/me", {})
-                .success(function(resp){
-                    console.log("successfully refreshed everything, redirecting to profile page ", resp)
-                    $auth.setToken(resp.token)
 
-                    // todo this might should be a method on CurrentUser
-                    $location.url("u/" + $auth.getPayload().orcid_id)
+            CurrentUser.setProperty("finished_wizard", true).then(
+                function(x){
+                    console.log("finished setting finished_wizard", x)
+                }
+            )
+
+            // this runs concurrently with the call to the server to set finished_wizard just above.
+            $http.post("api/me/refresh", {})
+                .success(function(resp){
+                    console.log("successfully refreshed everything ")
+                    CurrentUser.setFromToken(resp.token)
+                    CurrentUser.sendHome()
+
                 })
                 .error(function(resp){
                     console.log("we tried to refresh profile, but something went wrong :(", resp)
                     $scope.actionSelected = null
                 })
+
         }
     })
 

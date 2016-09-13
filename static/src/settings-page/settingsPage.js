@@ -9,13 +9,8 @@ angular.module('settingsPage', [
             templateUrl: 'settings-page/settings-page.tpl.html',
             controller: 'settingsPageCtrl',
             resolve: {
-                isAuth: function($q, $auth){
-                    if ($auth.isAuthenticated()){
-                        return $q.resolve()
-                    }
-                    else {
-                        return $q.reject("/settings only works if you're logged in.")
-                    }
+                isAuth: function($q, CurrentUser){
+                    return CurrentUser.isLoggedIn(true)
                 }
             }
         })
@@ -23,12 +18,20 @@ angular.module('settingsPage', [
 
 
 
-    .controller("settingsPageCtrl", function($scope, $rootScope, $auth, $route, $location, $http, Person){
+    .controller("settingsPageCtrl", function($scope,
+                                             $rootScope,
+                                             $auth,
+                                             $route,
+                                             $location,
+                                             $http,
+                                             Person,
+                                             CurrentUser){
 
         console.log("the settings page loaded")
-        var myOrcidId = $auth.getPayload().sub
+        var myOrcidId = CurrentUser.d.orcid_id
         $scope.orcidId = myOrcidId
-        $scope.givenNames = $auth.getPayload()["given_names"]
+        $scope.givenNames = CurrentUser.d.given_names
+
 
         $scope.wantToDelete = false
         $scope.deleteProfile = function() {
@@ -40,8 +43,7 @@ angular.module('settingsPage', [
                         is_deleted: true
                     })
 
-
-                    $auth.logout()
+                    CurrentUser.logout()
                     $location.path("/")
                     alert("Your profile has been deleted.")
                 })

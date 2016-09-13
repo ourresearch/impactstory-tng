@@ -81,6 +81,18 @@ def set_person_email(orcid_id, email, high_priority=False):
         print u"COMMIT fail on {}".format(orcid_id)
 
 
+def update_person(my_person, properties_to_change):
+    for k, v in properties_to_change.iteritems():
+        setattr(my_person, k, v)
+
+    db.session.merge(my_person)
+    commit_success = safe_commit(db)
+    if not commit_success:
+        print u"COMMIT fail on {}".format(my_person.orcid_id)
+    return my_person
+
+
+
 def set_person_claimed_at(my_person):
     my_person.claimed_at = datetime.datetime.utcnow().isoformat()
     db.session.merge(my_person)
@@ -122,6 +134,7 @@ def make_person(twitter_creds, high_priority=False):
 
     my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
     my_person.created = datetime.datetime.utcnow().isoformat()
+    my_person.claimed_at = datetime.datetime.utcnow().isoformat()
 
     full_twitter_profile = get_full_twitter_profile(twitter_creds)
     full_twitter_profile.update(twitter_creds)
@@ -240,6 +253,7 @@ class Person(db.Model):
     weekly_event_count = db.Column(db.Float)
     monthly_event_count = db.Column(db.Float)
     tweeted_quickly = db.Column(db.Boolean)
+    finished_wizard = db.Column(db.Boolean)
     saw_opencon_landing_page = db.Column(db.Boolean)
 
     coauthors = db.Column(MutableDict.as_mutable(JSONB))
@@ -1066,6 +1080,7 @@ class Person(db.Model):
             'id': self.id,
             'email': self.email,
             'num_products': self.num_products,
+            'finished_wizard': self.finished_wizard,
             'orcid_id': self.orcid_id,
             'twitter_screen_name': self.twitter,
             'first_name': self.first_name,

@@ -21,38 +21,62 @@ angular.module('auth', [
     })
 
 
-    .controller("LoginCtrl", function($scope, $location, $http, $auth){
+    .controller("LoginCtrl", function($scope, CurrentUser, $location, $http){
         console.log("LoginCtrl is running!")
-        $scope.loginTwitter = function(){
-            console.log("login twitter")
-        }
-        $scope.loginOrcid = function(){
-            console.log("login orcid")
-        }
+        $scope.currentUser = CurrentUser
+
+
+
+
+
 
     })
 
-    .controller("OauthCtrl", function($scope, $routeParams, $location, $http, CurrentUser){
+    .controller("OauthCtrl", function($scope, $cookies, $routeParams, $location, $http, CurrentUser){
         var requestObj = $location.search()
         if (_.isEmpty(requestObj)){
             console.log("we didn't get any codes or verifiers in the URL. aborting.")
             $location.url("/")
             return false
         }
-        requestObj.redirectUri = $location.path()
+
+        // set scope vars
+        $scope.identityProvider = $routeParams.identityProvider
+        $scope.intent = $routeParams.intent
+
+
+
+        var absUrl = $location.absUrl()
+        requestObj.redirectUri = absUrl.split("?")[0] // remove the search part of URL
+        console.log("using this redirectUri", requestObj.redirectUri)
+
+        // track signups that started at the opencon landing page
+        if ($cookies.get("sawOpenconLandingPage")) {
+            requestObj.sawOpenconLandingPage = true
+        }
 
         var urlBase = "api/me/"
         var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
 
+
+
+
+
+        console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
             .success(function(resp){
-                console.log("we successfully called the endpoint!", resp)
+                console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
-                $location.path(CurrentUser.getProfileUrl())
+                CurrentUser.sendHome()
+
             })
-            .error(function(resp){
-              console.log("problem getting token back from server!", resp)
-                // todo tell the user what went wrong
+            .error(function(error, status){
+                console.log("the server returned an error", status, error)
+                if (status == 404) {
+                    $scope.error = "not-found"
+                    $scope.identityProviderId = error.identity_provider_id
+                }
+
             })
 
     })

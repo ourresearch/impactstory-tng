@@ -26,6 +26,7 @@ angular.module('app', [
     'personPage',
     'settingsPage',
     'badgePage',
+    'wizard',
     'aboutPages'
 
 
@@ -35,32 +36,18 @@ angular.module('app', [
 
 
 angular.module('app').config(function ($routeProvider,
-                                       $authProvider,
                                        $mdThemingProvider,
                                        $locationProvider) {
 
 
     $locationProvider.html5Mode(true);
 
-    // handle 404s by redirecting to landing page.
-    $routeProvider.otherwise({ redirectTo: '/' })
+    // handle 404s.
+    $routeProvider.otherwise({ redirectTo: 'page-not-found' })
 
     $mdThemingProvider.theme('default')
         .primaryPalette('deep-orange')
         .accentPalette("blue")
-
-
-
-
-
-
-    //$authProvider.twitter({
-    //  url: '/auth/twitter',
-    //  authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
-    //  redirectUri: window.location.origin + "/twitter-login",
-    //  type: '1.0',
-    //  popupOptions: { width: 495, height: 645 }
-    //});
 
 
 
@@ -72,9 +59,9 @@ angular.module('app').run(function($route,
                                    $q,
                                    $timeout,
                                    $cookies,
-                                   $auth,
                                    $http,
                                    $location,
+                                   CurrentUser,
                                    Person) {
 
 
@@ -86,12 +73,9 @@ angular.module('app').run(function($route,
     ga('create', 'UA-23384030-1', 'auto');
 
     // if the user is logged in, get the most up-to-date token
-    if ($auth.isAuthenticated()){
-        $http.get("api/me").success(function(resp){
-            console.log("refreshing the current user's token", $auth.getPayload())
-            $auth.setToken(resp.token)
-        })
-    }
+    CurrentUser.boot()
+
+
 
 
 
@@ -108,11 +92,13 @@ angular.module('app').run(function($route,
 
 
     $rootScope.sendCurrentUserToIntercom = function(){
-        if (!$auth.isAuthenticated()){
-            return false
-        }
+        // needs refactoring!
 
-        $http.get("api/person/" + $auth.getPayload().sub)
+        // return false here if the user is not logged in
+
+
+        // no idea if this will still work with CurrentUser approach
+        $http.get("api/person/" + CurrentUser.d.orcid_id)
             .success(function(resp){
                 $rootScope.sendToIntercom(resp)
                 console.log("sending current user to intercom")
@@ -176,9 +162,10 @@ angular.module('app').run(function($route,
 
 
     $rootScope.$on('$routeChangeError', function(event, current, previous, rejection){
-        console.log("$routeChangeError, redirecting to /")
+        console.log("$routeChangeError! here's some things to look at: ", event, current, previous, rejection)
+
         $rootScope.setPersonIsLoading(false)
-        $location.url("/")
+        $location.url("page-not-found")
         window.scrollTo(0, 0)
     });
 
@@ -197,13 +184,15 @@ angular.module('app').controller('AppCtrl', function(
     $route,
     $location,
     NumFormat,
-    $auth,
     $interval,
     $http,
+    CurrentUser,
     $mdDialog,
+    $auth, // todo remove
     $sce){
 
-    $scope.auth = $auth
+    $scope.auth = $auth  // todo remove
+    $scope.currentUser = CurrentUser
     $scope.numFormat = NumFormat
     $scope.moment = moment // this will break unless moment.js loads over network...
 
@@ -365,10 +354,9 @@ angular.module('app').controller('AppCtrl', function(
     $scope.donate = function(cents){
         console.log("donate", cents)
         stripeInfo.cents = cents
-        var me = $auth.getPayload() // this might break on the donate page.
-        if (me){
-            stripeInfo.fullName = me.given_names + " " + me.family_name
-            stripeInfo.orcidId = me.sub
+        if (CurrentUser.isLoggedIn()){
+            stripeInfo.fullName = CurrentUser.d.given_names + " " + CurrentUser.d.family_name
+            stripeInfo.orcidId = CurrentUser.d.orcid_id
         }
 
         stripeHandler.open({

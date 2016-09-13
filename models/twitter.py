@@ -13,6 +13,7 @@ def get_twitter_creds(twitter_token, twitter_verifier):
                   verifier=twitter_verifier)
 
     r = requests.post(access_token_url, auth=auth)
+
     twitter_creds = dict(parse_qsl(r.text))
     print u"got back twitter_creds from twitter {}".format(twitter_creds)
     return twitter_creds
