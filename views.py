@@ -19,6 +19,7 @@ from models.search import autocomplete
 from models.url_slugs_to_redirect import url_slugs_to_redirect
 from models.twitter import get_twitter_creds
 from util import safe_commit
+from util import elapsed
 
 from flask import make_response
 from flask import request
@@ -42,6 +43,7 @@ import json
 import logging
 from urlparse import parse_qs, parse_qsl
 from time import sleep
+from time import time
 
 logger = logging.getLogger("views")
 
@@ -425,7 +427,11 @@ def refresh_my_orcid():
 
 @app.route("/api/me/twitter/login", methods=["POST"])
 def twitter_login():
+    start = time()
+    print "getting twitter creds"
     twitter_creds = get_twitter_creds(request.json.get('oauth_token'), request.json.get('oauth_verifier'))
+    print "got twittter creds, took {}".format(elapsed(start))
+
 
     my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
     if not my_person:

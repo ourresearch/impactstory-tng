@@ -74,7 +74,7 @@ angular.module('auth', [
                 console.log("the server returned an error", status, error)
                 if (status == 404) {
                     $scope.error = "not-found"
-                    $scope.id = error.id
+                    $scope.identityProviderId = error.identity_provider_id
                 }
 
             })
