@@ -9,17 +9,8 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                isLoggedIn: function($auth, $q, $location){
-                    var deferred = $q.defer()
-                    if ($auth.isAuthenticated()){
-                        var url = "/u/" + $auth.getPayload().sub
-                        $location.path(url)
-                    }
-                    else {
-                        return $q.when(true)
-                        deferred.resolve()
-                    }
-                    return deferred.promise
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendHomePromise(false)
                 },
                 customLandingPage: function($q){
                     return $q.when("default")
@@ -33,17 +24,8 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                isLoggedIn: function($auth, $q, $location){
-                    var deferred = $q.defer()
-                    if ($auth.isAuthenticated()){
-                        var url = "/u/" + $auth.getPayload().sub
-                        $location.path(url)
-                    }
-                    else {
-                        return $q.when(true)
-                        deferred.resolve()
-                    }
-                    return deferred.promise
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendHomePromise(false)
                 },
                 customLandingPage: function($q){
                     return $q.when("opencon")
@@ -55,64 +37,20 @@ angular.module('staticPages', [
 
 
 
+
     .config(function ($routeProvider) {
-        $routeProvider.when('/login', {
-            templateUrl: "static-pages/login.tpl.html",
-            controller: "LoginCtrl"
+        $routeProvider.when('/page-not-found', {
+            templateUrl: "static-pages/page-not-found.tpl.html",
+            controller: "PageNotFoundCtrl"
         })
     })
 
-    .config(function ($routeProvider) {
-        $routeProvider.when('/twitter-login', {
-            templateUrl: "static-pages/twitter-login.tpl.html",
-            controller: "TwitterLoginCtrl"
-        })
-    })
-
-    .controller("TwitterLoginCtrl", function($scope){
-        console.log("twitter page controller is running!")
+    .controller("PageNotFoundCtrl", function($scope){
+        console.log("PageNotFound controller is running!")
 
     })
 
 
-    .controller("LoginCtrl", function ($scope, $cookies, $location, $http, $auth, $rootScope, Person) {
-        console.log("kenny loggins page controller is running!")
-
-
-        var searchObject = $location.search();
-        var code = searchObject.code
-        if (!code){
-            $location.path("/")
-            return false
-        }
-
-        var requestObj = {
-            code: code,
-            redirectUri: window.location.origin + "/login"
-        }
-
-        // this it temporary till we do the twitter-based signup
-        if ($cookies.get("sawOpenconLandingPage")) {
-
-            // it's important this never gets set to false,
-            // the user user may be on a new machine. this is a gross hack.
-            requestObj.sawOpenconLandingPage = true
-        }
-        $http.post("api/auth/orcid", requestObj)
-            .success(function(resp){
-                console.log("got a token back from ye server", resp)
-                $auth.setToken(resp.token)
-                var payload = $auth.getPayload()
-
-                $rootScope.sendCurrentUserToIntercom()
-                $location.url("u/" + payload.sub)
-            })
-            .error(function(resp){
-              console.log("problem getting token back from server!", resp)
-                $location.url("/")
-            })
-
-    })
 
     .controller("LandingPageCtrl", function ($scope,
                                              $mdDialog,

@@ -96,7 +96,6 @@ angular.module('aboutPages', [])
     // used for about/data
     // used for about
     .controller("aboutPageCtrl", function($scope,
-                                          $auth,
                                           $timeout,
                                            $routeParams,
                                            $anchorScroll,
@@ -205,6 +204,7 @@ angular.module('app', [
     'personPage',
     'settingsPage',
     'badgePage',
+    'wizard',
     'aboutPages'
 
 
@@ -214,32 +214,18 @@ angular.module('app', [
 
 
 angular.module('app').config(function ($routeProvider,
-                                       $authProvider,
                                        $mdThemingProvider,
                                        $locationProvider) {
 
 
     $locationProvider.html5Mode(true);
 
-    // handle 404s by redirecting to landing page.
-    $routeProvider.otherwise({ redirectTo: '/' })
+    // handle 404s.
+    $routeProvider.otherwise({ redirectTo: 'page-not-found' })
 
     $mdThemingProvider.theme('default')
         .primaryPalette('deep-orange')
         .accentPalette("blue")
-
-
-
-
-
-
-    //$authProvider.twitter({
-    //  url: '/auth/twitter',
-    //  authorizationEndpoint: 'https://api.twitter.com/oauth/authenticate',
-    //  redirectUri: window.location.origin + "/twitter-login",
-    //  type: '1.0',
-    //  popupOptions: { width: 495, height: 645 }
-    //});
 
 
 
@@ -251,9 +237,9 @@ angular.module('app').run(function($route,
                                    $q,
                                    $timeout,
                                    $cookies,
-                                   $auth,
                                    $http,
                                    $location,
+                                   CurrentUser,
                                    Person) {
 
 
@@ -265,12 +251,9 @@ angular.module('app').run(function($route,
     ga('create', 'UA-23384030-1', 'auto');
 
     // if the user is logged in, get the most up-to-date token
-    if ($auth.isAuthenticated()){
-        $http.get("api/me").success(function(resp){
-            console.log("refreshing the current user's token", $auth.getPayload())
-            $auth.setToken(resp.token)
-        })
-    }
+    CurrentUser.boot()
+
+
 
 
 
@@ -287,11 +270,13 @@ angular.module('app').run(function($route,
 
 
     $rootScope.sendCurrentUserToIntercom = function(){
-        if (!$auth.isAuthenticated()){
-            return false
-        }
+        // needs refactoring!
 
-        $http.get("api/person/" + $auth.getPayload().sub)
+        // return false here if the user is not logged in
+
+
+        // no idea if this will still work with CurrentUser approach
+        $http.get("api/person/" + CurrentUser.d.orcid_id)
             .success(function(resp){
                 $rootScope.sendToIntercom(resp)
                 console.log("sending current user to intercom")
@@ -355,9 +340,10 @@ angular.module('app').run(function($route,
 
 
     $rootScope.$on('$routeChangeError', function(event, current, previous, rejection){
-        console.log("$routeChangeError, redirecting to /")
+        console.log("$routeChangeError! here's some things to look at: ", event, current, previous, rejection)
+
         $rootScope.setPersonIsLoading(false)
-        $location.url("/")
+        $location.url("page-not-found")
         window.scrollTo(0, 0)
     });
 
@@ -376,13 +362,15 @@ angular.module('app').controller('AppCtrl', function(
     $route,
     $location,
     NumFormat,
-    $auth,
     $interval,
     $http,
+    CurrentUser,
     $mdDialog,
+    $auth, // todo remove
     $sce){
 
-    $scope.auth = $auth
+    $scope.auth = $auth  // todo remove
+    $scope.currentUser = CurrentUser
     $scope.numFormat = NumFormat
     $scope.moment = moment // this will break unless moment.js loads over network...
 
@@ -544,10 +532,9 @@ angular.module('app').controller('AppCtrl', function(
     $scope.donate = function(cents){
         console.log("donate", cents)
         stripeInfo.cents = cents
-        var me = $auth.getPayload() // this might break on the donate page.
-        if (me){
-            stripeInfo.fullName = me.given_names + " " + me.family_name
-            stripeInfo.orcidId = me.sub
+        if (CurrentUser.isLoggedIn()){
+            stripeInfo.fullName = CurrentUser.d.given_names + " " + CurrentUser.d.family_name
+            stripeInfo.orcidId = CurrentUser.d.orcid_id
         }
 
         stripeHandler.open({
@@ -656,38 +643,62 @@ angular.module('auth', [
     })
 
 
-    .controller("LoginCtrl", function($scope, $location, $http, $auth){
+    .controller("LoginCtrl", function($scope, CurrentUser, $location, $http){
         console.log("LoginCtrl is running!")
-        $scope.loginTwitter = function(){
-            console.log("login twitter")
-        }
-        $scope.loginOrcid = function(){
-            console.log("login orcid")
-        }
+        $scope.currentUser = CurrentUser
+
+
+
+
+
 
     })
 
-    .controller("OauthCtrl", function($scope, $routeParams, $location, $http, CurrentUser){
+    .controller("OauthCtrl", function($scope, $cookies, $routeParams, $location, $http, CurrentUser){
         var requestObj = $location.search()
         if (_.isEmpty(requestObj)){
             console.log("we didn't get any codes or verifiers in the URL. aborting.")
             $location.url("/")
             return false
         }
-        requestObj.redirectUri = $location.path()
+
+        // set scope vars
+        $scope.identityProvider = $routeParams.identityProvider
+        $scope.intent = $routeParams.intent
+
+
+
+        var absUrl = $location.absUrl()
+        requestObj.redirectUri = absUrl.split("?")[0] // remove the search part of URL
+        console.log("using this redirectUri", requestObj.redirectUri)
+
+        // track signups that started at the opencon landing page
+        if ($cookies.get("sawOpenconLandingPage")) {
+            requestObj.sawOpenconLandingPage = true
+        }
 
         var urlBase = "api/me/"
         var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
 
+
+
+
+
+        console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
             .success(function(resp){
-                console.log("we successfully called the endpoint!", resp)
+                console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
-                $location.path(CurrentUser.getProfileUrl())
+                CurrentUser.sendHome()
+
             })
-            .error(function(resp){
-              console.log("problem getting token back from server!", resp)
-                // todo tell the user what went wrong
+            .error(function(error, status){
+                console.log("the server returned an error", status, error)
+                if (status == 404) {
+                    $scope.error = "not-found"
+                    $scope.identityProviderId = error.identity_provider_id
+                }
+
             })
 
     })
@@ -869,92 +880,6 @@ angular.module('footer', [
 
 
 
-angular.module('header', [
-  ])
-
-
-
-  .controller("headerCtrl", function($scope,
-                                     $location,
-                                     $rootScope,
-                                     FormatterService,
-                                     FilterService,
-                                     $http){
-
-
-
-    $scope.searchResultSelected = ''
-    $scope.format = FormatterService
-    $scope.foo = 42
-
-    $rootScope.$on('$routeChangeSuccess', function(next, current){
-      $scope.searchResultSelected = ''
-      document.getElementById("search-box").blur()
-    })
-    $rootScope.$on('$routeChangeError', function(event, current, previous, rejection){
-      $scope.searchResultSelected = ''
-      document.getElementById("search-box").blur()
-    });
-
-
-    $scope.onSelect = function(item ){
-      console.log("select!", item)
-      if (item.type=='pypi_project') {
-        $location.path("package/python/" + item.name)
-      }
-      else if (item.type=='cran_project') {
-        $location.path("package/r/" + item.name)
-      }
-      else if (item.type=='person') {
-        $location.path("person/" + item.id)
-      }
-      else if (item.type=='tag') {
-        FilterService.unsetAll()
-        $location.path("tag/" + encodeURIComponent(encodeURIComponent( item.name)))
-      }
-    }
-
-    $scope.doSearch = function(val){
-      console.log("doing search")
-      return $http.get("/api/search/" + val)
-        .then(
-          function(resp){
-            //return resp.data.list
-            return _.map(resp.data.list, function(match){
-              //return match
-              match.urlName = encodeURIComponent(encodeURIComponent(match.name))
-              return match
-            })
-
-            var names = _.pluck(resp.data.list, "name")
-            console.log(names)
-            return names
-          }
-        )
-    }
-
-  })
-
-.controller("searchResultCtrl", function($scope, $sce){
-
-
-    $scope.trustHtml = function(str){
-      console.log("trustHtml got a thing", str)
-
-      return $sce.trustAsHtml(str)
-    }
-
-
-
-
-  })
-
-
-
-
-
-
-
 angular.module('personPage', [
     'ngRoute',
     'person'
@@ -968,12 +893,22 @@ angular.module('personPage', [
             controller: 'personPageCtrl',
             reloadOnSearch: false,
             resolve: {
-                personResp: function($q, $http, $rootScope, $route, $location, Person){
-                    $rootScope.setPersonIsLoading(true)
+                personResp: function($q, $http, $rootScope, $route, $location, Person, CurrentUser){
                     console.log("person is loading!", $rootScope)
                     var urlId = $route.current.params.orcid
 
                     if (urlId.indexOf("0000-") === 0){ // got an ORCID
+
+                        // if this is my profile
+                        if (urlId == CurrentUser.d.orcid_id) {
+                            var redirecting = CurrentUser.sendHome()
+                            if (redirecting){
+                                var deferred = $q.defer()
+                                return deferred.promise
+                            }
+                        }
+
+                        $rootScope.setPersonIsLoading(true)
                         return Person.load(urlId)
                     }
                     else { // got a twitter name
@@ -1137,6 +1072,30 @@ angular.module('personPage', [
             )
         }
 
+        $scope.refreshFromSecretButton = function(){
+            console.log("ah, refreshing!")
+
+            // for testing
+            //var url = "https://impactstory.org/api/person/" + Person.d.orcid_id
+
+            // the real one
+            var url = "/api/person/" + Person.d.orcid_id + "/refresh"
+
+            $http.post(url)
+                .success(function(resp){
+
+                    // force the Person to reload. without this
+                    // the newly-synced data never gets displayed.
+                    console.log("reloading the Person")
+                    Person.reload().then(
+                        function(resp){
+                            $scope.profileStatus = "all_good"
+                            console.log("success, reloading page", resp)
+                            $route.reload()
+                        }
+                    )
+                })
+        }
 
 
         $scope.shareProfile = function(){
@@ -1600,9 +1559,10 @@ angular.module('currentUser', [
 
 
 
-    .factory("CurrentUser", function($auth, $http, $q, $route){
+    .factory("CurrentUser", function($auth, $http, $q, $route, $location){
 
 
+        var data = {}
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
@@ -1621,12 +1581,6 @@ angular.module('currentUser', [
             return deferred.promise
         }
 
-
-        var doTheyHaveProducts = function(){
-            $http.get("/api/me").success(function(resp){
-
-            })
-        }
 
 
         var twitterAuthenticate = function (intent) {
@@ -1660,7 +1614,7 @@ angular.module('currentUser', [
 
             var redirectUri = window.location.origin + "/oauth/" + intent + "/orcid"
 
-            console.log("ORCID authenticate!", showLogin)
+            console.log("ORCID authenticate!", intent, orcidAlreadyExists)
 
             var authUrl = "https://orcid.org/oauth/authorize" +
                 "?client_id=APP-PF0PDMP7P297AU8S" +
@@ -1676,35 +1630,141 @@ angular.module('currentUser', [
             return true
         }
 
-        function getProfileUrl(){
-            var data = getAllDataAsObject()
+        function sendHome(){
+            console.log("calling sendToCorrectPage() with this data", data)
+            var url
+            var currentPath = $location.path()
+            console.log("currentPath", currentPath)
 
-            if (data.finished_wizard){
-                return "u/" + data.orcid_id
+
+            if (data.finished_wizard && isMyProfile(currentPath)){
+                url = currentPath
             }
 
-            if (data.num_products > 0){
-                return "wizard/confirm-products"
-
+            else if (data.finished_wizard){
+                url = "/u/" + data.orcid_id
             }
 
-            if (data.orcid_id){
-                return "wizard/add-products"
+            else if (data.num_products > 0){
+                url = "/wizard/confirm-publications"
             }
 
-            return "wizard/connect-orcid"
+            else if (data.orcid_id){
+                url = "/wizard/add-publications"
+            }
+
+            else {
+                url = "/wizard/connect-orcid"
+            }
+
+            if (currentPath == url ){
+                return false
+            }
+            else {
+                $location.url(url)
+                return true
+            }
+        }
+
+        function isMyProfile(url){
+            if (!data.orcid_id){
+                return false
+            }
+            return url.indexOf(data.orcid_id) > -1
         }
 
 
-        function getAllDataAsObject(){
-            if (!$auth.isAuthenticated){
-                return {}
+
+
+        function sendHomePromise(requireLogin){
+            var deferred = $q.defer()
+
+            if (!isLoggedIn()){
+                if (requireLogin){
+                    $location.url("login")
+                }
+                else {
+                    deferred.resolve()
+                }
             }
-            return $auth.getPayload()
+
+            else {
+                var redirecting = sendHome()
+
+                console.log("sendHomePromise redirceing=", redirecting)
+
+                if (!redirecting){
+                    deferred.resolve()
+                }
+            }
+
+            return deferred.promise
+        }
+
+
+        function isLoggedIn(returnPromise){
+            if (returnPromise){
+                var deferred = $q.defer()
+                if ($auth.isAuthenticated()) {
+                    deferred.resolve()
+                }
+                else {
+                    deferred.reject()
+                }
+                return deferred.promise
+            }
+
+
+            return $auth.isAuthenticated()
+        }
+
+        function setProperty(k, v){
+            var data = {}
+            data[k] = v
+            return $http.post("api/me", data)
+                .success(function(resp){
+                    setFromToken(resp.token)
+                })
+                .error(function(resp){
+                    console.log("we tried to set a thing, but it didn't work", data, resp)
+                })
+        }
+
+
+        function logout(){
+            $auth.logout()
+            _.each(data, function(v, k){
+                delete data[k]
+            })
+            return true
+        }
+
+        function boot(){
+            _.each($auth.getPayload(), function(v, k){
+                data[k] = v
+            })
+            return reloadFromServer()
+        }
+
+        function reloadFromServer(){
+            console.log("reloading from server")
+            if (!isLoggedIn()){
+                console.log("user is not logged in")
+                return false
+            }
+
+            $http.get("api/me").success(function(resp){
+                console.log("refreshing data in CurrentUser", resp)
+                setFromToken(resp.token)
+            })
         }
 
         function setFromToken(token){
             $auth.setToken(token) // synchronous
+            _.each($auth.getPayload(), function(v, k){
+                data[k] = v
+            })
+
             sendTokenToIntercom()
         }
 
@@ -1713,7 +1773,15 @@ angular.module('currentUser', [
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
             setFromToken: setFromToken,
-            getProfileUrl: getProfileUrl
+            sendHome: sendHome,
+            sendHomePromise: sendHomePromise,
+            setProperty: setProperty,
+            d: data,
+            logout: logout,
+            isLoggedIn: isLoggedIn,
+            reloadFromServer: reloadFromServer,
+            boot: boot,
+            isMyProfile: isMyProfile
         }
     })
 angular.module("numFormat", [])
@@ -1931,13 +1999,8 @@ angular.module('settingsPage', [
             templateUrl: 'settings-page/settings-page.tpl.html',
             controller: 'settingsPageCtrl',
             resolve: {
-                isAuth: function($q, $auth){
-                    if ($auth.isAuthenticated()){
-                        return $q.resolve()
-                    }
-                    else {
-                        return $q.reject("/settings only works if you're logged in.")
-                    }
+                isAuth: function($q, CurrentUser){
+                    return CurrentUser.isLoggedIn(true)
                 }
             }
         })
@@ -1945,12 +2008,20 @@ angular.module('settingsPage', [
 
 
 
-    .controller("settingsPageCtrl", function($scope, $rootScope, $auth, $route, $location, $http, Person){
+    .controller("settingsPageCtrl", function($scope,
+                                             $rootScope,
+                                             $auth,
+                                             $route,
+                                             $location,
+                                             $http,
+                                             Person,
+                                             CurrentUser){
 
         console.log("the settings page loaded")
-        var myOrcidId = $auth.getPayload().sub
+        var myOrcidId = CurrentUser.d.orcid_id
         $scope.orcidId = myOrcidId
-        $scope.givenNames = $auth.getPayload()["given_names"]
+        $scope.givenNames = CurrentUser.d.given_names
+
 
         $scope.wantToDelete = false
         $scope.deleteProfile = function() {
@@ -1962,8 +2033,7 @@ angular.module('settingsPage', [
                         is_deleted: true
                     })
 
-
-                    $auth.logout()
+                    CurrentUser.logout()
                     $location.path("/")
                     alert("Your profile has been deleted.")
                 })
@@ -2017,17 +2087,8 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                isLoggedIn: function($auth, $q, $location){
-                    var deferred = $q.defer()
-                    if ($auth.isAuthenticated()){
-                        var url = "/u/" + $auth.getPayload().sub
-                        $location.path(url)
-                    }
-                    else {
-                        return $q.when(true)
-                        deferred.resolve()
-                    }
-                    return deferred.promise
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendHomePromise(false)
                 },
                 customLandingPage: function($q){
                     return $q.when("default")
@@ -2041,17 +2102,8 @@ angular.module('staticPages', [
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
-                isLoggedIn: function($auth, $q, $location){
-                    var deferred = $q.defer()
-                    if ($auth.isAuthenticated()){
-                        var url = "/u/" + $auth.getPayload().sub
-                        $location.path(url)
-                    }
-                    else {
-                        return $q.when(true)
-                        deferred.resolve()
-                    }
-                    return deferred.promise
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendHomePromise(false)
                 },
                 customLandingPage: function($q){
                     return $q.when("opencon")
@@ -2063,64 +2115,20 @@ angular.module('staticPages', [
 
 
 
+
     .config(function ($routeProvider) {
-        $routeProvider.when('/login', {
-            templateUrl: "static-pages/login.tpl.html",
-            controller: "LoginCtrl"
+        $routeProvider.when('/page-not-found', {
+            templateUrl: "static-pages/page-not-found.tpl.html",
+            controller: "PageNotFoundCtrl"
         })
     })
 
-    .config(function ($routeProvider) {
-        $routeProvider.when('/twitter-login', {
-            templateUrl: "static-pages/twitter-login.tpl.html",
-            controller: "TwitterLoginCtrl"
-        })
-    })
-
-    .controller("TwitterLoginCtrl", function($scope){
-        console.log("twitter page controller is running!")
+    .controller("PageNotFoundCtrl", function($scope){
+        console.log("PageNotFound controller is running!")
 
     })
 
 
-    .controller("LoginCtrl", function ($scope, $cookies, $location, $http, $auth, $rootScope, Person) {
-        console.log("kenny loggins page controller is running!")
-
-
-        var searchObject = $location.search();
-        var code = searchObject.code
-        if (!code){
-            $location.path("/")
-            return false
-        }
-
-        var requestObj = {
-            code: code,
-            redirectUri: window.location.origin + "/login"
-        }
-
-        // this it temporary till we do the twitter-based signup
-        if ($cookies.get("sawOpenconLandingPage")) {
-
-            // it's important this never gets set to false,
-            // the user user may be on a new machine. this is a gross hack.
-            requestObj.sawOpenconLandingPage = true
-        }
-        $http.post("api/auth/orcid", requestObj)
-            .success(function(resp){
-                console.log("got a token back from ye server", resp)
-                $auth.setToken(resp.token)
-                var payload = $auth.getPayload()
-
-                $rootScope.sendCurrentUserToIntercom()
-                $location.url("u/" + payload.sub)
-            })
-            .error(function(resp){
-              console.log("problem getting token back from server!", resp)
-                $location.url("/")
-            })
-
-    })
 
     .controller("LandingPageCtrl", function ($scope,
                                              $mdDialog,
@@ -2148,7 +2156,6 @@ angular.module('staticPages', [
             }
         }
 
-        
         $scope.noOrcid = function(ev){
             $mdDialog.show({
                 controller: orcidModalCtrl,
@@ -2190,12 +2197,13 @@ angular.module('wizard', [
 ])
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/wizard/welcome', {
-            templateUrl: "wizard/welcome.tpl.html",
-            controller: "WelcomePageCtrl",
+        $routeProvider.when('/wizard/connect-orcid', {
+            templateUrl: "wizard/connect-orcid.tpl.html",
+            controller: "ConnectOrcidPageCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+
+                    return CurrentUser.sendHomePromise(true)
                 }
             }
         })
@@ -2203,12 +2211,12 @@ angular.module('wizard', [
 
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/wizard/my-publications', {
-            templateUrl: "wizard/my-publications.tpl.html",
-            controller: "MyPublicationsCtrl",
+        $routeProvider.when('/wizard/confirm-publications', {
+            templateUrl: "wizard/confirm-publications.tpl.html",
+            controller: "ConfirmPublicationsCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendHomePromise(true)
                 }
             }
         })
@@ -2219,8 +2227,8 @@ angular.module('wizard', [
             templateUrl: "wizard/add-publications.tpl.html",
             controller: "AddPublicationsCtrl",
             resolve: {
-                isLoggedIn: function(CurrentUser){
-                    return CurrentUser.isAuthenticatedPromise()
+                redirect: function(CurrentUser){
+                    return CurrentUser.sendHomePromise(true)
                 }
             }
         })
@@ -2228,21 +2236,22 @@ angular.module('wizard', [
 
 
 
-    .controller("WelcomePageCtrl", function($scope, $location, $http, $auth){
+    .controller("ConnectOrcidPageCtrl", function($scope, $location, $http, $auth){
 
 
-        // @todo this probably should all go in CurrentUser
-        if ($auth.getPayload().orcid_id){
-            console.log("we've got their ORCID already")
-            if ($auth.getPayload().num_products){
-                console.log("they are all set, redirecting to their profile")
-                $location.url("u/" + $auth.getPayload().orcid_id)
-            }
-            else {
-                console.log("no products! redirecting to add-products")
-                $location.url("wizard/add-products")
-            }
-        }
+        //if ($auth.getPayload().orcid_id){
+        //    console.log("we've got their ORCID already")
+        //    if ($auth.getPayload().num_products){
+        //        console.log("they are all set, redirecting to their profile")
+        //        $location.url("u/" + $auth.getPayload().orcid_id)
+        //    }
+        //    else {
+        //        console.log("no products! redirecting to add-products")
+        //        $location.url("wizard/add-products")
+        //    }
+        //}
+
+
 
 
         console.log("WelcomePageCtrl is running!")
@@ -2251,28 +2260,37 @@ angular.module('wizard', [
             console.log("setting doYouHaveAnOrcid", answer)
             $scope.hasOrcid = answer
         }
-
     })
 
 
 
-    .controller("MyPublicationsCtrl", function($scope, $location, $http, $auth){
-        console.log("MyPublicationsCtrl is running!")
-        $scope.finishProfile = function(){
+    .controller("ConfirmPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser){
+        console.log("ConfirmPublicationsCtrl is running!")
+
+        // todo add this to the template.
+        $scope.confirm = function(){
             console.log("finishProfile()")
             $scope.actionSelected = "finish-profile"
-            $http.post("api/me", {})
-                .success(function(resp){
-                    console.log("successfully refreshed everything, redirecting to profile page ", resp)
-                    $auth.setToken(resp.token)
 
-                    // todo this might should be a method on CurrentUser
-                    $location.url("u/" + $auth.getPayload().orcid_id)
+            CurrentUser.setProperty("finished_wizard", true).then(
+                function(x){
+                    console.log("finished setting finished_wizard", x)
+                }
+            )
+
+            // this runs concurrently with the call to the server to set finished_wizard just above.
+            $http.post("api/me/refresh", {})
+                .success(function(resp){
+                    console.log("successfully refreshed everything ")
+                    CurrentUser.setFromToken(resp.token)
+                    CurrentUser.sendHome()
+
                 })
                 .error(function(resp){
                     console.log("we tried to refresh profile, but something went wrong :(", resp)
                     $scope.actionSelected = null
                 })
+
         }
     })
 
@@ -2323,7 +2341,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/confirm-publications.tpl.html', 'wizard/connect-orcid.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -2715,11 +2733,13 @@ angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templ
     "<div class=\"page login-page\">\n" +
     "    <h2>Log in</h2>\n" +
     "    <div class=\"actions\">\n" +
-    "        <div class=\"btn btn-lg btn-default\" ng-click=\"loginTwitter()\">\n" +
+    "        <div class=\"btn btn-lg btn-default\"\n" +
+    "             ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
     "            <i class=\"fa fa-twitter\"></i>\n" +
     "            Log in with Twitter\n" +
     "        </div>\n" +
-    "        <div class=\"btn btn-lg btn-default\" ng-click=\"loginOrcid()\">\n" +
+    "        <div class=\"btn btn-lg btn-default\"\n" +
+    "             ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
     "            Log in with ORCID\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -2729,8 +2749,62 @@ angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templ
 angular.module("auth/oauth.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("auth/oauth.tpl.html",
     "<div class=\"page oauth-page\">\n" +
-    "    <h2>OAuth page!</h2>\n" +
-    "    <p>doing login stuff now....</p>\n" +
+    "    <div class=\"working\" ng-show=\"!error\">\n" +
+    "        Connecting with your\n" +
+    "        <span class=\"identity-provider twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
+    "            Twitter\n" +
+    "        </span>\n" +
+    "        <span class=\"identity-provider orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
+    "            Orcid\n" +
+    "        </span>\n" +
+    "        &hellip;\n" +
+    "    </div>\n" +
+    "\n" +
+    "\n" +
+    "    <div ng-show=\"error\">\n" +
+    "\n" +
+    "        <div class=\"orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
+    "            <div class=\"msg\">\n" +
+    "                <i class=\"fa fa-exclamation-triangle\"></i>\n" +
+    "                We couldn't log you in because we don't have your ORCID account\n" +
+    "                (<a href=\"https://orcid.org/{{ identityProviderId }}\">{{ identityProviderId }}</a>)\n" +
+    "                on record.\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"btn btn-default\"\n" +
+    "                 ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                Log in with Twitter instead\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
+    "            <div class=\"msg\">\n" +
+    "                <i class=\"fa fa-exclamation-triangle\"></i>\n" +
+    "                We couldn't log you in because but we don't have your Twitter account\n" +
+    "                (<a href=\"https://twitter.com/{{ identityProviderId }}\">@{{ identityProviderId }}</a>)\n" +
+    "                on record.\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"buttons\">\n" +
+    "                <div class=\"btn btn-default\"\n" +
+    "                     ng-click=\"currentUser.twitterAuthenticate('register')\">\n" +
+    "                    <i class=\"fa fa-twitter\"></i>\n" +
+    "                    Create a new profile as @{{ identityProviderId }}\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"btn btn-default\"\n" +
+    "                    ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
+    "                    Log in with ORCID instead\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "    </div>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
+    "\n" +
     "\n" +
     "</div>");
 }]);
@@ -2899,132 +2973,6 @@ angular.module("footer/footer.tpl.html", []).run(["$templateCache", function($te
     "    </div>\n" +
     "\n" +
     "</div>");
-}]);
-
-angular.module("header/header.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("header/header.tpl.html",
-    "<div class=\"ti-header\" ng-controller=\"headerCtrl\">\n" +
-    "   <h1>\n" +
-    "      <a href=\"/\">\n" +
-    "         <img src=\"static/img/logo-circle.png\" alt=\"\"/>\n" +
-    "      </a>\n" +
-    "   </h1>\n" +
-    "\n" +
-    "   <div class=\"ti-menu\">\n" +
-    "      <a href=\"leaderboard?type=people\"\n" +
-    "         popover=\"Top authors\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\"\n" +
-    "         class=\"menu-link\" id=\"leaders-menu-link\">\n" +
-    "         <i class=\"fa fa-user\"></i>\n" +
-    "      </a>\n" +
-    "      <a href=\"leaderboard?type=packages\"\n" +
-    "         popover=\"Top projects\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\"\n" +
-    "         class=\"menu-link\" id=\"leaders-menu-link\">\n" +
-    "         <i class=\"fa fa-archive\"></i>\n" +
-    "      </a>\n" +
-    "      <a href=\"leaderboard?type=tags\"\n" +
-    "         popover=\"Top topics\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\"\n" +
-    "         class=\"menu-link\" id=\"leaders-menu-link\">\n" +
-    "         <i class=\"fa fa-tag\"></i>\n" +
-    "      </a>\n" +
-    "\n" +
-    "      <!-- needs weird style hacks -->\n" +
-    "      <a href=\"about\"\n" +
-    "         class=\"menu-link about\" id=\"leaders-menu-link\">\n" +
-    "         <i\n" +
-    "         popover=\"Learn more about Depsy\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\" class=\"fa fa-question-circle\"></i>\n" +
-    "      </a>\n" +
-    "\n" +
-    "\n" +
-    "   </div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "   <div class=\"search-box\">\n" +
-    "    <input type=\"text\"\n" +
-    "           id=\"search-box\"\n" +
-    "           ng-model=\"searchResultSelected\"\n" +
-    "           placeholder=\"Search packages, authors, and topics\"\n" +
-    "           typeahead=\"result as result.name for result in doSearch($viewValue)\"\n" +
-    "           typeahead-loading=\"loadingLocations\"\n" +
-    "           typeahead-no-results=\"noResults\"\n" +
-    "           typeahead-template-url=\"header/search-result.tpl.html\"\n" +
-    "           typeahead-focus-first=\"false\"\n" +
-    "           typeahead-on-select=\"onSelect($item)\"\n" +
-    "           class=\"form-control input-lg\">\n" +
-    "   </div>\n" +
-    "\n" +
-    "\n" +
-    "</div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "");
-}]);
-
-angular.module("header/search-result.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("header/search-result.tpl.html",
-    "\n" +
-    "<div class=\"typeahead-group-header\" ng-if=\"match.model.is_first\">\n" +
-    "   <span class=\"group-header-type pypy-package\" ng-if=\"match.model.type=='pypi_project'\">\n" +
-    "      <img src=\"static/img/python.png\" alt=\"\"/>\n" +
-    "      Python packages <span class=\"where\">on <a href=\"https://pypi.python.org/pypi\">PyPI</a></span>\n" +
-    "   </span>\n" +
-    "   <span class=\"group-header-type cran-package\" ng-if=\"match.model.type=='cran_project'\">\n" +
-    "      <img src=\"static/img/r-logo.png\" alt=\"\"/>\n" +
-    "      R packages <span class=\"where\">on <a href=\"https://cran.r-project.org/\">CRAN</a></span>\n" +
-    "   </span>\n" +
-    "   <span class=\"group-header-type people\" ng-if=\"match.model.type=='person'\">\n" +
-    "      <i class=\"fa fa-user\"></i>\n" +
-    "      People\n" +
-    "   </span>\n" +
-    "   <span class=\"group-header-type tags\" ng-if=\"match.model.type=='tag'\">\n" +
-    "      <i class=\"fa fa-tag\"></i>\n" +
-    "      Tags\n" +
-    "   </span>\n" +
-    "\n" +
-    "</div>\n" +
-    "<a ng-href=\"package/python/{{ match.model.name }}\" ng-if=\"match.model.type=='pypi_project'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "   <span  class=\"summary\">\n" +
-    "      {{ match.model.summary }}\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "<a ng-href=\"package/r/{{ match.model.name }}\" ng-if=\"match.model.type=='cran_project'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "   <span  class=\"summary\">\n" +
-    "      {{ match.model.summary }}\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "<a ng-href=\"person/{{ match.model.id }}\" ng-if=\"match.model.type=='person'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "<a ng-href=\"tag/{{ match.model.urlName }}\" ng-if=\"match.model.type=='tag'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "   <span class=\"tag summary\">\n" +
-    "      {{ match.model.impact }} packages\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "\n" +
-    "\n" +
-    "");
 }]);
 
 angular.module("helps.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -3592,7 +3540,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "        <div class=\"row person-footer\">\n" +
     "            <div class=\"text col-md-8\">\n" +
     "                <span class=\"text\">\n" +
-    "                    <span class=\"secret-sync\" ng-click=\"pullFromOrcid()\">\n" +
+    "                    <span class=\"secret-sync\" ng-click=\"refreshFromSecretButton()\">\n" +
     "                        <i class=\"fa fa-unlock\"></i>\n" +
     "                    </span>\n" +
     "                    All the data you see here is open for re-use.\n" +
@@ -3976,7 +3924,7 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "\n" +
     "        <div class=\"join-button\">\n" +
-    "            <md-button class=\"md-accent md-raised\" ng-click=\"twitterAuthenticate('register')\">\n" +
+    "            <md-button class=\"md-accent md-raised\" ng-click=\"currentUser.twitterAuthenticate('register')\">\n" +
     "                <i class=\"fa fa-twitter\"></i>\n" +
     "                Join for free with Twitter\n" +
     "            </md-button>\n" +
@@ -4027,6 +3975,14 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "</md-dialog>\n" +
     "</script>\n" +
     "");
+}]);
+
+angular.module("static-pages/page-not-found.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("static-pages/page-not-found.tpl.html",
+    "<div class=\"landing static-page\">\n" +
+    "    <h1>Sorry, we couldn't find that page!</h1>\n" +
+    "\n" +
+    "</div>");
 }]);
 
 angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -4081,8 +4037,8 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
     "");
 }]);
 
-angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("wizard/my-publications.tpl.html",
+angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/confirm-publications.tpl.html",
     "<div class=\"page wizard add-publications\">\n" +
     "\n" +
     "    <h2>my publications</h2>\n" +
@@ -4091,7 +4047,7 @@ angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", fun
     "        Does that look good?\n" +
     "    </div>\n" +
     "    <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
-    "        <span ng-click=\"finishProfile()\" class=\"btn btn-lg btn-success\">\n" +
+    "        <span ng-click=\"confirm()\" class=\"btn btn-lg btn-success\">\n" +
     "            <i class=\"fa fa-check\"></i>\n" +
     "            <span class=\"text\">\n" +
     "                <span class=\"main\">Close enough</span>\n" +
@@ -4114,8 +4070,8 @@ angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", fun
     "</div>");
 }]);
 
-angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("wizard/welcome.tpl.html",
+angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/connect-orcid.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
     "    <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>\n" +
     "    <p>\n" +
@@ -4149,7 +4105,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', true)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', true)\">\n" +
     "                Sign in to my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -4159,7 +4115,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', false)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
     "                Create my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -4170,7 +4126,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', false)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
     "                Try registering for an ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +

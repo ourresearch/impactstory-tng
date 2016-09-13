@@ -10,6 +10,7 @@ from models.person import connect_orcid
 from models.person import refresh_profile
 from models.person import refresh_person
 from models.person import delete_person
+from models.person import update_person
 from models.person import make_temporary_person_from_orcid
 from models.product import get_all_products
 from models.refset import num_people_in_db
@@ -18,6 +19,7 @@ from models.search import autocomplete
 from models.url_slugs_to_redirect import url_slugs_to_redirect
 from models.twitter import get_twitter_creds
 from util import safe_commit
+from util import elapsed
 
 from flask import make_response
 from flask import request
@@ -41,6 +43,7 @@ import json
 import logging
 from urlparse import parse_qs, parse_qsl
 from time import sleep
+from time import time
 
 logger = logging.getLogger("views")
 
@@ -79,12 +82,12 @@ def json_resp(thing):
     return resp
 
 
-def abort_json(status_code, msg):
+def abort_json(status_code, msg, **kwargs):
     body_dict = {
-        "HTTP_status_code": status_code,
-        "message": msg,
-        "error": True
+        "message": msg
     }
+    body_dict.update(kwargs)
+
     resp_string = json.dumps(body_dict, sort_keys=True, indent=4)
     resp = make_response(resp_string, status_code)
     resp.mimetype = "application/json"
@@ -243,21 +246,30 @@ def profile_endpoint_twitter(screen_name):
 # need to call it with https for it to work
 @app.route("/api/person/<orcid_id>", methods=["POST"])
 @app.route("/api/person/<orcid_id>.json", methods=["POST"])
-def refresh_profile_endpoint(orcid_id):
-    if request.json:
-        my_person = Person.query.filter_by(orcid_id=orcid_id).first()
+def modify_profile_endpoint(orcid_id):
+    my_person = Person.query.filter_by(orcid_id=orcid_id).first()
 
-        product_id = request.json["product"]["id"]
-        my_product = next(my_product for my_product in my_person.products if my_product.id==product_id)
-        url = request.json["product"]["fulltext_url"]
-        my_product.set_oa_from_user_supplied_fulltext_url(url)
+    product_id = request.json["product"]["id"]
+    my_product = next(my_product for my_product in my_person.products if my_product.id==product_id)
+    url = request.json["product"]["fulltext_url"]
+    my_product.set_oa_from_user_supplied_fulltext_url(url)
 
-        my_person.recalculate_openness()
+    my_person.recalculate_openness()
 
-        safe_commit(db)
-    else:
-        my_person = refresh_profile(orcid_id)
+    safe_commit(db)
+
     return json_resp(my_person.to_dict())
+
+
+
+@app.route("/api/person/<orcid_id>/refresh", methods=["POST"])
+@app.route("/api/person/<orcid_id>/refresh.json", methods=["POST"])
+def refresh_profile_endpoint(orcid_id):
+    my_person = refresh_profile(orcid_id)
+    return json_resp(my_person.to_dict())
+
+
+
 
 @app.route("/api/person/<orcid_id>/fulltext", methods=["POST"])
 @app.route("/api/person/<orcid_id>/fulltext.json", methods=["POST"])
@@ -351,12 +363,20 @@ def me():
         return jsonify({"token": my_person.get_token()})
 
     elif request.method == "POST":
-        refreshed_person = refresh_person(my_person)
-        return jsonify({"token": refreshed_person.get_token()})
+        updated_person = update_person(my_person, request.json)
+        return jsonify({"token": updated_person.get_token()})
 
     elif request.method == "DELETE":
-        delete_person(id=g.my_id)
+        delete_person(orcid_id=g.my_orcid_id)
         return jsonify({"msg": "Alas, poor Yorick! I knew him, Horatio"})
+
+
+@app.route("/api/me/refresh", methods=["POST"])
+@login_required
+def refresh_me():
+    my_person = Person.query.filter_by(id=g.my_id).first()
+    my_person = refresh_person(my_person)
+    return jsonify({"token":  my_person.get_token()})
 
 
 @app.route("/api/me/orcid/login", methods=["POST"])
@@ -369,6 +389,13 @@ def orcid_login():
         abort_json(401, "Bad ORCID response; the auth code you sent is probably expired.")
 
     my_person = Person.query.filter_by(orcid_id=my_orcid_id).first()
+    if not my_person:
+        abort_json(
+            404,
+            "We don't have that ORCID in the db.",
+            identity_provider_id=my_orcid_id
+        )
+
     return jsonify({"token":  my_person.get_token()})
 
 
@@ -400,11 +427,18 @@ def refresh_my_orcid():
 
 @app.route("/api/me/twitter/login", methods=["POST"])
 def twitter_login():
-    twitter_creds = get_twitter_creds(request.json.get('token'), request.json.get('verifier'))
+    start = time()
+    twitter_creds = get_twitter_creds(request.json.get('oauth_token'), request.json.get('oauth_verifier'))
+    print "got twittter creds, took {}".format(elapsed(start))
+
 
     my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
     if not my_person:
-        abort_json(404, "we have no impactstory user with this twitter screen name")
+        abort_json(
+            404,
+            "We don't have that Twitter in the db.",
+            identity_provider_id=twitter_creds["screen_name"]
+        )
 
     return jsonify({"token": my_person.get_token()})
 
@@ -412,7 +446,7 @@ def twitter_login():
 
 @app.route("/api/me/twitter/register", methods=["POST"])
 def twitter_register_but_login_if_they_are_already_registered():
-    twitter_creds = get_twitter_creds(request.json.get('token'), request.json.get('verifier'))
+    twitter_creds = get_twitter_creds(request.json.get('oauth_token'), request.json.get('oauth_verifier'))
 
     try:
         my_person = make_person(twitter_creds)

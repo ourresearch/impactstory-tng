@@ -1,4 +1,4 @@
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'header/header.tpl.html', 'header/search-result.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/my-publications.tpl.html', 'wizard/welcome.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/confirm-publications.tpl.html', 'wizard/connect-orcid.tpl.html', 'workspace.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -390,11 +390,13 @@ angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templ
     "<div class=\"page login-page\">\n" +
     "    <h2>Log in</h2>\n" +
     "    <div class=\"actions\">\n" +
-    "        <div class=\"btn btn-lg btn-default\" ng-click=\"loginTwitter()\">\n" +
+    "        <div class=\"btn btn-lg btn-default\"\n" +
+    "             ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
     "            <i class=\"fa fa-twitter\"></i>\n" +
     "            Log in with Twitter\n" +
     "        </div>\n" +
-    "        <div class=\"btn btn-lg btn-default\" ng-click=\"loginOrcid()\">\n" +
+    "        <div class=\"btn btn-lg btn-default\"\n" +
+    "             ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
     "            Log in with ORCID\n" +
     "        </div>\n" +
     "    </div>\n" +
@@ -404,8 +406,62 @@ angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templ
 angular.module("auth/oauth.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("auth/oauth.tpl.html",
     "<div class=\"page oauth-page\">\n" +
-    "    <h2>OAuth page!</h2>\n" +
-    "    <p>doing login stuff now....</p>\n" +
+    "    <div class=\"working\" ng-show=\"!error\">\n" +
+    "        Connecting with your\n" +
+    "        <span class=\"identity-provider twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
+    "            Twitter\n" +
+    "        </span>\n" +
+    "        <span class=\"identity-provider orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
+    "            Orcid\n" +
+    "        </span>\n" +
+    "        &hellip;\n" +
+    "    </div>\n" +
+    "\n" +
+    "\n" +
+    "    <div ng-show=\"error\">\n" +
+    "\n" +
+    "        <div class=\"orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
+    "            <div class=\"msg\">\n" +
+    "                <i class=\"fa fa-exclamation-triangle\"></i>\n" +
+    "                We couldn't log you in because we don't have your ORCID account\n" +
+    "                (<a href=\"https://orcid.org/{{ identityProviderId }}\">{{ identityProviderId }}</a>)\n" +
+    "                on record.\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"btn btn-default\"\n" +
+    "                 ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                Log in with Twitter instead\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
+    "            <div class=\"msg\">\n" +
+    "                <i class=\"fa fa-exclamation-triangle\"></i>\n" +
+    "                We couldn't log you in because but we don't have your Twitter account\n" +
+    "                (<a href=\"https://twitter.com/{{ identityProviderId }}\">@{{ identityProviderId }}</a>)\n" +
+    "                on record.\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"buttons\">\n" +
+    "                <div class=\"btn btn-default\"\n" +
+    "                     ng-click=\"currentUser.twitterAuthenticate('register')\">\n" +
+    "                    <i class=\"fa fa-twitter\"></i>\n" +
+    "                    Create a new profile as @{{ identityProviderId }}\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"btn btn-default\"\n" +
+    "                    ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
+    "                    Log in with ORCID instead\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "    </div>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
+    "\n" +
     "\n" +
     "</div>");
 }]);
@@ -574,132 +630,6 @@ angular.module("footer/footer.tpl.html", []).run(["$templateCache", function($te
     "    </div>\n" +
     "\n" +
     "</div>");
-}]);
-
-angular.module("header/header.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("header/header.tpl.html",
-    "<div class=\"ti-header\" ng-controller=\"headerCtrl\">\n" +
-    "   <h1>\n" +
-    "      <a href=\"/\">\n" +
-    "         <img src=\"static/img/logo-circle.png\" alt=\"\"/>\n" +
-    "      </a>\n" +
-    "   </h1>\n" +
-    "\n" +
-    "   <div class=\"ti-menu\">\n" +
-    "      <a href=\"leaderboard?type=people\"\n" +
-    "         popover=\"Top authors\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\"\n" +
-    "         class=\"menu-link\" id=\"leaders-menu-link\">\n" +
-    "         <i class=\"fa fa-user\"></i>\n" +
-    "      </a>\n" +
-    "      <a href=\"leaderboard?type=packages\"\n" +
-    "         popover=\"Top projects\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\"\n" +
-    "         class=\"menu-link\" id=\"leaders-menu-link\">\n" +
-    "         <i class=\"fa fa-archive\"></i>\n" +
-    "      </a>\n" +
-    "      <a href=\"leaderboard?type=tags\"\n" +
-    "         popover=\"Top topics\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\"\n" +
-    "         class=\"menu-link\" id=\"leaders-menu-link\">\n" +
-    "         <i class=\"fa fa-tag\"></i>\n" +
-    "      </a>\n" +
-    "\n" +
-    "      <!-- needs weird style hacks -->\n" +
-    "      <a href=\"about\"\n" +
-    "         class=\"menu-link about\" id=\"leaders-menu-link\">\n" +
-    "         <i\n" +
-    "         popover=\"Learn more about Depsy\"\n" +
-    "         popover-trigger=\"mouseenter\"\n" +
-    "         popover-placement=\"bottom\" class=\"fa fa-question-circle\"></i>\n" +
-    "      </a>\n" +
-    "\n" +
-    "\n" +
-    "   </div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "   <div class=\"search-box\">\n" +
-    "    <input type=\"text\"\n" +
-    "           id=\"search-box\"\n" +
-    "           ng-model=\"searchResultSelected\"\n" +
-    "           placeholder=\"Search packages, authors, and topics\"\n" +
-    "           typeahead=\"result as result.name for result in doSearch($viewValue)\"\n" +
-    "           typeahead-loading=\"loadingLocations\"\n" +
-    "           typeahead-no-results=\"noResults\"\n" +
-    "           typeahead-template-url=\"header/search-result.tpl.html\"\n" +
-    "           typeahead-focus-first=\"false\"\n" +
-    "           typeahead-on-select=\"onSelect($item)\"\n" +
-    "           class=\"form-control input-lg\">\n" +
-    "   </div>\n" +
-    "\n" +
-    "\n" +
-    "</div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "");
-}]);
-
-angular.module("header/search-result.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("header/search-result.tpl.html",
-    "\n" +
-    "<div class=\"typeahead-group-header\" ng-if=\"match.model.is_first\">\n" +
-    "   <span class=\"group-header-type pypy-package\" ng-if=\"match.model.type=='pypi_project'\">\n" +
-    "      <img src=\"static/img/python.png\" alt=\"\"/>\n" +
-    "      Python packages <span class=\"where\">on <a href=\"https://pypi.python.org/pypi\">PyPI</a></span>\n" +
-    "   </span>\n" +
-    "   <span class=\"group-header-type cran-package\" ng-if=\"match.model.type=='cran_project'\">\n" +
-    "      <img src=\"static/img/r-logo.png\" alt=\"\"/>\n" +
-    "      R packages <span class=\"where\">on <a href=\"https://cran.r-project.org/\">CRAN</a></span>\n" +
-    "   </span>\n" +
-    "   <span class=\"group-header-type people\" ng-if=\"match.model.type=='person'\">\n" +
-    "      <i class=\"fa fa-user\"></i>\n" +
-    "      People\n" +
-    "   </span>\n" +
-    "   <span class=\"group-header-type tags\" ng-if=\"match.model.type=='tag'\">\n" +
-    "      <i class=\"fa fa-tag\"></i>\n" +
-    "      Tags\n" +
-    "   </span>\n" +
-    "\n" +
-    "</div>\n" +
-    "<a ng-href=\"package/python/{{ match.model.name }}\" ng-if=\"match.model.type=='pypi_project'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "   <span  class=\"summary\">\n" +
-    "      {{ match.model.summary }}\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "<a ng-href=\"package/r/{{ match.model.name }}\" ng-if=\"match.model.type=='cran_project'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "   <span  class=\"summary\">\n" +
-    "      {{ match.model.summary }}\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "<a ng-href=\"person/{{ match.model.id }}\" ng-if=\"match.model.type=='person'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "<a ng-href=\"tag/{{ match.model.urlName }}\" ng-if=\"match.model.type=='tag'\">\n" +
-    "   <span class=\"name\">\n" +
-    "      {{ match.model.name }}\n" +
-    "   </span>\n" +
-    "   <span class=\"tag summary\">\n" +
-    "      {{ match.model.impact }} packages\n" +
-    "   </span>\n" +
-    "</a>\n" +
-    "\n" +
-    "\n" +
-    "");
 }]);
 
 angular.module("helps.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -1267,7 +1197,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "        <div class=\"row person-footer\">\n" +
     "            <div class=\"text col-md-8\">\n" +
     "                <span class=\"text\">\n" +
-    "                    <span class=\"secret-sync\" ng-click=\"pullFromOrcid()\">\n" +
+    "                    <span class=\"secret-sync\" ng-click=\"refreshFromSecretButton()\">\n" +
     "                        <i class=\"fa fa-unlock\"></i>\n" +
     "                    </span>\n" +
     "                    All the data you see here is open for re-use.\n" +
@@ -1651,7 +1581,7 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "\n" +
     "        <div class=\"join-button\">\n" +
-    "            <md-button class=\"md-accent md-raised\" ng-click=\"twitterAuthenticate('register')\">\n" +
+    "            <md-button class=\"md-accent md-raised\" ng-click=\"currentUser.twitterAuthenticate('register')\">\n" +
     "                <i class=\"fa fa-twitter\"></i>\n" +
     "                Join for free with Twitter\n" +
     "            </md-button>\n" +
@@ -1702,6 +1632,14 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "</md-dialog>\n" +
     "</script>\n" +
     "");
+}]);
+
+angular.module("static-pages/page-not-found.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("static-pages/page-not-found.tpl.html",
+    "<div class=\"landing static-page\">\n" +
+    "    <h1>Sorry, we couldn't find that page!</h1>\n" +
+    "\n" +
+    "</div>");
 }]);
 
 angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -1756,8 +1694,8 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
     "");
 }]);
 
-angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("wizard/my-publications.tpl.html",
+angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/confirm-publications.tpl.html",
     "<div class=\"page wizard add-publications\">\n" +
     "\n" +
     "    <h2>my publications</h2>\n" +
@@ -1766,7 +1704,7 @@ angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", fun
     "        Does that look good?\n" +
     "    </div>\n" +
     "    <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
-    "        <span ng-click=\"finishProfile()\" class=\"btn btn-lg btn-success\">\n" +
+    "        <span ng-click=\"confirm()\" class=\"btn btn-lg btn-success\">\n" +
     "            <i class=\"fa fa-check\"></i>\n" +
     "            <span class=\"text\">\n" +
     "                <span class=\"main\">Close enough</span>\n" +
@@ -1789,8 +1727,8 @@ angular.module("wizard/my-publications.tpl.html", []).run(["$templateCache", fun
     "</div>");
 }]);
 
-angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("wizard/welcome.tpl.html",
+angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("wizard/connect-orcid.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
     "    <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>\n" +
     "    <p>\n" +
@@ -1824,7 +1762,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', true)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', true)\">\n" +
     "                Sign in to my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -1834,7 +1772,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', false)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
     "                Create my ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +
@@ -1845,7 +1783,7 @@ angular.module("wizard/welcome.tpl.html", []).run(["$templateCache", function($t
     "                When you're done, you'll be redirected back here, and will be\n" +
     "                nearly done creating your profile.\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"orcidAuthenticate('connect', false)\">\n" +
+    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
     "                Try registering for an ORCID\n" +
     "            </span>\n" +
     "        </div>\n" +

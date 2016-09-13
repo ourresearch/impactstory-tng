@@ -3,9 +3,10 @@ angular.module('currentUser', [
 
 
 
-    .factory("CurrentUser", function($auth, $http, $q, $route){
+    .factory("CurrentUser", function($auth, $http, $q, $route, $location){
 
 
+        var data = {}
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
@@ -24,12 +25,6 @@ angular.module('currentUser', [
             return deferred.promise
         }
 
-
-        var doTheyHaveProducts = function(){
-            $http.get("/api/me").success(function(resp){
-
-            })
-        }
 
 
         var twitterAuthenticate = function (intent) {
@@ -63,7 +58,7 @@ angular.module('currentUser', [
 
             var redirectUri = window.location.origin + "/oauth/" + intent + "/orcid"
 
-            console.log("ORCID authenticate!", showLogin)
+            console.log("ORCID authenticate!", intent, orcidAlreadyExists)
 
             var authUrl = "https://orcid.org/oauth/authorize" +
                 "?client_id=APP-PF0PDMP7P297AU8S" +
@@ -79,35 +74,141 @@ angular.module('currentUser', [
             return true
         }
 
-        function getProfileUrl(){
-            var data = getAllDataAsObject()
+        function sendHome(){
+            console.log("calling sendToCorrectPage() with this data", data)
+            var url
+            var currentPath = $location.path()
+            console.log("currentPath", currentPath)
 
-            if (data.finished_wizard){
-                return "u/" + data.orcid_id
+
+            if (data.finished_wizard && isMyProfile(currentPath)){
+                url = currentPath
             }
 
-            if (data.num_products > 0){
-                return "wizard/confirm-products"
-
+            else if (data.finished_wizard){
+                url = "/u/" + data.orcid_id
             }
 
-            if (data.orcid_id){
-                return "wizard/add-products"
+            else if (data.num_products > 0){
+                url = "/wizard/confirm-publications"
             }
 
-            return "wizard/connect-orcid"
+            else if (data.orcid_id){
+                url = "/wizard/add-publications"
+            }
+
+            else {
+                url = "/wizard/connect-orcid"
+            }
+
+            if (currentPath == url ){
+                return false
+            }
+            else {
+                $location.url(url)
+                return true
+            }
+        }
+
+        function isMyProfile(url){
+            if (!data.orcid_id){
+                return false
+            }
+            return url.indexOf(data.orcid_id) > -1
         }
 
 
-        function getAllDataAsObject(){
-            if (!$auth.isAuthenticated){
-                return {}
+
+
+        function sendHomePromise(requireLogin){
+            var deferred = $q.defer()
+
+            if (!isLoggedIn()){
+                if (requireLogin){
+                    $location.url("login")
+                }
+                else {
+                    deferred.resolve()
+                }
             }
-            return $auth.getPayload()
+
+            else {
+                var redirecting = sendHome()
+
+                console.log("sendHomePromise redirceing=", redirecting)
+
+                if (!redirecting){
+                    deferred.resolve()
+                }
+            }
+
+            return deferred.promise
+        }
+
+
+        function isLoggedIn(returnPromise){
+            if (returnPromise){
+                var deferred = $q.defer()
+                if ($auth.isAuthenticated()) {
+                    deferred.resolve()
+                }
+                else {
+                    deferred.reject()
+                }
+                return deferred.promise
+            }
+
+
+            return $auth.isAuthenticated()
+        }
+
+        function setProperty(k, v){
+            var data = {}
+            data[k] = v
+            return $http.post("api/me", data)
+                .success(function(resp){
+                    setFromToken(resp.token)
+                })
+                .error(function(resp){
+                    console.log("we tried to set a thing, but it didn't work", data, resp)
+                })
+        }
+
+
+        function logout(){
+            $auth.logout()
+            _.each(data, function(v, k){
+                delete data[k]
+            })
+            return true
+        }
+
+        function boot(){
+            _.each($auth.getPayload(), function(v, k){
+                data[k] = v
+            })
+            return reloadFromServer()
+        }
+
+        function reloadFromServer(){
+            console.log("reloading from server")
+            if (!isLoggedIn()){
+                console.log("user is not logged in")
+                return false
+            }
+
+            $http.get("api/me").success(function(resp){
+                console.log("refreshing data in CurrentUser", resp)
+                setFromToken(resp.token)
+            })
         }
 
         function setFromToken(token){
             $auth.setToken(token) // synchronous
+            _.each($auth.getPayload(), function(v, k){
+                data[k] = v
+            })
+
             sendTokenToIntercom()
         }
 
@@ -116,6 +217,14 @@ angular.module('currentUser', [
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
             setFromToken: setFromToken,
-            getProfileUrl: getProfileUrl
+            sendHome: sendHome,
+            sendHomePromise: sendHomePromise,
+            setProperty: setProperty,
+            d: data,
+            logout: logout,
+            isLoggedIn: isLoggedIn,
+            reloadFromServer: reloadFromServer,
+            boot: boot,
+            isMyProfile: isMyProfile
         }
     })
