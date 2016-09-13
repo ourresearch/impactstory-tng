@@ -367,7 +367,7 @@ def me():
         return jsonify({"token": updated_person.get_token()})
 
     elif request.method == "DELETE":
-        delete_person(id=g.my_id)
+        delete_person(orcid_id=g.my_orcid_id)
         return jsonify({"msg": "Alas, poor Yorick! I knew him, Horatio"})
 
 
@@ -428,7 +428,6 @@ def refresh_my_orcid():
 @app.route("/api/me/twitter/login", methods=["POST"])
 def twitter_login():
     start = time()
-    print "getting twitter creds"
     twitter_creds = get_twitter_creds(request.json.get('oauth_token'), request.json.get('oauth_verifier'))
     print "got twittter creds, took {}".format(elapsed(start))
 
