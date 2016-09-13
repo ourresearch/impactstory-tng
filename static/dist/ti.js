@@ -2008,12 +2008,20 @@ angular.module('settingsPage', [
 
 
 
-    .controller("settingsPageCtrl", function($scope, $rootScope, $auth, $route, $location, $http, Person, CurrentUser){
+    .controller("settingsPageCtrl", function($scope,
+                                             $rootScope,
+                                             $auth,
+                                             $route,
+                                             $location,
+                                             $http,
+                                             Person,
+                                             CurrentUser){
 
         console.log("the settings page loaded")
-        var myOrcidId = $auth.getPayload().sub
+        var myOrcidId = CurrentUser.d.orcid_id
         $scope.orcidId = myOrcidId
-        $scope.givenNames = $auth.getPayload()["given_names"]
+        $scope.givenNames = CurrentUser.d.given_names
+
 
         $scope.wantToDelete = false
         $scope.deleteProfile = function() {
@@ -2024,7 +2032,6 @@ angular.module('settingsPage', [
                         user_id: myOrcidId,
                         is_deleted: true
                     })
-
 
                     CurrentUser.logout()
                     $location.path("/")
