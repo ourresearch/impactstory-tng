@@ -406,8 +406,62 @@ angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templ
 angular.module("auth/oauth.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("auth/oauth.tpl.html",
     "<div class=\"page oauth-page\">\n" +
-    "    <h2>OAuth page!</h2>\n" +
-    "    <p>doing login stuff now....</p>\n" +
+    "    <div class=\"working\" ng-show=\"!error\">\n" +
+    "        Connecting with your\n" +
+    "        <span class=\"identity-provider twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
+    "            Twitter\n" +
+    "        </span>\n" +
+    "        <span class=\"identity-provider orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
+    "            Orcid\n" +
+    "        </span>\n" +
+    "        &hellip;\n" +
+    "    </div>\n" +
+    "\n" +
+    "\n" +
+    "    <div ng-show=\"error\">\n" +
+    "\n" +
+    "        <div class=\"orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
+    "            <div class=\"msg\">\n" +
+    "                <i class=\"fa fa-exclamation-triangle\"></i>\n" +
+    "                We couldn't log you in because we don't have your ORCID account\n" +
+    "                (<a href=\"https://orcid.org/{{ identityProviderId }}\">{{ identityProviderId }}</a>)\n" +
+    "                on record.\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"btn btn-default\"\n" +
+    "                 ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                Log in with Twitter instead\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
+    "            <div class=\"msg\">\n" +
+    "                <i class=\"fa fa-exclamation-triangle\"></i>\n" +
+    "                We couldn't log you in because but we don't have your Twitter account\n" +
+    "                (<a href=\"https://twitter.com/{{ identityProviderId }}\">@{{ identityProviderId }}</a>)\n" +
+    "                on record.\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"buttons\">\n" +
+    "                <div class=\"btn btn-default\"\n" +
+    "                     ng-click=\"currentUser.twitterAuthenticate('register')\">\n" +
+    "                    <i class=\"fa fa-twitter\"></i>\n" +
+    "                    Create a new profile as @{{ identityProviderId }}\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"btn btn-default\"\n" +
+    "                    ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
+    "                    Log in with ORCID instead\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "    </div>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
+    "\n" +
     "\n" +
     "</div>");
 }]);
