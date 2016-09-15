@@ -329,7 +329,7 @@ angular.module('app').run(function($route,
         window.Intercom("boot", intercomInfo)
     }
 
-    //$rootScope.sendCurrentUserToIntercom()
+    $rootScope.sendCurrentUserToIntercom()
     
 
 
