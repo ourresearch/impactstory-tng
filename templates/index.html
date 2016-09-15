@@ -25,9 +25,8 @@
             <img src="static/img/impactstory-logo-sideways.png" alt="Impactstory" ng-show="global.isLandingPage">
          </a>
       </h1>
-
       <span class="controls logged-in" ng-show="currentUser.isLoggedIn() && currentUser.d.finished_wizard">
-         <a class="profile-link" href="u/{{ auth.getPayload().sub }}">
+         <a class="profile-link" href="u/{{ currentUser.d.orcid_id }}">
             <span class="hi">hi,</span>
             <span class="name">{{ auth.isAuthenticated && auth.getPayload().first_name }}</span>
          </a>
@@ -81,7 +80,10 @@
       <span class="pitch">
          Discover the online impact of your research.
       </span>
-      <a href="/" class="btn btn-primary btn-sm">Join for free</a>
+      <a ng-click="currentUser.twitterAuthenticate('register')" class="btn btn-primary btn-sm">
+          <i class="fa fa-twitter"></i>
+          Join free with Twitter
+      </a>
    </div>
 
    <div ng-include="'loading.tpl.html'" ng-show="global.personIsLoading"></div>
