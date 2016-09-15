@@ -184,6 +184,12 @@ def login_required(f):
             return response
 
         g.my_orcid_id = payload.get('orcid_id', None)
+
+        # legacy tokens
+        if payload.get('sub', None):
+            g.my_orcid_id = payload["sub"]
+
+
         g.my_twitter_screen_name = payload.get('twitter_screen_name', None)
         g.my_id = payload.get("id", None)
 
