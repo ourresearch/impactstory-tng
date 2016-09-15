@@ -1696,7 +1696,7 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
 
 angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/confirm-publications.tpl.html",
-    "<div class=\"page wizard add-publications\">\n" +
+    "<div class=\"page wizard confirm-publications\">\n" +
     "\n" +
     "    <h2>my publications</h2>\n" +
     "    <div>\n" +

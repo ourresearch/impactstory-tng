@@ -58,11 +58,12 @@ angular.module('settingsPage', [
         $scope.pullFromOrcid = function(){
             console.log("ah, refreshing!")
             $scope.syncState = "working"
-            $http.post("/api/person/" + myOrcidId)
+            $http.post("/api/me/refresh")
                 .success(function(resp){
+                    CurrentUser.setFromToken(resp.token)
+
                     // force a reload of the person
                     Intercom('trackEvent', 'synced-to-edit');
-                    $rootScope.sendToIntercom(resp)
                     Person.load(myOrcidId, true).then(
                         function(resp){
                             $scope.syncState = "success"
