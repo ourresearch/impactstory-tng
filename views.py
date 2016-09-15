@@ -183,6 +183,8 @@ def login_required(f):
             response.status_code = 401
             return response
 
+        print "payload", payload
+
         g.my_orcid_id = payload.get('orcid_id', None)
 
         # legacy tokens
