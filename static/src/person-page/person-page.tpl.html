@@ -39,9 +39,11 @@
                                 <i class="fa fa-refresh fa-spin"></i>
                                 linking Twitter...
                             </span>
+                            <!-- hiding this button for now until we implement a
+                            'connect' intent for twitter -->
                             <a href="" class="link-twitter btn btn-default btn-xs"
-                               ng-click="linkTwitter()"
-                               ng-show="person.belongsToCurrentUser() && !person.d.twitter && !d.linkTwitterLoading">
+                               ng-click="currentUser.()"
+                               ng-show="false && person.belongsToCurrentUser() && !person.d.twitter && !d.linkTwitterLoading">
                                 <i class="fa fa-twitter"></i>
                                 Connect your Twitter
                             </a>
