@@ -150,55 +150,6 @@ def logo_small():
     return send_file(filename, mimetype='image/png')
 
 
-###########################################################################
-# from satellizer.
-# move to another file later
-# this is copied from early GitHub-login version of Depsy. It's here:
-# https://github.com/Impactstory/depsy/blob/ed80c0cb945a280e39089822c9b3cefd45f24274/views.py
-###########################################################################
-
-
-
-
-def parse_token(req):
-    token = req.headers.get('Authorization').split()[1]
-    return jwt.decode(token, os.getenv("JWT_KEY"))
-
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not request.headers.get('Authorization'):
-            response = jsonify(message='Missing authorization header')
-            response.status_code = 401
-            return response
-
-        try:
-            payload = parse_token(request)
-        except DecodeError:
-            response = jsonify(message='Token is invalid')
-            response.status_code = 401
-            return response
-        except ExpiredSignature:
-            response = jsonify(message='Token has expired')
-            response.status_code = 401
-            return response
-
-        print "payload", payload
-
-        g.my_orcid_id = payload.get('orcid_id', None)
-
-        # legacy tokens
-        if payload.get('sub', None):
-            g.my_orcid_id = payload["sub"]
-
-        g.my_twitter_screen_name = payload.get('twitter_screen_name', None)
-        g.my_id = payload.get("id", None)
-
-        return f(*args, **kwargs)
-
-    return decorated_function
-
 
 
 
@@ -362,34 +313,65 @@ def donation_endpoint():
 ##############################################################################
 
 
+
+def parse_token(req):
+    token = req.headers.get('Authorization').split()[1]
+    return jwt.decode(token, os.getenv("JWT_KEY"))
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not request.headers.get('Authorization'):
+            response = jsonify(message='Missing authorization header')
+            response.status_code = 401
+            return response
+
+        try:
+            payload = parse_token(request)
+        except DecodeError:
+            response = jsonify(message='Token is invalid')
+            response.status_code = 401
+            return response
+        except ExpiredSignature:
+            response = jsonify(message='Token has expired')
+            response.status_code = 401
+            return response
+
+        try:
+            # this uses the current token format
+            g.my_person = Person.query.filter_by(id=payload["id"]).first()
+
+        except KeyError:
+
+            # this is a fallback for an older token format
+            g.my_person = Person.query.filter_by(orcid_id=payload["sub"]).first()
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
 @app.route('/api/me', methods=["GET", "DELETE", "POST"])
 @login_required
 def me():
-    my_person = Person.query.filter_by(id=g.my_id).first()
-    if my_person is None:
-        my_person = Person.query.filter_by(orcid_id=g.my_orcid_id).first()
-
     if request.method == "GET":
-        return jsonify({"token": my_person.get_token()})
+        return jsonify({"token":g.my_person.get_token()})
 
     elif request.method == "POST":
-        updated_person = update_person(my_person, request.json)
+        updated_person = update_person(g.my_person, request.json)
         return jsonify({"token": updated_person.get_token()})
 
     elif request.method == "DELETE":
-        delete_person(orcid_id=g.my_orcid_id)
+        delete_person(orcid_id=g.my_person.orcid_id)
         return jsonify({"msg": "Alas, poor Yorick! I knew him, Horatio"})
 
 
 @app.route("/api/me/refresh", methods=["POST"])
 @login_required
 def refresh_me():
-    my_person = Person.query.filter_by(id=g.my_id).first()
-    if my_person is None:
-        my_person = Person.query.filter_by(orcid_id=g.my_orcid_id).first()
-
-    my_person = refresh_person(my_person)
-    return jsonify({"token":  my_person.get_token()})
+    refresh_person(g.my_person)
+    return jsonify({"token":  g.my_person.get_token()})
 
 
 @app.route("/api/me/orcid/login", methods=["POST"])
@@ -415,10 +397,6 @@ def orcid_login():
 @app.route("/api/me/orcid/connect", methods=["POST"])
 @login_required
 def orcid_connect():
-    my_person = Person.query.filter_by(id=g.my_id).first()
-    if my_person is None:
-        my_person = Person.query.filter_by(orcid_id=g.my_orcid_id).first()
-
     orcid_id = get_orcid_id_from_oauth(
         request.json['code'],
         request.json['redirectUri']
@@ -426,20 +404,16 @@ def orcid_connect():
     if not orcid_id:
         abort_json(500, "Invalid JSON return from ORCID during OAuth.")
 
-    my_person = connect_orcid(my_person, orcid_id)
-    return jsonify({"token":  my_person.get_token()})
+    connect_orcid(g.my_person, orcid_id)
+    return jsonify({"token":  g.my_person.get_token()})
 
 
 
 @app.route("/api/me/orcid/refresh", methods=["POST"])
 @login_required
 def refresh_my_orcid():
-    my_person = Person.query.filter_by(id=g.my_id).first()
-    if my_person is None:
-        my_person = Person.query.filter_by(orcid_id=g.my_orcid_id).first()
-
-    my_person = refresh_orcid_info_and_save(my_person)
-    return jsonify({"token":  my_person.get_token()})
+    refresh_orcid_info_and_save(g.my_person)
+    return jsonify({"token":  g.my_person.get_token()})
 
 
 
