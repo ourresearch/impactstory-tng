@@ -94,6 +94,7 @@ def abort_json(status_code, msg, **kwargs):
     abort(resp)
 
 
+
 @app.route("/<path:page>")  # from http://stackoverflow.com/a/14023930/226013
 @app.route("/")
 def index_view(path="index", page=""):
