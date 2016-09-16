@@ -3,7 +3,7 @@ angular.module('person', [
 
 
 
-    .factory("Person", function($http, $q, $route){
+    .factory("Person", function($http, $q, $route, CurrentUser){
 
         var data = {}
         var badgeSortLevel = {
@@ -107,6 +107,13 @@ angular.module('person', [
             return ret
         }
 
+        function belongsToCurrentUser(){
+            if (!CurrentUser.isLoggedIn()) {
+                return false
+            }
+            return CurrentUser.d.id == data.id
+        }
+
 
         return {
             d: data,
@@ -120,6 +127,7 @@ angular.module('person', [
             setFulltextUrl: setFulltextUrl,
             reload: function(){
                 return load(data.orcid_id, true)
-            }
+            },
+            belongsToCurrentUser: belongsToCurrentUser
         }
     })
