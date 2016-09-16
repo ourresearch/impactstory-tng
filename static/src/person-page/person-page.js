@@ -73,20 +73,25 @@ angular.module('personPage', [
 
         $scope.global.personIsLoading = false
         $scope.global.title = Person.d.given_names + " " + Person.d.family_name
-        $scope.person = Person.d
+        $scope.person = Person
         $scope.products = Person.d.products
         $scope.sources = Person.d.sources
         $scope.badges = Person.badgesToShow()
         $scope.d = {}
 
 
-        var ownsThisProfile = $auth.isAuthenticated() && $auth.getPayload().sub == Person.d.orcid_id
+        // todo get rid of these and call Person.belongsToCurrentUser() directly in the template
+        //var ownsThisProfile = $auth.isAuthenticated() && $auth.getPayload().sub == Person.d.orcid_id
+        //var ownsThisProfile = Person.belongsToCurrentUser()
+        //$scope.ownsThisProfile = ownsThisProfile
+
+
+
         var badgeUrlName = function(badge){
            return badge.display_name.toLowerCase().replace(/\s/g, "-")
         }
         $scope.badgeUrlName = badgeUrlName
 
-        $scope.ownsThisProfile = ownsThisProfile
 
 
         console.log("retrieved the person", $scope.person)
@@ -153,17 +158,6 @@ angular.module('personPage', [
 
         $scope.userForm = {}
 
-        if (ownsThisProfile && !Person.d.email ) {
-            $scope.profileStatus = "no_email"
-            $scope.setEmailMethod = "twitter"
-        }
-        else if (ownsThisProfile && !Person.d.products.length) {
-            $scope.profileStatus = "no_products"
-        }
-        else {
-            $scope.profileStatus = "all_good"
-        }
-
         console.log("routeparamas", $routeParams)
         if ($routeParams.filter == "mendeley"){
             $scope.d.showMendeleyDetails = true
@@ -217,9 +211,6 @@ angular.module('personPage', [
 
 
         $scope.shareProfile = function(){
-            if (!ownsThisProfile){
-                return false // just to make sure
-            }
             var myOrcid = $auth.getPayload().sub // orcid ID
 
             console.log("sharing means caring")
