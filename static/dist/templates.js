@@ -723,12 +723,14 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                            </span>\n" +
     "                            <!-- hiding this button for now until we implement a\n" +
     "                            'connect' intent for twitter -->\n" +
+    "                            <!--\n" +
     "                            <a href=\"\" class=\"link-twitter btn btn-default btn-xs\"\n" +
     "                               ng-click=\"currentUser.()\"\n" +
-    "                               ng-show=\"false && person.belongsToCurrentUser() && !person.d.twitter && !d.linkTwitterLoading\">\n" +
+    "                               ng-show=\"person.belongsToCurrentUser() && !person.d.twitter && !d.linkTwitterLoading\">\n" +
     "                                <i class=\"fa fa-twitter\"></i>\n" +
     "                                Connect your Twitter\n" +
     "                            </a>\n" +
+    "                            -->\n" +
     "                        </span>\n" +
     "                    </h2>\n" +
     "                    <div class=\"aff\">\n" +
