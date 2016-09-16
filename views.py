@@ -191,9 +191,6 @@ def login_required(f):
         if payload.get('sub', None):
             g.my_orcid_id = payload["sub"]
 
-        print "this is the g."
-
-
         g.my_twitter_screen_name = payload.get('twitter_screen_name', None)
         g.my_id = payload.get("id", None)
 
@@ -369,8 +366,7 @@ def donation_endpoint():
 def me():
     my_person = Person.query.filter_by(id=g.my_id).first()
     if my_person is None:
-        my_person = Person.query.filter_by(orcid_id=g.orcid_id).first()
-
+        my_person = Person.query.filter_by(orcid_id=g.my_orcid_id).first()
 
     if request.method == "GET":
         return jsonify({"token": my_person.get_token()})
@@ -389,7 +385,7 @@ def me():
 def refresh_me():
     my_person = Person.query.filter_by(id=g.my_id).first()
     if my_person is None:
-        my_person = Person.query.filter_by(orcid_id=g.orcid_id).first()
+        my_person = Person.query.filter_by(orcid_id=g.my_orcid_id).first()
 
     my_person = refresh_person(my_person)
     return jsonify({"token":  my_person.get_token()})
@@ -420,7 +416,7 @@ def orcid_login():
 def orcid_connect():
     my_person = Person.query.filter_by(id=g.my_id).first()
     if my_person is None:
-        my_person = Person.query.filter_by(orcid_id=g.orcid_id).first()
+        my_person = Person.query.filter_by(orcid_id=g.my_orcid_id).first()
 
     orcid_id = get_orcid_id_from_oauth(
         request.json['code'],
@@ -439,7 +435,7 @@ def orcid_connect():
 def refresh_my_orcid():
     my_person = Person.query.filter_by(id=g.my_id).first()
     if my_person is None:
-        my_person = Person.query.filter_by(orcid_id=g.orcid_id).first()
+        my_person = Person.query.filter_by(orcid_id=g.my_orcid_id).first()
 
     my_person = refresh_orcid_info_and_save(my_person)
     return jsonify({"token":  my_person.get_token()})
