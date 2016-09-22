@@ -122,7 +122,7 @@ def make_temporary_person_from_orcid(orcid_id):
     print u"\nin make_person: made new person for {}".format(my_person)
 
     my_person.orcid_id = orcid_id
-    my_person.refresh_orcid_info()
+    my_person.refresh()
     return my_person
 
 
