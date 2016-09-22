@@ -1200,7 +1200,7 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                    <i class=\"fa fa-external-link\"></i>\n" +
     "                </a>\n" +
     "            </div>\n" +
-    "            <div class=\"no-fulltext\" ng-show=\"!product.fulltext_url && ownsThisProfile\">\n" +
+    "            <div class=\"no-fulltext\" ng-show=\"!product.fulltext_url && person.belongsToCurrentUser()\">\n" +
     "                <div class=\"btn btn-default\" ng-click=\"setFulltextUrl($event)\">\n" +
     "                    <i class=\"fa fa-link\"></i>\n" +
     "                    Add a link to free fulltext\n" +
