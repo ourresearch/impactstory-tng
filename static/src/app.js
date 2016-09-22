@@ -25,10 +25,8 @@ angular.module('app', [
     'productPage', // MUST be above personPage because personPage route is greedy for /p/
     'personPage',
     'settingsPage',
-    'badgePage',
     'wizard',
     'aboutPages'
-
 
 ]);
 
