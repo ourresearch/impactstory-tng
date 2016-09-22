@@ -196,6 +196,11 @@ angular.module('app').controller('AppCtrl', function(
     $scope.numFormat = NumFormat
     $scope.moment = moment // this will break unless moment.js loads over network...
 
+
+
+
+
+
     $scope.global = {}
 
     $rootScope.setPersonIsLoading = function(isLoading){
