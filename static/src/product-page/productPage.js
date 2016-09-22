@@ -58,7 +58,7 @@ angular.module('productPage', [
             $location.url("/u/" + Person.d.orcid_id + "/publications")
         }
 
-        $scope.person = Person.d
+        $scope.person = Person
         $scope.sources = product.sources
         $scope.product = product
         $scope.displayGenre = product.genre.replace("-", " ")

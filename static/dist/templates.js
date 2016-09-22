@@ -665,6 +665,9 @@ angular.module("loading.tpl.html", []).run(["$templateCache", function($template
     "     <md-progress-circular class=\"md-primary\"\n" +
     "                           md-diameter=\"100px\">\n" +
     "     </md-progress-circular>\n" +
+    "    <div class=\"message\">\n" +
+    "        Loading your twitter\n" +
+    "    </div>\n" +
     "</div>");
 }]);
 
@@ -1256,9 +1259,9 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "<div class=\"page product-page\">\n" +
     "    <div class=\"row biblio-row\">\n" +
     "        <div class=\"biblio-col col-md-8\">\n" +
-    "            <a href=\"/u/{{ person.orcid_id }}/publications\" class=\"back-to-profile\">\n" +
+    "            <a href=\"/u/{{ person.d.orcid_id }}/publications\" class=\"back-to-profile\">\n" +
     "                <i class=\"fa fa-chevron-left\"></i>\n" +
-    "                Back to {{ person.first_name }}'s publications\n" +
+    "                Back to {{ person.d.first_name }}'s publications\n" +
     "            </a>\n" +
     "            <div class=\"genre\" ng-show=\"product.genre != 'article' && product.genre != 'other'\">\n" +
     "                <i class=\"fa fa-{{ getGenreIcon(product.genre) }}\"></i>\n" +
@@ -1326,7 +1329,7 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                <p>\n" +
     "                    If you've\n" +
     "                    got a DOI for this publication we don't know about, you can add\n" +
-    "                    it in <a href=\"http://orcid.org/{{ person.orcid_id }}\" target=\"_blank\">your ORCID</a>\n" +
+    "                    it in <a href=\"http://orcid.org/{{ person.d.orcid_id }}\" target=\"_blank\">your ORCID</a>\n" +
     "                    and then re-sync.\n" +
     "                </p>\n" +
     "            </div>\n" +
@@ -1372,15 +1375,6 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                       <div class=\"under\">\n" +
     "                            <span class=\"date-and-attr\">\n" +
     "                                since this article's publication in {{ product.year }}\n" +
-    "                                <!--\n" +
-    "                                <span class=\"single\" ng-show=\"person.publishingAge > 1\">\n" +
-    "                                    {{ person.publishingAge }} years\n" +
-    "                                </span>\n" +
-    "                                <span class=\"single\" ng-show=\"person.publishingAge <= 1\">\n" +
-    "                                    year\n" +
-    "                                </span>\n" +
-    "                                -->\n" +
-    "\n" +
     "                            </span>\n" +
     "                       </div>\n" +
     "\n" +
