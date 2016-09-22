@@ -47,9 +47,6 @@ angular.module('productPage', [
 
 
         var possibleChannels = _.pluck(Person.d.sources, "source_name")
-
-        var ownsThisProfile = $auth.isAuthenticated() && $auth.getPayload().sub == Person.d.orcid_id
-
         var id
         id = $routeParams.id
         var product = _.findWhere(Person.d.products, {id: id})
@@ -58,17 +55,14 @@ angular.module('productPage', [
             $location.url("/u/" + Person.d.orcid_id + "/publications")
         }
 
-        $scope.person = Person.d
+        $scope.person = Person
         $scope.sources = product.sources
         $scope.product = product
         $scope.displayGenre = product.genre.replace("-", " ")
-        $scope.ownsThisProfile = ownsThisProfile
         $scope.d = {}
 
 
         console.log("$scope.product", $scope.product, $routeParams.filter)
-
-
 
 
         function makePostsWithRollups(posts){

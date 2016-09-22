@@ -86,7 +86,9 @@
       </a>
    </div>
 
-   <div ng-include="'loading.tpl.html'" ng-show="global.personIsLoading"></div>
+    <!--
+   <div ng-include="'loading.tpl.html'" ng-show="true"></div>
+   -->
 
 
 
@@ -107,7 +109,7 @@
             <div class="content">
                 <div class="title-row row">
                     <div class="title col-md-10">
-                        <a href="u/{{person.orcid_id}}/p/{{ product.id }}">{{ product.title }}</a>
+                        <a href="u/{{person.d.orcid_id}}/p/{{ product.id }}">{{ product.title }}</a>
                     </div>
                     <div class="fulltext col-md-2">
                         <a class="val"
@@ -124,7 +126,7 @@
                     <span class="attr">
                         {{ product.journal }}
                         <a class="missing-doi"
-                           href="u/{{ person.orcid_id }}/p/{{ product.id }}"
+                           href="u/{{ person.d.orcid_id }}/p/{{ product.id }}"
                            ng-show="!product.doi">
                             <md-tooltip>
                                 We may be missing data for this publication
@@ -134,12 +136,12 @@
                     </span>
                 </div>
                 <div class="source-icons" ng-show="product.num_mentions">
-                    <a href="u/{{ person.orcid_id }}/p/{{ product.id }}" class="sort-score">
+                    <a href="u/{{ person.d.orcid_id }}/p/{{ product.id }}" class="sort-score">
                         <span class="val">{{ product.num_mentions }}</span>
                     </a>
                     <span class="source-icon"
                       ng-repeat="source in product.sources | orderBy: 'display_name'">
-                        <a href="u/{{ person.orcid_id }}/p/{{ product.id }}/{{ source.source_name }}">
+                        <a href="u/{{ person.d.orcid_id }}/p/{{ product.id }}/{{ source.source_name }}">
                             <img ng-src="/static/img/favicons/{{ source.source_name }}.ico"
                                  class="{{source.source_name}} channel-icon">
                         </a>
@@ -219,16 +221,16 @@
                         </div>
                     </div>
                 </div>
-                <span class="badge-actions" ng-show="ownsThisProfile">
+                <span class="badge-actions" ng-show="person.belongsToCurrentUser()">
                     <a class="permalink badge-group-{{ badge.group }}"
-                       href="/u/{{ person.orcid_id }}/a/{{ badgeUrlName(badge)}}">
+                       href="/u/{{ person.d.orcid_id }}/a/{{ badgeUrlName(badge)}}">
                         <i class="fa fa-link"></i>
                         <span class="text">link</span>
                     </a>
                     <a class="share badge-group-{{ badge.group }}"
                        target="_blank"
                        ng-click="shareBadge(badge.name)"
-                       href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.orcid_id }}/a/{{ badgeUrlName(badge) }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:">
+                       href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.orcid_id }}/a/{{ badgeUrlName(badge) }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:">
                         <i class="fa fa-twitter"></i>
                         <span class="text">share</span>
                     </a>
@@ -291,7 +293,7 @@
                            <div class="support">
                                <a class="cites-title target"
                                   ng-if="tweet.citesTitle"
-                                  href="/u/{{person.orcid_id}}/p/{{ tweet.citesPublication }}">
+                                  href="/u/{{person.d.orcid_id}}/p/{{ tweet.citesPublication }}">
                                    <i class="fa fa-file-text-o"></i>
                                    <!--
                                    <span class="ti-label">on</span>
@@ -346,7 +348,7 @@
                     </div>
 
                     <div class="target">
-                        <a href="/u/{{person.orcid_id}}/p/{{ post.citesPublication }}" ng-if="post.citesTitle">
+                        <a href="/u/{{person.d.orcid_id}}/p/{{ post.citesPublication }}" ng-if="post.citesTitle">
                             <span class="ti-label">
                                 <i class="fa fa-file-text-o"></i>
                                 <!--
@@ -458,6 +460,12 @@
    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js"></script>
    <script src="https://checkout.stripe.com/checkout.js"></script>
    <script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',intercomSettings);}else{var d=document;var i=function(){i.c(arguments)};i.q=[];i.c=function(args){i.q.push(args)};w.Intercom=i;function l(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/z93rnxrs';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);}if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})()</script>
+
+
+
+
+
+
 
    <!-- our actual app -->
    <script type="text/javascript" src="{{ url_for('static', filename='dist/ti.js') }}"></script>

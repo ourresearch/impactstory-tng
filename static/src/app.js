@@ -25,10 +25,8 @@ angular.module('app', [
     'productPage', // MUST be above personPage because personPage route is greedy for /p/
     'personPage',
     'settingsPage',
-    'badgePage',
     'wizard',
     'aboutPages'
-
 
 ]);
 
@@ -195,6 +193,11 @@ angular.module('app').controller('AppCtrl', function(
     $scope.currentUser = CurrentUser
     $scope.numFormat = NumFormat
     $scope.moment = moment // this will break unless moment.js loads over network...
+
+
+
+
+
 
     $scope.global = {}
 

@@ -1,9 +1,9 @@
 <div class="page product-page">
     <div class="row biblio-row">
         <div class="biblio-col col-md-8">
-            <a href="/u/{{ person.orcid_id }}/publications" class="back-to-profile">
+            <a href="/u/{{ person.d.orcid_id }}/publications" class="back-to-profile">
                 <i class="fa fa-chevron-left"></i>
-                Back to {{ person.first_name }}'s publications
+                Back to {{ person.d.first_name }}'s publications
             </a>
             <div class="genre" ng-show="product.genre != 'article' && product.genre != 'other'">
                 <i class="fa fa-{{ getGenreIcon(product.genre) }}"></i>
@@ -44,7 +44,7 @@
                     <i class="fa fa-external-link"></i>
                 </a>
             </div>
-            <div class="no-fulltext" ng-show="!product.fulltext_url && ownsThisProfile">
+            <div class="no-fulltext" ng-show="!product.fulltext_url && person.belongsToCurrentUser()">
                 <div class="btn btn-default" ng-click="setFulltextUrl($event)">
                     <i class="fa fa-link"></i>
                     Add a link to free fulltext
@@ -71,7 +71,7 @@
                 <p>
                     If you've
                     got a DOI for this publication we don't know about, you can add
-                    it in <a href="http://orcid.org/{{ person.orcid_id }}" target="_blank">your ORCID</a>
+                    it in <a href="http://orcid.org/{{ person.d.orcid_id }}" target="_blank">your ORCID</a>
                     and then re-sync.
                 </p>
             </div>
@@ -117,15 +117,6 @@
                        <div class="under">
                             <span class="date-and-attr">
                                 since this article's publication in {{ product.year }}
-                                <!--
-                                <span class="single" ng-show="person.publishingAge > 1">
-                                    {{ person.publishingAge }} years
-                                </span>
-                                <span class="single" ng-show="person.publishingAge <= 1">
-                                    year
-                                </span>
-                                -->
-
                             </span>
                        </div>
 

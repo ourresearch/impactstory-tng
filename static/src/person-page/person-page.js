@@ -80,19 +80,10 @@ angular.module('personPage', [
         $scope.d = {}
 
 
-        // todo get rid of these and call Person.belongsToCurrentUser() directly in the template
-        //var ownsThisProfile = $auth.isAuthenticated() && $auth.getPayload().sub == Person.d.orcid_id
-        //var ownsThisProfile = Person.belongsToCurrentUser()
-        //$scope.ownsThisProfile = ownsThisProfile
-
-
-
         var badgeUrlName = function(badge){
            return badge.display_name.toLowerCase().replace(/\s/g, "-")
         }
         $scope.badgeUrlName = badgeUrlName
-
-
 
         console.log("retrieved the person", $scope.person)
 

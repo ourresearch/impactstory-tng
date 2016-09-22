@@ -203,10 +203,8 @@ angular.module('app', [
     'productPage', // MUST be above personPage because personPage route is greedy for /p/
     'personPage',
     'settingsPage',
-    'badgePage',
     'wizard',
     'aboutPages'
-
 
 ]);
 
@@ -373,6 +371,11 @@ angular.module('app').controller('AppCtrl', function(
     $scope.currentUser = CurrentUser
     $scope.numFormat = NumFormat
     $scope.moment = moment // this will break unless moment.js loads over network...
+
+
+
+
+
 
     $scope.global = {}
 
@@ -713,69 +716,6 @@ angular.module('auth', [
 
 
 
-angular.module('badgePage', [
-    'ngRoute',
-    'person'
-])
-
-
-
-    .config(function($routeProvider) {
-        $routeProvider.when('/u/:orcid/badge/:badgeName', {
-            templateUrl: 'badge-page/badge-page.tpl.html',
-            controller: 'badgePageCtrl',
-            resolve: {
-                personResp: function($http, $route, Person){
-                    console.log("loaded the person response in the route def")
-                    return Person.load($route.current.params.orcid)
-                },
-                badgesResp: function($http, $route, BadgeDefs){
-                    console.log("loaded the badge defs in the route def")
-                    return BadgeDefs.load()
-                }
-            }
-        })
-    })
-
-
-
-    .controller("badgePageCtrl", function($scope,
-                                           $routeParams,
-                                           Person,
-                                           BadgeDefs,
-                                           badgesResp,
-                                           personResp){
-        $scope.person = Person.d
-        $scope.badgeDefs = BadgeDefs
-
-        var badges = Person.getBadgesWithConfigs(BadgeDefs.d)
-
-        var badge = _.findWhere(badges, {name: $routeParams.badgeName})
-        $scope.badge = badge
-        $scope.badgeProducts = _.filter(Person.d.products, function(product){
-            return _.contains(badge.dois, product.doi)
-        })
-
-        console.log("we found these products fit the badge", $scope.badgeProducts)
-
-
-
-
-
-        console.log("loaded the badge page!", $scope.person, $scope.badgeDefs)
-
-
-
-
-
-
-
-
-    })
-
-
-
-
 angular.module("filterService", [])
 
 .factory("FilterService", function($location){
@@ -962,19 +902,10 @@ angular.module('personPage', [
         $scope.d = {}
 
 
-        // todo get rid of these and call Person.belongsToCurrentUser() directly in the template
-        //var ownsThisProfile = $auth.isAuthenticated() && $auth.getPayload().sub == Person.d.orcid_id
-        //var ownsThisProfile = Person.belongsToCurrentUser()
-        //$scope.ownsThisProfile = ownsThisProfile
-
-
-
         var badgeUrlName = function(badge){
            return badge.display_name.toLowerCase().replace(/\s/g, "-")
         }
         $scope.badgeUrlName = badgeUrlName
-
-
 
         console.log("retrieved the person", $scope.person)
 
@@ -1375,9 +1306,6 @@ angular.module('productPage', [
 
 
         var possibleChannels = _.pluck(Person.d.sources, "source_name")
-
-        var ownsThisProfile = $auth.isAuthenticated() && $auth.getPayload().sub == Person.d.orcid_id
-
         var id
         id = $routeParams.id
         var product = _.findWhere(Person.d.products, {id: id})
@@ -1386,17 +1314,14 @@ angular.module('productPage', [
             $location.url("/u/" + Person.d.orcid_id + "/publications")
         }
 
-        $scope.person = Person.d
+        $scope.person = Person
         $scope.sources = product.sources
         $scope.product = product
         $scope.displayGenre = product.genre.replace("-", " ")
-        $scope.ownsThisProfile = ownsThisProfile
         $scope.d = {}
 
 
         console.log("$scope.product", $scope.product, $routeParams.filter)
-
-
 
 
         function makePostsWithRollups(posts){
@@ -2355,7 +2280,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'badge-page/badge-page.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/confirm-publications.tpl.html', 'wizard/connect-orcid.tpl.html', 'workspace.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/confirm-publications.tpl.html', 'wizard/connect-orcid.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -2841,108 +2766,6 @@ angular.module("auth/twitter-login.tpl.html", []).run(["$templateCache", functio
     "</div>");
 }]);
 
-angular.module("badge-page/badge-page.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("badge-page/badge-page.tpl.html",
-    "<div class=\"page badge-page\">\n" +
-    "    <a href=\"/u/{{ person.orcid_id }}\" class=\"back-to-profile\">\n" +
-    "        <i class=\"fa fa-chevron-left\"></i>\n" +
-    "        Back to {{ person.given_names }}'s profile\n" +
-    "\n" +
-    "    </a>\n" +
-    "    <div class=\"who-earned-it\">\n" +
-    "        {{ person.given_names }} earned this badge\n" +
-    "        <span class=\"earned-time\">\n" +
-    "         {{ moment(badge.created).fromNow() }}:\n" +
-    "        </span>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <h2>\n" +
-    "        <i class=\"fa fa-circle badge-level-{{ badge.level }}\"></i>\n" +
-    "        <span class=\"name\">\n" +
-    "            {{ badge.display_name }}\n" +
-    "        </span>\n" +
-    "    </h2>\n" +
-    "    <div class=\"various-descriptions\">\n" +
-    "        <div class=\"description\">\n" +
-    "            {{ badge.description }}\n" +
-    "        </div>\n" +
-    "        <div class=\"extra-description\" ng-show=\"badge.extra_description\">\n" +
-    "            <i class=\"fa fa-info-circle\"></i>\n" +
-    "            <div class=\"text\" ng-bind-html=\"trustHtml(badge.extra_description)\"></div>\n" +
-    "        </div>\n" +
-    "        <div class=\"level-description\">\n" +
-    "            <span class=\"gold\" ng-show=\"badge.level=='gold'\">\n" +
-    "                This is a <span class=\"level badge-level-gold\">gold-level badge.</span>\n" +
-    "                That's impressive, gold badges are rarely awarded!\n" +
-    "            </span>\n" +
-    "            <span class=\"silver\" ng-show=\"badge.level=='silver'\">\n" +
-    "                This is a <span class=\"level badge-level-silver\">silver-level badge.</span>\n" +
-    "                That's pretty good, Silver badges are not easy to get!\n" +
-    "            </span>\n" +
-    "            <span class=\"gold\" ng-show=\"badge.level=='bronze'\">\n" +
-    "                This is a <span class=\"level badge-level-bronze\">bronze-level badge.</span>\n" +
-    "                They are relatively easy to get but nothing to sneeze at!\n" +
-    "            </span>\n" +
-    "\n" +
-    "            <span class=\"learn-more\">\n" +
-    "                You can learn more about badges on our <a href=\"/about/badges\">About Badges page.</a>\n" +
-    "            </span>\n" +
-    "\n" +
-    "        </div>\n" +
-    "\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div class=\"support\" ng-show=\"badge.support\">\n" +
-    "        <pre>{{ badge.support }}</pre>\n" +
-    "    </div>\n" +
-    "\n" +
-    "    <div class=\"products\" ng-show=\"badge.dois.length\">\n" +
-    "        <h3>{{ person.given_names }} earned this badge based on\n" +
-    "            {{ badge.dois.length }} product<span ng-show=\"badge.dois.length > 1\">s</span>:</h3>\n" +
-    "        <table>\n" +
-    "            <thead>\n" +
-    "                <th class=\"biblio\"></th>\n" +
-    "                <th class=\"sources\"></th>\n" +
-    "                <tn class=\"score\"></tn>\n" +
-    "                <tn class=\"has-new\"></tn>\n" +
-    "            </thead>\n" +
-    "            <tbody>\n" +
-    "                <tr ng-repeat=\"product in badgeProducts | orderBy : '-altmetric_score'\">\n" +
-    "                    <td class=\"biblio\">\n" +
-    "                        <div class=\"title\">\n" +
-    "                            {{ product.title }}\n" +
-    "                        </div>\n" +
-    "                        <div class=\"more\">\n" +
-    "                            <span class=\"year\">{{ product.year }}</span>\n" +
-    "                            <span class=\"journal\">{{ product.journal }}</span>\n" +
-    "                        </div>\n" +
-    "                    </td>\n" +
-    "                    <td class=\"sources has-oodles-{{ product.sources.length > 6 }}\">\n" +
-    "                        <span class=\"source-icon\"\n" +
-    "                              tooltip=\"a million wonderful things\"\n" +
-    "                              ng-repeat=\"source in product.sources | orderBy: 'posts_count'\">\n" +
-    "                            <img src=\"/static/img/favicons/{{ source.source_name }}.ico\">\n" +
-    "                        </span>\n" +
-    "                    </td>\n" +
-    "                    <td class=\"score\">\n" +
-    "                        {{ numFormat.short(product.altmetric_score) }}\n" +
-    "                    </td>\n" +
-    "                    <td class=\"has-new\">\n" +
-    "                        <i class=\"fa fa-arrow-up\" ng-show=\"product.events_last_week_count > 0\"></i>\n" +
-    "                    </td>\n" +
-    "\n" +
-    "                </tr>\n" +
-    "            </tbody>\n" +
-    "\n" +
-    "        </table>\n" +
-    "\n" +
-    "\n" +
-    "    </div>\n" +
-    "\n" +
-    "\n" +
-    "</div>");
-}]);
-
 angular.module("footer/footer.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("footer/footer.tpl.html",
     "<div id=\"footer\" ng-controller=\"footerCtrl\">\n" +
@@ -3022,6 +2845,9 @@ angular.module("loading.tpl.html", []).run(["$templateCache", function($template
     "     <md-progress-circular class=\"md-primary\"\n" +
     "                           md-diameter=\"100px\">\n" +
     "     </md-progress-circular>\n" +
+    "    <div class=\"message\">\n" +
+    "        Loading your twitter\n" +
+    "    </div>\n" +
     "</div>");
 }]);
 
@@ -3119,7 +2945,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.orcid_id }}&text=Check out the online impact of my research on @Impactstory:\"\n" +
     "                   target=\"_blank\"\n" +
     "                   ng-click=\"shareProfile()\"\n" +
-    "                   ng-show=\"ownsThisProfile\"\n" +
+    "                   ng-show=\"person.belongsToCurrentUser()\"\n" +
     "                   class=\"btn btn-sm btn-default\">\n" +
     "                    <i class=\"fa fa-twitter\"></i>\n" +
     "                    <span class=\"text\">share</span>\n" +
@@ -3219,7 +3045,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                        </span>\n" +
     "                    </span>\n" +
     "                    <a href=\"about/data#publications\"\n" +
-    "                       ng-show=\"ownsThisProfile && !selectedGenre\"\n" +
+    "                       ng-show=\"person.belongsToCurrentUser() && !selectedGenre\"\n" +
     "                       class=\"missing-publications help hedge\">\n" +
     "                        <i class=\"fa fa-question-circle-o\"></i>\n" +
     "                        Are any missing?\n" +
@@ -3613,9 +3439,9 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "<div class=\"page product-page\">\n" +
     "    <div class=\"row biblio-row\">\n" +
     "        <div class=\"biblio-col col-md-8\">\n" +
-    "            <a href=\"/u/{{ person.orcid_id }}/publications\" class=\"back-to-profile\">\n" +
+    "            <a href=\"/u/{{ person.d.orcid_id }}/publications\" class=\"back-to-profile\">\n" +
     "                <i class=\"fa fa-chevron-left\"></i>\n" +
-    "                Back to {{ person.first_name }}'s publications\n" +
+    "                Back to {{ person.d.first_name }}'s publications\n" +
     "            </a>\n" +
     "            <div class=\"genre\" ng-show=\"product.genre != 'article' && product.genre != 'other'\">\n" +
     "                <i class=\"fa fa-{{ getGenreIcon(product.genre) }}\"></i>\n" +
@@ -3656,7 +3482,7 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                    <i class=\"fa fa-external-link\"></i>\n" +
     "                </a>\n" +
     "            </div>\n" +
-    "            <div class=\"no-fulltext\" ng-show=\"!product.fulltext_url && ownsThisProfile\">\n" +
+    "            <div class=\"no-fulltext\" ng-show=\"!product.fulltext_url && person.belongsToCurrentUser()\">\n" +
     "                <div class=\"btn btn-default\" ng-click=\"setFulltextUrl($event)\">\n" +
     "                    <i class=\"fa fa-link\"></i>\n" +
     "                    Add a link to free fulltext\n" +
@@ -3683,7 +3509,7 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                <p>\n" +
     "                    If you've\n" +
     "                    got a DOI for this publication we don't know about, you can add\n" +
-    "                    it in <a href=\"http://orcid.org/{{ person.orcid_id }}\" target=\"_blank\">your ORCID</a>\n" +
+    "                    it in <a href=\"http://orcid.org/{{ person.d.orcid_id }}\" target=\"_blank\">your ORCID</a>\n" +
     "                    and then re-sync.\n" +
     "                </p>\n" +
     "            </div>\n" +
@@ -3729,15 +3555,6 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                       <div class=\"under\">\n" +
     "                            <span class=\"date-and-attr\">\n" +
     "                                since this article's publication in {{ product.year }}\n" +
-    "                                <!--\n" +
-    "                                <span class=\"single\" ng-show=\"person.publishingAge > 1\">\n" +
-    "                                    {{ person.publishingAge }} years\n" +
-    "                                </span>\n" +
-    "                                <span class=\"single\" ng-show=\"person.publishingAge <= 1\">\n" +
-    "                                    year\n" +
-    "                                </span>\n" +
-    "                                -->\n" +
-    "\n" +
     "                            </span>\n" +
     "                       </div>\n" +
     "\n" +
@@ -4152,175 +3969,4 @@ angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", funct
     "\n" +
     "</div>\n" +
     "");
-}]);
-
-angular.module("workspace.tpl.html", []).run(["$templateCache", function($templateCache) {
-  $templateCache.put("workspace.tpl.html",
-    "\n" +
-    "<!-- achievments workspace -->\n" +
-    "<div class=\"workspace-view row achievements\" ng-if=\"workspace=='achievements'\">\n" +
-    "    <div class=\"achievements-list\">\n" +
-    "        <div class=\"achievements workspace-item\"\n" +
-    "             ng-class=\"{'featured': $index < 3}\"\n" +
-    "             ng-repeat=\"badge in badges | orderBy: '-sort_score' | limitTo: badgeLimit \">\n" +
-    "            <div class=\"icon\">\n" +
-    "                <i class=\"fa {{ getBadgeIcon(badge.group) }}\"></i>\n" +
-    "            </div>\n" +
-    "            <div class=\"content\">\n" +
-    "                <div class=\"title\">\n" +
-    "                    <a href=\"/u/{{ person.orcid_id }}/badge/{{ badge.name }}\">\n" +
-    "                        {{badge.display_name}}\n" +
-    "                    </a>\n" +
-    "                </div>\n" +
-    "                <div class=\"under\">\n" +
-    "                    {{ badge.description }}\n" +
-    "                </div>\n" +
-    "                <div class=\"earned-on\" ng-show=\"badge.is_for_products\">\n" +
-    "                    Earned on\n" +
-    "                    <a href=\"/u/{{ person.orcid_id }}/badge/{{ badge.name }}\">\n" +
-    "                        {{ badge.dois.length }} products\n" +
-    "                    </a>\n" +
-    "                </div>\n" +
-    "                <div class=\"earned-on\" ng-show=\"!badge.is_for_products\">\n" +
-    "                    Earned on whole profile\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "        <div class=\"show-more\"\n" +
-    "             ng-show=\"badgeLimit==3 && badges.length > 3\"\n" +
-    "             ng-click=\"badgeLimit=999999999\">\n" +
-    "            <i class=\"fa fa-chevron-down\"></i>\n" +
-    "            show {{ badges.length - 3 }} more\n" +
-    "        </div>\n" +
-    "        <div class=\"show-fewer\" ng-show=\"badgeLimit > 3\" ng-click=\"badgeLimit=3\">\n" +
-    "            <i class=\"fa fa-chevron-up\"></i>\n" +
-    "            show fewer\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "<!-- products workspace -->\n" +
-    "<div class=\"workspace-view row products\" ng-if=\"workspace=='products'\">\n" +
-    "    <div class=\"products-list\">\n" +
-    "        <div class=\"products workspace-item\"\n" +
-    "             ng-repeat=\"product in products | orderBy : '-altmetric_score'\">\n" +
-    "            <div class=\"icon\">\n" +
-    "                <i class=\"fa fa-file-text-o\"></i>\n" +
-    "            </div>\n" +
-    "\n" +
-    "            <div class=\"content\">\n" +
-    "                <div class=\"title\">\n" +
-    "                    <a href=\"u/{{person.orcid_id}}/product/doi/{{ product.doi }}\">{{ product.title }}</a>\n" +
-    "                </div>\n" +
-    "                <div class=\"under\">\n" +
-    "                    <span class=\"year date\">{{ product.year }}</span>\n" +
-    "                    <span class=\"attr\">\n" +
-    "                        {{ product.journal }}\n" +
-    "                        <span class=\"oa-icon oa-journal\" ng-show=\"product.is_oa_journal\">\n" +
-    "                            <md-tooltip>\n" +
-    "                                This is an Open Access journal\n" +
-    "                            </md-tooltip>\n" +
-    "                            <i class=\"fa fa-unlock-alt\"></i>\n" +
-    "                        </span>\n" +
-    "                        <span class=\"oa-icon oa-journal\" ng-show=\"product.is_oa_repository\">\n" +
-    "                            <md-tooltip>\n" +
-    "                                This is an open-access repository\n" +
-    "                            </md-tooltip>\n" +
-    "                            <i class=\"fa fa-unlock-alt\"></i>\n" +
-    "                        </span>\n" +
-    "                    </span>\n" +
-    "                </div>\n" +
-    "                <div class=\"source-icons\">\n" +
-    "            <span class=\"source-icon\"\n" +
-    "                  ng-repeat=\"source in product.sources | orderBy: 'display_name'\">\n" +
-    "                <md-tooltip md-direction=\"top\">\n" +
-    "                    {{ source.posts_count }} {{source.display_name }}\n" +
-    "                </md-tooltip>\n" +
-    "                <img ng-src=\"/static/img/favicons/{{ source.source_name }}.ico\" class=\"{{source.source_name}}\">\n" +
-    "            </span>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "            <div class=\"metric\">\n" +
-    "                <md-tooltip md-direction=\"top\">\n" +
-    "                    Altmetric.com score\n" +
-    "                </md-tooltip>\n" +
-    "                {{ numFormat.short(product.altmetric_score) }}\n" +
-    "                <i class=\"fa fa-arrow-up\" ng-show=\"product.events_last_week_count > 0\"></i>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "<!-- posts workspace -->\n" +
-    "<div class=\"workspace-view row posts\" ng-if=\"workspace=='posts'\">\n" +
-    "    <div class=\"posts-list\">\n" +
-    "        <div class=\"posts workspace-item\"\n" +
-    "             ng-repeat=\"post in posts | orderBy: '-posted_on' | filter: {source: viewThisSource}\">\n" +
-    "            <div class=\"icon\">\n" +
-    "                <img ng-src=\"/static/img/favicons/{{ post.source }}.ico\">\n" +
-    "            </div>\n" +
-    "            <div class=\"content\">\n" +
-    "                <div class=\"title\">\n" +
-    "                    <a href=\"{{ post.url }}\">\n" +
-    "                        {{post.title}}\n" +
-    "                        <i class=\"fa fa-external-link\"></i>\n" +
-    "                    </a>\n" +
-    "                </div>\n" +
-    "                <div class=\"under\">\n" +
-    "                    <span class=\"date\">\n" +
-    "                        <md-tooltip>\n" +
-    "                            Posted on\n" +
-    "                            {{ moment(post.posted_on).format(\"dddd, MMMM Do YYYY, h:mm:ss a\") }}\n" +
-    "                        </md-tooltip>\n" +
-    "\n" +
-    "                        <span class=\"human-readable\">\n" +
-    "                            {{ moment(post.posted_on).fromNow() }}\n" +
-    "                        </span>\n" +
-    "                    </span>\n" +
-    "                    <span class=\"attr\">{{post.attribution}}</span>\n" +
-    "                    cited\n" +
-    "                    <a href=\"/u/{{person.orcid_id}}/product/doi/{{ post.citesDoi }}\">\n" +
-    "                        {{ post.citesTitle }}\n" +
-    "                    </a>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "\n" +
-    "\n" +
-    "<!-- twitter workspace -->\n" +
-    "<div class=\"workspace-view row tweeters\" ng-if=\"workspace=='twitter'\">\n" +
-    "    <div class=\"tweeters-list\">\n" +
-    "        <div class=\"tweeters workspace-item\"\n" +
-    "             ng-repeat=\"tweeter in tweeters | orderBy: '-followers' | limitTo: 25\">\n" +
-    "\n" +
-    "            <div class=\"icon\">\n" +
-    "                <img ng-src=\"{{ tweeter.img }}\">\n" +
-    "            </div>\n" +
-    "            <div class=\"content\">\n" +
-    "                <div class=\"title\">\n" +
-    "                    <a href=\"{{ tweeter.url }}\">\n" +
-    "                        {{tweeter.name}}\n" +
-    "                    </a>\n" +
-    "                    <span class=\"extra\">\n" +
-    "                        <span class=\"count\">\n" +
-    "                            {{  numFormat.short(tweeter.followers) }}\n" +
-    "                        </span>\n" +
-    "                        followers\n" +
-    "                    </span>\n" +
-    "                </div>\n" +
-    "                <div class=\"under\">\n" +
-    "                    <span class=\"attr\">{{tweeter.description}}</span>\n" +
-    "                </div>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>");
 }]);
