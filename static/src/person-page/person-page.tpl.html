@@ -80,7 +80,7 @@
                 <a href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.orcid_id }}&text=Check out the online impact of my research on @Impactstory:"
                    target="_blank"
                    ng-click="shareProfile()"
-                   ng-show="ownsThisProfile"
+                   ng-show="person.belongsToCurrentUser()"
                    class="btn btn-sm btn-default">
                     <i class="fa fa-twitter"></i>
                     <span class="text">share</span>
@@ -180,7 +180,7 @@
                         </span>
                     </span>
                     <a href="about/data#publications"
-                       ng-show="ownsThisProfile && !selectedGenre"
+                       ng-show="person.belongsToCurrentUser() && !selectedGenre"
                        class="missing-publications help hedge">
                         <i class="fa fa-question-circle-o"></i>
                         Are any missing?

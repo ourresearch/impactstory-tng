@@ -663,7 +663,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.orcid_id }}&text=Check out the online impact of my research on @Impactstory:\"\n" +
     "                   target=\"_blank\"\n" +
     "                   ng-click=\"shareProfile()\"\n" +
-    "                   ng-show=\"ownsThisProfile\"\n" +
+    "                   ng-show=\"person.belongsToCurrentUser()\"\n" +
     "                   class=\"btn btn-sm btn-default\">\n" +
     "                    <i class=\"fa fa-twitter\"></i>\n" +
     "                    <span class=\"text\">share</span>\n" +
@@ -763,7 +763,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                        </span>\n" +
     "                    </span>\n" +
     "                    <a href=\"about/data#publications\"\n" +
-    "                       ng-show=\"ownsThisProfile && !selectedGenre\"\n" +
+    "                       ng-show=\"person.belongsToCurrentUser() && !selectedGenre\"\n" +
     "                       class=\"missing-publications help hedge\">\n" +
     "                        <i class=\"fa fa-question-circle-o\"></i>\n" +
     "                        Are any missing?\n" +
