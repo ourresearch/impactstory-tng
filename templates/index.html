@@ -221,7 +221,7 @@
                         </div>
                     </div>
                 </div>
-                <span class="badge-actions" ng-show="ownsThisProfile">
+                <span class="badge-actions" ng-show="person.belongsToCurrentUser()">
                     <a class="permalink badge-group-{{ badge.group }}"
                        href="/u/{{ person.d.orcid_id }}/a/{{ badgeUrlName(badge)}}">
                         <i class="fa fa-link"></i>
