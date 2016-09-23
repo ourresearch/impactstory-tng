@@ -7,6 +7,8 @@ from models.person import PersonExistsException
 from models.person import make_person
 from models.person import refresh_orcid_info_and_save
 from models.person import connect_orcid
+from models.person import connect_twitter
+from models.person import disconnect_twitter
 from models.person import refresh_profile
 from models.person import refresh_person
 from models.person import delete_person
@@ -446,6 +448,28 @@ def twitter_register_but_login_if_they_are_already_registered():
         my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
 
     return jsonify({"token": my_person.get_token()})
+
+
+# since new users now MUST have a twitter, this endpoint is only useful for legacy users,
+# who signed up when you registered with ORCID and Twitter was optional
+@app.route("/api/me/twitter/connect", methods=["POST"])
+@login_required
+def twitter_connect():
+    twitter_creds = get_twitter_creds(
+        request.json.get('oauth_token'),
+        request.json.get('oauth_verifier')
+    )
+
+    connect_twitter(g.my_person, twitter_creds)
+    return jsonify({"token": g.my_person.get_token()})
+
+
+
+@app.route("/api/me/twitter/disconnect", methods=["POST"])
+@login_required
+def twitter_disconnect_endpoint():
+    disconnect_twitter(g.my_person)
+    return jsonify({"token": g.my_person.get_token()})
 
 
 

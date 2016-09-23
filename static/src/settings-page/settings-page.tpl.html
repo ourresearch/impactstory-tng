@@ -31,6 +31,37 @@
         </div>
     </div>
 
+    <div class="setting-panel twitter">
+        <div class="disconnect" ng-show="currentUser.d.twitter_screen_name">
+            <h3>Disconnect your Twitter</h3>
+            <p>
+                This is handy if you want to associate a different Twitter account with your
+                Impactstory profile.
+            </p>
+            <div class="button">
+                <span class="btn btn-lg btn-default"
+                      ng-click="currentUser.disconnectTwitter()">
+                    <i class="fa fa-twitter"></i>
+                    Disconnect from @{{ currentUser.d.twitter_screen_name }}
+                </span>
+            </div>
+        </div>
+        <div class="connect" ng-show="!currentUser.d.twitter_screen_name">
+            <h3>Connect to your Twitter</h3>
+            <p>
+                This will set your profile picture and add a link to your Twitter account.
+            </p>
+            <div class="button">
+                <span class="btn btn-lg btn-default"
+                      ng-click="currentUser.twitterAuthenticate('connect')">
+                    <i class="fa fa-twitter"></i>
+                    Connect to your Twitter
+                </span>
+            </div>
+        </div>
+        </div>
+    </div>
+
     <div class="setting-panel">
         <h3>Donate</h3>
         <p>
