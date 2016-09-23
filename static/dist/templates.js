@@ -624,14 +624,12 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                            </span>\n" +
     "                            <!-- hiding this button for now until we implement a\n" +
     "                            'connect' intent for twitter -->\n" +
-    "                            <!--\n" +
     "                            <a href=\"\" class=\"link-twitter btn btn-default btn-xs\"\n" +
-    "                               ng-click=\"currentUser.()\"\n" +
+    "                               ng-click=\"currentUser.twitterAuthenticate('connect')\"\n" +
     "                               ng-show=\"person.belongsToCurrentUser() && !person.d.twitter && !d.linkTwitterLoading\">\n" +
     "                                <i class=\"fa fa-twitter\"></i>\n" +
     "                                Connect your Twitter\n" +
     "                            </a>\n" +
-    "                            -->\n" +
     "                        </span>\n" +
     "                    </h2>\n" +
     "                    <div class=\"aff\">\n" +
@@ -1375,6 +1373,37 @@ angular.module("settings-page/settings-page.tpl.html", []).run(["$templateCache"
     "                <i class=\"fa fa-check\"></i>\n" +
     "                Sync complete!\n" +
     "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"setting-panel twitter\">\n" +
+    "        <div class=\"disconnect\" ng-show=\"currentUser.d.twitter_screen_name\">\n" +
+    "            <h3>Disconnect your Twitter</h3>\n" +
+    "            <p>\n" +
+    "                This is handy if you want to associate a different Twitter account with your\n" +
+    "                Impactstory profile.\n" +
+    "            </p>\n" +
+    "            <div class=\"button\">\n" +
+    "                <span class=\"btn btn-lg btn-default\"\n" +
+    "                      ng-click=\"currentUser.disconnectTwitter()\">\n" +
+    "                    <i class=\"fa fa-twitter\"></i>\n" +
+    "                    Disconnect from @{{ currentUser.d.twitter_screen_name }}\n" +
+    "                </span>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "        <div class=\"connect\" ng-show=\"!currentUser.d.twitter_screen_name\">\n" +
+    "            <h3>Connect to your Twitter</h3>\n" +
+    "            <p>\n" +
+    "                This will set your profile picture and add a link to your Twitter account.\n" +
+    "            </p>\n" +
+    "            <div class=\"button\">\n" +
+    "                <span class=\"btn btn-lg btn-default\"\n" +
+    "                      ng-click=\"currentUser.twitterAuthenticate('connect')\">\n" +
+    "                    <i class=\"fa fa-twitter\"></i>\n" +
+    "                    Connect to your Twitter\n" +
+    "                </span>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "\n" +

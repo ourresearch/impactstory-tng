@@ -60,8 +60,6 @@ angular.module('auth', [
 
 
 
-
-
         console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
             .success(function(resp){

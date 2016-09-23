@@ -74,6 +74,14 @@ angular.module('currentUser', [
             return true
         }
 
+        function disconnectTwitter(){
+            console.log("disconnect twitter!")
+            return $http.post("api/me/twitter/disconnect", {})
+                .success(function(resp){
+                    setFromToken(resp.token)
+                })
+        }
+
         function sendHome(){
             console.log("calling sendToCorrectPage() with this data", data)
             var url
@@ -216,6 +224,7 @@ angular.module('currentUser', [
             isAuthenticatedPromise: isAuthenticatedPromise,
             twitterAuthenticate: twitterAuthenticate,
             orcidAuthenticate: orcidAuthenticate,
+            disconnectTwitter: disconnectTwitter,
             setFromToken: setFromToken,
             sendHome: sendHome,
             sendHomePromise: sendHomePromise,
