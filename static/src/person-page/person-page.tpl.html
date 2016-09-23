@@ -35,18 +35,6 @@
                                class="twitter">
                                 <img src="static/img/favicons/twitter.ico" alt="">
                             </a>
-                            <span class="link-twitter loading" ng-show="d.linkTwitterLoading">
-                                <i class="fa fa-refresh fa-spin"></i>
-                                linking Twitter...
-                            </span>
-                            <!-- hiding this button for now until we implement a
-                            'connect' intent for twitter -->
-                            <a href="" class="link-twitter btn btn-default btn-xs"
-                               ng-click="currentUser.twitterAuthenticate('connect')"
-                               ng-show="person.belongsToCurrentUser() && !person.d.twitter && !d.linkTwitterLoading">
-                                <i class="fa fa-twitter"></i>
-                                Connect your Twitter
-                            </a>
                         </span>
                     </h2>
                     <div class="aff">

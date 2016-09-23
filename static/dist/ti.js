@@ -657,7 +657,7 @@ angular.module('auth', [
 
     })
 
-    .controller("OauthCtrl", function($scope, $cookies, $routeParams, $location, $http, CurrentUser){
+    .controller("OauthCtrl", function($scope, $cookies, $routeParams, $location, $http, $mdToast, CurrentUser){
         var requestObj = $location.search()
         if (_.isEmpty(requestObj)){
             console.log("we didn't get any codes or verifiers in the URL. aborting.")
@@ -684,6 +684,13 @@ angular.module('auth', [
         var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
 
 
+        // temp hack
+        if ($routeParams.identityProvider == "twitter" && $routeParams.intent == "connect"){
+            var msg = "Your Twitter account is connected!"
+        }
+
+
+
 
         console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
@@ -691,6 +698,13 @@ angular.module('auth', [
                 console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
                 CurrentUser.sendHome()
+                if (msg){
+                    $mdToast.show(
+                        $mdToast.simple()
+                            .textContent(msg)
+                            .position("top")
+                    )
+                }
 
             })
             .error(function(error, status){
@@ -1473,10 +1487,11 @@ angular.module('currentUser', [
 
 
 
-    .factory("CurrentUser", function($auth, $http, $q, $route, $location){
+    .factory("CurrentUser", function($auth, $http, $q, $route, $location, $mdToast, $timeout){
 
 
         var data = {}
+        var isLoading = false
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
@@ -1545,9 +1560,24 @@ angular.module('currentUser', [
         }
 
         function disconnectTwitter(){
+
+            isLoading = true
             console.log("disconnect twitter!")
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent("Disconnecting Twitter...")
+                    .position("top")
+                    .hideDelay(5000)
+            )
+
             return $http.post("api/me/twitter/disconnect", {})
                 .success(function(resp){
+                    isLoading = false
+                    $mdToast.show(
+                        $mdToast.simple()
+                            .textContent("Done!")
+                            .position("top")
+                    )
                     setFromToken(resp.token)
                 })
         }
@@ -1704,7 +1734,10 @@ angular.module('currentUser', [
             isLoggedIn: isLoggedIn,
             reloadFromServer: reloadFromServer,
             boot: boot,
-            isMyProfile: isMyProfile
+            isMyProfile: isMyProfile,
+            isLoading: function(){
+                return !!isLoading
+            }
         }
     })
 angular.module("numFormat", [])
@@ -2907,18 +2940,6 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                               class=\"twitter\">\n" +
     "                                <img src=\"static/img/favicons/twitter.ico\" alt=\"\">\n" +
     "                            </a>\n" +
-    "                            <span class=\"link-twitter loading\" ng-show=\"d.linkTwitterLoading\">\n" +
-    "                                <i class=\"fa fa-refresh fa-spin\"></i>\n" +
-    "                                linking Twitter...\n" +
-    "                            </span>\n" +
-    "                            <!-- hiding this button for now until we implement a\n" +
-    "                            'connect' intent for twitter -->\n" +
-    "                            <a href=\"\" class=\"link-twitter btn btn-default btn-xs\"\n" +
-    "                               ng-click=\"currentUser.twitterAuthenticate('connect')\"\n" +
-    "                               ng-show=\"person.belongsToCurrentUser() && !person.d.twitter && !d.linkTwitterLoading\">\n" +
-    "                                <i class=\"fa fa-twitter\"></i>\n" +
-    "                                Connect your Twitter\n" +
-    "                            </a>\n" +
     "                        </span>\n" +
     "                    </h2>\n" +
     "                    <div class=\"aff\">\n" +
@@ -3692,7 +3713,6 @@ angular.module("settings-page/settings-page.tpl.html", []).run(["$templateCache"
     "                    Connect to your Twitter\n" +
     "                </span>\n" +
     "            </div>\n" +
-    "        </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "\n" +

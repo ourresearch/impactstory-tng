@@ -618,18 +618,6 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                               class=\"twitter\">\n" +
     "                                <img src=\"static/img/favicons/twitter.ico\" alt=\"\">\n" +
     "                            </a>\n" +
-    "                            <span class=\"link-twitter loading\" ng-show=\"d.linkTwitterLoading\">\n" +
-    "                                <i class=\"fa fa-refresh fa-spin\"></i>\n" +
-    "                                linking Twitter...\n" +
-    "                            </span>\n" +
-    "                            <!-- hiding this button for now until we implement a\n" +
-    "                            'connect' intent for twitter -->\n" +
-    "                            <a href=\"\" class=\"link-twitter btn btn-default btn-xs\"\n" +
-    "                               ng-click=\"currentUser.twitterAuthenticate('connect')\"\n" +
-    "                               ng-show=\"person.belongsToCurrentUser() && !person.d.twitter && !d.linkTwitterLoading\">\n" +
-    "                                <i class=\"fa fa-twitter\"></i>\n" +
-    "                                Connect your Twitter\n" +
-    "                            </a>\n" +
     "                        </span>\n" +
     "                    </h2>\n" +
     "                    <div class=\"aff\">\n" +
@@ -1403,7 +1391,6 @@ angular.module("settings-page/settings-page.tpl.html", []).run(["$templateCache"
     "                    Connect to your Twitter\n" +
     "                </span>\n" +
     "            </div>\n" +
-    "        </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "\n" +
