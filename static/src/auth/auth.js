@@ -32,7 +32,7 @@ angular.module('auth', [
 
     })
 
-    .controller("OauthCtrl", function($scope, $cookies, $routeParams, $location, $http, CurrentUser){
+    .controller("OauthCtrl", function($scope, $cookies, $routeParams, $location, $http, $mdToast, CurrentUser){
         var requestObj = $location.search()
         if (_.isEmpty(requestObj)){
             console.log("we didn't get any codes or verifiers in the URL. aborting.")
@@ -59,6 +59,13 @@ angular.module('auth', [
         var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
 
 
+        // temp hack
+        if ($routeParams.identityProvider == "twitter" && $routeParams.intent == "connect"){
+            var msg = "Your Twitter account is connected!"
+        }
+
+
+
 
         console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
@@ -66,6 +73,13 @@ angular.module('auth', [
                 console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
                 CurrentUser.sendHome()
+                if (msg){
+                    $mdToast.show(
+                        $mdToast.simple()
+                            .textContent(msg)
+                            .position("top")
+                    )
+                }
 
             })
             .error(function(error, status){

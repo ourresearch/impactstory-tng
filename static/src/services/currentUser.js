@@ -3,10 +3,11 @@ angular.module('currentUser', [
 
 
 
-    .factory("CurrentUser", function($auth, $http, $q, $route, $location){
+    .factory("CurrentUser", function($auth, $http, $q, $route, $location, $mdToast, $timeout){
 
 
         var data = {}
+        var isLoading = false
         var sendTokenToIntercom = function(){
             // do send to intercom stuff
         }
@@ -75,9 +76,24 @@ angular.module('currentUser', [
         }
 
         function disconnectTwitter(){
+
+            isLoading = true
             console.log("disconnect twitter!")
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent("Disconnecting Twitter...")
+                    .position("top")
+                    .hideDelay(5000)
+            )
+
             return $http.post("api/me/twitter/disconnect", {})
                 .success(function(resp){
+                    isLoading = false
+                    $mdToast.show(
+                        $mdToast.simple()
+                            .textContent("Done!")
+                            .position("top")
+                    )
                     setFromToken(resp.token)
                 })
         }
@@ -234,6 +250,9 @@ angular.module('currentUser', [
             isLoggedIn: isLoggedIn,
             reloadFromServer: reloadFromServer,
             boot: boot,
-            isMyProfile: isMyProfile
+            isMyProfile: isMyProfile,
+            isLoading: function(){
+                return !!isLoading
+            }
         }
     })
