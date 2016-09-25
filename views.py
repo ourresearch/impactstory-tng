@@ -372,7 +372,7 @@ def me():
 @app.route("/api/me/refresh", methods=["POST"])
 @login_required
 def refresh_me():
-    # refresh_person(g.my_person)
+    refresh_person(g.my_person)
     return jsonify({"token":  g.my_person.get_token()})
 
 

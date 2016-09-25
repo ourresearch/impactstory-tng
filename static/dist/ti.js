@@ -2282,7 +2282,7 @@ angular.module('wizard', [
                                     // So.
                                     // clears out the Person obj first.
                                     Person.clear()
-                                    CurrentUser.sendHome()  
+                                    CurrentUser.sendHome()
                                 }
                             )
 
