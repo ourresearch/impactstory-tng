@@ -159,22 +159,6 @@ angular.module('personPage', [
 
 
 
-        var reloadWithNewEmail = function(){
-            Person.reload().then(
-                function(resp){
-                    window.Intercom("update", {
-                        user_id: $auth.getPayload().sub, // orcid ID
-                        email: Person.d.email
-                    })
-                    console.log("Added this person's email in Intercom. Reloading page.", Person)
-                    $route.reload()
-                },
-                function(resp){
-                    console.log("bad! Person.reload() died in finishing the profile.", resp)
-                }
-            )
-        }
-
         $scope.refreshFromSecretButton = function(){
             console.log("ah, refreshing!")
 

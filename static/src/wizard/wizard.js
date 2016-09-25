@@ -98,7 +98,7 @@ angular.module('wizard', [
         }
     })
 
-    .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser){
+    .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser, Person){
         console.log("AddPublicationsCtrl is running!")
 
         $scope.state = "prompting"
@@ -129,7 +129,21 @@ angular.module('wizard', [
                             CurrentUser.setProperty("finished_wizard", true).then(
                                 function(x){
                                     console.log("finished setting finished_wizard", x)
-                                    CurrentUser.sendHome()
+                                    console.log("reloading the current user")
+
+                                    // omg a 4th nested callback, so gross.
+                                    // it's a hack because if you were already on your own person page
+                                    // before, now you are gonna get sent back, and since it's got
+                                    // the same ID as before, it's gonna use the cached version, and
+                                    // you won't see your new products.
+                                    // So.
+                                    // preleads you in the Person service before sending you there.
+                                    Person.load(CurrentUser.d.orcid_id, true).then(function(){
+                                        CurrentUser.sendHome()
+
+                                    })
+
+
                                 }
                             )
 
