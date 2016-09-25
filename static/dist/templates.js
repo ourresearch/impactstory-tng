@@ -748,12 +748,15 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                            <span class=\"close-button\" ng-click=\"toggleSeletedGenre(selectedGenre)\">&times;</span>\n" +
     "                        </span>\n" +
     "                    </span>\n" +
-    "                    <a href=\"about/data#publications\"\n" +
+    "\n" +
+    "                    <a href=\"wizard/add-publications\"\n" +
     "                       ng-show=\"person.belongsToCurrentUser() && !selectedGenre\"\n" +
-    "                       class=\"missing-publications help hedge\">\n" +
-    "                        <i class=\"fa fa-question-circle-o\"></i>\n" +
-    "                        Are any missing?\n" +
+    "                       class=\"tool btn btn-default btn-sm\">\n" +
+    "                        <i class=\"fa fa-plus\"></i>\n" +
+    "                        Add publications\n" +
     "                    </a>\n" +
+    "\n" +
+    "\n" +
     "                </h3>\n" +
     "                <div class=\"publication-wrapper\"\n" +
     "                     ng-if=\"$index < d.viewItemsLimit\"\n" +

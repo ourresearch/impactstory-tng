@@ -165,12 +165,15 @@
                             <span class="close-button" ng-click="toggleSeletedGenre(selectedGenre)">&times;</span>
                         </span>
                     </span>
-                    <a href="about/data#publications"
+
+                    <a href="wizard/add-publications"
                        ng-show="person.belongsToCurrentUser() && !selectedGenre"
-                       class="missing-publications help hedge">
-                        <i class="fa fa-question-circle-o"></i>
-                        Are any missing?
+                       class="tool btn btn-default btn-sm">
+                        <i class="fa fa-plus"></i>
+                        Add publications
                     </a>
+
+
                 </h3>
                 <div class="publication-wrapper"
                      ng-if="$index < d.viewItemsLimit"
