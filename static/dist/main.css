@@ -99,11 +99,16 @@ html body tr:focus {
 }
 @media only screen and (max-width: 992px) {
   #pitch-banner {
-    padding: 3px;
+    padding: 3px 3px 10px 3px;
   }
 }
 #pitch-banner .btn {
   margin-left: 10px;
+  background: #ff4000;
+  border: #e63a00;
+}
+#pitch-banner .btn:hover {
+  background: #e63a00;
 }
 #pitch-banner .pitch {
   display: inline-block;
@@ -114,6 +119,7 @@ html body tr:focus {
     width: 155px;
     vertical-align: -10px;
     font-size: 14px;
+    margin-bottom: 5px;
   }
 }
 #site-footer {
