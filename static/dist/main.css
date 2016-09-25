@@ -91,7 +91,7 @@ html body tr:focus {
   left: 0;
   right: 0;
   background: #fff;
-  padding: 15px;
+  padding: 30px;
   text-align: center;
   border-top: 1px solid #999;
   background: rgba(255, 255, 255, 0.9);
@@ -103,7 +103,7 @@ html body tr:focus {
   }
 }
 #pitch-banner .btn {
-  margin-left: 10px;
+  margin-left: 20px;
   background: #ff4000;
   border: #e63a00;
 }
