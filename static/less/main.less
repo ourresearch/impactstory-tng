@@ -169,10 +169,15 @@ html {
   background: rgba(256, 256, 256, .9);
   z-index: 999;
   @media @mobile {
-    padding: 3px;
+    padding: 3px 3px 10px 3px;
   }
   .btn {
     margin-left: 10px;
+    background: @primaryColor;
+    border: darken(@primaryColor, 5%);
+    &:hover {
+      background: darken(@primaryColor, 5%);
+    }
   }
   .pitch {
     display: inline-block;
@@ -181,6 +186,7 @@ html {
       width: 155px;
       vertical-align: -10px;
       font-size: 14px;
+      margin-bottom: 5px;
     }
   }
 }
