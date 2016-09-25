@@ -993,22 +993,6 @@ angular.module('personPage', [
 
 
 
-        var reloadWithNewEmail = function(){
-            Person.reload().then(
-                function(resp){
-                    window.Intercom("update", {
-                        user_id: $auth.getPayload().sub, // orcid ID
-                        email: Person.d.email
-                    })
-                    console.log("Added this person's email in Intercom. Reloading page.", Person)
-                    $route.reload()
-                },
-                function(resp){
-                    console.log("bad! Person.reload() died in finishing the profile.", resp)
-                }
-            )
-        }
-
         $scope.refreshFromSecretButton = function(){
             console.log("ah, refreshing!")
 
@@ -1949,6 +1933,9 @@ angular.module('person', [
             reload: function(){
                 return load(data.orcid_id, true)
             },
+            clear:function(){
+                for (var member in data) delete data[member];
+            },
             belongsToCurrentUser: belongsToCurrentUser
         }
     })
@@ -2255,7 +2242,7 @@ angular.module('wizard', [
         }
     })
 
-    .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser){
+    .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser, Person){
         console.log("AddPublicationsCtrl is running!")
 
         $scope.state = "prompting"
@@ -2286,7 +2273,16 @@ angular.module('wizard', [
                             CurrentUser.setProperty("finished_wizard", true).then(
                                 function(x){
                                     console.log("finished setting finished_wizard", x)
-                                    CurrentUser.sendHome()
+                                    console.log("reloading the current user")
+
+                                    // a hack because if you were already on your own person page
+                                    // before, now you are gonna get sent back, and since it's got
+                                    // the same ID as before, it's gonna use the cached version, and
+                                    // you won't see your new products.
+                                    // So.
+                                    // clears out the Person obj first.
+                                    Person.clear()
+                                    CurrentUser.sendHome()  
                                 }
                             )
 
