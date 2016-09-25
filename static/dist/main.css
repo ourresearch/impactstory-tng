@@ -732,13 +732,11 @@ div.page.person .tab-view .main-col h3 .filter .label .close-button,
 div.page.product-page .tab-view .main-col h3 .filter .label .close-button {
   font-size: 18px;
 }
-div.page.person .tab-view .main-col h3 a.hedge,
-div.page.product-page .tab-view .main-col h3 a.hedge {
-  color: #777;
-  font-weight: normal;
-  font-size: 14px;
+div.page.person .tab-view .main-col h3 a.tool,
+div.page.product-page .tab-view .main-col h3 a.tool {
   text-transform: none;
-  margin-left: 5px;
+  margin-left: 15px;
+  margin-top: -2px;
 }
 div.page.person .tab-view .small-col h4,
 div.page.product-page .tab-view .small-col h4 {
