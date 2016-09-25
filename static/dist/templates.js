@@ -1496,6 +1496,12 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "                <i class=\"fa fa-twitter\"></i>\n" +
     "                Join for free with Twitter\n" +
     "            </md-button>\n" +
+    "            <div class=\"sample\">\n" +
+    "                <a href=\"u/0000-0001-6728-7745\">\n" +
+    "                    <i class=\"fa fa-search\"></i>\n" +
+    "                    See an example profile\n" +
+    "                </a>\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
     "\n" +
