@@ -128,6 +128,9 @@ angular.module('person', [
             reload: function(){
                 return load(data.orcid_id, true)
             },
+            clear:function(){
+                for (var member in data) delete data[member];
+            },
             belongsToCurrentUser: belongsToCurrentUser
         }
     })
