@@ -204,6 +204,7 @@ angular.module('currentUser', [
             _.each(data, function(v, k){
                 delete data[k]
             })
+            Intercom('shutdown')
             return true
         }
 
