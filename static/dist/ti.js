@@ -266,68 +266,67 @@ angular.module('app').run(function($route,
     })
 
 
-
-    $rootScope.sendCurrentUserToIntercom = function(){
-        // needs refactoring!
-
-        // return false here if the user is not logged in
-
-
-        // no idea if this will still work with CurrentUser approach
-        $http.get("api/person/" + CurrentUser.d.orcid_id)
-            .success(function(resp){
-                $rootScope.sendToIntercom(resp)
-                console.log("sending current user to intercom")
-            })
-    }
-
-    $rootScope.sendToIntercom = function(personResp){
-        var resp = personResp
-        var percentOA = resp.percent_fulltext
-        if (percentOA === null) {
-            percentOA = undefined
-        }
-        else {
-            percentOA * 100
-        }
-
-        var intercomInfo = {
-            // basic user metadata
-            app_id: "z93rnxrs",
-            name: resp._full_name,
-            user_id: resp.orcid_id, // orcid ID
-            claimed_at: moment(resp.claimed_at).unix(),
-            email: resp.email,
-
-            // user stuff for analytics
-            percent_oa: percentOA,
-            num_posts: resp.num_posts,
-            num_mentions: resp.num_mentions,
-            num_products: resp.products.length,
-            num_badges: resp.badges.length,
-            num_twitter_followers: resp.num_twitter_followers,
-            campaign: resp.campaign,
-            fresh_orcid: resp.fresh_orcid,
-
-            // we don't send person responses for deleted users (just 404s).
-            // so if we have a person response, this user isn't deleted.
-            // useful for when users deleted profile, then re-created later.
-            is_deleted: false
-
-        }
-
-        // this it temporary till we do the twitter-based signup
-        if ($cookies.get("sawOpenconLandingPage")) {
-            intercomInfo.saw_opencon_landing_page = true
-        }
-
-
-        console.log("sending to intercom", intercomInfo)
-
-        window.Intercom("boot", intercomInfo)
-    }
-
-    $rootScope.sendCurrentUserToIntercom()
+    //
+    //$rootScope.sendCurrentUserToIntercom = function(){
+    //    // needs refactoring!
+    //
+    //    // return false here if the user is not logged in
+    //
+    //    // no idea if this will still work with CurrentUser approach
+    //    $http.get("api/person/" + CurrentUser.d.orcid_id)
+    //        .success(function(resp){
+    //            $rootScope.sendToIntercom(resp)
+    //            console.log("sending current user to intercom")
+    //        })
+    //}
+    //
+    //$rootScope.sendToIntercom = function(personResp){
+    //    var resp = personResp
+    //    var percentOA = resp.percent_fulltext
+    //    if (percentOA === null) {
+    //        percentOA = undefined
+    //    }
+    //    else {
+    //        percentOA * 100
+    //    }
+    //
+    //    var intercomInfo = {
+    //        // basic user metadata
+    //        app_id: "z93rnxrs",
+    //        name: resp._full_name,
+    //        user_id: resp.orcid_id, // orcid ID
+    //        claimed_at: moment(resp.claimed_at).unix(),
+    //        email: resp.email,
+    //
+    //        // user stuff for analytics
+    //        percent_oa: percentOA,
+    //        num_posts: resp.num_posts,
+    //        num_mentions: resp.num_mentions,
+    //        num_products: resp.products.length,
+    //        num_badges: resp.badges.length,
+    //        num_twitter_followers: resp.num_twitter_followers,
+    //        campaign: resp.campaign,
+    //        fresh_orcid: resp.fresh_orcid,
+    //
+    //        // we don't send person responses for deleted users (just 404s).
+    //        // so if we have a person response, this user isn't deleted.
+    //        // useful for when users deleted profile, then re-created later.
+    //        is_deleted: false
+    //
+    //    }
+    //
+    //    // this it temporary till we do the twitter-based signup
+    //    if ($cookies.get("sawOpenconLandingPage")) {
+    //        intercomInfo.saw_opencon_landing_page = true
+    //    }
+    //
+    //
+    //    console.log("sending to intercom", intercomInfo)
+    //
+    //    window.Intercom("boot", intercomInfo)
+    //}
+    //
+    //$rootScope.sendCurrentUserToIntercom()
     
 
 
@@ -1693,8 +1692,56 @@ angular.module('currentUser', [
             $http.get("api/me").success(function(resp){
                 console.log("refreshing data in CurrentUser", resp)
                 setFromToken(resp.token)
+
+                // this is async and can take a while.
+                $http.get("api/person/" + data.orcid_id).success(function(resp){
+                    bootIntercom(resp)
+                })
+
             })
         }
+        
+        function bootIntercom(person){
+            var percentOA = person.percent_fulltext
+            if (percentOA === null) {
+                percentOA = undefined
+            }
+            else {
+                percentOA * 100
+            }
+    
+            var intercomInfo = {
+                // basic user metadata
+                app_id: "z93rnxrs",
+                name: person._full_name,
+                user_id: person.orcid_id, // orcid ID
+                claimed_at: moment(person.claimed_at).unix(),
+                email: person.email,
+    
+                // user stuff for analytics
+                percent_oa: percentOA,
+                num_posts: person.num_posts,
+                num_mentions: person.num_mentions,
+                num_products: person.products.length,
+                num_badges: person.badges.length,
+                num_twitter_followers: person.num_twitter_followers,
+                campaign: person.campaign,
+                fresh_orcid: person.fresh_orcid,
+    
+                // we don't send person responses for deleted users (just 404s).
+                // so if we have a person response, this user isn't deleted.
+                // useful for when users deleted profile, then re-created later.
+                is_deleted: false
+    
+            }
+    
+            if ($cookies.get("sawOpenconLandingPage")) {
+                intercomInfo.saw_opencon_landing_page = true
+            }
+    
+            console.log("sending to intercom", intercomInfo)
+            window.Intercom("boot", intercomInfo)
+        } 
 
         function setFromToken(token){
             $auth.setToken(token) // synchronous
