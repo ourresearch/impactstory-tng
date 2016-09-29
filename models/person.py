@@ -118,7 +118,7 @@ def make_temporary_person_from_orcid(orcid_id):
     my_person = Person()
 
     my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
-    my_person.created = datetime.datetime.utcnow().isoformat()
+    my_person.created = datetime.datetime.utcnow()
     print u"\nin make_temporary_person_from_orcid: made new person for {}".format(my_person)
 
     my_person.orcid_id = orcid_id
@@ -133,7 +133,7 @@ def make_person(twitter_creds, high_priority=False):
     my_person = Person()
 
     my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
-    my_person.created = datetime.datetime.utcnow().isoformat()
+    my_person.created = datetime.datetime.utcnow()
     my_person.claimed_at = datetime.datetime.utcnow().isoformat()
     print u"\nin make_person: made new person for {}".format(my_person)
 
@@ -797,17 +797,17 @@ class Person(db.Model):
         )
 
     def set_fresh_orcid(self):
-        try:
+        # try:
             orcid_created_date_timestamp = self.orcid_api_raw_json["orcid-history"]["submission-date"]["value"]
             orcid_created_date = datetime.datetime.fromtimestamp(orcid_created_date_timestamp/1000)
             profile_created_date = self.created
             if not profile_created_date:
                 # because just made and not set yet
-                profile_created_date = datetime.datetime.utcnow().isoformat()
+                profile_created_date = datetime.datetime.utcnow()
             self.fresh_orcid = (profile_created_date - orcid_created_date).total_seconds() < (60*60)  # 1 hour
         # orcid is blank
-        except TypeError:
-            print u"error in set_fresh_orcid on {}".format(self.orcid_id)
+        # except TypeError:
+        #     print u"error in set_fresh_orcid on {}".format(self.orcid_id)
 
     def set_from_orcid(self):
         total_start_time = time()
@@ -1097,6 +1097,7 @@ class Person(db.Model):
         self.num_products = len(self.all_products)
 
     def get_token(self):
+        # print u"in get_token with ", self
         payload = {
             'id': self.id,
             'email': self.email,
@@ -1358,8 +1359,10 @@ class Person(db.Model):
         return t_index
 
     def __repr__(self):
-        return u'<Person ({id}) "{given_names} {family_name}" >'.format(
+        return u'<Person ({id}, @{twitter}, {orcid_id}) "{given_names} {family_name}" >'.format(
             id=self.id,
+            twitter=self.twitter,
+            orcid_id=self.orcid_id,
             given_names=self.given_names,
             family_name=self.family_name
         )
