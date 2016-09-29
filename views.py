@@ -340,15 +340,21 @@ def login_required(f):
             response.status_code = 401
             return response
 
-        try:
+        # print u"*****payload: ", payload
+
+        if "id" in payload:
             # this uses the current token format
             g.my_person = Person.query.filter_by(id=payload["id"]).first()
-
-        except KeyError:
-
-            # this is a fallback for an older token format
+        if not g.my_person and "orcid_id" in payload:
+            # fallback because some tokens don't have id?
+            g.my_person = Person.query.filter_by(orcid_id=payload["orcid_id"]).first()
+        if not g.my_person and "sub" in payload:
+            # fallback for old token format
             g.my_person = Person.query.filter_by(orcid_id=payload["sub"]).first()
+        if not g.my_person:
+            print u"error, no known keys in payload: {}".format(payload)
 
+        # print u"****in login_required, got a person", g.my_person
         return f(*args, **kwargs)
 
     return decorated_function
