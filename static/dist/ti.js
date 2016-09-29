@@ -697,7 +697,6 @@ angular.module('auth', [
             .success(function(resp){
                 console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
-                CurrentUser.sendHome()
                 if (msg){
                     $mdToast.show(
                         $mdToast.simple()
@@ -1483,8 +1482,12 @@ angular.module('currentUser', [
 
         var data = {}
         var isLoading = false
-        var sendTokenToIntercom = function(){
-            // do send to intercom stuff
+        var sendToIntercom = function(){
+            // this is slow, but that's ok since it's async and doesn't
+            // affect the UX
+            $http.get("api/person/" + data.orcid_id).success(function(resp){
+                bootIntercom(resp)
+            })
         }
 
         var isAuthenticatedPromise = function(){
@@ -1700,12 +1703,6 @@ angular.module('currentUser', [
             $http.get("api/me").success(function(resp){
                 console.log("refreshing data in CurrentUser", resp)
                 setFromToken(resp.token)
-
-                // this is async and can take a while.
-                $http.get("api/person/" + data.orcid_id).success(function(resp){
-                    bootIntercom(resp)
-                })
-
             })
         }
         
@@ -1745,6 +1742,7 @@ angular.module('currentUser', [
     
             if ($cookies.get("sawOpenconLandingPage")) {
                 intercomInfo.saw_opencon_landing_page = true
+                
             }
     
             console.log("sending to intercom", intercomInfo)
@@ -1757,7 +1755,7 @@ angular.module('currentUser', [
                 data[k] = v
             })
 
-            sendTokenToIntercom()
+            sendToIntercom()
         }
 
         return {
