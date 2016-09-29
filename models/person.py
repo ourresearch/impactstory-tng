@@ -797,17 +797,13 @@ class Person(db.Model):
         )
 
     def set_fresh_orcid(self):
-        # try:
-            orcid_created_date_timestamp = self.orcid_api_raw_json["orcid-history"]["submission-date"]["value"]
-            orcid_created_date = datetime.datetime.fromtimestamp(orcid_created_date_timestamp/1000)
-            profile_created_date = self.created
-            if not profile_created_date:
-                # because just made and not set yet
-                profile_created_date = datetime.datetime.utcnow()
-            self.fresh_orcid = (profile_created_date - orcid_created_date).total_seconds() < (60*60)  # 1 hour
-        # orcid is blank
-        # except TypeError:
-        #     print u"error in set_fresh_orcid on {}".format(self.orcid_id)
+        orcid_created_date_timestamp = self.orcid_api_raw_json["orcid-history"]["submission-date"]["value"]
+        orcid_created_date = datetime.datetime.fromtimestamp(orcid_created_date_timestamp/1000)
+        profile_created_date = self.created
+        if not profile_created_date:
+            # because just made and not set yet
+            profile_created_date = datetime.datetime.utcnow()
+        self.fresh_orcid = (profile_created_date - orcid_created_date).total_seconds() < (60*60)  # 1 hour
 
     def set_from_orcid(self):
         total_start_time = time()
