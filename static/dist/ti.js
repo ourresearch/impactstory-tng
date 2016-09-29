@@ -1480,7 +1480,7 @@ angular.module('currentUser', [
                                      $cookies,
                                      $timeout){
 
-        
+
         var data = {}
         var isLoading = false
         var sendTokenToIntercom = function(){
