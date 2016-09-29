@@ -57,6 +57,7 @@ angular.module('app').run(function($route,
                                    $q,
                                    $timeout,
                                    $cookies,
+
                                    $http,
                                    $location,
                                    CurrentUser,
