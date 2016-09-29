@@ -72,7 +72,6 @@ angular.module('auth', [
             .success(function(resp){
                 console.log("we successfully called am api/me endpoint. got this back:", resp)
                 CurrentUser.setFromToken(resp.token)
-                CurrentUser.sendHome()
                 if (msg){
                     $mdToast.show(
                         $mdToast.simple()
