@@ -235,6 +235,7 @@ angular.module('app').run(function($route,
                                    $q,
                                    $timeout,
                                    $cookies,
+
                                    $http,
                                    $location,
                                    CurrentUser,
@@ -1470,9 +1471,16 @@ angular.module('currentUser', [
 
 
 
-    .factory("CurrentUser", function($auth, $http, $q, $route, $location, $mdToast, $timeout){
+    .factory("CurrentUser", function($auth,
+                                     $http,
+                                     $q,
+                                     $route,
+                                     $location,
+                                     $mdToast,
+                                     $cookies,
+                                     $timeout){
 
-
+        
         var data = {}
         var isLoading = false
         var sendTokenToIntercom = function(){
