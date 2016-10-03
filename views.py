@@ -188,7 +188,8 @@ def profile_endpoint_polling(orcid_id):
 def profile_endpoint(orcid_id):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
     if not my_person:
-       my_person = make_temporary_person_from_orcid(orcid_id)
+        print u"making temporary person, referred by {}".format(request.referrer)
+        my_person = make_temporary_person_from_orcid(orcid_id)
     return json_resp(my_person.to_dict())
 
 
@@ -342,6 +343,7 @@ def login_required(f):
 
         # print u"*****payload: ", payload
 
+        g.my_person = None
         if "id" in payload:
             # this uses the current token format
             g.my_person = Person.query.filter_by(id=payload["id"]).first()
@@ -352,7 +354,7 @@ def login_required(f):
             # fallback for old token format
             g.my_person = Person.query.filter_by(orcid_id=payload["sub"]).first()
         if not g.my_person:
-            print u"error, no known keys in payload: {}".format(payload)
+            print u"error logging in user, no known keys in token payload: {}".format(payload)
 
         # print u"****in login_required, got a person", g.my_person
         return f(*args, **kwargs)
