@@ -188,8 +188,11 @@ def profile_endpoint_polling(orcid_id):
 def profile_endpoint(orcid_id):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
     if not my_person:
-        print u"making temporary person, referred by {referrer} using url {url}".format(
-            request=request.referrer, url=request.url)
+        print u"making temporary person for {orcid_id}, referred by {referrer} using url {url}, ip {ip}".format(
+            orcid_id=orcid_id,
+            referrer=request.referrer,
+            url=request.url,
+            ip=request.remote_addr)
         my_person = make_temporary_person_from_orcid(orcid_id)
     return json_resp(my_person.to_dict())
 
