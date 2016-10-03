@@ -119,10 +119,11 @@ def make_temporary_person_from_orcid(orcid_id):
 
     my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
     my_person.created = datetime.datetime.utcnow()
-    print u"\nin make_temporary_person_from_orcid: made new person for {}".format(my_person)
+    print u"starting make_temporary_person_from_orcid: made new person for {}".format(my_person)
 
     my_person.orcid_id = orcid_id
     my_person.refresh()
+    print u"finished make_temporary_person_from_orcid: made new person for {}".format(my_person)
     return my_person
 
 
