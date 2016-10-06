@@ -364,6 +364,7 @@ class Person(db.Model):
         except OrcidDoesNotExist:
             self.invalid_orcid = True
             self.error = "invalid orcid"
+            print u"error: invalid orcid: {}".format(self.orcid_id)
         except Exception:
             logging.exception("refresh error")
             self.error = "refresh error"
@@ -403,6 +404,7 @@ class Person(db.Model):
         except OrcidDoesNotExist:
             self.invalid_orcid = True
             self.error = "invalid orcid"
+            print u"error: invalid orcid: {}".format(self.orcid_id)
         except Exception:
             logging.exception("refresh error")
             self.error = "refresh error"
