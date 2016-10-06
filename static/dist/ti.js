@@ -1930,8 +1930,7 @@ angular.module('person', [
                     myProduct.fulltext_url = fulltextUrl
                 }
             });
-            // todo un-hardcode this
-            var apiUrl = "https://impactstory.org/api/person/" + data.orcid_id
+            var apiUrl = "/api/person/" + data.orcid_id
             var postBody = {
                 product: {
                     id: productId,
