@@ -11,16 +11,17 @@ angular.module('currentUser', [
                                      $mdToast,
                                      $cookies,
                                      $timeout){
-
-
+        
         var data = {}
         var isLoading = false
         var sendToIntercom = function(){
-            // this is slow, but that's ok since it's async and doesn't
-            // affect the UX
-            $http.get("api/person/" + data.orcid_id).success(function(resp){
-                bootIntercom(resp)
-            })
+            // this is slow, but that's ok since it's async and doesn't affect the UX
+            // only call it if they have an orcid_id since the call needs it
+            if (data.orcid_id) {
+                $http.get("api/person/" + data.orcid_id).success(function(resp) {
+                    bootIntercom(resp)
+                })
+            }
         }
 
         var isAuthenticatedPromise = function(){
