@@ -373,7 +373,7 @@ class depsy(BadgeAssigner):
     context = ""
 
     def decide_if_assigned_threshold(self, person, threshold):
-        if person.depsy_id:
+        if person.depsy_id and person.depsy_percentile:
             self.assigned = True
             self.candidate_badge.value = person.depsy_percentile * 100
             # self.candidate_badge.support = u"You are in the {} percentile <a href='http://depsy.org/person/{}'>on Depsy</a>.".format(
