@@ -433,10 +433,10 @@ def refresh_my_orcid():
 
 @app.route("/api/me/twitter/login", methods=["POST"])
 def twitter_login():
-    start = time()
     twitter_creds = get_twitter_creds(request.json.get('oauth_token'), request.json.get('oauth_verifier'))
-    print "got twittter creds, took {}".format(elapsed(start))
-
+    if not twitter_creds:
+        print u"error in twitter_login, empty twitter creds"
+        abort_json(422, "empty twitter creds")
 
     my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
     if not my_person:
@@ -453,6 +453,9 @@ def twitter_login():
 @app.route("/api/me/twitter/register", methods=["POST"])
 def twitter_register_but_login_if_they_are_already_registered():
     twitter_creds = get_twitter_creds(request.json.get('oauth_token'), request.json.get('oauth_verifier'))
+    if not twitter_creds:
+        print u"error in twitter_register_but_login_if_they_are_already_registered, empty twitter creds"
+        abort_json(422, "empty twitter creds")
 
     try:
         my_person = make_person(twitter_creds)
