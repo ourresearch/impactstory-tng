@@ -132,7 +132,9 @@ def find_normalized_license(text):
         ("creativecommonsattributionnoncommercial", "cc-by-nc"),
         ("creativecommonsattributionnoderiv", "cc-by-nd"),
         ("creativecommonsattributionsharealike", "cc-by-sa"),
-        ("creativecommonsattribution", "cc-by")
+        ("creativecommonsattribution", "cc-by"),
+        ("publicdomain", "pd"),
+        ("openaccess", "oa")
     ]
 
     for (lookup, license) in license_lookups:
