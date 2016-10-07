@@ -193,7 +193,7 @@ def profile_endpoint(orcid_id):
             referrer=request.referrer,
             url=request.url,
             ip=request.remote_addr)
-        my_person = make_temporary_person_from_orcid(orcid_id)
+        my_person = make_temporary_person_from_orcid(orcid_id, request)
     return json_resp(my_person.to_dict())
 
 

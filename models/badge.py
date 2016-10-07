@@ -800,9 +800,9 @@ class open_science_triathlete(BadgeAssigner):
 #     show_in_ui = False
 #
 #     def decide_if_assigned(self, person):
-#         if person.openness_proportion:  # the openness_proportion takes into account having enough papers
-#             if person.openness_proportion >= 0.25:
-#                 self.candidate_badge.value = person.openness_proportion * 100
+#         if person.percent_fulltext:  # the percent_fulltext takes into account having enough papers
+#             if person.percent_fulltext >= 0.25:
+#                 self.candidate_badge.value = person.percent_fulltext * 100
 #                 self.assigned = True
 
 
@@ -814,8 +814,8 @@ class percent_fulltext(BadgeAssigner):
     importance = .9
 
     def decide_if_assigned(self, person):
-        openness = person.openness_proportion
-        if openness:  # the openness_proportion takes into account having enough papers
+        openness = person.percent_fulltext
+        if openness:  # the percent_fulltext takes into account having enough papers
             if openness >= 0.5:
                 self.candidate_badge.value = openness * 100
                 self.assigned = True
