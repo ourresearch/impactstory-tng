@@ -2,6 +2,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import deferred
+from sqlalchemy.orm import Load
 from sqlalchemy import orm
 from sqlalchemy import text
 from sqlalchemy import func
@@ -15,33 +16,56 @@ from models.badge import get_badge_assigner
 from util import safe_commit
 from util import chunk_into_n_sublists
 
-def num_people_in_db():
+def base_count_people_query():
     from models.person import Person
-
     # speed optimizations are from https://gist.github.com/hest/8798884
     count_q = db.session.query(Person)
-    # count_q = count_q.filter(Person.campaign == "2015_with_urls")
+    return count_q
+
+# make this standalone function so everywhere uses the same query for this
+def refine_refset_query(base_query):
+    from models.person import Person
+    q = base_query.filter(Person.campaign == "2015_with_urls")
+    return q
+
+def num_people_in_db():
+    count_q = base_count_people_query()
     count_q = count_q.statement.with_only_columns([func.count()]).order_by(None)
     count = db.session.execute(count_q).scalar()
-    print "refsize count", count
+    print u"db person count", count
+    return count
+
+def num_people_in_refset():
+    count_q = base_count_people_query()
+    count_q = refine_refset_query(count_q)
+    count_q = count_q.statement.with_only_columns([func.count()]).order_by(None)
+    count = db.session.execute(count_q).scalar()
+    print u"refsize count", count
     return count
 
 def update_refsets():
+    from models.person import Person
+
     print u"getting the badge percentile refsets...."
-    refset_list_dict = defaultdict(list)
-    q = db.session.query(
-        Badge.name,
-        Badge.value,
-    )
-    q = q.filter(Badge.value != None)
+
+    q = db.session.query(Person).options(
+             Load(Person).load_only("campaign", "orcid_id"))
+    q = q.options(orm.noload('*'))
+    q = q.options(orm.subqueryload("badges"))
+
+    # q = refine_refset_query(q)
     rows = q.all()
 
     print u"query finished, now set the values in the lists"
-    for row in rows:
-        if row[1]:
-            refset_list_dict[row[0]].append(row[1])
+    print "\n\n\n"
+    refset_list_dict = defaultdict(list)
+    for person in rows:
+        for badge in person.badges:
+            # print "BADGE", badge
+            if badge.value != None:
+                refset_list_dict[badge.name].append(badge.value)
 
-    num_in_refset = num_people_in_db()
+    num_in_refset = num_people_in_refset()
 
     for name, unsorted_values in refset_list_dict.iteritems():
         print u"refreshing refset {}".format(name)
@@ -70,6 +94,7 @@ def update_refsets():
 
 
     # and finally save it all
+
     safe_commit(db)
 
 
