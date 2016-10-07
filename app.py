@@ -96,7 +96,7 @@ with open("data/doaj_issns.json", "r") as fh:
     doaj_issns = json.load(fh)
 
 with open("data/doaj_titles.json", "r") as fh:
-    doaj_titles = [title.encode("utf-8") for title in json.load(fh)]
+    doaj_titles = [(title.encode("utf-8"), license) for (title, license) in json.load(fh)]
 
 
 # imports got here for tables that need auto-created.

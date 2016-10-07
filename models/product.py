@@ -39,6 +39,7 @@ from models.oa import preprint_doi_fragments
 from models.oa import open_doi_fragments
 from models.oa import dataset_url_fragments
 from models.oa import preprint_url_fragments
+from models.oa import find_normalized_license
 from models import oa
 from models.mendeley import set_mendeley_data
 
@@ -1034,19 +1035,22 @@ class Product(db.Model):
         start_time = time()
 
         open_reason = None
-        open_url = self.url
+        fulltext_url = self.url
 
-
+        license = "unknown"
         if oa.is_open_via_doaj_issn(self.issns):
+            license = oa.is_open_via_doaj_issn(self.issns)
             open_reason = "doaj issn"
         elif oa.is_open_via_doaj_journal(self.journal):
+            license = oa.is_open_via_doaj_journal(self.journal)
             open_reason = "doaj journal"
         elif oa.is_open_via_arxiv(self.arxiv):
             open_reason = "arxiv"
-            open_url = u"http://arxiv.org/abs/{}".format(self.arxiv)  # override because open url isn't the base url
+            fulltext_url = u"http://arxiv.org/abs/{}".format(self.arxiv)  # override because open url isn't the base url
         elif oa.is_open_via_datacite_prefix(self.doi):
             open_reason = "datacite prefix"
         elif oa.is_open_via_license_url(self.license_url):
+            license = find_normalized_license(self.license_url)
             open_reason = "license url"
         elif oa.is_open_via_doi_fragment(self.doi):
             open_reason = "doi fragment"
@@ -1054,8 +1058,9 @@ class Product(db.Model):
             open_reason = "url fragment"
 
         if open_reason:
-            self.fulltext_url = open_url
+            self.fulltext_url = fulltext_url
             self.open_step = u"local lookup: {}".format(open_reason)
+            self.license = license
 
 
     def to_dict(self):
