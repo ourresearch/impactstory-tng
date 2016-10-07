@@ -21,7 +21,7 @@ from models.source import sources_metadata
 from models.source import Source
 from models.refset import Refset
 from models.emailer import send
-from models.email import save_email
+from models.log_email import save_email
 from models.country import country_info
 from models.top_news import top_news_titles
 from models.log_temp_profile import add_new_log
