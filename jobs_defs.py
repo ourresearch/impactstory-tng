@@ -33,6 +33,11 @@ update_registry.register(Update(
     query=q,
 ))
 
+q = db.session.query(Person.id)
+update_registry.register(Update(
+    job=Person.call_base_on_base1s,
+    query=q
+))
 
 q = db.session.query(Person.id)
 update_registry.register(Update(

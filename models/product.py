@@ -145,6 +145,9 @@ class Product(db.Model):
     fulltext_url = db.Column(db.Text)
     user_supplied_fulltext_url = db.Column(db.Text)
 
+    license = db.Column(db.Text)
+    license_string = db.Column(db.Text)
+
     error = db.Column(db.Text)
 
     def __init__(self, **kwargs):

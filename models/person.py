@@ -25,6 +25,7 @@ from models.log_email import save_email
 from models.country import country_info
 from models.top_news import top_news_titles
 from models.log_temp_profile import add_new_log
+from models.oa import find_normalized_license
 from util import elapsed
 from util import chunks
 from util import date_as_iso_utc
@@ -592,6 +593,12 @@ class Person(db.Model):
         self.set_num_mentions()
         self.set_num_products()
 
+    # convenience method to call base again as a badge job,
+    # for example after adding license-storing code
+    def call_base_on_base1s(self):
+        products_with_base1 = [p for p in self.all_products if p.open_step == "base 1"]
+        self.call_base(products_with_base1)
+
 
     def set_fulltext_urls(self):
 
@@ -609,6 +616,8 @@ class Person(db.Model):
                 p.open_step = None
                 p.base_dcoa = None
                 p.base_dcprovider = None
+                p.license = ""
+                p.license_string = ""
                 p.sherlock_response = None
                 p.sherlock_error = None
 
@@ -695,7 +704,7 @@ class Person(db.Model):
 
         # now do the lookup in base
         titles_string = u"%20OR%20".join([u'%22{}%22'.format(title) for title in titles])
-        print u"{}: calling base with query string of length {}, utf8 bits {}".format(self.id, len(titles_string), 8*len(titles_string.encode('utf-8')))
+        # print u"{}: calling base with query string of length {}, utf8 bits {}".format(self.id, len(titles_string), 8*len(titles_string.encode('utf-8')))
         url_template = u"https://api.base-search.net/cgi-bin/BaseHttpSearchInterface.fcgi?func=PerformSearch&query=(dcoa:1%20OR%20dcoa:2)%20AND%20dctitle:({titles_string})&fields=dctitle,dccreator,dcyear,dcrights,dcprovider,dcidentifier,dcoa,dclink&hits=100000&format=json"
         url = url_template.format(titles_string=titles_string)
         # print u"{}: calling base with {}".format(self.id, url)
@@ -733,6 +742,9 @@ class Person(db.Model):
                                 p.repo_urls["urls"] = {}
                                 p.base_dcoa = base_dcoa
                                 p.base_dcprovider = doc["dcprovider"]
+                                if not p.license_string:
+                                    p.license_string = ""
+                                p.license_string += u"{};".format(doc["dcrights"])
                             elif base_dcoa == "2" and p.base_dcoa != "1":
                                 # got a 2 hit.  use only if we don't already have a 1.
                                 p.repo_urls["urls"] += doc["dcidentifier"]
@@ -750,6 +762,10 @@ class Person(db.Model):
                 # print u"no hit with title {}".format(doc["dctitle"])
                 # print u"normalized: {}".format(normalize(doc["dctitle"]))
                 pass
+
+        for p in products:
+            if p.license_string:
+                p.license = find_normalized_license(p.license_string)
 
 
         print u"finished base step of set_fulltext_urls with {} titles in {}s".format(
