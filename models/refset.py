@@ -48,20 +48,24 @@ def update_refsets():
 
     print u"getting the badge percentile refsets...."
 
+    # only get out the badge objects
     q = db.session.query(Person).options(
              Load(Person).load_only("campaign", "orcid_id"))
     q = q.options(orm.noload('*'))
     q = q.options(orm.subqueryload("badges"))
 
-    # q = refine_refset_query(q)
+    # limit to just what we want for the refset
+    q = refine_refset_query(q)
+
+    # and do the get
     rows = q.all()
 
     print u"query finished, now set the values in the lists"
-    print "\n\n\n"
     refset_list_dict = defaultdict(list)
     for person in rows:
         for badge in person.badges:
             # print "BADGE", badge
+            # handle the nones below, with the zeros
             if badge.value != None:
                 refset_list_dict[badge.name].append(badge.value)
 
@@ -76,9 +80,7 @@ def update_refsets():
             unsorted_values.extend([0] * (num_in_refset - len(unsorted_values)))
 
         # now sort
-        # for testing!!!
         refset_list_dict[name] = sorted(unsorted_values)
-        # refset_list_dict[name] = sorted(unsorted_values[0:200])
 
         # now pick out the cutoffs, minimum value at each of 100
         cutoffs = []
