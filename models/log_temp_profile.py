@@ -7,10 +7,8 @@ from util import safe_commit
 
 def add_new_log(my_temp_person, request=None):
     if LogTempProfile.query.get(my_temp_person.orcid_id):
-        print u"LogTempProfile already saved"
         return
 
-    print "**** request.url", request.url, request.args
     new_log = LogTempProfile(my_temp_person, request)
     db.session.add(new_log)
     safe_commit(db)
