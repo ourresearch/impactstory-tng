@@ -45,10 +45,10 @@ class LogTempProfile(db.Model):
                 source = urlparse.parse_qs(referrer_parsed.query).get("source", None)
                 if source:
                     self.source = source[0]
+                elif "datacite" in request.referrer:
+                    self.source = "datacite"
                 else:
                     self.source = request.referrer
-            elif "datacite" in request.referrer:
-                self.source = "datacite"
 
     def __repr__(self):
         return u'<LogTempProfile ({orcid_id}, {source}) >'.format(
