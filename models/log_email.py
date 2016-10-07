@@ -7,7 +7,7 @@ import shortuuid
 from util import safe_commit
 
 def save_email(orcid_id, contents):
-    email = Email()
+    email = LogEmail()
     email.id = shortuuid.uuid()[0:10]
     email.sent = datetime.datetime.utcnow().isoformat()
     email.orcid_id = orcid_id
@@ -17,7 +17,7 @@ def save_email(orcid_id, contents):
     if not commit_success:
         print u"COMMIT fail on email {}".format(email.orcid_id)
 
-class Email(db.Model):
+class LogEmail(db.Model):
     id = db.Column(db.Text, primary_key=True)
     orcid_id = db.Column(db.Text)
     sent = db.Column(db.DateTime)
