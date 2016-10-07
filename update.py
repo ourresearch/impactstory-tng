@@ -28,6 +28,7 @@ def parse_update_optional_args(parser):
 
     # just for updating one
     parser.add_argument('--id', nargs="?", type=str, help="id of the one thing you want to update")
+    parser.add_argument('--orcid', nargs="?", type=str, help="orcid id of the one thing you want to update")
 
     # parse and run
     parsed_args = parser.parse_args()
@@ -38,6 +39,13 @@ def run_update(parsed_args):
     update = update_registry.get(parsed_args.fn)
 
     start = time()
+
+    #convenience method for handling an orcid
+    if parsed_args.orcid:
+        from models.person import Person
+        my_person = db.session.query(Person).filter(Person.orcid_id==parsed_args.orcid).first()
+        parsed_args.id = my_person.id
+
     update.run(
         use_rq=parsed_args.rq,
         obj_id=parsed_args.id,  # is empty unless updating just one row

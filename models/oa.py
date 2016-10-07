@@ -104,6 +104,41 @@ def is_open_via_url_fragment(url):
     return False
 
 
+def find_normalized_license(text):
+    normalized_text = text.replace(" ", "").replace("-", "").lower()
+
+    # the lookup order matters
+    # assumes no spaces, no dashes, and all lowercase
+    # inspired by https://github.com/CottageLabs/blackbox/blob/fc13e5855bd13137cf1ef8f5e93883234fdab464/service/licences.py
+    # thanks CottageLabs!  :)
+
+    license_lookups = [
+        ("creativecommons.org/licenses/byncnd", "cc-by-nc-nd"),
+        ("creativecommons.org/licenses/byncsa", "cc-by-nc-sa"),
+        ("creativecommons.org/licenses/bynd", "cc-by-nd"),
+        ("creativecommons.org/licenses/bysa", "cc-by-sa"),
+        ("creativecommons.org/licenses/bync", "cc-by-nc"),
+        ("creativecommons.org/licenses/by", "cc-by"),
+        ("creativecommons.org/publicdomain/zero", "cc0"),
+        ("ccbyncnd", "cc-by-nc-nd"),
+        ("ccbyncsa", "cc-by-nc-sa"),
+        ("ccbync", "cc-by-nc"),
+        ("ccbynd", "cc-by-nd"),
+        ("ccbysa", "cc-by-sa"),
+        ("ccby", "cc-by"),
+        ("cc0", "cc0"),
+        ("creativecommonsattributionnoncommercialnoderiv", "cc-by-nc-nd"),
+        ("creativecommonsattributionnoncommercialsharealike", "cc-by-nc-sa"),
+        ("creativecommonsattributionnoncommercial", "cc-by-nc"),
+        ("creativecommonsattributionnoderiv", "cc-by-nd"),
+        ("creativecommonsattributionsharealike", "cc-by-sa"),
+        ("creativecommonsattribution", "cc-by")
+    ]
+
+    for (lookup, license) in license_lookups:
+        if lookup in normalized_text:
+            return license
+    return "unknown"
 
 
 def save_extract_doaj_file():
