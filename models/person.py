@@ -24,6 +24,7 @@ from models.emailer import send
 from models.email import save_email
 from models.country import country_info
 from models.top_news import top_news_titles
+from models.log_temp_profile import add_new_log
 from util import elapsed
 from util import chunks
 from util import date_as_iso_utc
@@ -114,7 +115,7 @@ def get_full_twitter_profile(twitter_creds):
     return full_twitter_profile
 
 
-def make_temporary_person_from_orcid(orcid_id):
+def make_temporary_person_from_orcid(orcid_id, request=None):
     my_person = Person()
 
     my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
@@ -123,6 +124,10 @@ def make_temporary_person_from_orcid(orcid_id):
 
     my_person.orcid_id = orcid_id
     my_person.refresh()
+
+    print u"saving log_temp_profile for {}".format(my_person)
+    temp_profile_log = add_new_log(my_person, request)
+
     print u"finished make_temporary_person_from_orcid: made new person for {}".format(my_person)
     return my_person
 
@@ -1044,7 +1049,7 @@ class Person(db.Model):
         return None
 
     @property
-    def openness_proportion(self):
+    def percent_fulltext(self):
         if not self.all_products:
             return None
 
@@ -1060,7 +1065,7 @@ class Person(db.Model):
 
 
     def set_openness(self):
-        self.openness = self.openness_proportion
+        self.openness = self.percent_fulltext
         return self.openness
 
 
@@ -1385,7 +1390,7 @@ class Person(db.Model):
             "twitter": self.twitter,
             "depsy_id": self.depsy_id,
             "campaign": self.campaign,
-            "percent_fulltext": self.openness_proportion,
+            "percent_fulltext": self.percent_fulltext,
             "fresh_orcid": self.fresh_orcid,
             "num_posts": self.num_posts,
             "num_mentions": self.num_mentions,
