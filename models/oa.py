@@ -58,16 +58,19 @@ def is_oa_license(license_url):
 def is_open_via_doaj_issn(issns):
     if issns:
         for issn in issns:
-            if issn in doaj_issns:
-                # print "open: doaj issn match!"
-                return True
+            for (row_issn, row_license) in doaj_issns:
+                if issn == row_issn:
+                    # print "open: doaj issn match!"
+                    return find_normalized_license(row_license)
     return False
 
 def is_open_via_doaj_journal(journal_name):
     if journal_name:
-        if journal_name.encode('utf-8') in doaj_titles:
-            # print "open: doaj journal name match!"
-            return True
+        journal_name_encoded = journal_name.encode('utf-8')
+        for (row_journal_name, row_license) in doaj_titles:
+            if journal_name_encoded == row_journal_name:
+                # print "open: doaj journal name match!"
+                return find_normalized_license(row_license)
     return False
 
 def is_open_via_arxiv(arxiv):
@@ -878,8 +881,9 @@ datacite_doi_prefixes_string = """
 #     for row in doaj_rows:
 #         for column_name in ['Journal title', 'Alternative title']:
 #             journal_title = row[column_name]
+#             license = row['Journal license']
 #             if journal_title:
-#                 journal_titles.append(journal_title)
+#                 journal_titles.append((journal_title, license))
 #     return journal_titles
 #
 # def get_doaj_issns(doaj_rows):
@@ -887,8 +891,9 @@ datacite_doi_prefixes_string = """
 #     for row in doaj_rows:
 #         for issn_column_name in ['Journal ISSN (print version)', 'Journal EISSN (online version)']:
 #             issn = row[issn_column_name]
+#             license = row['Journal license']
 #             if issn:
-#                 issns.append(issn)
+#                 issns.append((issn, license))
 #     return issns
 #
 # from util import read_csv_file
@@ -899,6 +904,7 @@ datacite_doi_prefixes_string = """
 # doaj_issns = get_doaj_issns(doaj_rows)
 # with open("data/doaj_issns.json", "w") as fh:
 #     json.dump(doaj_issns, fh, indent=4)
+#
 #
 # doaj_titles = get_doaj_journal_titles(doaj_rows)
 # with open("data/doaj_titles.json", "w") as fh:
