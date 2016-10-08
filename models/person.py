@@ -593,11 +593,21 @@ class Person(db.Model):
         self.set_num_mentions()
         self.set_num_products()
 
-    # convenience method to call base again as a badge job,
+    # convenience method to call base again as a batch job,
     # for example after adding license-storing code
     def call_base_on_base1s(self):
         products_with_base1 = [p for p in self.all_products if p.open_step == "base 1"]
         self.call_base(products_with_base1)
+
+
+    # convenience method to call sherlock again as a batch job,
+    # for example after adding license-storing code
+    def call_sherlock_on_license_unknowns(self):
+        products_for_sherlock = []
+        for p in self.all_products:
+            if p.fulltext_url and (not p.license or p.license=="unknown"):
+                products_for_sherlock += [p]
+        self.call_sherlock(products_for_sherlock)
 
 
     def set_fulltext_urls(self):
@@ -635,13 +645,21 @@ class Person(db.Model):
         self.call_local_lookup_oa(products_for_lookup)
         print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
 
-        ### check base with everything that isn't yet open and has a title
+        ## check base with everything that isn't yet open and has a title
         products_for_base = [p for p in self.all_products if p.title and not p.has_fulltext_url]
         self.call_base(products_for_base)
         print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
 
         ### check sherlock with all base 2s and all not-yet-open dois
-        products_for_sherlock = set([p for p in self.all_products if not p.has_fulltext_url])
+        # and also all those where we don't know the license
+        products_for_sherlock = set()
+        for p in self.all_products:
+            if not p.has_fulltext_url:
+                products_for_sherlock.add(p)
+            if not p.license:
+                products_for_sherlock.add(p)
+            if p.license and p.license == "unknown":
+                products_for_sherlock.add(p)
         self.call_sherlock(list(products_for_sherlock))
         print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
 
@@ -656,7 +674,7 @@ class Person(db.Model):
     def call_local_lookup_oa(self, limit_to_products=None):
         start_time = time()
 
-        if limit_to_products:
+        if limit_to_products != None:
             products = limit_to_products
         else:
             products = self.products
@@ -670,6 +688,7 @@ class Person(db.Model):
         if not products:
             print "empty product list so not calling sherlock"
             return
+
         self.set_data_for_all_products("set_oa_from_sherlock", high_priority=True, include_products=products)
 
 

@@ -137,7 +137,11 @@ update_registry.register(Update(
 ))
 
 
-
+q = db.session.query(Person.id)
+update_registry.register(Update(
+    job=Person.call_sherlock_on_license_unknowns,
+    query=q
+))
 
 q = db.session.query(Person.id)
 # q = q.filter(Person.orcid_id.in_([
