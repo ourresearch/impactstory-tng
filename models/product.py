@@ -204,7 +204,9 @@ class Product(db.Model):
 
             self.sherlock_response = u"sherlock error: timeout on {}".format(host)
 
-            url = u"http://sherlockoa.org/articles"
+            url = u"http://sherlockoa.org/articles?set_license_even_if_not_oa=True"
+            # url = u"http://sherlockoa.org/articles"
+
             # print u"calling sherlock with", sherlock_request_list
             r = requests.post(url, json=sherlock_request_list)
             if r and r.status_code==200:
@@ -213,9 +215,8 @@ class Product(db.Model):
                 error_responses = [r for r in results if "error" in r]
                 if open_responses:
                     response = open_responses[0]
-                    print u"sherlock says it is open!", response["url"]
+                    # print u"sherlock says it is open!", response["url"]
                     self.fulltext_url = response["url"]
-                    self.license = response["license"]
                     self.open_step = "sherlock {}".format(response["host"])
                     self.sherlock_response = u"sherlock says: open {}".format(response["host"])
                 elif error_responses:
@@ -227,6 +228,13 @@ class Product(db.Model):
                 else:
                     # print u"sherlock says it is closed:", sherlock_request_list
                     self.sherlock_response = u"sherlock says: closed {}".format(host)
+
+                #if it is oa and sherlock found a license, set the license
+                if self.fulltext_url and results[0]["license"]:
+                    self.license = results[0]["license"]
+                    if self.license != "unknown":
+                        print u"sherlock found license {} on {}".format(self.license, sherlock_request_list)
+
 
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
