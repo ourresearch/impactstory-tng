@@ -184,6 +184,7 @@ class Product(db.Model):
 
 
     def set_oa_from_sherlock(self, high_priority=False):
+
         try:
             sherlock_request_list = []
             host = 0
@@ -191,13 +192,14 @@ class Product(db.Model):
                 host = "repo"
                 for repo_url in self.repo_urls["urls"]:
                     sherlock_request_list.append([repo_url, host])
-            elif self.doi:
+            elif self.url and (self.guess_genre == "article"):
                 host = "journal"
                 sherlock_request_list.append([self.url, host])
             elif self.url:
-                host = "journal"
+                host = "repo"
                 sherlock_request_list.append([self.url, host])
             else:
+                # print "not looking up", self.url
                 return  # shouldn't have been called
 
             self.sherlock_response = u"sherlock error: timeout on {}".format(host)
@@ -213,6 +215,7 @@ class Product(db.Model):
                     response = open_responses[0]
                     print u"sherlock says it is open!", response["url"]
                     self.fulltext_url = response["url"]
+                    self.license = response["license"]
                     self.open_step = "sherlock {}".format(response["host"])
                     self.sherlock_response = u"sherlock says: open {}".format(response["host"])
                 elif error_responses:
@@ -1090,6 +1093,7 @@ class Product(db.Model):
             "posts": self.posts,
             "events_last_week_count": self.events_last_week_count,
             "genre": self.guess_genre(),
+            "license": self.license,
             "is_open": self.has_fulltext_url,
             "has_fulltext_url": self.has_fulltext_url,
             "fulltext_url": self.fulltext_url
