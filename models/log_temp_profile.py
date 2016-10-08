@@ -37,7 +37,12 @@ class LogTempProfile(db.Model):
         self.created = datetime.datetime.utcnow()
 
         if request:
-            self.ip = request.remote_addr
+            # from http://stackoverflow.com/a/12771438/596939
+            if request.headers.getlist("X-Forwarded-For"):
+               self.ip = request.headers.getlist("X-Forwarded-For")[0]
+            else:
+               self.ip = request.remote_addr
+
             if request.referrer:
                 referrer_parsed = urlparse.urlparse(request.referrer)
                 source = urlparse.parse_qs(referrer_parsed.query).get("source", None)
