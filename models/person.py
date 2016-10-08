@@ -605,7 +605,7 @@ class Person(db.Model):
     def call_sherlock_on_license_unknowns(self):
         products_for_sherlock = []
         for p in self.all_products:
-            if p.fulltext_url and (not p.license or p.license=="unknown"):
+            if p.fulltext_url and not p.license:
                 products_for_sherlock += [p]
         self.call_sherlock(products_for_sherlock)
 
