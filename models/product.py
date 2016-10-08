@@ -181,10 +181,10 @@ class Product(db.Model):
         self.user_supplied_fulltext_url = url
         self.fulltext_url = url
         self.open_step = "user supplied fulltext url"
+        self.license = "unknown"
 
 
     def set_oa_from_sherlock(self, high_priority=False):
-
         try:
             sherlock_request_list = []
             host = 0
