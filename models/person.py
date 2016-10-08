@@ -284,11 +284,15 @@ class Person(db.Model):
     finished_wizard = db.Column(db.Boolean)
     saw_opencon_landing_page = db.Column(db.Boolean)
 
+    num_fulltext = db.Column(db.Integer)
+    num_any_oa = db.Column(db.Integer)
+    num_cc_by = db.Column(db.Integer)
+    num_cc_restricted = db.Column(db.Integer)
+    num_cc0_pd = db.Column(db.Integer)
+
     coauthors = db.Column(MutableDict.as_mutable(JSONB))
 
     error = db.Column(db.Text)
-
-
 
     products = db.relationship(
         'Product',
@@ -467,8 +471,32 @@ class Person(db.Model):
 
     def recalculate_openness(self):
         self.set_openness()
+        self.set_num_oa_licenses()
         self.assign_badges(limit_to_badges=["percent_fulltext"])
         self.set_badge_percentiles(limit_to_badges=["percent_fulltext"])
+
+    def set_num_oa_licenses(self):
+        self.num_fulltext = 0
+        self.num_any_oa = 0
+        self.num_cc_by = 0
+        self.num_cc_restricted = 0
+        self.num_cc0_pd = 0
+
+        for p in self.all_products:
+            if p.fulltext_url:
+                self.num_fulltext += 1
+
+            if p.fulltext_url and p.license:
+                if p.license != "unknown":
+                    self.num_any_oa += 1
+
+                if p.license == "cc-by":
+                    self.num_cc_by += 1
+                elif p.license == "cc0" or p.license == "pd":
+                    self.num_cc0_pd += 1
+                elif "cc-" in p.license:
+                    self.num_cc_restricted += 1
+
 
     def email_new_stuff(self):
         if not self.claimed_at:
@@ -553,9 +581,7 @@ class Person(db.Model):
     def calculate(self):
         # things with api calls in them, or things needed to make those calls
         start_time = time()
-        self.set_publisher()
-        self.set_openness()
-        self.set_fulltext_urls()
+        self.set_fulltext_urls()  # do after set publisher, which gets issns
         self.set_depsy()
         print u"finished api calling part of {method_name} on {num} products in {sec}s".format(
             method_name="calculate".upper(),
@@ -570,6 +596,8 @@ class Person(db.Model):
         self.set_num_posts()
         self.set_num_mentions()
         self.set_num_products()
+        self.set_openness()  # do after set_fulltext_urls
+        self.set_num_oa_licenses() # do after set_fulltext_urls
         self.set_event_counts()
         self.set_coauthors()  # do this last, uses scores
         print u"finished calculating part of {method_name} on {num} products in {sec}s".format(
@@ -1276,12 +1304,6 @@ class Person(db.Model):
     @property
     def full_name(self):
         return u"{} {}".format(self.given_names, self.family_name)
-
-
-    # temp convenience, to run on a person
-    def set_publisher(self):
-        for p in self.products:
-            p.set_publisher()
 
 
     @property

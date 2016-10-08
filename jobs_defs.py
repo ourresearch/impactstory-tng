@@ -144,6 +144,13 @@ update_registry.register(Update(
 ))
 
 q = db.session.query(Person.id)
+update_registry.register(Update(
+    job=Person.set_num_oa_licenses,
+    query=q
+))
+
+
+q = db.session.query(Person.id)
 # q = q.filter(Person.orcid_id.in_([
 #             "0000-0002-6133-2581",
 #             "0000-0002-0159-2197",
