@@ -2,8 +2,6 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict
 
 from models.country import country_info
-from models.country import get_name_from_iso
-from models.source import sources_metadata
 from models.scientist_stars import scientists_twitter
 
 from app import db
@@ -15,19 +13,14 @@ from util import as_proportion
 
 import datetime
 import shortuuid
-import re
 from textstat.textstat import textstat
-from collections import defaultdict
-import math
-from nameparser import HumanName
-from gender_detector import GenderDetector
+
 
 def get_badge_assigner(name):
     for assigner in all_badge_assigners():
         if assigner.__name__ == name:
             return assigner
     return dummy_badge_assigner
-
 
 def all_badge_assigner_names():
     return [assigner().name for assigner in all_badge_assigners()]
@@ -50,7 +43,6 @@ class Badge(db.Model):
     name = db.Column(db.Text)
     orcid_id = db.Column(db.Text, db.ForeignKey('person.orcid_id'))
     created = db.Column(db.DateTime)
-    level = db.Column(db.Float)
     value = db.Column(db.Float)
     percentile = db.Column(db.Float)
     support = db.Column(db.Text)
@@ -121,26 +113,22 @@ class Badge(db.Model):
     def display_in_the_top_percentile(self):
         if not self.percentile:
             return None
-
         ret = int(100 - self.percentile * 100)
         if ret == 100:
             ret = 99
         if ret < 1:
             ret = 1
-
         return ret
 
     @property
     def display_percentile(self):
         if not self.percentile:
             return None
-
         ret = int(self.percentile * 100)
         if ret == 100:
             ret = 99
         if ret < 1:
             ret = 1
-
         return ret
 
     # what the UI is currently expecting
@@ -260,32 +248,14 @@ class Badge(db.Model):
         return resp
 
 
-class BadgeLevel(object):
-    def __init__(self, level, threshold=None, custom_description=None):
-        self.level = level
-        self.threshold = threshold
-        self.custom_description = custom_description
-
-    def __repr__(self):
-        return u'<BadgeLevel level={level} (threshold={threshold})>'.format(
-            level=self.level,
-            threshold=self.threshold
-        )
-
-
 class BadgeAssigner(object):
     display_name = ""
-    level = 1
-    is_for_products = True
     group = None
     description = ""
     extra_description = None
     img_url = None
     video_url = None
     credit = None
-    next_level = None
-    levels = []
-    threshold = None
     value = None
     importance = 1
     context = None
@@ -299,47 +269,17 @@ class BadgeAssigner(object):
         self.candidate_badge = Badge(name=self.__class__.__name__)
         self.assigned = False
 
-    def get_threshold(self, level):
-        for my_level in self.levels:
-            if my_level.level == level:
-                return my_level.threshold
-        return None
-
     @property
     def name(self):
         return self.__class__.__name__
-
-    @property
-    def max_level(self):
-        if not self.levels:
-            return 1  # is a single level badge
-
-        ordered_levels_reversed = sorted(self.levels, key=lambda x: x.level, reverse=True)
-        resp = ordered_levels_reversed[0].level
-        return resp
 
     # override this in subclasses
     def decide_if_assigned(self, person):
         return None
 
-    def decide_if_assigned_with_levels(self, person):
-        ordered_levels_reversed = sorted(self.levels, key=lambda x: x.level, reverse=True)
-        for my_level in ordered_levels_reversed:
-            self.decide_if_assigned_threshold(person, my_level.threshold)
-            if self.assigned:
-                self.level = my_level.level
-                self.threshold = my_level.threshold
-                return
-        return None
-
     def get_badge_or_None(self, person):
-        if self.levels:
-            self.decide_if_assigned_with_levels(person)
-        else:
-            self.decide_if_assigned(person)
-
+        self.decide_if_assigned(person)
         if self.assigned:
-            self.candidate_badge.level = self.level
             return self.candidate_badge
         return None
 
@@ -348,7 +288,6 @@ class BadgeAssigner(object):
         resp = {
             "name": cls.__name__,
             "display_name": cls.display_name,
-            "is_for_products": cls.is_for_products,
             "group": cls.group,
             "description": cls.description,
         }
@@ -356,23 +295,19 @@ class BadgeAssigner(object):
 
 
 
-
 # for use when other things have been deleted
 class dummy_badge_assigner(BadgeAssigner):
     valid_badge = False
 
+
 class depsy(BadgeAssigner):
     display_name = "Software Reuse"
-    is_for_products = False
     group = "openness"
     description = u"Your research software keeps on giving.  Your software impact is in the top {value} percent of all research software creators on Depsy."
     importance = .6
-    levels = [
-        BadgeLevel(1, threshold=0.01),
-    ]
     context = ""
 
-    def decide_if_assigned_threshold(self, person, threshold):
+    def decide_if_assigned(self, person):
         if person.depsy_id and person.depsy_percentile:
             self.assigned = True
             self.candidate_badge.value = person.depsy_percentile * 100
@@ -384,18 +319,14 @@ class depsy(BadgeAssigner):
 
 class reading_level(BadgeAssigner):
     display_name = "All Readers Welcome"
-    is_for_products = True
     group = "openness"
     description = u"Your writing has a reading level that is easily understood at grade {value} and above, based on its abstracts and titles."
     importance = .5
-    levels = [
-        BadgeLevel(1, threshold=.01),
-    ]
     context = u"That's great &mdash; it helps lay people and practitioners use your research.  " \
               u"It also puts you in the top {percentile}% in readability."
     pad_percentiles_with_zeros = False
 
-    def decide_if_assigned_threshold(self, person, threshold):
+    def decide_if_assigned(self, person):
         reading_levels = {}
         for my_product in person.all_products:
             text = ""
@@ -426,64 +357,14 @@ class reading_level(BadgeAssigner):
 
 
 
-
-# class gender_balance(BadgeAssigner):
-#     display_name = "Gender Balance"
-#     is_for_products = False
-#     group = "engagement"
-#     description = u"Of the people who tweet about your research, {value}% are women and {one_hundred_minus_value}% are men."
-#     importance = .5
-#     levels = [
-#         BadgeLevel(1, threshold=.01),
-#     ]
-#     # context = u"The average gender balance in our database is 30% women, 70% men."
-#     context = u"That's a better balance than average &mdash; " \
-#               u"only {in_the_top_percentile}% of researchers in our database are tweeted by this high a proportion of women."
-#     pad_percentiles_with_zeros = False
-#
-#     # get the average gender balance using this sql
-#     # select avg(value) from badge, person
-#     # where badge.orcid_id = person.orcid_id
-#     # and person.campaign='2015_with_urls'
-#     # and name='gender_balance'
-#
-#
-#     def decide_if_assigned_threshold(self, person, threshold):
-#         self.candidate_badge.value = 0
-#         tweeter_names = person.get_tweeter_names(most_recent=100)
-#
-#         counts = defaultdict(int)
-#         detector = GenderDetector('us')
-#
-#         for name in tweeter_names:
-#             first_name = HumanName(name)["first"]
-#             if first_name:
-#                 try:
-#                     # print u"{} guessed as {}".format(first_name, detector.guess(first_name))
-#                     counts[detector.guess(first_name)] += 1
-#                 except KeyError:  # the detector throws this for some badly formed first names
-#                     pass
-#
-#         if counts["male"] > 1:
-#             ratio_female = counts["female"] / float(counts["male"] + counts["female"])
-#             if ratio_female > threshold:
-#                 print u"counts female={}, counts male={}, ratio={}".format(
-#                     counts["female"], counts["male"], ratio_female)
-#                 self.candidate_badge.value = ratio_female * 100
-#                 self.assigned = True
-
 class big_hit(BadgeAssigner):
     display_name = "Greatest Hit"
-    is_for_products = True
     group = "buzz"
     description = u"Your top publication has been saved and shared {value} times."
     importance = .5
-    levels = [
-        BadgeLevel(1, threshold=0),
-    ]
     context = u"Only {in_the_top_percentile}% of researchers get this much attention on a publication."
 
-    def decide_if_assigned_threshold(self, person, threshold):
+    def decide_if_assigned(self, person):
         self.candidate_badge.value = 0
         for my_product in person.products:
             if my_product.num_mentions > self.candidate_badge.value:
@@ -497,20 +378,17 @@ class big_hit(BadgeAssigner):
                     title=my_product.title
                 )
 
+
 class wiki_hit(BadgeAssigner):
     display_name = "Wikitastic"
-    is_for_products = False
     group = "engagement"
     description = u"Your research is mentioned in {value} Wikipedia articles!"
     importance = .9
-    levels = [
-        BadgeLevel(1, threshold=1),
-    ]
     context = u"Only {in_the_top_percentile}% of researchers are this highly cited in Wikipedia."
 
-    def decide_if_assigned_threshold(self, person, threshold):
+    def decide_if_assigned(self, person):
         num_wikipedia_posts = person.post_counts_by_source("wikipedia")
-        if num_wikipedia_posts >= threshold:
+        if num_wikipedia_posts >= 1:
             self.assigned = True
             self.candidate_badge.value = num_wikipedia_posts
 
@@ -521,71 +399,16 @@ class wiki_hit(BadgeAssigner):
             # print self.candidate_badge.support
 
 
-# inspired by https://github.com/ThinkUpLLC/ThinkUp/blob/db6fbdbcc133a4816da8e7cc622fd6f1ce534672/webapp/plugins/insightsgenerator/insights/followcountvisualizer.php
-# class impressions(BadgeAssigner):
-#     display_name = "Mass Exposure"
-#     is_for_products = False
-#     group = "engagement"
-#     description = u"Your research has appeared Twitter timelines {value} times."
-#     importance = .8
-#     img_url = "https://en.wikipedia.org/wiki/File:Avery_fisher_hall.jpg"
-#     credit = "Photo: Mikhail Klassen"
-#     levels = [
-#         BadgeLevel(1, threshold=1000),
-#     ]
-#     context = u"That's a lot of impressions! Only {in_the_top_percentile}% of scholars have such a large Twitter audience."
-#
-#     def decide_if_assigned_threshold(self, person, threshold):
-#         if person.impressions > threshold:
-#             self.assigned = True
-#             self.candidate_badge.value = person.impressions
-
-
-# class babel(BadgeAssigner):
-#     display_name = "Multilingual"
-#     level = 1
-#     is_for_products = False
-#     group = "engagement"
-#     description = u"People talk about your research in English &mdash; and {value} other languages!"
-#     # extra_description = "Due to issues with the Twitter API, we don't have language information for tweets yet."
-#     importance = .85
-#     levels = [
-#         BadgeLevel(1, threshold=1),
-#     ]
-#     context = u"Only {in_the_top_percentile}% of researchers have their work discussed in this many languages."
-#
-#     def decide_if_assigned_threshold(self, person, threshold):
-#         languages_with_examples = {}
-#
-#         for my_product in person.products_with_dois:
-#             languages_with_examples.update(my_product.languages_with_examples)
-#             if len(set(my_product.languages_with_examples.keys()) - set(["en"])) > 0:
-#                 self.candidate_badge.add_product(my_product)
-#
-#         if len(languages_with_examples) >= threshold:
-#             self.assigned = True
-#             self.candidate_badge.value = len(languages_with_examples)
-#             language_url_list = [u"<a href='{}'>{}</a>".format(url, lang)
-#                  for (lang, url) in languages_with_examples.iteritems()]
-#             self.candidate_badge.support = u"Your langauges include: {}".format(u", ".join(language_url_list))
-#             # print self.candidate_badge.support
-
-
-
 class global_reach(BadgeAssigner):
     display_name = "Global Reach"
-    is_for_products = False
     group = "engagement"
     description = u"Your research has been saved and shared in {value} countries."
     importance = .8
-    levels = [
-        BadgeLevel(1, threshold=1),
-    ]
     support_finale = " countries."
     context = u"That's high: only {in_the_top_percentile}% of researchers get that much international attention."
 
-    def decide_if_assigned_threshold(self, person, threshold):
-        if len(person.countries_using_mendeley) > threshold:
+    def decide_if_assigned(self, person):
+        if len(person.countries_using_mendeley) > 1:
             self.assigned = True
             self.candidate_badge.value = len(person.countries_using_mendeley)
             self.candidate_badge.support = u"Countries include: {}".format(", ".join(person.countries_using_mendeley))
@@ -593,23 +416,18 @@ class global_reach(BadgeAssigner):
 
 class megafan(BadgeAssigner):
     display_name = "Follower Frenzy"
-    level = 1
-    is_for_products = True
     group = "engagement"
     description = u"Someone with {value} followers has tweeted your research."
     importance = .2
-    levels = [
-        BadgeLevel(1, threshold=1000),
-    ]
     context = u"Only {in_the_top_percentile}% of scholars have been tweeted by someone with this many followers."
 
-    def decide_if_assigned_threshold(self, person, threshold):
+    def decide_if_assigned(self, person):
         biggest_fan = None
 
         self.candidate_badge.value = 0
         for my_product in person.products_with_dois:
             for fan_name, followers in my_product.twitter_posters_with_followers.iteritems():
-                if followers >= self.candidate_badge.value and followers > threshold:
+                if followers >= self.candidate_badge.value and followers > 1000:
                     self.assigned = True
                     self.candidate_badge.value = followers
                     self.candidate_badge.remove_all_products()  # clear them
@@ -620,20 +438,14 @@ class megafan(BadgeAssigner):
             fan=biggest_fan)
 
 
-
 class hot_streak(BadgeAssigner):
     display_name = "Hot Streak"
-    level = 1
-    is_for_products = False
     group = "buzz"
     description = u"People keep talking about your research. Someone has shared your research online every month for the last {value} months."
     importance = .5
-    levels = [
-        BadgeLevel(1, threshold=1),
-    ]
     context = u"That's a sharing streak matched by only {in_the_top_percentile}% of scholars."
 
-    def decide_if_assigned_threshold(self, person, threshold):
+    def decide_if_assigned(self, person):
         streak = True
         streak_length = 0
         all_event_days_ago = [days_ago(e) for e in person.get_event_dates()]
@@ -649,57 +461,14 @@ class hot_streak(BadgeAssigner):
             self.candidate_badge.value = streak_length
 
 
-
-# class deep_interest(BadgeAssigner):
-#     display_name = "Deep Engagement"
-#     level = 1
-#     is_for_products = True
-#     group = "engagement"
-#     description = u"People are engaging deeply with your research &mdash; they are writing {value} news and blog posts" \
-#                   u" for every 100 times they mention you on twitter and facebook."
-#     # extra_description = "Based on papers published since 2012 that have more than 10 relevant posts."
-#     importance = .4
-#     levels = [
-#         BadgeLevel(1, threshold=.05),
-#     ]
-#     context = u"Only {in_the_top_percentile}% of researchers have such a high ratio of long-form to short-form engagement."
-#     pad_percentiles_with_zeros = False
-#     show_in_ui = False
-#
-#     def decide_if_assigned_threshold(self, person, threshold):
-#         self.candidate_badge.value = 0
-#         for my_product in person.products_with_dois:
-#             longform_posts = 0.0
-#             shortform_posts = 0.0
-#
-#             if my_product.year_int > 2011:
-#                 longform_posts += my_product.post_counts_by_source("news")
-#                 longform_posts += my_product.post_counts_by_source("blogs")
-#                 shortform_posts += my_product.post_counts_by_source("twitter")
-#                 shortform_posts += my_product.post_counts_by_source("facebook")
-#
-#             if (shortform_posts > 0) and (longform_posts+shortform_posts > 10):
-#                 ratio = longform_posts / shortform_posts
-#                 # print u"deep-interest ratio: ", ratio
-#                 if ratio >= self.candidate_badge.value:
-#                     self.assigned = True
-#                     self.candidate_badge.value = ratio * 100
-#                     self.candidate_badge.remove_all_products()
-#                     self.candidate_badge.add_product(my_product)
-
 class clean_sweep(BadgeAssigner):
     display_name = "Clean Sweep"
-    level = 1
-    is_for_products = False
     group = "buzz"
     description = "Every one of your publications since 2012 has been saved and shared online."
     importance = .1
-    levels = [
-        BadgeLevel(1, threshold=0),
-    ]
     context = u"Fewer than a quarter of researchers show this kind of consistency."
 
-    def decide_if_assigned_threshold(self, person, threshold):
+    def decide_if_assigned(self, person):
         num_with_metrics = 0
         num_applicable = 0
         for my_product in person.products:
@@ -716,18 +485,12 @@ class clean_sweep(BadgeAssigner):
 
 class global_south(BadgeAssigner):
     display_name = "Global South"
-    level = 1
-    is_for_products = True
     group = "engagement"
     description = u"Of people who save and share your research, {value}% are in the Global South."
     importance = .4
-    levels = [
-        BadgeLevel(1, threshold=.001),
-    ]
     context = u"That's a high proportion: only {in_the_top_percentile}% of researchers publish work that inspires this level of engagement from the developing world."
 
-
-    def decide_if_assigned_threshold(self, person, threshold):
+    def decide_if_assigned(self, person):
         countries = set()
 
         total_geo_located_posts = 0.0
@@ -772,7 +535,6 @@ def proportion_poster_counts_by_type(person, poster_type):
 
 class open_science_triathlete(BadgeAssigner):
     display_name = "Open Science Triathlete"
-    is_for_products = True
     group = "openness"
     description = u"Congratulations, you hit the trifecta. You have an Open Access paper, open dataset, and open source software."
     importance = .5
@@ -788,22 +550,6 @@ class open_science_triathlete(BadgeAssigner):
         if (has_oa_paper and has_data and has_software):
             self.assigned = True
             self.candidate_badge.value = 1
-
-# OLD
-# class oa_advocate(BadgeAssigner):
-#     display_name = "Open Sesame"
-#     is_for_products = True
-#     group = "openness"
-#     description = u"You've published {value}% of your research in gold open access venues."
-#     context = u"This level of openness is matched by only {in_the_top_percentile}% of researchers."
-#     importance = .5
-#     show_in_ui = False
-#
-#     def decide_if_assigned(self, person):
-#         if person.percent_fulltext:  # the percent_fulltext takes into account having enough papers
-#             if person.percent_fulltext >= 0.25:
-#                 self.candidate_badge.value = person.percent_fulltext * 100
-#                 self.assigned = True
 
 
 class percent_fulltext(BadgeAssigner):
@@ -822,42 +568,10 @@ class percent_fulltext(BadgeAssigner):
 
 
 
-#############
-# FUN
-#############
 
-
-# class bff(BadgeAssigner):
-#     display_name = "BFF"
-#     is_for_products = False
-#     group = "fun"
-#     description = u"You have {value} <a href='https://en.wikipedia.org/wiki/Best_friends_forever'>BFFs</a>! {value} people have tweeted three or more of your papers."
-#     importance = .4
-#     context = ""
-#     show_in_ui = False
-#
-#     def decide_if_assigned(self, person):
-#         fan_counts = defaultdict(int)
-#         fans = set()
-#
-#         for my_product in person.products_with_dois:
-#             for fan_name in my_product.twitter_posters_with_followers:
-#                 fan_counts[fan_name] += 1
-#
-#         for fan_name, tweeted_papers_count in fan_counts.iteritems():
-#             if tweeted_papers_count >= 3:
-#                 self.assigned = True
-#                 fans.add(fan_name)
-#
-#         if self.assigned:
-#             self.candidate_badge.value = len(fans)
-#             fan_urls = [u"<a href='http://twitter.com/{fan}'>@{fan}</a>".format(fan=fan) for fan in fans]
-#             self.candidate_badge.support = u"BFFs include: {}".format(u",".join(fan_urls))
-#
 
 class rick_roll(BadgeAssigner):
     display_name = "Rickroll"
-    is_for_products = True
     group = "fun"
     description = u"""You have been tweeted by a person named Richard!
                   A recent study found this is correlated with a 19% boost in citations <a href='https://www.youtube.com/watch?v=dQw4w9WgXcQ'>[source]</a>."""
@@ -884,9 +598,9 @@ class rick_roll(BadgeAssigner):
         # if self.assigned:
         #     print "RICK!!!!", self.candidate_badge.support
 
+
 class big_in_japan(BadgeAssigner):
     display_name = "Big in Japan"
-    is_for_products = True
     group = "fun"
     description = u"Your work was saved or shared by someone in Japan!"
     video_url = "https://www.youtube.com/watch?v=tl6u2NASUzU"
@@ -902,9 +616,37 @@ class big_in_japan(BadgeAssigner):
                 self.candidate_badge.value = 1
 
 
+
+class famous_follower(BadgeAssigner):
+    display_name = "Kind of a Big Deal"
+    group = "fun"
+    description = u"""Cool! Your research has been tweeted by {value}
+                  scientists who are considered Big Deals on Twitter <a href='http://www.sciencemag.org/news/2014/09/top-50-science-stars-twitter'>[source]</a>."""
+    importance = 0.3
+    context = u"This isn't common: only {in_the_top_percentile}% of other researchers have been mentioned by these twitter stars."
+
+    def decide_if_assigned(self, person):
+        fans = set()
+        for my_product in person.products_with_dois:
+            for twitter_handle in my_product.twitter_posters_with_followers:
+                try:
+                    if twitter_handle.lower() in scientists_twitter:
+                        fans.add(twitter_handle)
+                        self.candidate_badge.add_product(my_product)
+                except AttributeError:
+                    pass
+
+        if len(fans) > 1:
+            self.assigned = True
+            self.candidate_badge.value = len(fans)
+            fan_urls = [u"<a href='http://twitter.com/{fan}'>@{fan}</a>".format(fan=fan) for fan in fans]
+            self.candidate_badge.support = u"The Big Deal Scientists who tweeted your research include: {}".format(u",".join(fan_urls))
+
+
+
+
 # class librarian(BadgeAssigner):
 #     display_name = "Librarian Love"
-#     is_for_products = False
 #     group = "engagement"
 #     description = u"Librarians love you: {value}% of your bookmarks come from librarians."
 #     importance = 0.3
@@ -922,7 +664,6 @@ class big_in_japan(BadgeAssigner):
 
 # class faculty(BadgeAssigner):
 #     display_name = "Faculty Fav"
-#     is_for_products = False
 #     group = "engagement"
 #     description = u"You are a faculty favorite: {value}% of your bookmarks come from faculty."
 #     importance = 0.3
@@ -940,7 +681,6 @@ class big_in_japan(BadgeAssigner):
 
 # class teaching(BadgeAssigner):
 #     display_name = "Teaching Goodness"
-#     is_for_products = False
 #     group = "engagement"
 #     description = u"Your research helps newbies get started: {value}% of your bookmarks come from undergrad and Master's students."
 #     importance = 0.4
@@ -960,7 +700,6 @@ class big_in_japan(BadgeAssigner):
 
 # class teaching_phd(BadgeAssigner):
 #     display_name = "Teaching Goodness"
-#     is_for_products = False
 #     group = "engagement"
 #     description = u"Your research helps newbies get started: {value}% of your bookmarks come from undergrad and graduate students."
 #     importance = 0.4
@@ -983,7 +722,6 @@ class big_in_japan(BadgeAssigner):
 
 # class interdisciplinarity(BadgeAssigner):
 #     display_name = "Interdisciplinary Delight"
-#     is_for_products = False
 #     group = "engagement"
 #     description = u"Your research is cross-over hit: people in {value} different fields have heavily bookmarked your papers."
 #     importance = 0.8
@@ -1007,56 +745,115 @@ class big_in_japan(BadgeAssigner):
 #                 ", ".join(sorted(disciplines_above_threshold)))
 
 
-# class controversial(BadgeAssigner):
-#     display_name = "Causing a Stir"
-#     is_for_products = True
+
+
+# class bff(BadgeAssigner):
+#     display_name = "BFF"
 #     group = "fun"
-#     description = u"Cool! An F1000 reviewer called your research Controversial!"
-#     importance = 0.2
+#     description = u"You have {value} <a href='https://en.wikipedia.org/wiki/Best_friends_forever'>BFFs</a>! {value} people have tweeted three or more of your papers."
+#     importance = .4
+#     context = ""
+#     show_in_ui = False
 #
 #     def decide_if_assigned(self, person):
-#         urls = []
+#         fan_counts = defaultdict(int)
+#         fans = set()
+#
 #         for my_product in person.products_with_dois:
-#             f1000_urls = my_product.f1000_urls_for_class("controversial")
-#             if f1000_urls:
+#             for fan_name in my_product.twitter_posters_with_followers:
+#                 fan_counts[fan_name] += 1
+#
+#         for fan_name, tweeted_papers_count in fan_counts.iteritems():
+#             if tweeted_papers_count >= 3:
 #                 self.assigned = True
-#                 self.candidate_badge.add_product(my_product)
-#                 urls += f1000_urls
+#                 fans.add(fan_name)
 #
 #         if self.assigned:
-#             self.candidate_badge.value = 1
-#             self.candidate_badge.support = u"The F1000 reviews include: {}.".format(
-#                 ", ".join(urls))
+#             self.candidate_badge.value = len(fans)
+#             fan_urls = [u"<a href='http://twitter.com/{fan}'>@{fan}</a>".format(fan=fan) for fan in fans]
+#             self.candidate_badge.support = u"BFFs include: {}".format(u",".join(fan_urls))
+#
+
+
+# inspired by https://github.com/ThinkUpLLC/ThinkUp/blob/db6fbdbcc133a4816da8e7cc622fd6f1ce534672/webapp/plugins/insightsgenerator/insights/followcountvisualizer.php
+# class impressions(BadgeAssigner):
+#     display_name = "Mass Exposure"
+#     group = "engagement"
+#     description = u"Your research has appeared Twitter timelines {value} times."
+#     importance = .8
+#     img_url = "https://en.wikipedia.org/wiki/File:Avery_fisher_hall.jpg"
+#     credit = "Photo: Mikhail Klassen"
+#     context = u"That's a lot of impressions! Only {in_the_top_percentile}% of scholars have such a large Twitter audience."
+#
+#     def decide_if_assigned(self, person):
+#         if person.impressions > 1000:
+#             self.assigned = True
+#             self.candidate_badge.value = person.impressions
+
+
+# class babel(BadgeAssigner):
+#     display_name = "Multilingual"
+#     group = "engagement"
+#     description = u"People talk about your research in English &mdash; and {value} other languages!"
+#     # extra_description = "Due to issues with the Twitter API, we don't have language information for tweets yet."
+#     importance = .85
+#     context = u"Only {in_the_top_percentile}% of researchers have their work discussed in this many languages."
+#
+#     def decide_if_assigned(self, person):
+#         languages_with_examples = {}
+#
+#         for my_product in person.products_with_dois:
+#             languages_with_examples.update(my_product.languages_with_examples)
+#             if len(set(my_product.languages_with_examples.keys()) - set(["en"])) > 0:
+#                 self.candidate_badge.add_product(my_product)
+#
+#         if len(languages_with_examples) >= 1:
+#             self.assigned = True
+#             self.candidate_badge.value = len(languages_with_examples)
+#             language_url_list = [u"<a href='{}'>{}</a>".format(url, lang)
+#                  for (lang, url) in languages_with_examples.iteritems()]
+#             self.candidate_badge.support = u"Your langauges include: {}".format(u", ".join(language_url_list))
 #             # print self.candidate_badge.support
 
 
-class famous_follower(BadgeAssigner):
-    display_name = "Kind of a Big Deal"
-    is_for_products = True
-    group = "fun"
-    description = u"""Cool! Your research has been tweeted by {value}
-                  scientists who are considered Big Deals on Twitter <a href='http://www.sciencemag.org/news/2014/09/top-50-science-stars-twitter'>[source]</a>."""
-    levels = [
-        BadgeLevel(1, threshold=1)
-    ]
-    importance = 0.3
-    context = u"This isn't common: only {in_the_top_percentile}% of other researchers have been mentioned by these twitter stars."
 
-    def decide_if_assigned_threshold(self, person, threshold):
-        fans = set()
-        for my_product in person.products_with_dois:
-            for twitter_handle in my_product.twitter_posters_with_followers:
-                try:
-                    if twitter_handle.lower() in scientists_twitter:
-                        fans.add(twitter_handle)
-                        self.candidate_badge.add_product(my_product)
-                except AttributeError:
-                    pass
-
-        if len(fans) > threshold:
-            self.assigned = True
-            self.candidate_badge.value = len(fans)
-            fan_urls = [u"<a href='http://twitter.com/{fan}'>@{fan}</a>".format(fan=fan) for fan in fans]
-            self.candidate_badge.support = u"The Big Deal Scientists who tweeted your research include: {}".format(u",".join(fan_urls))
-
-
+# class gender_balance(BadgeAssigner):
+#     display_name = "Gender Balance"
+#     group = "engagement"
+#     description = u"Of the people who tweet about your research, {value}% are women and {one_hundred_minus_value}% are men."
+#     importance = .5
+#     # context = u"The average gender balance in our database is 30% women, 70% men."
+#     context = u"That's a better balance than average &mdash; " \
+#               u"only {in_the_top_percentile}% of researchers in our database are tweeted by this high a proportion of women."
+#     pad_percentiles_with_zeros = False
+#
+#     # get the average gender balance using this sql
+#     # select avg(value) from badge, person
+#     # where badge.orcid_id = person.orcid_id
+#     # and person.campaign='2015_with_urls'
+#     # and name='gender_balance'
+#
+#
+#     def decide_if_assigned(self, person):
+#         self.candidate_badge.value = 0
+#         tweeter_names = person.get_tweeter_names(most_recent=100)
+#
+#         counts = defaultdict(int)
+#         detector = GenderDetector('us')
+#
+#         for name in tweeter_names:
+#             first_name = HumanName(name)["first"]
+#             if first_name:
+#                 try:
+#                     # print u"{} guessed as {}".format(first_name, detector.guess(first_name))
+#                     counts[detector.guess(first_name)] += 1
+#                 except KeyError:  # the detector throws this for some badly formed first names
+#                     pass
+#
+#         if counts["male"] > 1:
+#             ratio_female = counts["female"] / float(counts["male"] + counts["female"])
+#             if ratio_female > 0.01:
+#                 print u"counts female={}, counts male={}, ratio={}".format(
+#                     counts["female"], counts["male"], ratio_female)
+#                 self.candidate_badge.value = ratio_female * 100
+#                 self.assigned = True

@@ -1316,7 +1316,6 @@ class Person(db.Model):
 
             if candidate_badge:
                 if already_assigned_badge:
-                    already_assigned_badge.level = candidate_badge.level
                     already_assigned_badge.value = candidate_badge.value
                     already_assigned_badge.products = candidate_badge.products
                     already_assigned_badge.support = candidate_badge.support
