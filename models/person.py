@@ -62,6 +62,22 @@ from util import update_recursive_sum
 class PersonExistsException(Exception):
     pass
 
+def get_random_people(n, refset_only=False):
+    # this simpler way didn't work: func.setseed(0.42)
+    # below way is from https://github.com/khanduri/khanduri.github.io/blob/master/_posts/2016-02-26-fetch-rows-in-random-order-with-seed-support.md
+    sql = text('select setseed({0});'.format(0.42))
+    db.engine.execute(sql)
+
+    q = Person.query
+    if refset_only:
+        q = q.filter(Person.campaign == "2015_with_urls")
+
+    q = q.order_by(func.random())
+    q = q.limit(n)
+    people = q.all()
+    return people
+
+
 def delete_person(orcid_id):
     # also need delete all the badges, products
     product.Product.query.filter_by(orcid_id=orcid_id).delete()
@@ -314,6 +330,56 @@ class Person(db.Model):
     def __init__(self):
         self.invalid_orcid = False
 
+    @property
+    def percent_cc_by(self):
+        if not self.num_products:
+            return -1
+        if self.num_products <= 3:
+            return -1
+        if not self.num_cc_by:
+            return 0
+        return (float(self.num_cc_by)/self.num_products)
+
+    @property
+    def percent_oa(self):
+        if not self.num_products:
+            return -1
+        if self.num_products <= 3:
+            return -1
+        if not self.num_any_oa:
+            return 0
+        return (float(self.num_any_oa)/self.num_products)
+
+    @property
+    def percent_oa_of_fulltext(self):
+        if not self.num_fulltext:
+            return -1
+        if self.num_fulltext <= 3:
+            return -1
+        if not self.num_any_oa:
+            return 0
+        return (float(self.num_any_oa)/self.num_fulltext)
+
+    @property
+    def percent_cc_by_of_oa(self):
+
+        if not self.num_any_oa:
+            return -1
+        if self.num_any_oa <= 3:
+            return -1
+        if not self.num_any_oa:
+            return 0
+        return (float(self.num_cc_by)/self.num_any_oa)
+
+
+
+
+    @property
+    def impactstory_url(self):
+        if self.orcid_id:
+            return u"https://impactstory.org/u/{}".format(self.orcid_id)
+        else:
+            return None
 
     # doesn't have error handling; called by refresh when you want it to be robust
     def call_apis(self, high_priority=False, overwrite_orcid=True, overwrite_metrics=True):

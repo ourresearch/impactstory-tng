@@ -118,6 +118,12 @@
                            ng-show="product.fulltext_url">
                             [full text]
                         </a>
+                        <!--a class="val"
+                           target="_blank"
+                           href="{{ product.license }}"
+                           ng-show="product.license && product.license != 'unknown'">
+                            <img  width="80" ng-src="/static/img/licenses/{{ product.license }}.png">
+                        </a-->
                     </div>
 
                 </div>

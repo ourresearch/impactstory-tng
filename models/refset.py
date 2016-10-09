@@ -43,6 +43,7 @@ def num_people_in_refset():
     print u"refsize count", count
     return count
 
+
 def update_refsets():
     from models.person import Person
 
