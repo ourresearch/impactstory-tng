@@ -142,9 +142,10 @@ def find_normalized_license(text):
 
         ("creativecommons.org/publicdomain/zero", "cc0"),
         ("creativecommonszero", "cc0"),
-        ("cc0", "cc0"),
 
+        ("creativecommons.org/publicdomain/mark", "pd"),
         ("publicdomain", "pd"),
+
         ("openaccess", "oa")
     ]
 

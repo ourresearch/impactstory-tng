@@ -14,6 +14,7 @@ from models.person import refresh_person
 from models.person import delete_person
 from models.person import update_person
 from models.person import make_temporary_person_from_orcid
+from models.person import get_random_people
 from models.product import get_all_products
 from models.refset import num_people_in_db
 from models.badge import badge_configs
@@ -43,6 +44,7 @@ import os
 import sys
 import json
 import logging
+from operator import attrgetter
 from urlparse import parse_qs, parse_qsl
 from time import sleep
 from time import time
@@ -502,6 +504,50 @@ def get_twitter_request_token():
     r = requests.post(request_token_url, auth=oauth)
     oauth_token_dict = dict(parse_qsl(r.text))
     return jsonify(oauth_token_dict)
+
+
+##########
+# admin
+
+@app.route("/admin/random/<n>", methods=["GET"])
+def random_people(n):
+    people = get_random_people(n)
+    summary = [(p.impactstory_url, p.full_name) for p in people]
+    response = {"people": summary}
+    return jsonify(response)
+
+
+
+@app.route("/admin/badge-test/<badge_name>", methods=["GET"])
+def badge_test(badge_name):
+    people = get_random_people(250, refset_only=True)
+    people.sort(key=attrgetter(badge_name), reverse=False)
+
+    refset = [getattr(p, badge_name) for p in people]
+
+    percentiles = [0, .25, .5, .75, .9, .99]
+    indexes = [int(i * len(refset)) for i in percentiles]
+    people_summaries = [(p.impactstory_url, p.full_name, getattr(p, badge_name)) for p in people]
+    people_at_percentiles = [people_summaries[i] for i in indexes]
+    percentile_exemplars = zip(percentiles, people_at_percentiles)
+
+    people_above_90th = people_summaries[int(0.9*len(refset)):]
+
+    detailed_percentiles = [x * .01 for x in range(100)]
+    detailed_indexes = [int(i * len(refset)) for i in detailed_percentiles]
+    detailed_percentile_values = [refset[i] for i in detailed_indexes]
+    refset_response = []
+    for (percent, value) in zip(detailed_percentiles, detailed_percentile_values):
+        refset_response += [u"{}: {:.2f}".format(int(100*percent), value)]
+
+    response = {
+        "_badge_name": badge_name,
+        "_percentile_exemplars": percentile_exemplars,
+        "people_above_90th": people_above_90th,
+        "refset": refset_response
+    }
+
+    return jsonify(response)
 
 
 
