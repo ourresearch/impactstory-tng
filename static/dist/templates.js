@@ -388,17 +388,28 @@ angular.module("about-pages/search.tpl.html", []).run(["$templateCache", functio
 angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("auth/login.tpl.html",
     "<div class=\"page login-page\">\n" +
-    "    <h2>Log in</h2>\n" +
-    "    <div class=\"actions\">\n" +
-    "        <div class=\"btn btn-lg btn-default\"\n" +
-    "             ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
-    "            <i class=\"fa fa-twitter\"></i>\n" +
-    "            Log in with Twitter\n" +
+    "    <div class=\"login-container\">\n" +
+    "        <h2>\n" +
+    "            <a href=\"/\"><img src=\"static/img/impactstory-logo-sideways.png\" alt=\"\"></a>\n" +
+    "        </h2>\n" +
+    "        <div class=\"actions\">\n" +
+    "            <div class=\"btn btn-lg btn-default twitter\"\n" +
+    "                 ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                Log in with Twitter\n" +
+    "            </div>\n" +
+    "            <div class=\"btn btn-lg btn-default orcid\"\n" +
+    "                 ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
+    "                <img src=\"static/img/orcid-logo-white.png\" alt=\"\">\n" +
+    "                Log in with ORCID\n" +
+    "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"btn btn-lg btn-default\"\n" +
-    "             ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
-    "            Log in with ORCID\n" +
+    "        <div class=\"create-account\">\n" +
+    "            Don't have an account?\n" +
+    "            <a href=\"/\" ng-click=\"currentUser.twitterAuthenticate('register')\">Join for free</a>\n" +
+    "            with Twitter.\n" +
     "        </div>\n" +
+    "\n" +
     "    </div>\n" +
     "</div>");
 }]);

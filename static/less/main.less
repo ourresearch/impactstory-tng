@@ -23,26 +23,15 @@
 @silverBadge: #999;
 @bronzeBadge: #f29f51;
 
-// generated from http://tools.medialab.sciences-po.fr/iwanthue/
-//@engagement: #40B6FC;
-//@consistency: #16B223;
-//@geo: #8c6239;
-//@openness: #fb9d00;
-//@buzz: #16B223;
-//@fun: #F86AF8;
-
-
-// depsy colors
-//@engagement: #377eb8;
-//@openness: #fb9d00;
-//@buzz: #4daf4a;
-//@fun: #984ea3;
-
 // material design colors
 @engagement: #2196F3;
 @openness: #fb9d00;
 @buzz: #4CAF50;
 @fun: #9C27B0;
+
+// other handy colors:
+@twitterColor: #4099FF;
+@orcidColor: #A6CE39;
 
 
 
@@ -60,6 +49,10 @@ html {
     //@media @mobile {
     //  font-size: 12px;
     //}
+    &.template-auth-login {
+      background: #fafafa;
+    }
+
     .container-fluid {
       max-width: 993px;
     }
@@ -393,6 +386,83 @@ img.channel-icon {
 
 
 
+
+
+
+// LOGIN PAGE FOR THE LOGGING OF IN
+// ***********************************************************
+// ***********************************************************
+// ***********************************************************
+// ***********************************************************
+
+
+.page.login-page {
+  .login-container {
+    border: 1px solid #eee;
+    padding: 50px 100px 100px;
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 3px;
+
+    @media @mobile {
+      padding: 50px 10px 100px;
+    }
+
+    display: -webkit-flex;
+    -webkit-flex-direction: column;
+    -webkit-align-items: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      img {
+        width: 200px;
+        //.grayscale(.7);
+      }
+    }
+
+    .actions {
+      .btn {
+        margin: 10px 10px;
+        padding: 15px 30px;
+        font-size: 20px;
+        color: #fff;
+        border: none;
+        &.twitter {
+          background: @twitterColor;
+          &:hover {
+            background: darken(@twitterColor, 5%);
+          }
+          i {
+            font-size: 30px;
+            vertical-align: -3px;
+          }
+        }
+        &.orcid {
+          background: @orcidColor;
+          &:hover {
+            background: darken(@orcidColor, 5%);
+          }
+          img {
+            height: 30px;
+            vertical-align: -8px;
+            margin-right: 5px;
+          }
+        }
+      }
+    }
+    .create-account {
+      margin-top: 20px;
+    }
+
+  }
+}
 
 
 

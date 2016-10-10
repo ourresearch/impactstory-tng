@@ -10,6 +10,9 @@ html body {
   font-family: "Lato", sans-serif;
   height: auto;
 }
+html body.template-auth-login {
+  background: #fafafa;
+}
 html body .container-fluid {
   max-width: 993px;
 }
@@ -386,6 +389,64 @@ img.channel-icon.weibo {
 .landing.static-page .landing-footer .col.links a {
   margin: 0 15px 0 0;
   color: #999;
+}
+.page.login-page .login-container {
+  border: 1px solid #eee;
+  padding: 50px 100px 100px;
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 3px;
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+@media only screen and (max-width: 992px) {
+  .page.login-page .login-container {
+    padding: 50px 10px 100px;
+  }
+}
+.page.login-page .login-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.page.login-page .login-container h2 img {
+  width: 200px;
+}
+.page.login-page .login-container .actions .btn {
+  margin: 10px 10px;
+  padding: 15px 30px;
+  font-size: 20px;
+  color: #fff;
+  border: none;
+}
+.page.login-page .login-container .actions .btn.twitter {
+  background: #4099FF;
+}
+.page.login-page .login-container .actions .btn.twitter:hover {
+  background: #268bff;
+}
+.page.login-page .login-container .actions .btn.twitter i {
+  font-size: 30px;
+  vertical-align: -3px;
+}
+.page.login-page .login-container .actions .btn.orcid {
+  background: #A6CE39;
+}
+.page.login-page .login-container .actions .btn.orcid:hover {
+  background: #98be2f;
+}
+.page.login-page .login-container .actions .btn.orcid img {
+  height: 30px;
+  vertical-align: -8px;
+  margin-right: 5px;
+}
+.page.login-page .login-container .create-account {
+  margin-top: 20px;
 }
 div.page.person-incomplete.blank {
   height: 100vh;

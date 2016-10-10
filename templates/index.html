@@ -15,10 +15,10 @@
 </head>
 
 
-<body ng-cloak>
+<body ng-cloak class="template-{{ global.template }}">
 
     <!-- site header -->
-   <div class="ti-nav landing-page-{{ global.isLandingPage }}">
+   <div class="ti-nav landing-page-{{ global.isLandingPage }}" ng-hide="global.hideHeader">
       <h1>
          <a href="/">
             <img src="static/img/impactstory-logo-white.png" alt="Impactstory" ng-show="!global.isLandingPage">

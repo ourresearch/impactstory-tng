@@ -25,6 +25,7 @@ angular.module('auth', [
         console.log("LoginCtrl is running!")
         $scope.currentUser = CurrentUser
         $scope.global.showBottomStuff = false
+        $scope.global.hideHeader = true
 
 
 
