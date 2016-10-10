@@ -343,6 +343,7 @@ angular.module('app').controller('AppCtrl', function(
         $scope.global.loggingIn = false
         $scope.global.title = null
         $scope.global.isLandingPage = false
+        $scope.global.isFocusPage = false
         $location.search("source", null)
     })
 
@@ -597,6 +598,7 @@ angular.module('auth', [
         $scope.currentUser = CurrentUser
         $scope.global.showBottomStuff = false
         $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
 
 
 
@@ -608,11 +610,13 @@ angular.module('auth', [
     .controller("OauthCtrl", function($scope, $cookies, $routeParams, $location, $http, $mdToast, CurrentUser){
         $scope.global.showBottomStuff = false
         $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
+
 
         var requestObj = $location.search()
         if (_.isEmpty(requestObj)){
             console.log("we didn't get any codes or verifiers in the URL. aborting.")
-            //$location.url("/")
+            $location.url("/")
             return false
         }
 
@@ -2757,6 +2761,7 @@ angular.module("auth/oauth.tpl.html", []).run(["$templateCache", function($templ
     "            <img src=\"static/img/impactstory-logo-sideways.png\" alt=\"\">\n" +
     "        </h2>\n" +
     "        <div class=\"working\" ng-show=\"!error\">\n" +
+    "            <i class=\"fa fa-refresh fa-spin\"></i>\n" +
     "            Connecting with your\n" +
     "            <span class=\"identity-provider twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
     "                Twitter\n" +

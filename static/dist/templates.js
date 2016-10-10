@@ -423,6 +423,7 @@ angular.module("auth/oauth.tpl.html", []).run(["$templateCache", function($templ
     "            <img src=\"static/img/impactstory-logo-sideways.png\" alt=\"\">\n" +
     "        </h2>\n" +
     "        <div class=\"working\" ng-show=\"!error\">\n" +
+    "            <i class=\"fa fa-refresh fa-spin\"></i>\n" +
     "            Connecting with your\n" +
     "            <span class=\"identity-provider twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
     "                Twitter\n" +
