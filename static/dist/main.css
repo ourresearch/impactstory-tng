@@ -13,6 +13,9 @@ html body {
 html body.template-auth-login {
   background: #fafafa;
 }
+html body.is-focus-page-true {
+  background: #fafafa;
+}
 html body .container-fluid {
   max-width: 993px;
 }
@@ -481,6 +484,7 @@ img.channel-icon.weibo {
   justify-content: center;
   align-items: center;
   text-align: center;
+  font-size: 20px;
 }
 .page.oauth-page .focus-container h2 {
   text-align: center;

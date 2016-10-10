@@ -165,6 +165,7 @@ angular.module('app').controller('AppCtrl', function(
         $scope.global.loggingIn = false
         $scope.global.title = null
         $scope.global.isLandingPage = false
+        $scope.global.isFocusPage = false
         $location.search("source", null)
     })
 
