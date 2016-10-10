@@ -455,6 +455,40 @@ img.channel-icon.weibo {
 .page.login-page .login-container .create-account {
   margin-top: 20px;
 }
+.page.oauth-page {
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-align-items: center;
+  -webkit-justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.page.oauth-page .focus-container {
+  border: 1px solid #eee;
+  max-width: 800px;
+  background: #fff;
+  border-radius: 3px;
+  padding: 50px 100px 100px;
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-align-items: center;
+  -webkit-justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.page.oauth-page .focus-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.page.oauth-page .focus-container h2 img {
+  width: 200px;
+}
 div.page.person-incomplete.blank {
   height: 100vh;
 }
