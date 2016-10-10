@@ -26,7 +26,6 @@ angular.module('personPage', [
                             }
                         }
 
-                        $rootScope.setPersonIsLoading(true)
                         return Person.load(urlId)
                     }
                     else { // got a twitter name
@@ -71,7 +70,6 @@ angular.module('personPage', [
 
 
 
-        $scope.global.personIsLoading = false
         $scope.global.title = Person.d.given_names + " " + Person.d.family_name
         $scope.person = Person
         $scope.products = Person.d.products

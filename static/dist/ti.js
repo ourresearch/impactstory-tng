@@ -187,6 +187,7 @@ angular.module('app', [
     'ngResource',
     'ngSanitize',
     'ngMaterial',
+    'ngProgress',
 
     // this is how it accesses the cached templates in ti.js
     'templates.app',
@@ -340,7 +341,6 @@ angular.module('app').run(function($route,
     $rootScope.$on('$routeChangeError', function(event, current, previous, rejection){
         console.log("$routeChangeError! here's some things to look at: ", event, current, previous, rejection)
 
-        $rootScope.setPersonIsLoading(false)
         $location.url("page-not-found")
         window.scrollTo(0, 0)
     });
@@ -355,6 +355,7 @@ angular.module('app').run(function($route,
 
 
 angular.module('app').controller('AppCtrl', function(
+    ngProgressFactory,
     $rootScope,
     $scope,
     $route,
@@ -366,6 +367,11 @@ angular.module('app').controller('AppCtrl', function(
     $mdDialog,
     $auth, // todo remove
     $sce){
+
+    var progressBarInstance = ngProgressFactory.createInstance();
+
+    $rootScope.progressbar = progressBarInstance
+    $scope.progressbar = progressBarInstance
 
     $scope.auth = $auth  // todo remove
     $scope.currentUser = CurrentUser
@@ -379,9 +385,6 @@ angular.module('app').controller('AppCtrl', function(
 
     $scope.global = {}
 
-    $rootScope.setPersonIsLoading = function(isLoading){
-        $scope.global.personIsLoading = !!isLoading
-    }
 
 
     $scope.pageTitle = function(){
@@ -860,7 +863,6 @@ angular.module('personPage', [
                             }
                         }
 
-                        $rootScope.setPersonIsLoading(true)
                         return Person.load(urlId)
                     }
                     else { // got a twitter name
@@ -905,7 +907,6 @@ angular.module('personPage', [
 
 
 
-        $scope.global.personIsLoading = false
         $scope.global.title = Person.d.given_names + " " + Person.d.family_name
         $scope.person = Person
         $scope.products = Person.d.products
@@ -1864,7 +1865,7 @@ angular.module('person', [
 
 
 
-    .factory("Person", function($http, $q, $route, CurrentUser){
+    .factory("Person", function($http, $q, $route, $rootScope, CurrentUser){
 
         var data = {}
         var badgeSortLevel = {
@@ -1894,13 +1895,20 @@ angular.module('person', [
 
             var url = "/api/person/" + orcidId
             console.log("Person Service getting from server:", orcidId)
-            return $http.get(url).success(function(resp){
+            $rootScope.progressbar.start()
+            return $http.get(url)
+                .success(function(resp){
 
-                // clear the data object and put the new data in
-                for (var member in data) delete data[member];
-                overwriteData(resp)
+                    // clear the data object and put the new data in
+                    for (var member in data) delete data[member];
+                    overwriteData(resp)
+                    $rootScope.progressbar.complete()
 
-            })
+                })
+                .error(function(resp){
+                    $rootScope.progressbar.complete()
+
+                })
         }
 
         function overwriteData(newData){
