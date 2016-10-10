@@ -9,6 +9,7 @@ angular.module('app', [
     'ngResource',
     'ngSanitize',
     'ngMaterial',
+    'ngProgress',
 
     // this is how it accesses the cached templates in ti.js
     'templates.app',
@@ -162,7 +163,6 @@ angular.module('app').run(function($route,
     $rootScope.$on('$routeChangeError', function(event, current, previous, rejection){
         console.log("$routeChangeError! here's some things to look at: ", event, current, previous, rejection)
 
-        $rootScope.setPersonIsLoading(false)
         $location.url("page-not-found")
         window.scrollTo(0, 0)
     });
@@ -177,6 +177,7 @@ angular.module('app').run(function($route,
 
 
 angular.module('app').controller('AppCtrl', function(
+    ngProgressFactory,
     $rootScope,
     $scope,
     $route,
@@ -188,6 +189,11 @@ angular.module('app').controller('AppCtrl', function(
     $mdDialog,
     $auth, // todo remove
     $sce){
+
+    var progressBarInstance = ngProgressFactory.createInstance();
+
+    $rootScope.progressbar = progressBarInstance
+    $scope.progressbar = progressBarInstance
 
     $scope.auth = $auth  // todo remove
     $scope.currentUser = CurrentUser
@@ -201,9 +207,6 @@ angular.module('app').controller('AppCtrl', function(
 
     $scope.global = {}
 
-    $rootScope.setPersonIsLoading = function(isLoading){
-        $scope.global.personIsLoading = !!isLoading
-    }
 
 
     $scope.pageTitle = function(){
