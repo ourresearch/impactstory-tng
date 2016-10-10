@@ -24,6 +24,7 @@ angular.module('auth', [
     .controller("LoginCtrl", function($scope, CurrentUser, $location, $http){
         console.log("LoginCtrl is running!")
         $scope.currentUser = CurrentUser
+        $scope.global.showBottomStuff = false
 
 
 
@@ -43,6 +44,7 @@ angular.module('auth', [
         // set scope vars
         $scope.identityProvider = $routeParams.identityProvider
         $scope.intent = $routeParams.intent
+        $scope.global.showBottomStuff = false
 
 
 
