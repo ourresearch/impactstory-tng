@@ -397,24 +397,30 @@ img.channel-icon {
 
 
 .page.login-page {
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-align-items: center;
+  -webkit-justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
   .login-container {
     border: 1px solid #eee;
-    padding: 50px 100px 100px;
     max-width: 800px;
-    margin: 0 auto;
     background: #fff;
     border-radius: 3px;
-
-    @media @mobile {
-      padding: 50px 10px 100px;
-    }
+    padding: 50px 100px 100px;
 
     display: -webkit-flex;
     -webkit-flex-direction: column;
     -webkit-align-items: center;
-
+    -webkit-justify-content: center;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
     text-align: center;
 
