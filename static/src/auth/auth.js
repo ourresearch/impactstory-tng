@@ -24,6 +24,9 @@ angular.module('auth', [
     .controller("LoginCtrl", function($scope, CurrentUser, $location, $http){
         console.log("LoginCtrl is running!")
         $scope.currentUser = CurrentUser
+        $scope.global.showBottomStuff = false
+        $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
 
 
 
@@ -33,6 +36,11 @@ angular.module('auth', [
     })
 
     .controller("OauthCtrl", function($scope, $cookies, $routeParams, $location, $http, $mdToast, CurrentUser){
+        $scope.global.showBottomStuff = false
+        $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
+
+
         var requestObj = $location.search()
         if (_.isEmpty(requestObj)){
             console.log("we didn't get any codes or verifiers in the URL. aborting.")
@@ -43,6 +51,7 @@ angular.module('auth', [
         // set scope vars
         $scope.identityProvider = $routeParams.identityProvider
         $scope.intent = $routeParams.intent
+        $scope.global.showBottomStuff = false
 
 
 

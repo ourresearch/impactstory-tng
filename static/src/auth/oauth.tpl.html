@@ -1,56 +1,64 @@
 <div class="page oauth-page">
-    <div class="working" ng-show="!error">
-        Connecting with your
-        <span class="identity-provider twitter" ng-show="identityProvider=='twitter'">
-            Twitter
-        </span>
-        <span class="identity-provider orcid" ng-show="identityProvider=='orcid'">
-            Orcid
-        </span>
-        &hellip;
-    </div>
 
-
-    <div ng-show="error">
-
-        <div class="orcid" ng-show="identityProvider=='orcid'">
-            <div class="msg">
-                <i class="fa fa-exclamation-triangle"></i>
-                We couldn't log you in because we don't have your ORCID account
-                (<a href="https://orcid.org/{{ identityProviderId }}">{{ identityProviderId }}</a>)
-                on record.
-            </div>
-
-            <div class="btn btn-default"
-                 ng-click="currentUser.twitterAuthenticate('login')">
-                <i class="fa fa-twitter"></i>
-                Log in with Twitter instead
-            </div>
+    <div class="focus-container">
+        <h2>
+            <img src="static/img/impactstory-logo-sideways.png" alt="">
+        </h2>
+        <div class="working" ng-show="!error">
+            <i class="fa fa-refresh fa-spin"></i>
+            Connecting with your
+            <span class="identity-provider twitter" ng-show="identityProvider=='twitter'">
+                Twitter
+            </span>
+            <span class="identity-provider orcid" ng-show="identityProvider=='orcid'">
+                Orcid
+            </span>
+            &hellip;
         </div>
 
-        <div class="twitter" ng-show="identityProvider=='twitter'">
-            <div class="msg">
-                <i class="fa fa-exclamation-triangle"></i>
-                We couldn't log you in because but we don't have your Twitter account
-                (<a href="https://twitter.com/{{ identityProviderId }}">@{{ identityProviderId }}</a>)
-                on record.
-            </div>
 
-            <div class="buttons">
+        <div ng-show="error">
+
+            <div class="orcid" ng-show="identityProvider=='orcid'">
+                <div class="msg">
+                    <i class="fa fa-exclamation-triangle"></i>
+                    We couldn't log you in because we don't have your ORCID account
+                    (<a href="https://orcid.org/{{ identityProviderId }}">{{ identityProviderId }}</a>)
+                    on record.
+                </div>
+
                 <div class="btn btn-default"
-                     ng-click="currentUser.twitterAuthenticate('register')">
+                     ng-click="currentUser.twitterAuthenticate('login')">
                     <i class="fa fa-twitter"></i>
-                    Create a new profile as @{{ identityProviderId }}
-                </div>
-
-                <div class="btn btn-default"
-                    ng-click="currentUser.orcidAuthenticate('login', true)">
-                    Log in with ORCID instead
+                    Log in with Twitter instead
                 </div>
             </div>
-        </div>
 
+            <div class="twitter" ng-show="identityProvider=='twitter'">
+                <div class="msg">
+                    <i class="fa fa-exclamation-triangle"></i>
+                    We couldn't log you in because but we don't have your Twitter account
+                    (<a href="https://twitter.com/{{ identityProviderId }}">@{{ identityProviderId }}</a>)
+                    on record.
+                </div>
+
+                <div class="buttons">
+                    <div class="btn btn-default"
+                         ng-click="currentUser.twitterAuthenticate('register')">
+                        <i class="fa fa-twitter"></i>
+                        Create a new profile as @{{ identityProviderId }}
+                    </div>
+
+                    <div class="btn btn-default"
+                        ng-click="currentUser.orcidAuthenticate('login', true)">
+                        Log in with ORCID instead
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
+
 
 
 

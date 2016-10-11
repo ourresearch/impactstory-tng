@@ -3,7 +3,7 @@ angular.module('person', [
 
 
 
-    .factory("Person", function($http, $q, $route, CurrentUser){
+    .factory("Person", function($http, $q, $route, $rootScope, CurrentUser){
 
         var data = {}
         var badgeSortLevel = {
@@ -33,13 +33,20 @@ angular.module('person', [
 
             var url = "/api/person/" + orcidId
             console.log("Person Service getting from server:", orcidId)
-            return $http.get(url).success(function(resp){
+            $rootScope.progressbar.start()
+            return $http.get(url)
+                .success(function(resp){
 
-                // clear the data object and put the new data in
-                for (var member in data) delete data[member];
-                overwriteData(resp)
+                    // clear the data object and put the new data in
+                    for (var member in data) delete data[member];
+                    overwriteData(resp)
+                    $rootScope.progressbar.complete()
 
-            })
+                })
+                .error(function(resp){
+                    $rootScope.progressbar.complete()
+
+                })
         }
 
         function overwriteData(newData){
