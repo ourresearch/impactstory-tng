@@ -109,6 +109,7 @@ with open("data/doaj_titles.json", "r") as fh:
 # from models import refset
 # from models import email
 # from models import log_temp_profile
+# from models import log_openness
 #
 # db.create_all()
 # commit_success = safe_commit(db)

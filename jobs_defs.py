@@ -145,6 +145,12 @@ update_registry.register(Update(
 
 q = db.session.query(Person.id)
 update_registry.register(Update(
+    job=Person.run_log_openness,
+    query=q
+))
+
+q = db.session.query(Person.id)
+update_registry.register(Update(
     job=Person.set_num_oa_licenses,
     query=q
 ))
