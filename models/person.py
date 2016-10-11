@@ -22,6 +22,7 @@ from models.source import Source
 from models.refset import Refset
 from models.emailer import send
 from models.log_email import save_email
+from models.log_openness import save_openness_log
 from models.country import country_info
 from models.top_news import top_news_titles
 from models.log_temp_profile import add_new_log
@@ -612,6 +613,10 @@ class Person(db.Model):
         send(self.email, "Your research is getting new attention online", "notification", {"profile": details_dict}, for_real=True)
         # send(self.email, "Your research is getting new attention online", "notification", {"profile": details_dict}, for_real=False)
         save_email(self.orcid_id, new_event_counts)
+
+
+    def run_log_openness(self):
+        save_openness_log(self)
 
 
     ## used to fix people's pictures if they have updated them on twitter
