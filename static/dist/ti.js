@@ -187,6 +187,7 @@ angular.module('app', [
     'ngResource',
     'ngSanitize',
     'ngMaterial',
+    'ngProgress',
 
     // this is how it accesses the cached templates in ti.js
     'templates.app',
@@ -267,68 +268,6 @@ angular.module('app').run(function($route,
     })
 
 
-    //
-    //$rootScope.sendCurrentUserToIntercom = function(){
-    //    // needs refactoring!
-    //
-    //    // return false here if the user is not logged in
-    //
-    //    // no idea if this will still work with CurrentUser approach
-    //    $http.get("api/person/" + CurrentUser.d.orcid_id)
-    //        .success(function(resp){
-    //            $rootScope.sendToIntercom(resp)
-    //            console.log("sending current user to intercom")
-    //        })
-    //}
-    //
-    //$rootScope.sendToIntercom = function(personResp){
-    //    var resp = personResp
-    //    var percentOA = resp.percent_fulltext
-    //    if (percentOA === null) {
-    //        percentOA = undefined
-    //    }
-    //    else {
-    //        percentOA * 100
-    //    }
-    //
-    //    var intercomInfo = {
-    //        // basic user metadata
-    //        app_id: "z93rnxrs",
-    //        name: resp._full_name,
-    //        user_id: resp.orcid_id, // orcid ID
-    //        claimed_at: moment(resp.claimed_at).unix(),
-    //        email: resp.email,
-    //
-    //        // user stuff for analytics
-    //        percent_oa: percentOA,
-    //        num_posts: resp.num_posts,
-    //        num_mentions: resp.num_mentions,
-    //        num_products: resp.products.length,
-    //        num_badges: resp.badges.length,
-    //        num_twitter_followers: resp.num_twitter_followers,
-    //        campaign: resp.campaign,
-    //        fresh_orcid: resp.fresh_orcid,
-    //
-    //        // we don't send person responses for deleted users (just 404s).
-    //        // so if we have a person response, this user isn't deleted.
-    //        // useful for when users deleted profile, then re-created later.
-    //        is_deleted: false
-    //
-    //    }
-    //
-    //    // this it temporary till we do the twitter-based signup
-    //    if ($cookies.get("sawOpenconLandingPage")) {
-    //        intercomInfo.saw_opencon_landing_page = true
-    //    }
-    //
-    //
-    //    console.log("sending to intercom", intercomInfo)
-    //
-    //    window.Intercom("boot", intercomInfo)
-    //}
-    //
-    //$rootScope.sendCurrentUserToIntercom()
-    
 
 
 
@@ -340,7 +279,6 @@ angular.module('app').run(function($route,
     $rootScope.$on('$routeChangeError', function(event, current, previous, rejection){
         console.log("$routeChangeError! here's some things to look at: ", event, current, previous, rejection)
 
-        $rootScope.setPersonIsLoading(false)
         $location.url("page-not-found")
         window.scrollTo(0, 0)
     });
@@ -355,6 +293,7 @@ angular.module('app').run(function($route,
 
 
 angular.module('app').controller('AppCtrl', function(
+    ngProgressFactory,
     $rootScope,
     $scope,
     $route,
@@ -366,6 +305,11 @@ angular.module('app').controller('AppCtrl', function(
     $mdDialog,
     $auth, // todo remove
     $sce){
+
+    var progressBarInstance = ngProgressFactory.createInstance();
+
+    $rootScope.progressbar = progressBarInstance
+    $scope.progressbar = progressBarInstance
 
     $scope.auth = $auth  // todo remove
     $scope.currentUser = CurrentUser
@@ -379,9 +323,6 @@ angular.module('app').controller('AppCtrl', function(
 
     $scope.global = {}
 
-    $rootScope.setPersonIsLoading = function(isLoading){
-        $scope.global.personIsLoading = !!isLoading
-    }
 
 
     $scope.pageTitle = function(){
@@ -394,9 +335,15 @@ angular.module('app').controller('AppCtrl', function(
 
     $rootScope.$on('$routeChangeSuccess', function(next, current){
         $scope.global.showBottomStuff = true
+        $scope.global.hideHeader = false
+
+        $scope.global.template = current.loadedTemplateUrl
+            .replace("/", "-")
+            .replace(".tpl.html", "")
         $scope.global.loggingIn = false
         $scope.global.title = null
         $scope.global.isLandingPage = false
+        $scope.global.isFocusPage = false
         $location.search("source", null)
     })
 
@@ -649,6 +596,9 @@ angular.module('auth', [
     .controller("LoginCtrl", function($scope, CurrentUser, $location, $http){
         console.log("LoginCtrl is running!")
         $scope.currentUser = CurrentUser
+        $scope.global.showBottomStuff = false
+        $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
 
 
 
@@ -658,6 +608,11 @@ angular.module('auth', [
     })
 
     .controller("OauthCtrl", function($scope, $cookies, $routeParams, $location, $http, $mdToast, CurrentUser){
+        $scope.global.showBottomStuff = false
+        $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
+
+
         var requestObj = $location.search()
         if (_.isEmpty(requestObj)){
             console.log("we didn't get any codes or verifiers in the URL. aborting.")
@@ -668,6 +623,7 @@ angular.module('auth', [
         // set scope vars
         $scope.identityProvider = $routeParams.identityProvider
         $scope.intent = $routeParams.intent
+        $scope.global.showBottomStuff = false
 
 
 
@@ -860,7 +816,6 @@ angular.module('personPage', [
                             }
                         }
 
-                        $rootScope.setPersonIsLoading(true)
                         return Person.load(urlId)
                     }
                     else { // got a twitter name
@@ -905,7 +860,6 @@ angular.module('personPage', [
 
 
 
-        $scope.global.personIsLoading = false
         $scope.global.title = Person.d.given_names + " " + Person.d.family_name
         $scope.person = Person
         $scope.products = Person.d.products
@@ -1473,6 +1427,7 @@ angular.module('currentUser', [
 
     .factory("CurrentUser", function($auth,
                                      $http,
+                                     $rootScope,
                                      $q,
                                      $route,
                                      $location,
@@ -1519,6 +1474,9 @@ angular.module('currentUser', [
 
             // first ask our server to get the OAuth token that we use to create the
             // twitter URL that we will redirect the user too.
+
+            $rootScope.progressbar.start() // it will take some time
+
             var baseUrlToGetOauthTokenFromOurServer = "/api/auth/twitter/request-token?redirectUri=";
             var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
             $http.get(baseUrlToGetOauthTokenFromOurServer + redirectUri).success(
@@ -1864,7 +1822,7 @@ angular.module('person', [
 
 
 
-    .factory("Person", function($http, $q, $route, CurrentUser){
+    .factory("Person", function($http, $q, $route, $rootScope, CurrentUser){
 
         var data = {}
         var badgeSortLevel = {
@@ -1894,13 +1852,20 @@ angular.module('person', [
 
             var url = "/api/person/" + orcidId
             console.log("Person Service getting from server:", orcidId)
-            return $http.get(url).success(function(resp){
+            $rootScope.progressbar.start()
+            return $http.get(url)
+                .success(function(resp){
 
-                // clear the data object and put the new data in
-                for (var member in data) delete data[member];
-                overwriteData(resp)
+                    // clear the data object and put the new data in
+                    for (var member in data) delete data[member];
+                    overwriteData(resp)
+                    $rootScope.progressbar.complete()
 
-            })
+                })
+                .error(function(resp){
+                    $rootScope.progressbar.complete()
+
+                })
         }
 
         function overwriteData(newData){
@@ -2761,17 +2726,28 @@ angular.module("about-pages/search.tpl.html", []).run(["$templateCache", functio
 angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("auth/login.tpl.html",
     "<div class=\"page login-page\">\n" +
-    "    <h2>Log in</h2>\n" +
-    "    <div class=\"actions\">\n" +
-    "        <div class=\"btn btn-lg btn-default\"\n" +
-    "             ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
-    "            <i class=\"fa fa-twitter\"></i>\n" +
-    "            Log in with Twitter\n" +
+    "    <div class=\"login-container\">\n" +
+    "        <h2>\n" +
+    "            <a href=\"/\"><img src=\"static/img/impactstory-logo-sideways.png\" alt=\"\"></a>\n" +
+    "        </h2>\n" +
+    "        <div class=\"actions\">\n" +
+    "            <div class=\"btn btn-lg btn-default twitter\"\n" +
+    "                 ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                Log in with Twitter\n" +
+    "            </div>\n" +
+    "            <div class=\"btn btn-lg btn-default orcid\"\n" +
+    "                 ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
+    "                <img src=\"static/img/orcid-logo-white.png\" alt=\"\">\n" +
+    "                Log in with ORCID\n" +
+    "            </div>\n" +
     "        </div>\n" +
-    "        <div class=\"btn btn-lg btn-default\"\n" +
-    "             ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
-    "            Log in with ORCID\n" +
+    "        <div class=\"create-account\">\n" +
+    "            Don't have an account?\n" +
+    "            <a href=\"/\" ng-click=\"currentUser.twitterAuthenticate('register')\">Join for free</a>\n" +
+    "            with Twitter.\n" +
     "        </div>\n" +
+    "\n" +
     "    </div>\n" +
     "</div>");
 }]);
@@ -2779,58 +2755,66 @@ angular.module("auth/login.tpl.html", []).run(["$templateCache", function($templ
 angular.module("auth/oauth.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("auth/oauth.tpl.html",
     "<div class=\"page oauth-page\">\n" +
-    "    <div class=\"working\" ng-show=\"!error\">\n" +
-    "        Connecting with your\n" +
-    "        <span class=\"identity-provider twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
-    "            Twitter\n" +
-    "        </span>\n" +
-    "        <span class=\"identity-provider orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
-    "            Orcid\n" +
-    "        </span>\n" +
-    "        &hellip;\n" +
-    "    </div>\n" +
     "\n" +
-    "\n" +
-    "    <div ng-show=\"error\">\n" +
-    "\n" +
-    "        <div class=\"orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
-    "            <div class=\"msg\">\n" +
-    "                <i class=\"fa fa-exclamation-triangle\"></i>\n" +
-    "                We couldn't log you in because we don't have your ORCID account\n" +
-    "                (<a href=\"https://orcid.org/{{ identityProviderId }}\">{{ identityProviderId }}</a>)\n" +
-    "                on record.\n" +
-    "            </div>\n" +
-    "\n" +
-    "            <div class=\"btn btn-default\"\n" +
-    "                 ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
-    "                <i class=\"fa fa-twitter\"></i>\n" +
-    "                Log in with Twitter instead\n" +
-    "            </div>\n" +
+    "    <div class=\"focus-container\">\n" +
+    "        <h2>\n" +
+    "            <img src=\"static/img/impactstory-logo-sideways.png\" alt=\"\">\n" +
+    "        </h2>\n" +
+    "        <div class=\"working\" ng-show=\"!error\">\n" +
+    "            <i class=\"fa fa-refresh fa-spin\"></i>\n" +
+    "            Connecting with your\n" +
+    "            <span class=\"identity-provider twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
+    "                Twitter\n" +
+    "            </span>\n" +
+    "            <span class=\"identity-provider orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
+    "                Orcid\n" +
+    "            </span>\n" +
+    "            &hellip;\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
-    "            <div class=\"msg\">\n" +
-    "                <i class=\"fa fa-exclamation-triangle\"></i>\n" +
-    "                We couldn't log you in because but we don't have your Twitter account\n" +
-    "                (<a href=\"https://twitter.com/{{ identityProviderId }}\">@{{ identityProviderId }}</a>)\n" +
-    "                on record.\n" +
-    "            </div>\n" +
     "\n" +
-    "            <div class=\"buttons\">\n" +
+    "        <div ng-show=\"error\">\n" +
+    "\n" +
+    "            <div class=\"orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
+    "                <div class=\"msg\">\n" +
+    "                    <i class=\"fa fa-exclamation-triangle\"></i>\n" +
+    "                    We couldn't log you in because we don't have your ORCID account\n" +
+    "                    (<a href=\"https://orcid.org/{{ identityProviderId }}\">{{ identityProviderId }}</a>)\n" +
+    "                    on record.\n" +
+    "                </div>\n" +
+    "\n" +
     "                <div class=\"btn btn-default\"\n" +
-    "                     ng-click=\"currentUser.twitterAuthenticate('register')\">\n" +
+    "                     ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
     "                    <i class=\"fa fa-twitter\"></i>\n" +
-    "                    Create a new profile as @{{ identityProviderId }}\n" +
-    "                </div>\n" +
-    "\n" +
-    "                <div class=\"btn btn-default\"\n" +
-    "                    ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
-    "                    Log in with ORCID instead\n" +
+    "                    Log in with Twitter instead\n" +
     "                </div>\n" +
     "            </div>\n" +
-    "        </div>\n" +
     "\n" +
+    "            <div class=\"twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
+    "                <div class=\"msg\">\n" +
+    "                    <i class=\"fa fa-exclamation-triangle\"></i>\n" +
+    "                    We couldn't log you in because but we don't have your Twitter account\n" +
+    "                    (<a href=\"https://twitter.com/{{ identityProviderId }}\">@{{ identityProviderId }}</a>)\n" +
+    "                    on record.\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"buttons\">\n" +
+    "                    <div class=\"btn btn-default\"\n" +
+    "                         ng-click=\"currentUser.twitterAuthenticate('register')\">\n" +
+    "                        <i class=\"fa fa-twitter\"></i>\n" +
+    "                        Create a new profile as @{{ identityProviderId }}\n" +
+    "                    </div>\n" +
+    "\n" +
+    "                    <div class=\"btn btn-default\"\n" +
+    "                        ng-click=\"currentUser.orcidAuthenticate('login', true)\">\n" +
+    "                        Log in with ORCID instead\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "\n" +
+    "        </div>\n" +
     "    </div>\n" +
+    "\n" +
     "\n" +
     "\n" +
     "\n" +

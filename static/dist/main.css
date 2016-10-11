@@ -10,6 +10,12 @@ html body {
   font-family: "Lato", sans-serif;
   height: auto;
 }
+html body.template-auth-login {
+  background: #fafafa;
+}
+html body.is-focus-page-true {
+  background: #fafafa;
+}
 html body .container-fluid {
   max-width: 993px;
 }
@@ -386,6 +392,106 @@ img.channel-icon.weibo {
 .landing.static-page .landing-footer .col.links a {
   margin: 0 15px 0 0;
   color: #999;
+}
+.page.login-page {
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-align-items: center;
+  -webkit-justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.page.login-page .login-container {
+  border: 1px solid #eee;
+  max-width: 800px;
+  background: #fff;
+  border-radius: 3px;
+  padding: 50px 100px 100px;
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-align-items: center;
+  -webkit-justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.page.login-page .login-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.page.login-page .login-container h2 img {
+  width: 200px;
+}
+.page.login-page .login-container .actions .btn {
+  margin: 10px 10px;
+  padding: 15px 30px;
+  font-size: 20px;
+  color: #fff;
+  border: none;
+}
+.page.login-page .login-container .actions .btn.twitter {
+  background: #4099FF;
+}
+.page.login-page .login-container .actions .btn.twitter:hover {
+  background: #268bff;
+}
+.page.login-page .login-container .actions .btn.twitter i {
+  font-size: 30px;
+  vertical-align: -3px;
+}
+.page.login-page .login-container .actions .btn.orcid {
+  background: #A6CE39;
+}
+.page.login-page .login-container .actions .btn.orcid:hover {
+  background: #98be2f;
+}
+.page.login-page .login-container .actions .btn.orcid img {
+  height: 30px;
+  vertical-align: -8px;
+  margin-right: 5px;
+}
+.page.login-page .login-container .create-account {
+  margin-top: 20px;
+}
+.page.oauth-page {
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-align-items: center;
+  -webkit-justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.page.oauth-page .focus-container {
+  border: 1px solid #eee;
+  max-width: 800px;
+  background: #fff;
+  border-radius: 3px;
+  padding: 50px 100px 100px;
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-align-items: center;
+  -webkit-justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 20px;
+}
+.page.oauth-page .focus-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.page.oauth-page .focus-container h2 img {
+  width: 200px;
 }
 div.page.person-incomplete.blank {
   height: 100vh;
@@ -1645,6 +1751,32 @@ div.page.settings-page div.setting-panel div.second-q h4 {
 .page.products-sample .product .id {
   font-size: 14px;
   color: #999;
+}
+#ngProgress {
+  margin: 0;
+  padding: 0;
+  z-index: 99998;
+  background-color: green;
+  color: green;
+  box-shadow: 0 0 10px 0;
+  /* Inherits the font color */
+  height: 2px;
+  opacity: 0;
+  /* Add CSS3 styles for transition smoothing */
+  -webkit-transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  -o-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+}
+/* Styling for the ngProgress-container */
+#ngProgress-container {
+  position: fixed;
+  margin: 0;
+  padding: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
 }
 md-dialog {
   max-width: 500px;

@@ -5,6 +5,7 @@ angular.module('currentUser', [
 
     .factory("CurrentUser", function($auth,
                                      $http,
+                                     $rootScope,
                                      $q,
                                      $route,
                                      $location,
@@ -51,6 +52,9 @@ angular.module('currentUser', [
 
             // first ask our server to get the OAuth token that we use to create the
             // twitter URL that we will redirect the user too.
+
+            $rootScope.progressbar.start() // it will take some time
+
             var baseUrlToGetOauthTokenFromOurServer = "/api/auth/twitter/request-token?redirectUri=";
             var baseTwitterLoginPageUrl = "https://api.twitter.com/oauth/authenticate?oauth_token="
             $http.get(baseUrlToGetOauthTokenFromOurServer + redirectUri).success(
