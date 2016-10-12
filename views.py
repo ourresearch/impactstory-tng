@@ -191,15 +191,6 @@ def profile_endpoint_polling(orcid_id):
 def profile_endpoint(orcid_id):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
     if not my_person:
-        print u"making temporary person for {orcid_id}, referred by {referrer} using url {url}, ip {ip}".format(
-            orcid_id=orcid_id,
-            referrer=request.referrer,
-            url=request.url,
-            ip=request.remote_addr)
-        my_person = make_temporary_person_from_orcid(orcid_id)
-        print u"saving log_temp_profile for {}".format(my_person)
-        temp_profile_log = add_new_log_temp_profile(my_person, request)
-
         if not request.args.get("source"):
             if request.headers.getlist("X-Forwarded-For"):
                 ip = request.headers.getlist("X-Forwarded-For")[0]
@@ -208,6 +199,15 @@ def profile_endpoint(orcid_id):
                                     Please add ?source=YOUREMAILADDRESS to your API calls,
                                     or email us at team@impactstory.org for more details on
                                     our API. Thanks!""")
+
+        print u"making temporary person for {orcid_id}, referred by {referrer} using url {url}, ip {ip}".format(
+            orcid_id=orcid_id,
+            referrer=request.referrer,
+            url=request.url,
+            ip=request.remote_addr)
+        my_person = make_temporary_person_from_orcid(orcid_id)
+        print u"saving log_temp_profile for {}".format(my_person)
+        temp_profile_log = add_new_log_temp_profile(my_person, request)
 
     return json_resp(my_person.to_dict())
 
