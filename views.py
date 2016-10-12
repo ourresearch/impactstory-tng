@@ -205,7 +205,9 @@ def profile_endpoint(orcid_id):
                 ip = request.headers.getlist("X-Forwarded-For")[0]
                 if ip == "54.210.209.20":
                     abort_json(429, """We've noticed you are making many requests.
-                                    Please add ?source=YOUREMAILADDRESS. Thanks!""")
+                                    Please add ?source=YOUREMAILADDRESS to your API calls,
+                                    or email us at team@impactstory.org for more details on
+                                    our API. Thanks!""")
 
     return json_resp(my_person.to_dict())
 
