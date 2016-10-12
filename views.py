@@ -14,6 +14,7 @@ from models.person import refresh_person
 from models.person import delete_person
 from models.person import update_person
 from models.person import make_temporary_person_from_orcid
+from models.log_temp_profile import add_new_log_temp_profile
 from models.person import get_random_people
 from models.product import get_all_products
 from models.refset import num_people_in_db
@@ -195,7 +196,10 @@ def profile_endpoint(orcid_id):
             referrer=request.referrer,
             url=request.url,
             ip=request.remote_addr)
-        my_person = make_temporary_person_from_orcid(orcid_id, request)
+        my_person = make_temporary_person_from_orcid(orcid_id)
+        print u"saving log_temp_profile for {}".format(my_person)
+        temp_profile_log = add_new_log(my_person, request)
+
     return json_resp(my_person.to_dict())
 
 
