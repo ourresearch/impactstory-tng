@@ -5,7 +5,7 @@ import urlparse
 from app import db
 from util import safe_commit
 
-def add_new_log(my_temp_person, request=None):
+def add_new_log_temp_profile(my_temp_person, request=None):
     if LogTempProfile.query.get(my_temp_person.orcid_id):
         return
 
@@ -13,10 +13,12 @@ def add_new_log(my_temp_person, request=None):
     db.session.add(new_log)
     safe_commit(db)
 
+
 class LogTempProfile(db.Model):
     orcid_id = db.Column(db.Text, primary_key=True)
     source = db.Column(db.Text)
     ip = db.Column(db.Text)
+    user_agent = db.Column(db.Text)
     created = db.Column(db.DateTime)
     num_products = db.Column(db.Integer)
     num_posts = db.Column(db.Integer)
@@ -37,6 +39,8 @@ class LogTempProfile(db.Model):
         self.created = datetime.datetime.utcnow()
 
         if request:
+            self.user_agent = request.headers.get("User-Agent", None)
+
             # from http://stackoverflow.com/a/12771438/596939
             if request.headers.getlist("X-Forwarded-For"):
                self.ip = request.headers.getlist("X-Forwarded-For")[0]

@@ -25,7 +25,7 @@ from models.log_email import save_email
 from models.log_openness import save_openness_log
 from models.country import country_info
 from models.top_news import top_news_titles
-from models.log_temp_profile import add_new_log
+from models.log_temp_profile import add_new_log_temp_profile
 from models.oa import find_normalized_license
 from util import elapsed
 from util import chunks
@@ -133,7 +133,7 @@ def get_full_twitter_profile(twitter_creds):
     return full_twitter_profile
 
 
-def make_temporary_person_from_orcid(orcid_id, request=None):
+def make_temporary_person_from_orcid(orcid_id):
     my_person = Person()
 
     my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
@@ -142,9 +142,6 @@ def make_temporary_person_from_orcid(orcid_id, request=None):
 
     my_person.orcid_id = orcid_id
     my_person.refresh()
-
-    print u"saving log_temp_profile for {}".format(my_person)
-    temp_profile_log = add_new_log(my_person, request)
 
     print u"finished make_temporary_person_from_orcid: made new person for {}".format(my_person)
     return my_person
