@@ -26,8 +26,6 @@ class LogTempProfile(db.Model):
     percent_fulltext = db.Column(db.Float)
     error = db.Column(db.Text)
 
-    details = db.Column(JSONB)
-
     def __init__(self, my_temp_person, request=None):
         self.orcid_id = my_temp_person.orcid_id
         self.num_products = my_temp_person.num_products
