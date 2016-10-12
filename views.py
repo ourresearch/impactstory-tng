@@ -198,7 +198,14 @@ def profile_endpoint(orcid_id):
             ip=request.remote_addr)
         my_person = make_temporary_person_from_orcid(orcid_id)
         print u"saving log_temp_profile for {}".format(my_person)
-        temp_profile_log = add_new_log(my_person, request)
+        temp_profile_log = add_new_log_temp_profile(my_person, request)
+
+        if request.headers.getlist("X-Forwarded-For"):
+            ip = request.headers.getlist("X-Forwarded-For")[0]
+            if ip == "54.210.209.20":
+                abort_json(429, """We've noticed you are making many requests.
+                                Please email us at team@impactstory.org so
+                                we can give you details on our API.""")
 
     return json_resp(my_person.to_dict())
 
