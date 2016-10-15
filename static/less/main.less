@@ -52,10 +52,6 @@ html {
     &.template-auth-login {
       background: #fafafa;
     }
-    &.is-focus-page-true {
-      background: #fafafa;
-
-    }
 
     .container-fluid {
       max-width: 993px;
@@ -476,7 +472,7 @@ img.channel-icon {
 
 
 
-// OAUTH WAITING PAGE BECAUSE OAUTH AIN'T FAST
+// OAUTH WAITING PAGE BECAUSE THERE IS MUCH WAITING
 // ***********************************************************
 // ***********************************************************
 // ***********************************************************
@@ -494,7 +490,6 @@ img.channel-icon {
   text-align: center;
 
   .focus-container {
-    border: 1px solid #eee;
     max-width: 800px;
     background: #fff;
     border-radius: 3px;
@@ -514,10 +509,20 @@ img.channel-icon {
 
     h2 {
       text-align: center;
-      margin-bottom: 30px;
       img {
         width: 200px;
       }
+    }
+
+    .loading-container {
+      width: 200px;
+      margin: 0 auto;
+    }
+
+    .working {
+      margin-top: 30px;
+      font-size: 25px;
+      font-weight: 100;
     }
   }
 

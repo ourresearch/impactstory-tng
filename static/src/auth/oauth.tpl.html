@@ -4,8 +4,12 @@
         <h2>
             <img src="static/img/impactstory-logo-sideways.png" alt="">
         </h2>
+        <div class="loading-container" ng-show="!error">
+            <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+        </div>
         <div class="working" ng-show="!error">
-            <i class="fa fa-refresh fa-spin"></i>
+            <!--<i class="fa fa-refresh fa-spin"></i>-->
+
             Connecting with your
             <span class="identity-provider twitter" ng-show="identityProvider=='twitter'">
                 Twitter
