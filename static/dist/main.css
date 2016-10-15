@@ -13,9 +13,6 @@ html body {
 html body.template-auth-login {
   background: #fafafa;
 }
-html body.is-focus-page-true {
-  background: #fafafa;
-}
 html body .container-fluid {
   max-width: 993px;
 }
@@ -470,7 +467,6 @@ img.channel-icon.weibo {
   text-align: center;
 }
 .page.oauth-page .focus-container {
-  border: 1px solid #eee;
   max-width: 800px;
   background: #fff;
   border-radius: 3px;
@@ -488,10 +484,18 @@ img.channel-icon.weibo {
 }
 .page.oauth-page .focus-container h2 {
   text-align: center;
-  margin-bottom: 30px;
 }
 .page.oauth-page .focus-container h2 img {
   width: 200px;
+}
+.page.oauth-page .focus-container .loading-container {
+  width: 200px;
+  margin: 0 auto;
+}
+.page.oauth-page .focus-container .working {
+  margin-top: 30px;
+  font-size: 25px;
+  font-weight: 100;
 }
 div.page.person-incomplete.blank {
   height: 100vh;
