@@ -1041,13 +1041,6 @@ class Person(db.Model):
 
 
     @property
-    def first_publishing_date(self):
-        pubdates = [p.pubdate for p in self.products if p.pubdate]
-        if pubdates:
-            return min(pubdates)
-        return None
-
-    @property
     def percent_fulltext(self):
         if not self.all_products:
             return None
