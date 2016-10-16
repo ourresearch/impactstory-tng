@@ -383,6 +383,36 @@ img.channel-icon {
 
 
 
+.login-button {
+  margin: 10px 10px;
+  padding: 15px 30px;
+  font-size: 20px;
+  color: #fff;
+  border: none;
+  &.twitter {
+    background: @twitterColor;
+    &:hover {
+      background: darken(@twitterColor, 5%);
+      color: #fff;
+    }
+    i {
+      font-size: 30px;
+      vertical-align: -3px;
+    }
+  }
+  &.orcid {
+    background: @orcidColor;
+    &:hover {
+      background: darken(@orcidColor, 5%);
+      color: #fff;
+    }
+    img {
+      height: 30px;
+      vertical-align: -8px;
+      margin-right: 5px;
+    }
+  }
+}
 
 
 
@@ -434,34 +464,6 @@ img.channel-icon {
     }
 
     .actions {
-      .btn {
-        margin: 10px 10px;
-        padding: 15px 30px;
-        font-size: 20px;
-        color: #fff;
-        border: none;
-        &.twitter {
-          background: @twitterColor;
-          &:hover {
-            background: darken(@twitterColor, 5%);
-          }
-          i {
-            font-size: 30px;
-            vertical-align: -3px;
-          }
-        }
-        &.orcid {
-          background: @orcidColor;
-          &:hover {
-            background: darken(@orcidColor, 5%);
-          }
-          img {
-            height: 30px;
-            vertical-align: -8px;
-            margin-right: 5px;
-          }
-        }
-      }
     }
     .create-account {
       margin-top: 20px;
@@ -490,7 +492,7 @@ img.channel-icon {
   text-align: center;
 
   .focus-container {
-    max-width: 800px;
+    //max-width: 600px;
     background: #fff;
     border-radius: 3px;
     padding: 50px 100px 100px;
@@ -524,6 +526,23 @@ img.channel-icon {
       font-size: 25px;
       font-weight: 100;
     }
+    .error {
+      margin-top: 20px;
+      .msg {
+        margin-bottom: 20px;
+        color: #c9302c;
+        font-size: 25px;
+
+      }
+      .btn {
+        //width: 50%;
+        @media @mobile {
+          width: auto;
+        }
+      }
+
+    }
+
   }
 
 }
