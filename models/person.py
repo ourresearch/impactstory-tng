@@ -819,8 +819,8 @@ class Person(db.Model):
 
         biblios_for_sherlock = [p.biblio_for_sherlock() for p in products_for_sherlock.values()]
         # print biblios_for_sherlock
-        # url = u"http://api.sherlockoa.org/v1/publications"
-        url = u"http://localhost:5000/v1/publications"
+        url = u"http://api.sherlockoa.org/v1/publications"
+        # url = u"http://localhost:5000/v1/publications"
 
         # print u"calling sherlock with", biblios_for_sherlock
         post_body = {"biblios": biblios_for_sherlock}
