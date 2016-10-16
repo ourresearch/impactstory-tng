@@ -2068,24 +2068,18 @@ angular.module('staticPages', [
             resolve: {
                 redirect: function(CurrentUser){
                     return CurrentUser.sendHomePromise(false)
-                },
-                customLandingPage: function($q){
-                    return $q.when("default")
                 }
             }
         })
     })
 
     .config(function ($routeProvider) {
-        $routeProvider.when('/opencon', {
+        $routeProvider.when('/landing/:landingPageName', {
             templateUrl: "static-pages/landing.tpl.html",
             controller: "LandingPageCtrl",
             resolve: {
                 redirect: function(CurrentUser){
                     return CurrentUser.sendHomePromise(false)
-                },
-                customLandingPage: function($q){
-                    return $q.when("opencon")
                 }
             }
         })
@@ -2113,13 +2107,16 @@ angular.module('staticPages', [
                                              $mdDialog,
                                              $cookies,
                                              $rootScope,
-                                             customLandingPage,
+                                             $routeParams,
                                              $timeout) {
 
-        if (customLandingPage == "opencon") {
-            console.log("this is a custom landing page: ",customLandingPage)
-            $scope.customPageName = "opencon"
-            $cookies.put("sawOpenconLandingPage", true)
+        if ($routeParams.landingPageName) {
+            console.log("this is a custom landing page: ", $routeParams.landingPageName)
+            $scope.customPageName = $routeParams.landingPageName
+            if ($routeParams.landingPageName == "open"){
+                $cookies.put("sawOpenconLandingPage", true) // legacy
+                $cookies.put("customLandingPage", $routeParams.landingPageName)
+            }
 
         }
 
