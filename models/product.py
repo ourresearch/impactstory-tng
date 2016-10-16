@@ -125,7 +125,6 @@ class Product(db.Model):
     title = db.Column(db.Text)
     journal = db.Column(db.Text)
     type = db.Column(db.Text)
-    pubdate = db.Column(db.DateTime)
     year = db.Column(db.Text)
     authors = deferred(db.Column(db.Text))
     authors_short = db.Column(db.Text)
@@ -146,18 +145,10 @@ class Product(db.Model):
     poster_counts = db.Column(MutableDict.as_mutable(JSONB))
     event_dates = db.Column(MutableDict.as_mutable(JSONB))
 
-    repo_urls = db.Column(MutableDict.as_mutable(JSONB))  #change to list when upgrade to sqla 1.1
-    base_dcoa = db.Column(db.Text)
-    base_dcprovider = db.Column(db.Text)
-    open_step = db.Column(db.Text)
-    license_url = db.Column(db.Text)
-    sherlock_response = db.Column(db.Text)
-    sherlock_error = db.Column(db.Text)
-    fulltext_url = db.Column(db.Text)
     user_supplied_fulltext_url = db.Column(db.Text)
-
+    fulltext_url = db.Column(db.Text)
     license = db.Column(db.Text)
-    license_string = db.Column(db.Text)
+    open_step = db.Column(db.Text)
 
     error = db.Column(db.Text)
 
@@ -430,15 +421,6 @@ class Product(db.Model):
         resp = {}
         for source, date_list in self.event_dates.iteritems():
             resp[source] = [days_ago(event_date_string) for event_date_string in date_list]
-        return resp
-
-    @property
-    def event_days_since_publication(self):
-        if not self.event_dates or not self.pubdate:
-            return {}
-        resp = {}
-        for source, date_list in self.event_dates.iteritems():
-            resp[source] = [days_between(event_date_string, self.pubdate.isoformat()) for event_date_string in date_list]
         return resp
 
     def set_event_dates(self):
