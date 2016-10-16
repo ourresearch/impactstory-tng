@@ -41,7 +41,6 @@ angular.module('auth', [
         $scope.global.isFocusPage = true
 
 
-
         var requestObj = $location.search()
         if (_.isEmpty(requestObj)){
             console.log("we didn't get any codes or verifiers in the URL. aborting.")

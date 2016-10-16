@@ -390,6 +390,36 @@ img.channel-icon.weibo {
   margin: 0 15px 0 0;
   color: #999;
 }
+.login-button {
+  margin: 10px 10px;
+  padding: 15px 30px;
+  font-size: 20px;
+  color: #fff;
+  border: none;
+}
+.login-button.twitter {
+  background: #4099FF;
+}
+.login-button.twitter:hover {
+  background: #268bff;
+  color: #fff;
+}
+.login-button.twitter i {
+  font-size: 30px;
+  vertical-align: -3px;
+}
+.login-button.orcid {
+  background: #A6CE39;
+}
+.login-button.orcid:hover {
+  background: #98be2f;
+  color: #fff;
+}
+.login-button.orcid img {
+  height: 30px;
+  vertical-align: -8px;
+  margin-right: 5px;
+}
 .page.login-page {
   display: -webkit-flex;
   -webkit-flex-direction: column;
@@ -424,34 +454,6 @@ img.channel-icon.weibo {
 .page.login-page .login-container h2 img {
   width: 200px;
 }
-.page.login-page .login-container .actions .btn {
-  margin: 10px 10px;
-  padding: 15px 30px;
-  font-size: 20px;
-  color: #fff;
-  border: none;
-}
-.page.login-page .login-container .actions .btn.twitter {
-  background: #4099FF;
-}
-.page.login-page .login-container .actions .btn.twitter:hover {
-  background: #268bff;
-}
-.page.login-page .login-container .actions .btn.twitter i {
-  font-size: 30px;
-  vertical-align: -3px;
-}
-.page.login-page .login-container .actions .btn.orcid {
-  background: #A6CE39;
-}
-.page.login-page .login-container .actions .btn.orcid:hover {
-  background: #98be2f;
-}
-.page.login-page .login-container .actions .btn.orcid img {
-  height: 30px;
-  vertical-align: -8px;
-  margin-right: 5px;
-}
 .page.login-page .login-container .create-account {
   margin-top: 20px;
 }
@@ -467,7 +469,6 @@ img.channel-icon.weibo {
   text-align: center;
 }
 .page.oauth-page .focus-container {
-  max-width: 800px;
   background: #fff;
   border-radius: 3px;
   padding: 50px 100px 100px;
@@ -496,6 +497,19 @@ img.channel-icon.weibo {
   margin-top: 30px;
   font-size: 25px;
   font-weight: 100;
+}
+.page.oauth-page .focus-container .error {
+  margin-top: 20px;
+}
+.page.oauth-page .focus-container .error .msg {
+  margin-bottom: 20px;
+  color: #c9302c;
+  font-size: 25px;
+}
+@media only screen and (max-width: 992px) {
+  .page.oauth-page .focus-container .error .btn {
+    width: auto;
+  }
 }
 div.page.person-incomplete.blank {
   height: 100vh;
