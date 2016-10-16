@@ -824,9 +824,9 @@ class Person(db.Model):
 
         # print u"calling sherlock with", biblios_for_sherlock
         post_body = {"biblios": biblios_for_sherlock}
-        print "\n\n"
-        print json.dumps(post_body)
-        print "\n\n"
+        # print "\n\n"
+        # print json.dumps(post_body)
+        # print "\n\n"
         r = requests.post(url, json=post_body)
         if r and r.status_code==200:
             results = r.json()["results"]
