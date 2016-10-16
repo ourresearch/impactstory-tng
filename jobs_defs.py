@@ -35,13 +35,19 @@ update_registry.register(Update(
 
 q = db.session.query(Person.id)
 update_registry.register(Update(
-    job=Person.call_base_on_base1s,
+    job=Person.call_sherlock,
     query=q
 ))
 
 q = db.session.query(Person.id)
 update_registry.register(Update(
     job=Person.set_from_orcid,
+    query=q
+))
+
+q = db.session.query(Person.id)
+update_registry.register(Update(
+    job=Person.set_fulltext_urls,
     query=q
 ))
 
@@ -115,33 +121,7 @@ update_registry.register(Update(
     query=q
 ))
 
-q = db.session.query(Person.id)
-update_registry.register(Update(
-    job=Person.set_fulltext_urls,
-    query=q,
-    queue_id=1
-))
 
-q = db.session.query(Product.id)
-q = q.filter(Product.altmetric_score != None)
-q = q.filter(Product.altmetric_score > 0)
-update_registry.register(Update(
-    job=Product.set_data_from_crossref,
-    query=q
-))
-
-q = db.session.query(Person.id)
-update_registry.register(Update(
-    job=Person.call_local_lookup_oa,
-    query=q
-))
-
-
-q = db.session.query(Person.id)
-update_registry.register(Update(
-    job=Person.call_sherlock_on_license_unknowns,
-    query=q
-))
 
 q = db.session.query(Person.id)
 update_registry.register(Update(
