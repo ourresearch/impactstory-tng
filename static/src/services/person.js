@@ -6,6 +6,7 @@ angular.module('person', [
     .factory("Person", function($http, $q, $route, $rootScope, CurrentUser){
 
         var data = {}
+        var isLoading = false
         var badgeSortLevel = {
             "gold": 1,
             "silver": 2,
@@ -34,6 +35,7 @@ angular.module('person', [
             var url = "/api/person/" + orcidId
             console.log("Person Service getting from server:", orcidId)
             $rootScope.progressbar.start()
+            isLoading = true
             return $http.get(url)
                 .success(function(resp){
 
@@ -41,10 +43,12 @@ angular.module('person', [
                     for (var member in data) delete data[member];
                     overwriteData(resp)
                     $rootScope.progressbar.complete()
+                    isLoading = false
 
                 })
                 .error(function(resp){
                     $rootScope.progressbar.complete()
+                    isLoading = false
 
                 })
         }
@@ -137,6 +141,9 @@ angular.module('person', [
             clear:function(){
                 for (var member in data) delete data[member];
             },
-            belongsToCurrentUser: belongsToCurrentUser
+            belongsToCurrentUser: belongsToCurrentUser,
+            isLoading: function(){
+                return !!isLoading
+            }
         }
     })

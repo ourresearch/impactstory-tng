@@ -2,10 +2,14 @@
 
     <div class="focus-container">
         <h2>
-            <img src="static/img/impactstory-logo-sideways.png" alt="">
+            <img src="static/img/impactstory-logo-sideways.png" alt="" ng-show="!error">
         </h2>
+        <div class="loading-container" ng-show="!error">
+            <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+        </div>
         <div class="working" ng-show="!error">
-            <i class="fa fa-refresh fa-spin"></i>
+            <!--<i class="fa fa-refresh fa-spin"></i>-->
+
             Connecting with your
             <span class="identity-provider twitter" ng-show="identityProvider=='twitter'">
                 Twitter
@@ -16,43 +20,43 @@
             &hellip;
         </div>
 
+        <div class="error" ng-show="error">
 
-        <div ng-show="error">
-
+            <!-- ORCID error -->
             <div class="orcid" ng-show="identityProvider=='orcid'">
                 <div class="msg">
                     <i class="fa fa-exclamation-triangle"></i>
-                    We couldn't log you in because we don't have your ORCID account
-                    (<a href="https://orcid.org/{{ identityProviderId }}">{{ identityProviderId }}</a>)
-                    on record.
+                    Sorry, we don't recognize your ORCID account!
                 </div>
 
-                <div class="btn btn-default"
+                <div class="btn btn-default login-button twitter"
                      ng-click="currentUser.twitterAuthenticate('login')">
                     <i class="fa fa-twitter"></i>
                     Log in with Twitter instead
                 </div>
             </div>
 
+            <!-- Twitter error -->
             <div class="twitter" ng-show="identityProvider=='twitter'">
                 <div class="msg">
                     <i class="fa fa-exclamation-triangle"></i>
-                    We couldn't log you in because but we don't have your Twitter account
-                    (<a href="https://twitter.com/{{ identityProviderId }}">@{{ identityProviderId }}</a>)
-                    on record.
+
+                    Sorry, we don't recognize your Twitter account (@{{ identityProviderId }}).
                 </div>
 
                 <div class="buttons">
-                    <div class="btn btn-default"
-                         ng-click="currentUser.twitterAuthenticate('register')">
-                        <i class="fa fa-twitter"></i>
-                        Create a new profile as @{{ identityProviderId }}
-                    </div>
-
-                    <div class="btn btn-default"
+                    <div class="btn login-button orcid"
                         ng-click="currentUser.orcidAuthenticate('login', true)">
+                        <img src="static/img/orcid-logo-white.png" alt="">
                         Log in with ORCID instead
                     </div>
+
+                    <div class="btn login-button twitter"
+                         ng-click="currentUser.twitterAuthenticate('register')">
+                        <i class="fa fa-twitter"></i>
+                        Create a new profile
+                    </div>
+
                 </div>
             </div>
 
