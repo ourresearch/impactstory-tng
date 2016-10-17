@@ -633,7 +633,11 @@ angular.module('auth', [
 
         // track signups that started at the opencon landing page
         // this is ignored by server unless we are hitting /me/twitter/register
-        requestObj.customLandingPage = $cookies.put("customLandingPage")
+        var landingPage = $cookies.get("customLandingPage")
+        if (!landingPage){
+            landingPage = "default"
+        }
+        requestObj.customLandingPage = landingPage
 
         var urlBase = "api/me/"
         var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
@@ -1691,6 +1695,7 @@ angular.module('currentUser', [
                 num_twitter_followers: person.num_twitter_followers,
                 campaign: person.campaign,
                 fresh_orcid: person.fresh_orcid,
+                landing_page: $cookies.get("customLandingPage"),
     
                 // we don't send person responses for deleted users (just 404s).
                 // so if we have a person response, this user isn't deleted.
@@ -1698,12 +1703,7 @@ angular.module('currentUser', [
                 is_deleted: false
     
             }
-    
-            if ($cookies.get("sawOpenconLandingPage")) {
-                intercomInfo.saw_opencon_landing_page = true
 
-            }
-    
             console.log("sending to intercom", intercomInfo)
             window.Intercom("boot", intercomInfo)
         } 
@@ -2113,7 +2113,6 @@ angular.module('staticPages', [
             console.log("this is a custom landing page: ", $routeParams.landingPageName)
             $scope.customPageName = $routeParams.landingPageName
             if ($routeParams.landingPageName == "open"){
-                $cookies.put("sawOpenconLandingPage", true) // legacy
                 $cookies.put("customLandingPage", $routeParams.landingPageName)
             }
 
