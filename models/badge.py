@@ -560,13 +560,23 @@ class percent_fulltext(BadgeAssigner):
     importance = .9
 
     def decide_if_assigned(self, person):
-        openness = person.percent_fulltext
-        if openness:  # the percent_fulltext takes into account having enough papers
-            if openness >= 0.5:
-                self.candidate_badge.value = openness * 100
+        if person.percent_fulltext:  # the percent_fulltext takes into account having enough papers
+            if person.percent_fulltext >= 0.5:
+                self.candidate_badge.value = person.percent_fulltext * 100
                 self.assigned = True
 
+class open_license(BadgeAssigner):
+    display_name = "Open License"
+    group = "openness"
+    description = u"{value}% of your research has a CC-BY, CC0, or public domain license."
+    context = u"This level of availability puts you in the top {in_the_top_percentile}% of researchers."
+    importance = .8
 
+    def decide_if_assigned(self, person):
+        if person.percent_cc_by:  # the percent_cc_by takes into account having enough papers
+            if person.percent_cc_by >= 0.1:
+                self.candidate_badge.value = person.percent_cc_by * 100
+                self.assigned = True
 
 
 
