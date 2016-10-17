@@ -270,6 +270,7 @@ angular.module('currentUser', [
                 num_twitter_followers: person.num_twitter_followers,
                 campaign: person.campaign,
                 fresh_orcid: person.fresh_orcid,
+                landing_page: $cookies.get("customLandingPage"),
     
                 // we don't send person responses for deleted users (just 404s).
                 // so if we have a person response, this user isn't deleted.
@@ -277,12 +278,7 @@ angular.module('currentUser', [
                 is_deleted: false
     
             }
-    
-            if ($cookies.get("sawOpenconLandingPage")) {
-                intercomInfo.saw_opencon_landing_page = true
 
-            }
-    
             console.log("sending to intercom", intercomInfo)
             window.Intercom("boot", intercomInfo)
         } 
