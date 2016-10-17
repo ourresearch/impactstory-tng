@@ -41,6 +41,9 @@ angular.module('wizard', [
 
 
     .controller("ConnectOrcidPageCtrl", function($scope, $location, $http, $auth){
+        $scope.global.showBottomStuff = false
+        $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
 
 
         //if ($auth.getPayload().orcid_id){

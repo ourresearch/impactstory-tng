@@ -632,9 +632,8 @@ angular.module('auth', [
         console.log("using this redirectUri", requestObj.redirectUri)
 
         // track signups that started at the opencon landing page
-        if ($cookies.get("sawOpenconLandingPage")) {
-            requestObj.sawOpenconLandingPage = true
-        }
+        // this is ignored by server unless we are hitting /me/twitter/register
+        requestObj.customLandingPage = $cookies.put("customLandingPage")
 
         var urlBase = "api/me/"
         var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
@@ -2209,6 +2208,9 @@ angular.module('wizard', [
 
 
     .controller("ConnectOrcidPageCtrl", function($scope, $location, $http, $auth){
+        $scope.global.showBottomStuff = false
+        $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
 
 
         //if ($auth.getPayload().orcid_id){
@@ -4015,64 +4017,71 @@ angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache"
 angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/connect-orcid.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
-    "    <h2>Welcome, {{ auth.getPayload().first_name }}!</h2>\n" +
-    "    <p>\n" +
-    "        Impactstory is built on <a href=\"http://orcid.org\">ORCID</a>,\n" +
-    "        a global nonprofit registry of researchers and their publications.\n" +
-    "    </p>\n" +
-    "    <p>Do you have an ORCID ID?</p>\n" +
-    "    <div class=\"do-you-have-an-orcid\" ng-show=\"!hasOrcid\">\n" +
-    "        <span class=\"have-orcid-yes btn btn-lg btn-success\"\n" +
-    "              ng-click=\"doYouHaveAnOrcid('yes')\">\n" +
-    "            <i class=\"fa fa-check\"></i>\n" +
-    "            Yes\n" +
-    "        </span>\n" +
+    "    <div class=\"focus-container\">\n" +
+    "        <div class=\"intro\" ng-show=\"hasOrcid===null\">\n" +
+    "            <h2>Welcome to Impactstory, {{ auth.getPayload().first_name }}!</h2>\n" +
+    "            <p>Let's get your profile set up!</p>\n" +
     "\n" +
-    "        <span class=\"have-orcid-no btn btn-lg btn-danger\"\n" +
-    "              ng-click=\"doYouHaveAnOrcid('no')\">\n" +
-    "            <i class=\"fa fa-times\"></i>\n" +
-    "            No\n" +
-    "        </span>\n" +
+    "            <p>\n" +
+    "                Impactstory is built on <a href=\"http://orcid.org\">ORCID</a>,\n" +
+    "                a global nonprofit registry of researchers and their publications.\n" +
+    "            </p>\n" +
+    "            <p>Do you have an ORCID ID?</p>\n" +
+    "            <div class=\"do-you-have-an-orcid\" ng-show=\"!hasOrcid\">\n" +
+    "                <span class=\"have-orcid-yes btn btn-lg btn-success\"\n" +
+    "                      ng-click=\"doYouHaveAnOrcid('yes')\">\n" +
+    "                    <i class=\"fa fa-check\"></i>\n" +
+    "                    Yes\n" +
+    "                </span>\n" +
     "\n" +
-    "        <span class=\"have-orcid-maybe btn btn-lg btn-info\"\n" +
-    "              ng-click=\"doYouHaveAnOrcid('maybe')\">\n" +
-    "            <i class=\"fa fa-question\"></i>\n" +
-    "            Maybe\n" +
-    "        </span>\n" +
-    "    </div>\n" +
-    "    <div id=\"orcid-register-instr\">\n" +
-    "        <div class=\"have-orcid-yes\" ng-show=\"hasOrcid=='yes'\">\n" +
-    "            <div class=\"text\">\n" +
-    "                Great, just go sign in and you're all good.\n" +
-    "                When you're done, you'll be redirected back here, and will be\n" +
-    "                nearly done creating your profile.\n" +
+    "                <span class=\"have-orcid-no btn btn-lg btn-danger\"\n" +
+    "                      ng-click=\"doYouHaveAnOrcid('no')\">\n" +
+    "                    <i class=\"fa fa-times\"></i>\n" +
+    "                    No\n" +
+    "                </span>\n" +
+    "\n" +
+    "                <span class=\"have-orcid-maybe btn btn-lg btn-info\"\n" +
+    "                      ng-click=\"doYouHaveAnOrcid('maybe')\">\n" +
+    "                    <i class=\"fa fa-question\"></i>\n" +
+    "                    Maybe\n" +
+    "                </span>\n" +
     "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', true)\">\n" +
-    "                Sign in to my ORCID\n" +
-    "            </span>\n" +
-    "        </div>\n" +
-    "        <div class=\"have-orcid-no\" ng-show=\"hasOrcid=='no'\">\n" +
-    "            <div class=\"text\">\n" +
-    "                No problem, it'll take you less than 20 seconds to make an ORCID.\n" +
-    "                When you're done, you'll be redirected back here, and will be\n" +
-    "                nearly done creating your profile.\n" +
-    "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
-    "                Create my ORCID\n" +
-    "            </span>\n" +
-    "        </div>\n" +
-    "        <div class=\"have-orcid-yes\" ng-show=\"hasOrcid=='maybe'\">\n" +
-    "            <div class=\"text\">\n" +
-    "                No problem, just go register for an ORCID. If you've already made one,\n" +
-    "                it'll redirect you there automatically once you enter your email.\n" +
-    "                When you're done, you'll be redirected back here, and will be\n" +
-    "                nearly done creating your profile.\n" +
-    "            </div>\n" +
-    "            <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
-    "                Try registering for an ORCID\n" +
-    "            </span>\n" +
     "        </div>\n" +
     "\n" +
+    "        <div id=\"orcid-register-instr\">\n" +
+    "            <div class=\"have-orcid-yes\" ng-show=\"hasOrcid=='yes'\">\n" +
+    "                <div class=\"text\">\n" +
+    "                    Great, just go sign in and you're all good.\n" +
+    "                    When you're done, you'll be redirected back here, and will be\n" +
+    "                    nearly done creating your profile.\n" +
+    "                </div>\n" +
+    "                <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', true)\">\n" +
+    "                    Sign in to my ORCID\n" +
+    "                </span>\n" +
+    "            </div>\n" +
+    "            <div class=\"have-orcid-no\" ng-show=\"hasOrcid=='no'\">\n" +
+    "                <div class=\"text\">\n" +
+    "                    No problem, it'll take you less than 20 seconds to make an ORCID.\n" +
+    "                    When you're done, you'll be redirected back here, and will be\n" +
+    "                    nearly done creating your profile.\n" +
+    "                </div>\n" +
+    "                <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
+    "                    Create my ORCID\n" +
+    "                </span>\n" +
+    "            </div>\n" +
+    "            <div class=\"have-orcid-yes\" ng-show=\"hasOrcid=='maybe'\">\n" +
+    "                <div class=\"text\">\n" +
+    "                    No problem, just go register for an ORCID. If you've already made one,\n" +
+    "                    it'll redirect you there automatically once you enter your email.\n" +
+    "                    When you're done, you'll be redirected back here, and will be\n" +
+    "                    nearly done creating your profile.\n" +
+    "                </div>\n" +
+    "                <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
+    "                    Try registering for an ORCID\n" +
+    "                </span>\n" +
+    "            </div>\n" +
+    "\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "\n" +
     "</div>\n" +
