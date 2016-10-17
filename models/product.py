@@ -1,7 +1,6 @@
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import deferred
-from sqlalchemy import or_
 from collections import defaultdict
 import langdetect
 import json
@@ -104,11 +103,6 @@ def distinct_product_list(new_product, list_so_far):
 
 def get_all_products(limit=100):
     q = db.session.query(Product.title, Product.doi, Product.id)
-    q = q.filter( or_(
-        Product.open_step=="closed",
-        Product.open_step=="sherlock journal"
-        )
-    )
     q = q.filter(Product.doi != None)
     q = q.order_by(Product.id)
     q = q.limit(limit)
@@ -889,13 +883,14 @@ class Product(db.Model):
 
 
     def biblio_for_sherlock(self):
-        response = {"id": self.id}
+        response = {"product_id": self.id}
         if self.doi:
             response["doi"] = self.doi
             return response
         else:
             response["url"] = self.url
             response["title"] = self.title
+            response["arxiv"] = self.arxiv
         return response
 
 
