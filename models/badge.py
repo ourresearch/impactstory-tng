@@ -571,6 +571,7 @@ class open_license(BadgeAssigner):
     description = u"{value}% of your research has a CC-BY, CC0, or public domain license."
     context = u"This level of availability puts you in the top {in_the_top_percentile}% of researchers."
     importance = .8
+    show_in_ui = False
 
     def decide_if_assigned(self, person):
         if person.percent_cc_by:  # the percent_cc_by takes into account having enough papers
