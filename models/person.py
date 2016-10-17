@@ -147,7 +147,7 @@ def make_temporary_person_from_orcid(orcid_id):
     return my_person
 
 
-def make_person(twitter_creds, high_priority=False):
+def make_person(twitter_creds, high_priority=False, landing_page=None):
     if Person.query.filter_by(twitter=twitter_creds["screen_name"]).first():
         raise PersonExistsException
 
@@ -156,6 +156,7 @@ def make_person(twitter_creds, high_priority=False):
     my_person.id = "u_is{}".format(shortuuid.uuid()[0:5])
     my_person.created = datetime.datetime.utcnow()
     my_person.claimed_at = datetime.datetime.utcnow().isoformat()
+    my_person.landing_page = landing_page
     print u"\nin make_person: made new person for {}".format(my_person)
 
     return connect_twitter(my_person, twitter_creds, set_everything_possible=True)
@@ -277,6 +278,7 @@ class Person(db.Model):
     twitter = db.Column(db.Text)
     twitter_creds = db.Column(MutableDict.as_mutable(JSONB))
     campaign = db.Column(db.Text)
+    landing_page = db.Column(db.Text)
     depsy_id = db.Column(db.Text)
     depsy_percentile = db.Column(db.Float)
     affiliation_name = db.Column(db.Text)
