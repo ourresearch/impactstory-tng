@@ -34,14 +34,27 @@ from models.language import get_language_from_abbreviation
 from models.orcid import set_biblio_from_biblio_dict
 from models.orcid import get_doi_from_biblio_dict
 from models.orcid import clean_doi
-from models.oa import dataset_doi_fragments
-from models.oa import preprint_doi_fragments
-from models.oa import open_doi_fragments
-from models.oa import dataset_url_fragments
-from models.oa import preprint_url_fragments
-from models.oa import find_normalized_license
-from models import oa
 from models.mendeley import set_mendeley_data
+
+preprint_url_fragments = [
+    "/npre.",
+    "arxiv.org/",
+    "10.15200/winn.",
+    "/peerj.preprints",
+    ".figshare.",
+    "10.1101/",  #biorxiv
+    "10.15363/" #thinklab
+]
+dataset_url_fragments = [
+                 "/dryad.",
+                 "/zenodo.",
+                 ".gbif.org/"
+                 ]
+open_url_fragments = preprint_url_fragments + dataset_url_fragments
+
+preprint_doi_fragments = preprint_url_fragments
+dataset_doi_fragments = dataset_url_fragments
+open_doi_fragments = preprint_doi_fragments + dataset_doi_fragments
 
 
 def make_product(orcid_product_dict):
@@ -112,7 +125,6 @@ class Product(db.Model):
     title = db.Column(db.Text)
     journal = db.Column(db.Text)
     type = db.Column(db.Text)
-    pubdate = db.Column(db.DateTime)
     year = db.Column(db.Text)
     authors = deferred(db.Column(db.Text))
     authors_short = db.Column(db.Text)
@@ -122,9 +134,6 @@ class Product(db.Model):
     orcid_importer = db.Column(db.Text)
 
     orcid_api_raw_json = deferred(db.Column(JSONB))
-    # orcid_api_raw_json = db.Column(JSONB)
-    # crossref_api_raw = deferred(db.Column(JSONB))
-    crossref_api_raw = db.Column(JSONB)
     altmetric_api_raw = deferred(db.Column(JSONB))
     # mendeley_api_raw = deferred(db.Column(JSONB)) #  @todo go back to this when done exploring
     mendeley_api_raw = db.Column(JSONB)
@@ -136,18 +145,10 @@ class Product(db.Model):
     poster_counts = db.Column(MutableDict.as_mutable(JSONB))
     event_dates = db.Column(MutableDict.as_mutable(JSONB))
 
-    repo_urls = db.Column(MutableDict.as_mutable(JSONB))  #change to list when upgrade to sqla 1.1
-    base_dcoa = db.Column(db.Text)
-    base_dcprovider = db.Column(db.Text)
-    open_step = db.Column(db.Text)
-    license_url = db.Column(db.Text)
-    sherlock_response = db.Column(db.Text)
-    sherlock_error = db.Column(db.Text)
-    fulltext_url = db.Column(db.Text)
     user_supplied_fulltext_url = db.Column(db.Text)
-
+    fulltext_url = db.Column(db.Text)
     license = db.Column(db.Text)
-    license_string = db.Column(db.Text)
+    open_step = db.Column(db.Text)
 
     error = db.Column(db.Text)
 
@@ -156,98 +157,11 @@ class Product(db.Model):
         self.created = datetime.datetime.utcnow().isoformat()
         super(Product, self).__init__(**kwargs)
 
-    def set_data_from_crossref(self, high_priority=False):
-        if not self.doi:
-            return
-
-        # set_crossref_api_raw catches its own errors, but since this is the method
-        # called by the thread from Person.set_data_from_crossref
-        # want to have defense in depth and wrap this whole thing in a try/catch too
-        try:
-            # right now this is used for ISSN and license url
-            self.set_crossref_api_raw(high_priority)
-        except (KeyboardInterrupt, SystemExit):
-            # let these ones through, don't save anything to db
-            raise
-        except Exception:
-            logging.exception("exception in set_data_from_crossref")
-            self.error = "error in set_data_from_crossref"
-            print self.error
-            print u"in generic exception handler, so rolling back in case it is needed"
-            db.session.rollback()
-
-
     def set_oa_from_user_supplied_fulltext_url(self, url):
         self.user_supplied_fulltext_url = url
         self.fulltext_url = url
         self.open_step = "user supplied fulltext url"
         self.license = "unknown"
-
-
-    def set_oa_from_sherlock(self, high_priority=False):
-        try:
-            sherlock_request_list = []
-            host = 0
-            if self.base_dcoa=="2":
-                host = "repo"
-                for repo_url in self.repo_urls["urls"]:
-                    sherlock_request_list.append([repo_url, host])
-            elif self.url and (self.guess_genre == "article"):
-                host = "journal"
-                sherlock_request_list.append([self.url, host])
-            elif self.url:
-                host = "repo"
-                sherlock_request_list.append([self.url, host])
-            else:
-                # print "not looking up", self.url
-                return  # shouldn't have been called
-
-            self.sherlock_response = u"sherlock error: timeout on {}".format(host)
-
-            url = u"http://sherlockoa.org/articles?set_license_even_if_not_oa=True"
-            # url = u"http://sherlockoa.org/articles"
-
-            # print u"calling sherlock with", sherlock_request_list
-            r = requests.post(url, json=sherlock_request_list)
-            if r and r.status_code==200:
-                results = r.json()["results"]
-                open_responses = [r for r in results if r["is_oa"]]
-                error_responses = [r for r in results if "error" in r]
-                if open_responses:
-                    response = open_responses[0]
-                    # print u"sherlock says it is open!", response["url"]
-                    self.fulltext_url = response["url"]
-                    self.open_step = "sherlock {}".format(response["host"])
-                    self.sherlock_response = u"sherlock says: open {}".format(response["host"])
-                elif error_responses:
-                    response = error_responses[0]
-                    print u"sherlock says error: {} {}".format(host, response["error"])
-                    self.fulltext_url = None
-                    self.sherlock_response = u"sherlock error: {} {}".format(host, response["error"])
-                    self.sherlock_error = response["error_message"]
-                else:
-                    # print u"sherlock says it is closed:", sherlock_request_list
-                    self.sherlock_response = u"sherlock says: closed {}".format(host)
-
-                #if it is oa and sherlock found a license, set the license
-                if self.fulltext_url and results[0]["license"]:
-                    self.license = results[0]["license"]
-                    if self.license != "unknown":
-                        print u"sherlock found license {} on {}".format(self.license, sherlock_request_list)
-
-
-        except (KeyboardInterrupt, SystemExit):
-            # let these ones through, don't save anything to db
-            raise
-        except requests.Timeout:
-            print u"timeout from requests when getting sherlock data"
-            logging.exception("exception in set_oa_from_sherlock")
-            print u"rolling back in case it is needed"
-            db.session.rollback()
-        except Exception:
-            logging.exception("exception in set_oa_from_sherlock")
-            print u"rolling back in case it is needed"
-            db.session.rollback()
 
 
     def set_biblio_from_orcid(self):
@@ -285,8 +199,6 @@ class Product(db.Model):
         self.set_poster_counts()
         self.set_post_details()
         self.set_event_dates()
-        self.set_license_url()
-        self.set_publisher()
 
     @property
     def display_authors(self):
@@ -295,7 +207,6 @@ class Product(db.Model):
     @property
     def has_fulltext_url(self):
         return (self.fulltext_url != None)
-
 
     def set_altmetric_score(self):
         self.altmetric_score = 0
@@ -512,15 +423,6 @@ class Product(db.Model):
             resp[source] = [days_ago(event_date_string) for event_date_string in date_list]
         return resp
 
-    @property
-    def event_days_since_publication(self):
-        if not self.event_dates or not self.pubdate:
-            return {}
-        resp = {}
-        for source, date_list in self.event_dates.iteritems():
-            resp[source] = [days_between(event_date_string, self.pubdate.isoformat()) for event_date_string in date_list]
-        return resp
-
     def set_event_dates(self):
         self.event_dates = {}
 
@@ -581,44 +483,6 @@ class Product(db.Model):
         # print ".",
         return None
 
-
-    def set_crossref_api_raw(self, high_priority=False):
-        try:
-            self.error = None
-
-            headers={"Accept": "application/json", "User-Agent": "impactstory.org"}
-            url = u"http://api.crossref.org/works/{doi}".format(doi=self.clean_doi)
-
-            # might throw requests.Timeout
-            # print u"calling {} with headers {}".format(url, headers)
-
-            r = requests.get(url, headers=headers, timeout=10)  #timeout in seconds
-
-            if r.status_code == 404: # not found
-                self.crossref_api_raw = {"error": "404"}
-            elif r.status_code == 200:
-                self.crossref_api_raw = r.json()["message"]
-            else:
-                self.error = u"got unexpected crossref status_code code {}".format(r.status_code)
-
-        except (KeyboardInterrupt, SystemExit):
-            # let these ones through, don't save anything to db
-            raise
-        except requests.Timeout:
-            self.error = "timeout from requests when getting crossref data"
-            print self.error
-        except Exception:
-            logging.exception("exception in set_crossref_api_raw")
-            self.error = "misc error in set_crossref_api_raw"
-            print u"in generic exception handler, so rolling back in case it is needed"
-            db.session.rollback()
-        finally:
-            if self.error:
-                print u"ERROR on {doi} profile {orcid_id}: {error}, calling {url}".format(
-                    doi=self.clean_doi,
-                    orcid_id=self.orcid_id,
-                    error=self.error,
-                    url=url)
 
 
     def set_altmetric_api_raw(self, high_priority=False):
@@ -696,18 +560,6 @@ class Product(db.Model):
             self.altmetric_id = self.altmetric_api_raw["altmetric_id"]
         except (KeyError, TypeError):
             self.altmetric_id = None
-
-    def set_publisher(self):
-        try:
-            self.publisher = self.crossref_api_raw["publisher"]
-        except (KeyError, TypeError):
-            pass
-
-    def set_license_url(self):
-        try:
-            self.license_url = self.crossref_api_raw["license"][0]["URL"]
-        except (KeyError, TypeError):
-            pass
 
 
     @property
@@ -1035,43 +887,16 @@ class Product(db.Model):
             pass
         return resp
 
-    @property
-    def issns(self):
-        try:
-            return self.crossref_api_raw["ISSN"]
-        except (AttributeError, TypeError, KeyError):
-            return None
 
-    def set_local_lookup_oa(self):
-        start_time = time()
-
-        open_reason = None
-        fulltext_url = self.url
-
-        license = "unknown"
-        if oa.is_open_via_doaj_issn(self.issns):
-            license = oa.is_open_via_doaj_issn(self.issns)
-            open_reason = "doaj issn"
-        elif oa.is_open_via_doaj_journal(self.journal):
-            license = oa.is_open_via_doaj_journal(self.journal)
-            open_reason = "doaj journal"
-        elif oa.is_open_via_arxiv(self.arxiv):
-            open_reason = "arxiv"
-            fulltext_url = u"http://arxiv.org/abs/{}".format(self.arxiv)  # override because open url isn't the base url
-        elif oa.is_open_via_datacite_prefix(self.doi):
-            open_reason = "datacite prefix"
-        elif oa.is_open_via_license_url(self.license_url):
-            license = find_normalized_license(self.license_url)
-            open_reason = "license url"
-        elif oa.is_open_via_doi_fragment(self.doi):
-            open_reason = "doi fragment"
-        elif oa.is_open_via_url_fragment(self.url):
-            open_reason = "url fragment"
-
-        if open_reason:
-            self.fulltext_url = fulltext_url
-            self.open_step = u"local lookup: {}".format(open_reason)
-            self.license = license
+    def biblio_for_sherlock(self):
+        response = {"id": self.id}
+        if self.doi:
+            response["doi"] = self.doi
+            return response
+        else:
+            response["url"] = self.url
+            response["title"] = self.title
+        return response
 
 
     def to_dict(self):
@@ -1102,7 +927,6 @@ class Product(db.Model):
             "events_last_week_count": self.events_last_week_count,
             "genre": self.guess_genre(),
             "license": self.license,
-            "is_open": self.has_fulltext_url,
             "has_fulltext_url": self.has_fulltext_url,
             "fulltext_url": self.fulltext_url
         }
