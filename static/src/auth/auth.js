@@ -60,9 +60,12 @@ angular.module('auth', [
         console.log("using this redirectUri", requestObj.redirectUri)
 
         // track signups that started at the opencon landing page
-        if ($cookies.get("sawOpenconLandingPage")) {
-            requestObj.sawOpenconLandingPage = true
+        // this is ignored by server unless we are hitting /me/twitter/register
+        var landingPage = $cookies.get("customLandingPage")
+        if (!landingPage){
+            landingPage = "default"
         }
+        requestObj.customLandingPage = landingPage
 
         var urlBase = "api/me/"
         var url = urlBase + $routeParams.identityProvider + "/" + $routeParams.intent
