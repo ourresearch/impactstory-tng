@@ -832,7 +832,7 @@ class Person(db.Model):
             results = r.json()["results"]
             for response_dict in results:
                 if response_dict["free_fulltext_url"]:
-                    product_id = response_dict["id"]
+                    product_id = response_dict["product_id"]
                     products_for_sherlock[product_id].fulltext_url = response_dict["free_fulltext_url"]
                     products_for_sherlock[product_id].license = response_dict["license"]
 
