@@ -23,21 +23,13 @@ from models.refset import Refset
 from models.emailer import send
 from models.log_email import save_email
 from models.log_openness import save_openness_log
-from models.country import country_info
-from models.top_news import top_news_titles
-from models.log_temp_profile import add_new_log_temp_profile
-from models.oa import find_normalized_license
 from util import elapsed
 from util import chunks
 from util import date_as_iso_utc
 from util import days_ago
 from util import safe_commit
 from util import calculate_percentile
-from util import NoDoiException
-from util import normalize
-from util import replace_punctuation
 from util import as_proportion
-from util import pick_best_url
 
 from time import time
 from time import sleep
@@ -249,12 +241,15 @@ def refresh_profile(orcid_id, high_priority=False):
     # sleep(5)
     # return my_person
 
-
     my_person.refresh(high_priority=high_priority)
     db.session.merge(my_person)
+
     commit_success = safe_commit(db)
-    if not commit_success:
+    if commit_success:
+        print u"committed {}".format(orcid_id)
+    else:
         print u"COMMIT fail on {}".format(orcid_id)
+
     return my_person
 
 
@@ -392,18 +387,13 @@ class Person(db.Model):
         # parse orcid so we now what to gather
         self.set_from_orcid()
 
-        # never bother overwriting crossref, so isn't even an option
-        products_without_crossref = [p for p in self.products if not p.crossref_api_raw]
-
-        if products_without_crossref:
+        products_without_dois = [p for p in self.products if not p.doi]
+        if products_without_dois:
             print u"** calling set_data_for_all_products for crossref doi lookup"
             # do this first, so have doi for everything else
             self.set_data_for_all_products("set_doi_from_crossref_biblio_lookup", high_priority)
-
-            print u"** calling set_data_for_all_products for crossref"
-            self.set_data_for_all_products("set_data_from_crossref", high_priority)
         else:
-            print u"** all products have crossref data, so not calling crossref"
+            print u"** all products have dois data, so not calling crossref to look for dois"
 
         products_without_altmetric = [p for p in self.products if not p.altmetric_api_raw]
         if overwrite_metrics or products_without_altmetric:
@@ -499,7 +489,6 @@ class Person(db.Model):
         self.mendeley_sums = None
         products_with_mendeley = [p for p in self.all_products if p.mendeley_api_raw]
         if products_with_mendeley:
-            print "saving mendeley"
             self.mendeley_sums = {
             "readers": self.mendeley_readers,
             "country": self.mendeley_countries,
@@ -708,186 +697,6 @@ class Person(db.Model):
         self.call_sherlock(products_for_sherlock)
 
 
-    def set_fulltext_urls(self):
-
-        total_start_time = time()
-        start_time = time()
-
-        #### default everything to closed
-        # reset everything that we are going to redo
-        for p in self.all_products:
-
-            # p.fulltext_url = None  # uncomment this if want to set open from scratch
-
-            if not p.has_fulltext_url:
-                p.repo_urls = {"urls": []}
-                p.open_step = None
-                p.base_dcoa = None
-                p.base_dcprovider = None
-                p.license = ""
-                p.license_string = ""
-                p.sherlock_response = None
-                p.sherlock_error = None
-
-        print u"starting set_fulltext_urls with {} total products".format(len([p for p in self.all_products]))
-        print u"STARTING WITH: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
-
-        ### first: user supplied a url?  it is open!
-        print u"first making user_supplied_fulltext_url products open"
-        for p in self.all_products:
-            if p.user_supplied_fulltext_url:
-                p.set_oa_from_user_supplied_fulltext_url(p.user_supplied_fulltext_url)
-
-        ### go see if it is open based on its id
-        products_for_lookup = [p for p in self.all_products if not p.has_fulltext_url]
-        self.call_local_lookup_oa(products_for_lookup)
-        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
-
-        ## check base with everything that isn't yet open and has a title
-        products_for_base = [p for p in self.all_products if p.title and not p.has_fulltext_url]
-        self.call_base(products_for_base)
-        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
-
-        ### check sherlock with all base 2s and all not-yet-open dois
-        # and also all those where we don't know the license
-        products_for_sherlock = set()
-        for p in self.all_products:
-            if not p.has_fulltext_url:
-                products_for_sherlock.add(p)
-            if not p.license:
-                products_for_sherlock.add(p)
-            if p.license and p.license == "unknown":
-                products_for_sherlock.add(p)
-        self.call_sherlock(list(products_for_sherlock))
-        print u"SO FAR: {} open\n".format(len([p for p in self.all_products if p.has_fulltext_url]))
-
-        ## and that's a wrap!
-        for p in self.all_products:
-            if not p.has_fulltext_url:
-                p.open_step = "closed"  # so can tell it didn't error out
-        print u"finished all of set_fulltext_urls in {}s".format(elapsed(total_start_time, 2))
-
-
-    # if not called with products, run on everything
-    def call_local_lookup_oa(self, limit_to_products=None):
-        start_time = time()
-
-        if limit_to_products != None:
-            products = limit_to_products
-        else:
-            products = self.products
-
-        for p in products:
-            p.set_local_lookup_oa()
-        print u"finished local step of set_fulltext_urls in {}s".format(elapsed(start_time, 2))
-
-
-    def call_sherlock(self, products):
-        if not products:
-            print "empty product list so not calling sherlock"
-            return
-
-        self.set_data_for_all_products("set_oa_from_sherlock", high_priority=True, include_products=products)
-
-
-    def call_base(self, products):
-        if not products:
-            print "empty product list so not calling base"
-            return
-
-        titles = []
-        # may be more than one product for a given title, so is a dict of lists
-        titles_to_products = defaultdict(list)
-
-        for p in products:
-            title = p.title
-            titles_to_products[normalize(title)].append(p)
-
-            title = title.lower()
-            # can't just replace all punctuation because ' replaced with ? gets no hits
-            title = title.replace('"', "?")
-            title = title.replace('#', "?")
-            title = title.replace('=', "?")
-            title = title.replace('&', "?")
-            title = title.replace('%', "?")
-            title = title.replace('-', "*")
-
-            # only bother looking up titles that are at least 3 words long
-            title_words = title.split()
-            if len(title_words) >= 3:
-                # only look up the first 12 words
-                title_to_query = u" ".join(title_words[0:12])
-                titles.append(title_to_query)
-
-        # now do the lookup in base
-        titles_string = u"%20OR%20".join([u'%22{}%22'.format(title) for title in titles])
-        # print u"{}: calling base with query string of length {}, utf8 bits {}".format(self.id, len(titles_string), 8*len(titles_string.encode('utf-8')))
-        url_template = u"https://api.base-search.net/cgi-bin/BaseHttpSearchInterface.fcgi?func=PerformSearch&query=(dcoa:1%20OR%20dcoa:2)%20AND%20dctitle:({titles_string})&fields=dctitle,dccreator,dcyear,dcrights,dcprovider,dcidentifier,dcoa,dclink&hits=100000&format=json"
-        url = url_template.format(titles_string=titles_string)
-        # print u"{}: calling base with {}".format(self.id, url)
-
-        start_time = time()
-        proxy_url = os.getenv("STATIC_IP_PROXY")
-        proxies = {"https": proxy_url}
-        r = None
-        try:
-            r = requests.get(url, proxies=proxies, timeout=6)
-            # print u"** querying with {} titles took {}s".format(len(titles), elapsed(start_time))
-        except requests.exceptions.ConnectionError:
-            print u"connection error in set_fulltext_urls on {}, skipping.".format(self.orcid_id)
-        except requests.Timeout:
-            print u"timeout error in set_fulltext_urls on {}, skipping.".format(self.orcid_id)
-
-        if r != None and r.status_code != 200:
-            print u"problem searching base for {}! status_code={}".format(self.id, r.status_code)
-            for p in products:
-                p.base_dcoa = u"base query error: status_code={}".format(r.status_code)
-
-        else:
-            try:
-                data = r.json()["response"]
-                # print "number found:", data["numFound"]
-                for doc in data["docs"]:
-                    base_dcoa = str(doc["dcoa"])
-                    try:
-                        matching_products = titles_to_products[normalize(doc["dctitle"])]
-                        for p in matching_products:
-                            if base_dcoa == "1":
-                                # got a 1 hit.  yay!  overwrite no matter what.
-                                p.fulltext_url = pick_best_url(doc["dcidentifier"])
-                                p.open_step = "base 1"
-                                p.repo_urls["urls"] = {}
-                                p.base_dcoa = base_dcoa
-                                p.base_dcprovider = doc["dcprovider"]
-                                if not p.license_string:
-                                    p.license_string = ""
-                                p.license_string += u"{};".format(doc["dcrights"])
-                            elif base_dcoa == "2" and p.base_dcoa != "1":
-                                # got a 2 hit.  use only if we don't already have a 1.
-                                p.repo_urls["urls"] += doc["dcidentifier"]
-                                p.base_dcoa = base_dcoa
-                                p.base_dcprovider = doc["dcprovider"]
-                    except KeyError:
-                        # print u"no hit with title {}".format(doc["dctitle"])
-                        # print u"normalized: {}".format(normalize(doc["dctitle"]))
-                        pass
-            except ValueError:  # includes simplejson.decoder.JSONDecodeError
-                print u'decoding JSON has failed base response for {}'.format(self.orcid_id)
-                for p in products:
-                    p.base_dcoa = u"base lookup error: json response parsing"
-            except AttributeError:  # no json
-                # print u"no hit with title {}".format(doc["dctitle"])
-                # print u"normalized: {}".format(normalize(doc["dctitle"]))
-                pass
-
-        for p in products:
-            if p.license_string:
-                p.license = find_normalized_license(p.license_string)
-
-
-        print u"finished base step of set_fulltext_urls with {} titles in {}s".format(
-            len(titles_to_products), elapsed(start_time, 2))
-
 
     def set_depsy(self):
         if self.email:
@@ -906,6 +715,7 @@ class Person(db.Model):
                 self.depsy_id = response_dict["list"][0]["id"]
                 self.depsy_percentile = response_dict["list"][0]["impact_percentile"]
                 print u"got a depsy id for {}: {}".format(self.id, self.depsy_id)
+
 
     @property
     def first_name(self):
@@ -978,6 +788,64 @@ class Person(db.Model):
 
         self.set_products(products_to_add)
 
+
+
+    def set_fulltext_urls(self):
+        # handle this in impactstory
+        # ### first: user supplied a url?  it is open!
+        # print u"first making user_supplied_fulltext_url products open"
+        for p in self.all_products:
+            if p.user_supplied_fulltext_url:
+                p.set_oa_from_user_supplied_fulltext_url(p.user_supplied_fulltext_url)
+
+        # then call sherlock on the rest!
+        self.call_sherlock()
+
+
+
+    def call_sherlock(self, call_even_if_already_open=False):
+        print u"calling sherlock!"
+        start_time = time()
+
+        products_for_sherlock = {}
+
+        for p in self.products:
+            if call_even_if_already_open:
+                products_for_sherlock[p.id] = p
+            else:
+                if not p.has_fulltext_url or not p.license:
+                    products_for_sherlock[p.id] = p
+
+        if not products_for_sherlock:
+            return
+
+        biblios_for_sherlock = [p.biblio_for_sherlock() for p in products_for_sherlock.values()]
+        # print biblios_for_sherlock
+        url = u"http://api.sherlockoa.org/v1/publications"
+        # url = u"http://localhost:5000/v1/publications"
+
+        # print u"calling sherlock with", biblios_for_sherlock
+        post_body = {"biblios": biblios_for_sherlock}
+        # print "\n\n"
+        # print json.dumps(post_body)
+        # print "\n\n"
+        r = requests.post(url, json=post_body)
+        if r and r.status_code==200:
+            results = r.json()["results"]
+            for response_dict in results:
+                if response_dict["free_fulltext_url"]:
+                    product_id = response_dict["id"]
+                    products_for_sherlock[product_id].fulltext_url = response_dict["free_fulltext_url"]
+                    products_for_sherlock[product_id].license = response_dict["license"]
+
+        open_products = [p for p in products_for_sherlock.values() if p.has_fulltext_url]
+        print u"number of open_products is {}".format(len(open_products))
+
+        print u"finished {method_name} on {num} products in {sec}s".format(
+            method_name="call_sherlock".upper(),
+            num = len(products_for_sherlock),
+            sec = elapsed(start_time, 2)
+        )
 
     def set_data_for_all_products(self, method_name, high_priority=False, include_products=None):
         start_time = time()
@@ -1103,7 +971,7 @@ class Person(db.Model):
         # safe_commit(db)
 
         # now go for it
-        print u"running coauthors for {}".format(self.orcid_id)
+        # print u"running coauthors for {}".format(self.orcid_id)
         coauthor_orcid_id_query = u"""select distinct orcid_id
                     from product
                     where doi in
@@ -1173,13 +1041,6 @@ class Person(db.Model):
             posts += my_product.posts
         return posts
 
-
-    @property
-    def first_publishing_date(self):
-        pubdates = [p.pubdate for p in self.products if p.pubdate]
-        if pubdates:
-            return min(pubdates)
-        return None
 
     @property
     def percent_fulltext(self):
