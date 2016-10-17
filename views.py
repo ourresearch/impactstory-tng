@@ -468,12 +468,13 @@ def twitter_login():
 @app.route("/api/me/twitter/register", methods=["POST"])
 def twitter_register_but_login_if_they_are_already_registered():
     twitter_creds = get_twitter_creds(request.json.get('oauth_token'), request.json.get('oauth_verifier'))
+    landing_page = request.json.get("customLandingPage", "default")
     if not twitter_creds:
         print u"error in twitter_register_but_login_if_they_are_already_registered, empty twitter creds"
         abort_json(422, "empty twitter creds")
 
     try:
-        my_person = make_person(twitter_creds)
+        my_person = make_person(twitter_creds, landing_page=landing_page)
     except PersonExistsException:
         my_person = Person.query.filter_by(twitter=twitter_creds["screen_name"]).first()
 

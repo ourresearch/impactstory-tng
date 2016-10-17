@@ -511,6 +511,22 @@ img.channel-icon.weibo {
     width: auto;
   }
 }
+.page.wizard {
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-align-items: center;
+  -webkit-justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.page.wizard .focus-container {
+  max-width: 600px;
+  font-size: 20px;
+  text-align: left;
+}
 div.page.person-incomplete.blank {
   height: 100vh;
 }

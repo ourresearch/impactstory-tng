@@ -57,7 +57,6 @@ angular.module('staticPages', [
             console.log("this is a custom landing page: ", $routeParams.landingPageName)
             $scope.customPageName = $routeParams.landingPageName
             if ($routeParams.landingPageName == "open"){
-                $cookies.put("sawOpenconLandingPage", true) // legacy
                 $cookies.put("customLandingPage", $routeParams.landingPageName)
             }
 
