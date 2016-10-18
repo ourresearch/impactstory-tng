@@ -153,7 +153,7 @@ q = db.session.query(Person.id)
 update_registry.register(Update(
     job=Person.assign_badges,
     query=q,
-    shortcut_fn=lambda: ["open_license", "percent_fulltext_with_openness", "open_license_since_2006"]
+    shortcut_fn=lambda: ["open_license", "percent_fulltext"]
 ))
 
 q = db.session.query(Person.id)
