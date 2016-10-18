@@ -1673,10 +1673,11 @@ angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache"
 angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/connect-orcid.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
+    "    <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
     "    <div class=\"focus-container\">\n" +
     "        <div class=\"intro\" ng-show=\"hasOrcid===null\">\n" +
     "            <h2>Welcome to Impactstory, {{ auth.getPayload().first_name }}!</h2>\n" +
-    "            <p>Let's get your profile set up!</p>\n" +
+    "            <p>Let's get your profile set up.</p>\n" +
     "\n" +
     "            <p>\n" +
     "                Impactstory is built on <a href=\"http://orcid.org\">ORCID</a>,\n" +
@@ -1705,32 +1706,43 @@ angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", funct
     "        </div>\n" +
     "\n" +
     "        <div id=\"orcid-register-instr\">\n" +
-    "            <div class=\"have-orcid-yes\" ng-show=\"hasOrcid=='yes'\">\n" +
+    "            <div class=\"have-orcid-yes animated fadeInUp\" ng-show=\"hasOrcid=='yes'\">\n" +
+    "                <h2>Great, let's use your ORCID!</h2>\n" +
     "                <div class=\"text\">\n" +
-    "                    Great, just go sign in and you're all good.\n" +
-    "                    When you're done, you'll be redirected back here, and will be\n" +
+    "                    Once you're done, you'll be redirected back here, and will be\n" +
     "                    nearly done creating your profile.\n" +
     "                </div>\n" +
     "                <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', true)\">\n" +
     "                    Sign in to my ORCID\n" +
     "                </span>\n" +
     "            </div>\n" +
-    "            <div class=\"have-orcid-no\" ng-show=\"hasOrcid=='no'\">\n" +
+    "            <div class=\"have-orcid-no animated fadeInUp\" ng-show=\"hasOrcid=='no'\">\n" +
+    "                <h2>No ORCID? No problem.</h2>\n" +
     "                <div class=\"text\">\n" +
-    "                    No problem, it'll take you less than 20 seconds to make an ORCID.\n" +
-    "                    When you're done, you'll be redirected back here, and will be\n" +
-    "                    nearly done creating your profile.\n" +
+    "                    <p>\n" +
+    "                        You can create your ORCID in less than 30 seconds.\n" +
+    "                    </p>\n" +
+    "                    <p>\n" +
+    "                        Once you're done, you'll be redirected back here, and will be\n" +
+    "                        nearly done creating your profile.\n" +
+    "                    </p>\n" +
     "                </div>\n" +
     "                <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
     "                    Create my ORCID\n" +
     "                </span>\n" +
     "            </div>\n" +
-    "            <div class=\"have-orcid-yes\" ng-show=\"hasOrcid=='maybe'\">\n" +
+    "            <div class=\"have-orcid-yes animated fadeInUp\" ng-show=\"hasOrcid=='maybe'\">\n" +
+    "                <h2>No problem!</h2>\n" +
     "                <div class=\"text\">\n" +
-    "                    No problem, just go register for an ORCID. If you've already made one,\n" +
-    "                    it'll redirect you there automatically once you enter your email.\n" +
-    "                    When you're done, you'll be redirected back here, and will be\n" +
-    "                    nearly done creating your profile.\n" +
+    "                    <p>\n" +
+    "                        Just register for a new ORCID. If you've already got one, ORCID will let you know\n" +
+    "                        as part of their registration process.\n" +
+    "                    </p>\n" +
+    "\n" +
+    "                    <p>\n" +
+    "                        When you're done, you'll be redirected back here, and will be\n" +
+    "                        nearly done creating your profile.\n" +
+    "                    </p>\n" +
     "                </div>\n" +
     "                <span class=\"btn btn-primary btn-lg\" ng-click=\"currentUser.orcidAuthenticate('connect', false)\">\n" +
     "                    Try registering for an ORCID\n" +
