@@ -326,46 +326,14 @@ class Person(db.Model):
         self.invalid_orcid = False
 
     @property
-    def percent_cc_by(self):
+    def percent_full_oa(self):
         if not self.num_products:
             return -1
         if self.num_products <= 3:
             return -1
-        if not self.num_cc_by:
+        if not self.num_cc_by and not self.num_cc0_pd:
             return 0
-        return (float(self.num_cc_by)/self.num_products)
-
-    @property
-    def percent_oa(self):
-        if not self.num_products:
-            return -1
-        if self.num_products <= 3:
-            return -1
-        if not self.num_any_oa:
-            return 0
-        return (float(self.num_any_oa)/self.num_products)
-
-    @property
-    def percent_oa_of_fulltext(self):
-        if not self.num_fulltext:
-            return -1
-        if self.num_fulltext <= 3:
-            return -1
-        if not self.num_any_oa:
-            return 0
-        return (float(self.num_any_oa)/self.num_fulltext)
-
-    @property
-    def percent_cc_by_of_oa(self):
-
-        if not self.num_any_oa:
-            return -1
-        if self.num_any_oa <= 3:
-            return -1
-        if not self.num_any_oa:
-            return 0
-        return (float(self.num_cc_by)/self.num_any_oa)
-
+        return (float(self.num_cc_by+self.num_cc0_pd)/self.num_products)
 
 
 
@@ -1378,6 +1346,7 @@ class Person(db.Model):
             "depsy_id": self.depsy_id,
             "campaign": self.campaign,
             "percent_fulltext": self.percent_fulltext,
+            "percent_open_license": self.percent_full_oa,
             "fresh_orcid": self.fresh_orcid,
             "num_posts": self.num_posts,
             "num_mentions": self.num_mentions,
