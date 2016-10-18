@@ -1006,7 +1006,7 @@ class Person(db.Model):
             return None
 
         if self.num_products >= 1:
-            response = round(self.num_cc_by+self.num_cc0_pd/float(self.num_products)), 3)
+            response = round((self.num_cc_by+self.num_cc0_pd/float(self.num_products)), 3)
         else:
             response = None
 
