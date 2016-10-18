@@ -560,14 +560,14 @@ class percent_fulltext(BadgeAssigner):
     importance = .9
 
     def decide_if_assigned(self, person):
-        if person.percent_fulltext:  # the percent_fulltext takes into account having enough papers
+        if person.num_products >= 3 and person.percent_fulltext:
             if person.percent_fulltext >= 0.5:
                 self.candidate_badge.value = person.percent_fulltext * 100
                 self.assigned = True
-                if person.percent_full_oa > 0:
+                if person.percent_open_license > 0:
                     self.candidate_badge.support = \
                         u'Even better, {}% of your papers are published under a fully Open license like CC-BY, making them available for a wide range of reuse (not just reading). Learn more about why this is important at <a href="http://sparcopen.org/our-work/howopenisit/">HowOpenIsIt.</a>'.format(
-                            int(person.percent_full_oa * 100))
+                            int(person.percent_open_license * 100))
                 else:
                     self.candidate_badge.support = ""
 
@@ -582,9 +582,9 @@ class open_license(BadgeAssigner):
     show_in_ui = False
 
     def decide_if_assigned(self, person):
-        if person.percent_full_oa:  # the percent_full_oa takes into account having enough papers
-            if person.percent_full_oa >= 0.1:
-                self.candidate_badge.value = person.percent_full_oa * 100
+        if person.num_products >= 3 and person.percent_open_license:
+            if person.percent_open_license >= 0.1:
+                self.candidate_badge.value = person.percent_open_license * 100
                 self.assigned = True
 
 
