@@ -833,10 +833,8 @@ class Person(db.Model):
         if r and r.status_code==200:
             results = r.json()["results"]
             for response_dict in results:
-                print "sherlock response dict"
-                print response_dict
                 if response_dict["free_fulltext_url"]:
-                    product_id = response_dict["id"]
+                    product_id = response_dict["product_id"]
                     products_for_sherlock[product_id].fulltext_url = response_dict["free_fulltext_url"]
                     products_for_sherlock[product_id].license = response_dict["license"]
 
@@ -1053,11 +1051,11 @@ class Person(db.Model):
 
         # only defined if three or more products
         if self.num_products >= 3:
-            openness = round((num_open_products / float(self.num_products)), 3)
+            response = round((num_open_products / float(self.num_products)), 3)
         else:
-            openness = None
+            response = None
 
-        return openness
+        return response
 
 
     def set_openness(self):
