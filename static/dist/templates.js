@@ -650,17 +650,27 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                        </span>\n" +
     "                    </div>\n" +
     "                    <div class=\"person-profile-info\">\n" +
-    "\n" +
-    "                        <div class=\"person-score belt\">\n" +
-    "                            <span class=\"subscore {{ subscore.name }}\"\n" +
-    "                                  ng-class=\"{ unselected: selectedSubscore && selectedSubscore.name != subscore.name}\"\n" +
-    "                                  ng-click=\"toggleSeletedSubscore(subscore)\"\n" +
-    "                                  ng-show=\"subscore.badgesCount\"\n" +
-    "                                  ng-repeat=\"subscore in subscores | orderBy: 'sortOrder' | filter: { name: '!fun' }\">\n" +
-    "                                <i class=\"fa fa-{{ getBadgeIcon(subscore.name) }}\"></i>\n" +
-    "                                <span class=\"number\">{{ subscore.badgesCount }}</span>\n" +
+    "                        <div class=\"open-access\">\n" +
+    "                            <span class=\"ti-label\">\n" +
+    "                                <i class=\"fa fa-unlock-alt\"></i>\n" +
+    "                                open access\n" +
+    "                            </span>\n" +
+    "                            <span class=\"val\">\n" +
+    "                                {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%\n" +
     "                            </span>\n" +
     "                        </div>\n" +
+    "                        <div class=\"open-license\">\n" +
+    "                            <span class=\"ti-label\">\n" +
+    "                                full OA\n" +
+    "                            </span>\n" +
+    "                            <span class=\"val\">\n" +
+    "                                {{ numFormat.decimalToPerc(person.d.percent_open_license) }}%\n" +
+    "                            </span>\n" +
+    "\n" +
+    "                        </div>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
     "                    </div>\n" +
     "\n" +
     "                </div>\n" +
@@ -1588,7 +1598,9 @@ angular.module("static-pages/page-not-found.tpl.html", []).run(["$templateCache"
 angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/add-publications.tpl.html",
     "<div class=\"page wizard add-publications\">\n" +
-    "    <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    <a class=\"logo\" href=\"/\">\n" +
+    "        <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    </a>\n" +
     "    <div class=\"focus-container\">\n" +
     "        <div class=\"prompting\" ng-show=\"state=='prompting'\">\n" +
     "            <h2>Let's add your publications</h2>\n" +
@@ -1661,7 +1673,9 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
 angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/confirm-publications.tpl.html",
     "<div class=\"page wizard confirm-publications\">\n" +
-    "    <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    <a class=\"logo\" href=\"/\">\n" +
+    "        <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    </a>\n" +
     "    <div class=\"focus-container\">\n" +
     "        <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
     "            <h2>We found some of your publications</h2>\n" +
@@ -1701,7 +1715,9 @@ angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache"
 angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/connect-orcid.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
-    "    <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    <a class=\"logo\" href=\"/\">\n" +
+    "        <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    </a>\n" +
     "    <div class=\"focus-container\">\n" +
     "        <div class=\"intro\" ng-show=\"hasOrcid===null\">\n" +
     "            <h2>Welcome to Impactstory, {{ auth.getPayload().first_name }}!</h2>\n" +

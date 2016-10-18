@@ -44,17 +44,27 @@
                         </span>
                     </div>
                     <div class="person-profile-info">
-
-                        <div class="person-score belt">
-                            <span class="subscore {{ subscore.name }}"
-                                  ng-class="{ unselected: selectedSubscore && selectedSubscore.name != subscore.name}"
-                                  ng-click="toggleSeletedSubscore(subscore)"
-                                  ng-show="subscore.badgesCount"
-                                  ng-repeat="subscore in subscores | orderBy: 'sortOrder' | filter: { name: '!fun' }">
-                                <i class="fa fa-{{ getBadgeIcon(subscore.name) }}"></i>
-                                <span class="number">{{ subscore.badgesCount }}</span>
+                        <div class="open-access">
+                            <span class="ti-label">
+                                <i class="fa fa-unlock-alt"></i>
+                                open access
+                            </span>
+                            <span class="val">
+                                {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%
                             </span>
                         </div>
+                        <div class="open-license">
+                            <span class="ti-label">
+                                full OA
+                            </span>
+                            <span class="val">
+                                {{ numFormat.decimalToPerc(person.d.percent_open_license) }}%
+                            </span>
+
+                        </div>
+
+
+
                     </div>
 
                 </div>
