@@ -552,12 +552,17 @@ img.channel-icon.weibo {
   font-weight: 300;
   font-size: 35px;
 }
+.page.wizard .focus-container .loading-container {
+  margin-bottom: 20px;
+}
 .page.wizard .focus-container .btn {
   margin: 20px 10px 0 0;
+  max-width: 100%;
 }
 @media only screen and (max-width: 992px) {
   .page.wizard .focus-container .btn {
     width: 100%;
+    white-space: normal;
   }
 }
 div.page.person-incomplete.blank {

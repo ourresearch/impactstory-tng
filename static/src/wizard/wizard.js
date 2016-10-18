@@ -70,14 +70,16 @@ angular.module('wizard', [
     })
 
 
-
     .controller("ConfirmPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser){
         console.log("ConfirmPublicationsCtrl is running!")
+        $scope.global.showBottomStuff = false
+        $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
 
         // todo add this to the template.
         $scope.confirm = function(){
             console.log("finishProfile()")
-            $scope.actionSelected = "finish-profile"
+            $scope.actionSelected = "finish-profile" // foo
 
             CurrentUser.setProperty("finished_wizard", true).then(
                 function(x){

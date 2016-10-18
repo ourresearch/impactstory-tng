@@ -566,6 +566,7 @@ img.channel-icon {
   justify-content: center;
   align-items: center;
   text-align: center;
+
   img.logo {
     position: absolute;
     top: 0;
@@ -593,10 +594,16 @@ img.channel-icon {
       font-size: 35px;
     }
 
+    .loading-container {
+      margin-bottom: 20px;
+    }
+
     .btn {
       margin: 20px 10px 0 0;
+      max-width: 100%;
       @media @mobile {
         width: 100%;
+        white-space: normal;
       }
     }
 

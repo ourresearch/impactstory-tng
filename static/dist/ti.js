@@ -2236,14 +2236,16 @@ angular.module('wizard', [
     })
 
 
-
     .controller("ConfirmPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser){
         console.log("ConfirmPublicationsCtrl is running!")
+        $scope.global.showBottomStuff = false
+        $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
 
         // todo add this to the template.
         $scope.confirm = function(){
             console.log("finishProfile()")
-            $scope.actionSelected = "finish-profile"
+            $scope.actionSelected = "finish-profile" // foo
 
             CurrentUser.setProperty("finished_wizard", true).then(
                 function(x){
@@ -3983,32 +3985,39 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
 angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/confirm-publications.tpl.html",
     "<div class=\"page wizard confirm-publications\">\n" +
+    "    <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    <div class=\"focus-container\">\n" +
+    "        <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
+    "            <h2>We found some of your publications</h2>\n" +
+    "            <div>\n" +
+    "                Or more specifically, we found the {{ auth.getPayload().num_products }} publications\n" +
+    "                listed in your ORCID profile.\n" +
+    "                Is that the right number?\n" +
+    "            </div>\n" +
+    "            <span ng-click=\"confirm()\" class=\"btn btn-lg btn-success\">\n" +
     "\n" +
-    "    <h2>my publications</h2>\n" +
-    "    <div>\n" +
-    "        Nice job, we found {{ auth.getPayload().num_products }} publications for you.\n" +
-    "        Does that look good?\n" +
-    "    </div>\n" +
-    "    <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
-    "        <span ng-click=\"confirm()\" class=\"btn btn-lg btn-success\">\n" +
-    "            <i class=\"fa fa-check\"></i>\n" +
-    "            <span class=\"text\">\n" +
-    "                <span class=\"main\">Close enough</span>\n" +
-    "                <span class=\"extra\">I can always add more later</span>\n" +
+    "                <span class=\"text\">\n" +
+    "                    <span class=\"main\"><i class=\"fa fa-check\"></i> Close enough,</span>\n" +
+    "                    <span class=\"extra\">I can add more later</span>\n" +
+    "                </span>\n" +
     "            </span>\n" +
-    "        </span>\n" +
-    "        <a href=\"wizard/add-publications\" class=\"btn btn-lg btn-danger\">\n" +
-    "            <i class=\"fa fa-times\"></i>\n" +
+    "            <a href=\"wizard/add-publications\" class=\"btn btn-lg btn-danger\">\n" +
+    "                <span class=\"text\">\n" +
+    "                    <span class=\"main\"><i class=\"fa fa-times\"></i> Nope,</span>\n" +
+    "                    <span class=\"extra\">let's fix this now</span>\n" +
+    "                </span>\n" +
+    "            </a>\n" +
+    "        </div>\n" +
+    "        <div class=\"loading animated fadeInUp\" ng-show=\"actionSelected\">\n" +
+    "            <h2>Finishing up&hellip;</h2>\n" +
+    "            <div class=\"loading-container\">\n" +
+    "                <md-progress-linear md-mode=\"indeterminate\"></md-progress-linear>\n" +
+    "            </div>\n" +
     "            <span class=\"text\">\n" +
-    "                <span class=\"main\">Nope</span>\n" +
-    "                <span class=\"extra\">Let's fix this now.</span>\n" +
+    "                We're crunching the numbers now. In a few seconds you'll be able\n" +
+    "                to see your completed profile!\n" +
     "            </span>\n" +
-    "        </a>\n" +
-    "    </div>\n" +
-    "    <div class=\"loading\" ng-show=\"actionSelected\">\n" +
-    "        <i class=\"fa fa-refresh fa-spin\"></i>\n" +
-    "        <span class=\"text\">Great! Then we'll build your profile right now.\n" +
-    "            It'll take a few seconds&hellip;</span>\n" +
+    "        </div>\n" +
     "    </div>\n" +
     "</div>");
 }]);
