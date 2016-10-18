@@ -565,6 +565,27 @@ class percent_fulltext(BadgeAssigner):
                 self.candidate_badge.value = person.percent_fulltext * 100
                 self.assigned = True
 
+class percent_fulltext_with_openness(BadgeAssigner):
+    display_name = "Open Access"
+    group = "openness"
+    description = u"{value}% of your research is free to read online."
+    context = u"This level of availability puts you in the top {in_the_top_percentile}% of researchers."
+    importance = .9
+    show_in_ui = False
+
+    def decide_if_assigned(self, person):
+        if person.percent_fulltext:  # the percent_fulltext takes into account having enough papers
+            if person.percent_fulltext >= 0.5:
+                self.candidate_badge.value = person.percent_fulltext * 100
+                self.assigned = True
+                if person.percent_full_oa_since_2006 > 0:
+                    self.candidate_badge.support = \
+                        u"Since 2006, you've published {}% of your research openly using full Open Access licenses (CC-BY, CC0). Congrats and Thanks!".format(
+                            int(person.percent_full_oa_since_2006 * 100))
+                else:
+                    self.candidate_badge.support = ""
+
+
 class open_license(BadgeAssigner):
     display_name = "Open License"
     group = "openness"
@@ -574,10 +595,25 @@ class open_license(BadgeAssigner):
     show_in_ui = False
 
     def decide_if_assigned(self, person):
-        if person.percent_cc_by:  # the percent_cc_by takes into account having enough papers
-            if person.percent_cc_by >= 0.1:
-                self.candidate_badge.value = person.percent_cc_by * 100
+        if person.percent_full_oa:  # the percent_full_oa takes into account having enough papers
+            if person.percent_full_oa >= 0.1:
+                self.candidate_badge.value = person.percent_full_oa * 100
                 self.assigned = True
+
+class open_license_since_2006(BadgeAssigner):
+    display_name = "Open License"
+    group = "openness"
+    description = u"{value}% of your research published since 2006 has a CC-BY, CC0, or public domain license."
+    context = u"This level of availability puts you in the top {in_the_top_percentile}% of researchers."
+    importance = .8
+    show_in_ui = False
+
+    def decide_if_assigned(self, person):
+        if person.percent_full_oa_since_2006:  # the percent_full_oa_since_2006 takes into account having enough papers
+            if person.percent_full_oa_since_2006 >= 0.1:
+                self.candidate_badge.value = person.percent_full_oa_since_2006 * 100
+                self.assigned = True
+
 
 
 

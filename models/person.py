@@ -326,14 +326,32 @@ class Person(db.Model):
         self.invalid_orcid = False
 
     @property
-    def percent_cc_by(self):
+    def percent_full_oa(self):
         if not self.num_products:
             return -1
         if self.num_products <= 3:
             return -1
-        if not self.num_cc_by:
+        if not self.num_cc_by and not self.num_cc0_pd:
             return 0
-        return (float(self.num_cc_by)/self.num_products)
+        return (float(self.num_cc_by+self.num_cc0_pd)/self.num_products)
+
+    @property
+    def percent_full_oa_since_2006(self):
+        num_open = 0
+        num_applicable = 0
+
+        for my_product in self.products:
+            if my_product.year >= 2006:
+                num_applicable += 1
+                if my_product.license == "cc-by":
+                    num_open += 1
+                elif my_product.license == "cc0" or my_product.license == "pd":
+                    num_open += 1
+        if num_applicable <= 3:
+            return -1
+
+        return (float(num_open)/num_applicable)
+
 
     @property
     def percent_oa(self):
