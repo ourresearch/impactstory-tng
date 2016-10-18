@@ -1,8 +1,9 @@
 <div class="page wizard link-your-orcid">
+    <img class="logo" src="static/img/impactstory-logo-sideways.png">
     <div class="focus-container">
         <div class="intro" ng-show="hasOrcid===null">
             <h2>Welcome to Impactstory, {{ auth.getPayload().first_name }}!</h2>
-            <p>Let's get your profile set up!</p>
+            <p>Let's get your profile set up.</p>
 
             <p>
                 Impactstory is built on <a href="http://orcid.org">ORCID</a>,
@@ -31,32 +32,43 @@
         </div>
 
         <div id="orcid-register-instr">
-            <div class="have-orcid-yes" ng-show="hasOrcid=='yes'">
+            <div class="have-orcid-yes animated fadeInUp" ng-show="hasOrcid=='yes'">
+                <h2>Great, let's use your ORCID!</h2>
                 <div class="text">
-                    Great, just go sign in and you're all good.
-                    When you're done, you'll be redirected back here, and will be
+                    Once you're done, you'll be redirected back here, and will be
                     nearly done creating your profile.
                 </div>
                 <span class="btn btn-primary btn-lg" ng-click="currentUser.orcidAuthenticate('connect', true)">
                     Sign in to my ORCID
                 </span>
             </div>
-            <div class="have-orcid-no" ng-show="hasOrcid=='no'">
+            <div class="have-orcid-no animated fadeInUp" ng-show="hasOrcid=='no'">
+                <h2>No ORCID? No problem.</h2>
                 <div class="text">
-                    No problem, it'll take you less than 20 seconds to make an ORCID.
-                    When you're done, you'll be redirected back here, and will be
-                    nearly done creating your profile.
+                    <p>
+                        You can create your ORCID in less than 30 seconds.
+                    </p>
+                    <p>
+                        Once you're done, you'll be redirected back here, and will be
+                        nearly done creating your profile.
+                    </p>
                 </div>
                 <span class="btn btn-primary btn-lg" ng-click="currentUser.orcidAuthenticate('connect', false)">
                     Create my ORCID
                 </span>
             </div>
-            <div class="have-orcid-yes" ng-show="hasOrcid=='maybe'">
+            <div class="have-orcid-yes animated fadeInUp" ng-show="hasOrcid=='maybe'">
+                <h2>No problem!</h2>
                 <div class="text">
-                    No problem, just go register for an ORCID. If you've already made one,
-                    it'll redirect you there automatically once you enter your email.
-                    When you're done, you'll be redirected back here, and will be
-                    nearly done creating your profile.
+                    <p>
+                        Just register for a new ORCID. If you've already got one, ORCID will let you know
+                        as part of their registration process.
+                    </p>
+
+                    <p>
+                        When you're done, you'll be redirected back here, and will be
+                        nearly done creating your profile.
+                    </p>
                 </div>
                 <span class="btn btn-primary btn-lg" ng-click="currentUser.orcidAuthenticate('connect', false)">
                     Try registering for an ORCID

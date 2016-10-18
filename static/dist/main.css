@@ -522,10 +522,48 @@ img.channel-icon.weibo {
   align-items: center;
   text-align: center;
 }
+.page.wizard img.logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 20px;
+  width: 200px;
+}
+@media only screen and (max-width: 992px) {
+  .page.wizard img.logo {
+    width: 150px;
+    left: 50%;
+    margin-left: -80px;
+  }
+}
 .page.wizard .focus-container {
   max-width: 600px;
   font-size: 20px;
   text-align: left;
+}
+@media only screen and (max-width: 992px) {
+  .page.wizard .focus-container {
+    font-size: 18px;
+  }
+}
+.page.wizard .focus-container h2 {
+  margin-bottom: 20px;
+  color: #ff4000;
+  font-weight: 300;
+  font-size: 35px;
+}
+.page.wizard .focus-container .loading-container {
+  margin-bottom: 20px;
+}
+.page.wizard .focus-container .btn {
+  margin: 20px 10px 0 0;
+  max-width: 100%;
+}
+@media only screen and (max-width: 992px) {
+  .page.wizard .focus-container .btn {
+    width: 100%;
+    white-space: normal;
+  }
 }
 div.page.person-incomplete.blank {
   height: 100vh;
