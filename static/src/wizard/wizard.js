@@ -105,6 +105,9 @@ angular.module('wizard', [
 
     .controller("AddPublicationsCtrl", function($scope, $location, $http, $auth, CurrentUser, Person){
         console.log("AddPublicationsCtrl is running!")
+        $scope.global.showBottomStuff = false
+        $scope.global.hideHeader = true
+        $scope.global.isFocusPage = true
 
         $scope.state = "prompting"
         function checkForNewProducts(){
@@ -116,11 +119,11 @@ angular.module('wizard', [
                 CurrentUser.setFromToken(resp.token)
                 console.log("used to have " + oldNumberOfProducts + " products, now " + CurrentUser.d.num_products)
 
-
                 if (oldNumberOfProducts != CurrentUser.d.num_products){
                     console.log("found the new products! assuming we're done getting products now.")
                     $scope.state = "making-profile"
                     $scope.num_products_added = CurrentUser.d.num_products - oldNumberOfProducts
+
 
                     // profile has all products now, but we need to get metrics. refresh it.
                     $http.post("api/me/refresh", {})
