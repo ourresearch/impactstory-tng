@@ -1,29 +1,36 @@
 <div class="page wizard confirm-publications">
+    <img class="logo" src="static/img/impactstory-logo-sideways.png">
+    <div class="focus-container">
+        <div class="actions" ng-hide="actionSelected">
+            <h2>We found some of your publications</h2>
+            <div>
+                Or more specifically, we found the {{ auth.getPayload().num_products }} publications
+                listed in your ORCID profile.
+                Is that the right number?
+            </div>
+            <span ng-click="confirm()" class="btn btn-lg btn-success">
 
-    <h2>my publications</h2>
-    <div>
-        Nice job, we found {{ auth.getPayload().num_products }} publications for you.
-        Does that look good?
-    </div>
-    <div class="actions" ng-hide="actionSelected">
-        <span ng-click="confirm()" class="btn btn-lg btn-success">
-            <i class="fa fa-check"></i>
-            <span class="text">
-                <span class="main">Close enough</span>
-                <span class="extra">I can always add more later</span>
+                <span class="text">
+                    <span class="main"><i class="fa fa-check"></i> Close enough,</span>
+                    <span class="extra">I can add more later</span>
+                </span>
             </span>
-        </span>
-        <a href="wizard/add-publications" class="btn btn-lg btn-danger">
-            <i class="fa fa-times"></i>
+            <a href="wizard/add-publications" class="btn btn-lg btn-danger">
+                <span class="text">
+                    <span class="main"><i class="fa fa-times"></i> Nope,</span>
+                    <span class="extra">let's fix this now</span>
+                </span>
+            </a>
+        </div>
+        <div class="loading animated fadeInUp" ng-show="actionSelected">
+            <h2>Finishing up&hellip;</h2>
+            <div class="loading-container">
+                <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+            </div>
             <span class="text">
-                <span class="main">Nope</span>
-                <span class="extra">Let's fix this now.</span>
+                We're crunching the numbers now. In a few seconds you'll be able
+                to see your completed profile!
             </span>
-        </a>
-    </div>
-    <div class="loading" ng-show="actionSelected">
-        <i class="fa fa-refresh fa-spin"></i>
-        <span class="text">Great! Then we'll build your profile right now.
-            It'll take a few seconds&hellip;</span>
+        </div>
     </div>
 </div>
