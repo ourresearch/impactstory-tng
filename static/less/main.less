@@ -566,11 +566,49 @@ img.channel-icon {
   justify-content: center;
   align-items: center;
   text-align: center;
+
+  img.logo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    width: 200px;
+    @media @mobile {
+      width: 150px;
+      left: 50%;
+      margin-left: -80px;
+    }
+  }
   .focus-container {
     max-width: 600px;
     font-size: 20px;
     text-align: left;
+    @media @mobile {
+      font-size: 18px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: @primaryColor;
+      font-weight: 300;
+      font-size: 35px;
+    }
+
+    .loading-container {
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      margin: 20px 10px 0 0;
+      max-width: 100%;
+      @media @mobile {
+        width: 100%;
+        white-space: normal;
+      }
+    }
+
   }
+
 }
 
 
