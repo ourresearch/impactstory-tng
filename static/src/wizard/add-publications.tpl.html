@@ -1,47 +1,68 @@
 <div class="page wizard add-publications">
-    <h2>add publications</h2>
-    <div class="prompting" ng-show="state=='prompting'">
-        <div class="intro">
-            <span class="no-products" ng-show="!auth.getPayload().num_products">
-                Looks like there are no publications associated with your
-                ORCID. We'll need to fix that. But no worries&mdash;it'll take less
-                than five minutes.
-            </span>
-            <span class="some-products" ng-show="auth.getPayload().num_products">
-                Looks like your ORCID doesn't have all your publications associated with
-                it yet. But there's good news&mdash;fixing that will take less than
-                five minutes.
-            </span>
-            <span>
-                Once you're done, we'll automatically import your publications
-                into Impactstory and you'll be ready to roll!
-            </span>
-        </div>
+    <img class="logo" src="static/img/impactstory-logo-sideways.png">
+    <div class="focus-container">
+        <div class="prompting" ng-show="state=='prompting'">
+            <h2>Let's add your publications</h2>
+            <div class="intro">
+                <p class="no-products" ng-show="!auth.getPayload().num_products">
+                    Looks like there are no publications associated with your
+                    ORCID. We'll need to fix that. But no worries&mdash;it'll take less
+                    than five minutes.
+                </p>
+                <p class="some-products" ng-show="auth.getPayload().num_products">
+                    Looks like your ORCID doesn't have all your publications associated with
+                    it yet. But there's good news&mdash;fixing that will take less than
+                    five minutes.
+                </p>
+                <p>
+                    Once you're done, we'll automatically import your publications
+                    into Impactstory and you'll be ready to roll.
+                </p>
+            </div>
 
-        <div>
-            Here's how it works: we'll send you to the Scopus ORCID importer wizard
-            in a new tab. You just follow the steps in the wizard. When you're done,
-            close that tab and come back here and check out your newly-complete
-            Impactstory profile!
-        </div>
-        <div class="actions">
-            <a href="http://orcid.scopusfeedback.com/"
-               target="_blank"
-               ng-click="start()"
-               class="btn btn-lg btn-primary">Ok let's do it!</a>
-        </div>
+            <div>
+                Here's how it works: we'll send you to the Scopus ORCID importer wizard
+                in a new tab. You'll follow the steps in their wizard. When you're done,
+                close that tab and come back here and check out your newly-complete
+                Impactstory profile!
+            </div>
+            <div class="actions">
+                <a href="http://orcid.scopusfeedback.com/"
+                   target="_blank"
+                   ng-click="start()"
+                   class="btn btn-lg btn-primary">Ok let's do it!</a>
+            </div>
 
-    </div>
-    <div class="working polling" ng-show="state=='polling'">
-        <i class="fa fa-refresh fa-spin"></i>
-        <span class="text">Checking for new products in your ORCID now&hellip;</span>
-    </div>
-    <div class="working making-profile" ng-show="state=='making-profile'">
-        <i class="fa fa-refresh fa-spin"></i>
-        <span class="text">
-            Great, we just imported the  {{ num_products_added }} new products
-            you added to your ORCID. Now we're building your profile...it'll be ready
-            in a few seconds!
-        </span>
+        </div>
+        <div class="working polling" ng-show="state=='polling'">
+            <h2>Loading your new publications&hellip;</h2>
+            <div class="loading-container" ng-show="!error">
+                <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+            </div>
+            <div class="text">
+                <p>
+                    This should only take a few seconds.
+                </p>
+                <p>
+                    If you ran into trouble, you may want to make sure you completed the
+                    Scopus import wizard.
+                </p>
+
+                <a href="http://orcid.scopusfeedback.com/"
+                   target="_blank"
+                   ng-click="start()"
+                   class="btn btn-lg btn-primary">Start the wizard again</a>
+            </div>
+        </div>
+        <div class="working making-profile" ng-show="state=='making-profile'">
+            <h2>Imported {{ num_products_added }} new publications!</h2>
+            <div class="loading-container" ng-show="!error">
+                <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+            </div>
+            <span class="text">
+                We're crunching the numbers for these publications now. In a few seconds you'll be able
+                to see your completed profile!
+            </span>
+        </div>
     </div>
 </div>
