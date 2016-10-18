@@ -1005,8 +1005,9 @@ class Person(db.Model):
         if not self.all_products:
             return None
 
+        num_open_license_products = self.num_cc_by+self.num_cc0_pd
         if self.num_products >= 1:
-            response = round((self.num_cc_by+self.num_cc0_pd/float(self.num_products)), 3)
+            response = round((num_open_license_products/float(self.num_products)), 3)
         else:
             response = None
 
