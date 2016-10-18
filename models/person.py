@@ -1346,7 +1346,7 @@ class Person(db.Model):
             "depsy_id": self.depsy_id,
             "campaign": self.campaign,
             "percent_fulltext": self.percent_fulltext,
-            "percent_open_licenses": self.percent_full_oa,
+            "percent_open_license": self.percent_full_oa,
             "fresh_orcid": self.fresh_orcid,
             "num_posts": self.num_posts,
             "num_mentions": self.num_mentions,
