@@ -760,6 +760,10 @@ div.page.product-page .person-header.row .content div.bio h2 .accounts .link-twi
   margin-left: 5px;
   font-size: 16px;
 }
+div.page.person .person-header.row .content div.bio .person-profile-info,
+div.page.product-page .person-header.row .content div.bio .person-profile-info {
+  margin-top: 5px;
+}
 div.page.person .person-header.row .content div.bio .person-profile-info .open-access-info,
 div.page.product-page .person-header.row .content div.bio .person-profile-info .open-access-info {
   color: #333;
