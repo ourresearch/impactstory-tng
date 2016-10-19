@@ -649,20 +649,28 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                            {{ person.d.affiliation_role_title }}\n" +
     "                        </span>\n" +
     "                    </div>\n" +
-    "                    <div class=\"person-profile-info\">\n" +
     "\n" +
-    "                        <div class=\"person-score belt\">\n" +
-    "                            <span class=\"subscore {{ subscore.name }}\"\n" +
-    "                                  ng-class=\"{ unselected: selectedSubscore && selectedSubscore.name != subscore.name}\"\n" +
-    "                                  ng-click=\"toggleSeletedSubscore(subscore)\"\n" +
-    "                                  ng-show=\"subscore.badgesCount\"\n" +
-    "                                  ng-repeat=\"subscore in subscores | orderBy: 'sortOrder' | filter: { name: '!fun' }\">\n" +
-    "                                <i class=\"fa fa-{{ getBadgeIcon(subscore.name) }}\"></i>\n" +
-    "                                <span class=\"number\">{{ subscore.badgesCount }}</span>\n" +
+    "                    <div class=\"person-profile-info\">\n" +
+    "                        <div class=\"open-access-info\" ng-click=\"showAboutOaDialog($event)\">\n" +
+    "                            <span class=\"fulltext\">\n" +
+    "                                <i class=\"fa fa-unlock-alt\"></i>\n" +
+    "                                <span class=\"ti-label\">\n" +
+    "                                    open access\n" +
+    "                                </span>\n" +
+    "                                <span class=\"val\">\n" +
+    "                                    {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%\n" +
+    "                                </span>\n" +
+    "                            </span>\n" +
+    "                            <span class=\"open-license\">\n" +
+    "                                <span class=\"ti-label\">\n" +
+    "                                    full OA\n" +
+    "                                </span>\n" +
+    "                                <span class=\"val\">\n" +
+    "                                    {{ numFormat.decimalToPerc(person.d.percent_open_license) }}%\n" +
+    "                                </span>\n" +
     "                            </span>\n" +
     "                        </div>\n" +
     "                    </div>\n" +
-    "\n" +
     "                </div>\n" +
     "            </div>\n" +
     "\n" +
@@ -1161,6 +1169,56 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "    </md-dialog>\n" +
     "</script>\n" +
     "\n" +
+    "\n" +
+    "<script type=\"text/ng-template\" id=\"aboutOaDialog.tpl.html\">\n" +
+    "    <md-dialog id=\"aboutOaDialog\">\n" +
+    "        <md-dialog-content>\n" +
+    "            <div class=\"md-dialog-content\">\n" +
+    "                <h2 class=\"main\"><i class=\"fa fa-unlock-alt\"></i> What's your score?</h2>\n" +
+    "                <p>\n" +
+    "                    In celebration of <a href=\"http://www.openaccessweek.org/\">Open Access Week,</a>\n" +
+    "                    we're highlighting the percentage of your work that's open.\n" +
+    "                </p>\n" +
+    "                <h3>Free to read</h3>\n" +
+    "                \n" +
+    "                <p>\n" +
+    "                    We've found <strong>{{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%</strong> of your publications\n" +
+    "                    freely available online. That's great! Research shows that openly-available papers\n" +
+    "                    are more likely to be <a href=\"http://sparceurope.org/oaca/\">cited,</a>\n" +
+    "                    <a href=\"http://microblogging.infodocs.eu/wp-content/uploads/2015/12/openScience_oct2015_ver2.pdf\">read,</a>\n" +
+    "                    and <a href=\"https://www.altmetric.com/blog/attentionoa/\">discussed online</a> more than toll-access ones.\n" +
+    "                </p>\n" +
+    "                <p>\n" +
+    "                    You can increase your percentage of freely available papers by uploading fulltext\n" +
+    "                    to an open repository.\n" +
+    "                </p>\n" +
+    "                <div class=\"reuse\" ng-show=\"person.d.percent_open_license\">\n" +
+    "                    <h3>Open to reuse</h3>\n" +
+    "                    <p>\n" +
+    "                        Even better, you've published <strong>{{ numFormat.decimalToPerc(person.d.percent_open_license) }}%</strong>\n" +
+    "                        of your papers under a fully Open license like <a\n" +
+    "                            href=\"https://creativecommons.org/licenses/by/3.0/\">CC-BY.</a> That lets other researchers\n" +
+    "                        build on your work by searching, remixing, indexing, data-mining them and more.\n" +
+    "                    </p>\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <p>\n" +
+    "                    To learn more about Open Access and the importance of open licenses, check out <a\n" +
+    "                        href=\"http://sparcopen.org/our-work/howopenisit/\">HowOpenIsIt.</a>\n" +
+    "                </p>\n" +
+    "\n" +
+    "            </div>\n" +
+    "\n" +
+    "        </md-dialog-content>\n" +
+    "        <md-dialog-actions class=\"dialog-actions\">\n" +
+    "            <span ng-click=\"cancel()\" class=\"btn btn-default\">\n" +
+    "                <i class=\"fa fa-times\"></i>\n" +
+    "                <span class=\"text\">Dismiss</span>\n" +
+    "            </span>\n" +
+    "        </md-dialog-actions>\n" +
+    "    </md-dialog>\n" +
+    "</script>\n" +
+    "\n" +
     "");
 }]);
 
@@ -1588,7 +1646,9 @@ angular.module("static-pages/page-not-found.tpl.html", []).run(["$templateCache"
 angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/add-publications.tpl.html",
     "<div class=\"page wizard add-publications\">\n" +
-    "    <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    <a class=\"logo\" href=\"/\">\n" +
+    "        <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    </a>\n" +
     "    <div class=\"focus-container\">\n" +
     "        <div class=\"prompting\" ng-show=\"state=='prompting'\">\n" +
     "            <h2>Let's add your publications</h2>\n" +
@@ -1661,7 +1721,9 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
 angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/confirm-publications.tpl.html",
     "<div class=\"page wizard confirm-publications\">\n" +
-    "    <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    <a class=\"logo\" href=\"/\">\n" +
+    "        <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    </a>\n" +
     "    <div class=\"focus-container\">\n" +
     "        <div class=\"actions\" ng-hide=\"actionSelected\">\n" +
     "            <h2>We found some of your publications</h2>\n" +
@@ -1701,7 +1763,9 @@ angular.module("wizard/confirm-publications.tpl.html", []).run(["$templateCache"
 angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("wizard/connect-orcid.tpl.html",
     "<div class=\"page wizard link-your-orcid\">\n" +
-    "    <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    <a class=\"logo\" href=\"/\">\n" +
+    "        <img class=\"logo\" src=\"static/img/impactstory-logo-sideways.png\">\n" +
+    "    </a>\n" +
     "    <div class=\"focus-container\">\n" +
     "        <div class=\"intro\" ng-show=\"hasOrcid===null\">\n" +
     "            <h2>Welcome to Impactstory, {{ auth.getPayload().first_name }}!</h2>\n" +
