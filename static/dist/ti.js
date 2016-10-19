@@ -857,6 +857,7 @@ angular.module('personPage', [
                                            $timeout,
                                            $sce,
                                            Person,
+                                           NumFormat,
                                            personResp){
 
 
@@ -1031,6 +1032,8 @@ angular.module('personPage', [
                 templateUrl: 'aboutOaDialog.tpl.html',
                 controller: function($scope){
                     console.log("running the showAboutOaDialog ctrl")
+                    $scope.person = Person
+                    $scope.numFormat = NumFormat
                     $scope.cancel = function() {
                         console.log("fucking cancel")
                         $mdDialog.cancel();
@@ -3551,7 +3554,37 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "    <md-dialog id=\"aboutOaDialog\">\n" +
     "        <md-dialog-content>\n" +
     "            <div class=\"md-dialog-content\">\n" +
-    "                oa things\n" +
+    "                <h2><i class=\"fa fa-unlock-alt\"></i> What's your score?</h2>\n" +
+    "                <p>\n" +
+    "                    In celebration of <a href=\"http://www.openaccessweek.org/\">Open Access Week,</a>\n" +
+    "                    we're highlighting the percentage of your work that's open.\n" +
+    "                </p>\n" +
+    "                <h3>Open to read</h3>\n" +
+    "                <p>\n" +
+    "                    We've found <strong>{{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%</strong> of your publications\n" +
+    "                    freely available online. That's great! Research shows that openly-available papers\n" +
+    "                    are more likely to be <a href=\"http://sparceurope.org/oaca/\">cited,</a>\n" +
+    "                    <a href=\"http://microblogging.infodocs.eu/wp-content/uploads/2015/12/openScience_oct2015_ver2.pdf\">read,</a>\n" +
+    "                    and <a href=\"https://www.altmetric.com/blog/attentionoa/\">discussed online</a> more than toll-access ones.\n" +
+    "                </p>\n" +
+    "                <p>\n" +
+    "                    You can increase your percentage of freely available papers by uploading fulltext\n" +
+    "                    to an open repository.\n" +
+    "                </p>\n" +
+    "                <div class=\"reuse\" ng-show=\"person.d.percent_open_license\">\n" +
+    "                    <h3>Open to reuse</h3>\n" +
+    "                    <p>\n" +
+    "                        Even better, you've published <strong>{{ numFormat.decimalToPerc(person.d.percent_open_license) }}%</strong>\n" +
+    "                        of your papers under a proper Open license like <a\n" +
+    "                            href=\"https://creativecommons.org/licenses/by/3.0/\">CC-BY.</a> That lets other researchers\n" +
+    "                        build on your work by searching, remixing, indexing, data-mining them and more.\n" +
+    "                    </p>\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <p>\n" +
+    "                    To learn more about Open Access and the importance of open licenses, check out <a\n" +
+    "                        href=\"http://sparcopen.org/our-work/howopenisit/\">HowOpenIsIt.</a>\n" +
+    "                </p>\n" +
     "\n" +
     "            </div>\n" +
     "\n" +
