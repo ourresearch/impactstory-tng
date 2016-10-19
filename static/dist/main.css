@@ -1843,6 +1843,9 @@ div.page.settings-page div.setting-panel div.second-q h4 {
 md-dialog {
   max-width: 500px;
 }
+md-dialog#aboutOaDialog h2 {
+  color: #fb9d00;
+}
 md-dialog#badgeDialog {
   padding: 20px 10px 0;
 }
