@@ -1179,7 +1179,8 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    In celebration of <a href=\"http://www.openaccessweek.org/\">Open Access Week,</a>\n" +
     "                    we're highlighting the percentage of your work that's open.\n" +
     "                </p>\n" +
-    "                <h3>Open to read</h3>\n" +
+    "                <h3>Free to read</h3>\n" +
+    "                \n" +
     "                <p>\n" +
     "                    We've found <strong>{{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%</strong> of your publications\n" +
     "                    freely available online. That's great! Research shows that openly-available papers\n" +
