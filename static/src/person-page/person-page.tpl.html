@@ -43,30 +43,28 @@
                             {{ person.d.affiliation_role_title }}
                         </span>
                     </div>
+
                     <div class="person-profile-info">
-                        <div class="open-access">
-                            <span class="ti-label">
+                        <div class="open-access-info" ng-click="showAboutOaDialog($event)">
+                            <span class="fulltext">
                                 <i class="fa fa-unlock-alt"></i>
-                                open access
+                                <span class="ti-label">
+                                    open access
+                                </span>
+                                <span class="val">
+                                    {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%
+                                </span>
                             </span>
-                            <span class="val">
-                                {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%
+                            <span class="open-license">
+                                <span class="ti-label">
+                                    full OA
+                                </span>
+                                <span class="val">
+                                    {{ numFormat.decimalToPerc(person.d.percent_open_license) }}%
+                                </span>
                             </span>
                         </div>
-                        <div class="open-license">
-                            <span class="ti-label">
-                                full OA
-                            </span>
-                            <span class="val">
-                                {{ numFormat.decimalToPerc(person.d.percent_open_license) }}%
-                            </span>
-
-                        </div>
-
-
-
                     </div>
-
                 </div>
             </div>
 
@@ -557,6 +555,25 @@
                 <i class="fa fa-twitter"></i>
                 <span class="text">Share</span>
             </a>
+            <span ng-click="cancel()" class="btn btn-default">
+                <i class="fa fa-times"></i>
+                <span class="text">Dismiss</span>
+            </span>
+        </md-dialog-actions>
+    </md-dialog>
+</script>
+
+
+<script type="text/ng-template" id="aboutOaDialog.tpl.html">
+    <md-dialog id="aboutOaDialog">
+        <md-dialog-content>
+            <div class="md-dialog-content">
+                oa things
+
+            </div>
+
+        </md-dialog-content>
+        <md-dialog-actions class="dialog-actions">
             <span ng-click="cancel()" class="btn btn-default">
                 <i class="fa fa-times"></i>
                 <span class="text">Dismiss</span>
