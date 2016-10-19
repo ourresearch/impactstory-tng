@@ -1021,6 +1021,33 @@ angular.module('personPage', [
 
 
 
+        // top of profile
+
+        $scope.showAboutOaDialog = function(ev){
+
+            $mdDialog.show({
+                clickOutsideToClose: true,
+                targetEvent: ev,
+                templateUrl: 'aboutOaDialog.tpl.html',
+                controller: function($scope){
+                    console.log("running the showAboutOaDialog ctrl")
+                    $scope.cancel = function() {
+                        console.log("fucking cancel")
+                        $mdDialog.cancel();
+                    };
+                }
+            })
+        }
+
+
+
+
+
+
+
+
+
+
 
         // posts and activity stuff
         var posts = []
@@ -1196,6 +1223,8 @@ angular.module('personPage', [
                 $location.url("u/" + Person.d.orcid_id + "/achievements/" + subscore.name)
             }
         }
+
+
 
 
 
@@ -2997,30 +3026,28 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                            {{ person.d.affiliation_role_title }}\n" +
     "                        </span>\n" +
     "                    </div>\n" +
+    "\n" +
     "                    <div class=\"person-profile-info\">\n" +
-    "                        <div class=\"open-access\">\n" +
-    "                            <span class=\"ti-label\">\n" +
+    "                        <div class=\"open-access-info\" ng-click=\"showAboutOaDialog($event)\">\n" +
+    "                            <span class=\"fulltext\">\n" +
     "                                <i class=\"fa fa-unlock-alt\"></i>\n" +
-    "                                open access\n" +
+    "                                <span class=\"ti-label\">\n" +
+    "                                    open access\n" +
+    "                                </span>\n" +
+    "                                <span class=\"val\">\n" +
+    "                                    {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%\n" +
+    "                                </span>\n" +
     "                            </span>\n" +
-    "                            <span class=\"val\">\n" +
-    "                                {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%\n" +
+    "                            <span class=\"open-license\">\n" +
+    "                                <span class=\"ti-label\">\n" +
+    "                                    full OA\n" +
+    "                                </span>\n" +
+    "                                <span class=\"val\">\n" +
+    "                                    {{ numFormat.decimalToPerc(person.d.percent_open_license) }}%\n" +
+    "                                </span>\n" +
     "                            </span>\n" +
     "                        </div>\n" +
-    "                        <div class=\"open-license\">\n" +
-    "                            <span class=\"ti-label\">\n" +
-    "                                full OA\n" +
-    "                            </span>\n" +
-    "                            <span class=\"val\">\n" +
-    "                                {{ numFormat.decimalToPerc(person.d.percent_open_license) }}%\n" +
-    "                            </span>\n" +
-    "\n" +
-    "                        </div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
     "                    </div>\n" +
-    "\n" +
     "                </div>\n" +
     "            </div>\n" +
     "\n" +
@@ -3511,6 +3538,25 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                <i class=\"fa fa-twitter\"></i>\n" +
     "                <span class=\"text\">Share</span>\n" +
     "            </a>\n" +
+    "            <span ng-click=\"cancel()\" class=\"btn btn-default\">\n" +
+    "                <i class=\"fa fa-times\"></i>\n" +
+    "                <span class=\"text\">Dismiss</span>\n" +
+    "            </span>\n" +
+    "        </md-dialog-actions>\n" +
+    "    </md-dialog>\n" +
+    "</script>\n" +
+    "\n" +
+    "\n" +
+    "<script type=\"text/ng-template\" id=\"aboutOaDialog.tpl.html\">\n" +
+    "    <md-dialog id=\"aboutOaDialog\">\n" +
+    "        <md-dialog-content>\n" +
+    "            <div class=\"md-dialog-content\">\n" +
+    "                oa things\n" +
+    "\n" +
+    "            </div>\n" +
+    "\n" +
+    "        </md-dialog-content>\n" +
+    "        <md-dialog-actions class=\"dialog-actions\">\n" +
     "            <span ng-click=\"cancel()\" class=\"btn btn-default\">\n" +
     "                <i class=\"fa fa-times\"></i>\n" +
     "                <span class=\"text\">Dismiss</span>\n" +
