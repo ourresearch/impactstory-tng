@@ -1174,7 +1174,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "    <md-dialog id=\"aboutOaDialog\">\n" +
     "        <md-dialog-content>\n" +
     "            <div class=\"md-dialog-content\">\n" +
-    "                <h2><i class=\"fa fa-unlock-alt\"></i> What's your score?</h2>\n" +
+    "                <h2 class=\"main\"><i class=\"fa fa-unlock-alt\"></i> What's your score?</h2>\n" +
     "                <p>\n" +
     "                    In celebration of <a href=\"http://www.openaccessweek.org/\">Open Access Week,</a>\n" +
     "                    we're highlighting the percentage of your work that's open.\n" +
@@ -1195,7 +1195,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    <h3>Open to reuse</h3>\n" +
     "                    <p>\n" +
     "                        Even better, you've published <strong>{{ numFormat.decimalToPerc(person.d.percent_open_license) }}%</strong>\n" +
-    "                        of your papers under a proper Open license like <a\n" +
+    "                        of your papers under a fully Open license like <a\n" +
     "                            href=\"https://creativecommons.org/licenses/by/3.0/\">CC-BY.</a> That lets other researchers\n" +
     "                        build on your work by searching, remixing, indexing, data-mining them and more.\n" +
     "                    </p>\n" +
