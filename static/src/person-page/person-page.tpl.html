@@ -43,20 +43,28 @@
                             {{ person.d.affiliation_role_title }}
                         </span>
                     </div>
-                    <div class="person-profile-info">
 
-                        <div class="person-score belt">
-                            <span class="subscore {{ subscore.name }}"
-                                  ng-class="{ unselected: selectedSubscore && selectedSubscore.name != subscore.name}"
-                                  ng-click="toggleSeletedSubscore(subscore)"
-                                  ng-show="subscore.badgesCount"
-                                  ng-repeat="subscore in subscores | orderBy: 'sortOrder' | filter: { name: '!fun' }">
-                                <i class="fa fa-{{ getBadgeIcon(subscore.name) }}"></i>
-                                <span class="number">{{ subscore.badgesCount }}</span>
+                    <div class="person-profile-info">
+                        <div class="open-access-info" ng-click="showAboutOaDialog($event)">
+                            <span class="fulltext">
+                                <i class="fa fa-unlock-alt"></i>
+                                <span class="ti-label">
+                                    open access
+                                </span>
+                                <span class="val">
+                                    {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%
+                                </span>
+                            </span>
+                            <span class="open-license">
+                                <span class="ti-label">
+                                    full OA
+                                </span>
+                                <span class="val">
+                                    {{ numFormat.decimalToPerc(person.d.percent_open_license) }}%
+                                </span>
                             </span>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -547,6 +555,56 @@
                 <i class="fa fa-twitter"></i>
                 <span class="text">Share</span>
             </a>
+            <span ng-click="cancel()" class="btn btn-default">
+                <i class="fa fa-times"></i>
+                <span class="text">Dismiss</span>
+            </span>
+        </md-dialog-actions>
+    </md-dialog>
+</script>
+
+
+<script type="text/ng-template" id="aboutOaDialog.tpl.html">
+    <md-dialog id="aboutOaDialog">
+        <md-dialog-content>
+            <div class="md-dialog-content">
+                <h2 class="main"><i class="fa fa-unlock-alt"></i> What's your score?</h2>
+                <p>
+                    In celebration of <a href="http://www.openaccessweek.org/">Open Access Week,</a>
+                    we're highlighting the percentage of your work that's open.
+                </p>
+                <h3>Free to read</h3>
+
+                <p>
+                    We've found <strong>{{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%</strong> of your publications
+                    freely available online. That's great! Research shows that openly-available papers
+                    are more likely to be <a href="http://sparceurope.org/oaca/">cited,</a>
+                    <a href="http://microblogging.infodocs.eu/wp-content/uploads/2015/12/openScience_oct2015_ver2.pdf">read,</a>
+                    and <a href="https://www.altmetric.com/blog/attentionoa/">discussed online</a> more than toll-access ones.
+                </p>
+                <p>
+                    You can increase your percentage of freely available papers by uploading fulltext
+                    to an open repository.
+                </p>
+                <div class="reuse" ng-show="person.d.percent_open_license">
+                    <h3>Open to reuse</h3>
+                    <p>
+                        Even better, you've published <strong>{{ numFormat.decimalToPerc(person.d.percent_open_license) }}%</strong>
+                        of your papers under a fully Open license like <a
+                            href="https://creativecommons.org/licenses/by/3.0/">CC-BY.</a> That lets other researchers
+                        build on your work by searching, remixing, indexing, data-mining them and more.
+                    </p>
+                </div>
+
+                <p>
+                    To learn more about Open Access and the importance of open licenses, check out <a
+                        href="http://sparcopen.org/our-work/howopenisit/">HowOpenIsIt.</a>
+                </p>
+
+            </div>
+
+        </md-dialog-content>
+        <md-dialog-actions class="dialog-actions">
             <span ng-click="cancel()" class="btn btn-default">
                 <i class="fa fa-times"></i>
                 <span class="text">Dismiss</span>

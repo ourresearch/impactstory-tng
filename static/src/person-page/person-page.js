@@ -64,6 +64,7 @@ angular.module('personPage', [
                                            $timeout,
                                            $sce,
                                            Person,
+                                           NumFormat,
                                            personResp){
 
 
@@ -222,6 +223,35 @@ angular.module('personPage', [
             $location.url("u/" + Person.d.orcid_id + "/a/" + badgeUrlName(badge))
 
         }
+
+
+
+
+
+
+        // top of profile
+
+        $scope.showAboutOaDialog = function(ev){
+
+            $mdDialog.show({
+                clickOutsideToClose: true,
+                targetEvent: ev,
+                templateUrl: 'aboutOaDialog.tpl.html',
+                controller: function($scope){
+                    console.log("running the showAboutOaDialog ctrl")
+                    $scope.person = Person
+                    $scope.numFormat = NumFormat
+                    $scope.cancel = function() {
+                        console.log("fucking cancel")
+                        $mdDialog.cancel();
+                    };
+                }
+            })
+        }
+
+
+
+
 
 
 
@@ -403,6 +433,8 @@ angular.module('personPage', [
                 $location.url("u/" + Person.d.orcid_id + "/achievements/" + subscore.name)
             }
         }
+
+
 
 
 
