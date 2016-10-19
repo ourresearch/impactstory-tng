@@ -615,7 +615,7 @@ class Person(db.Model):
         self.set_num_mentions()
         self.set_num_products()
         self.set_openness()  # do after set_fulltext_urls
-        self.set_num_oa_licenses() # do after set_fulltext_urls
+        self.set_num_oa_licenses() # do after set_fulltext_urls, before assign_badges
         self.set_event_counts()
         self.set_coauthors()  # do this last, uses scores
         print u"finished calculating part of {method_name} on {num} products in {sec}s".format(
@@ -1005,7 +1005,12 @@ class Person(db.Model):
         if not self.all_products:
             return None
 
-        num_open_license_products = self.num_cc_by+self.num_cc0_pd
+        num_open_license_products = 0
+        if self.num_cc_by:
+            num_open_license_products += self.num_cc_by
+        if self.num_cc0_pd:
+            num_open_license_products += self.num_cc0_pd
+
         if self.num_products >= 1:
             response = round((num_open_license_products/float(self.num_products)), 3)
         else:
