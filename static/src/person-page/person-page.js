@@ -64,6 +64,7 @@ angular.module('personPage', [
                                            $timeout,
                                            $sce,
                                            Person,
+                                           NumFormat,
                                            personResp){
 
 
@@ -238,6 +239,8 @@ angular.module('personPage', [
                 templateUrl: 'aboutOaDialog.tpl.html',
                 controller: function($scope){
                     console.log("running the showAboutOaDialog ctrl")
+                    $scope.person = Person
+                    $scope.numFormat = NumFormat
                     $scope.cancel = function() {
                         console.log("fucking cancel")
                         $mdDialog.cancel();
