@@ -325,15 +325,6 @@ class Person(db.Model):
     def __init__(self):
         self.invalid_orcid = False
 
-    @property
-    def percent_full_oa(self):
-        if not self.num_products:
-            return -1
-        if self.num_products <= 3:
-            return -1
-        if not self.num_cc_by and not self.num_cc0_pd:
-            return 0
-        return (float(self.num_cc_by+self.num_cc0_pd)/self.num_products)
 
 
 
@@ -1009,6 +1000,19 @@ class Person(db.Model):
             posts += my_product.posts
         return posts
 
+    @property
+    def percent_open_license(self):
+        if not self.all_products:
+            return None
+
+        num_open_license_products = self.num_cc_by+self.num_cc0_pd
+        if self.num_products >= 1:
+            response = round((num_open_license_products/float(self.num_products)), 3)
+        else:
+            response = None
+
+        return response
+
 
     @property
     def percent_fulltext(self):
@@ -1018,7 +1022,7 @@ class Person(db.Model):
         num_open_products = len([p for p in self.all_products if p.has_fulltext_url])
 
         # only defined if three or more products
-        if self.num_products >= 3:
+        if self.num_products >= 1:
             response = round((num_open_products / float(self.num_products)), 3)
         else:
             response = None
@@ -1346,7 +1350,7 @@ class Person(db.Model):
             "depsy_id": self.depsy_id,
             "campaign": self.campaign,
             "percent_fulltext": self.percent_fulltext,
-            "percent_open_license": self.percent_full_oa,
+            "percent_open_license": self.percent_open_license,
             "fresh_orcid": self.fresh_orcid,
             "num_posts": self.num_posts,
             "num_mentions": self.num_mentions,
