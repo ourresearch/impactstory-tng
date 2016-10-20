@@ -763,7 +763,6 @@ class Person(db.Model):
 
 
     def call_sherlock(self, call_even_if_already_open=False):
-        print u"calling sherlock!"
         start_time = time()
 
         products_for_sherlock = {}
@@ -780,25 +779,28 @@ class Person(db.Model):
 
         biblios_for_sherlock = [p.biblio_for_sherlock() for p in products_for_sherlock.values()]
         # print biblios_for_sherlock
-        url = u"http://api.sherlockoa.org/v1/publications"
-        # url = u"http://localhost:5000/v1/publications"
+        url = u"http://api.oadoi.org/v1/publications?no-cache"
 
         # print u"calling sherlock with", biblios_for_sherlock
+        print u"calling sherlock with {} products".format(len(biblios_for_sherlock))
         post_body = {"biblios": biblios_for_sherlock}
+
         # print "\n\n"
         # print json.dumps(post_body)
         # print "\n\n"
+
         r = requests.post(url, json=post_body)
         if r and r.status_code==200:
             results = r.json()["results"]
             for response_dict in results:
                 if response_dict["free_fulltext_url"]:
-                    product_id = response_dict["product_id"]
-                    products_for_sherlock[product_id].fulltext_url = response_dict["free_fulltext_url"]
-                    products_for_sherlock[product_id].license = response_dict["license"]
+                    my_product = products_for_sherlock[response_dict["product_id"]]
+                    my_product.fulltext_url = response_dict["free_fulltext_url"]
+                    my_product.license = response_dict["license"]
+                    print u"got a new open product! {} {} ({})".format(
+                        my_product.id, my_product.fulltext_url, my_product.license)
 
         open_products = [p for p in products_for_sherlock.values() if p.has_fulltext_url]
-        print u"number of open_products is {}".format(len(open_products))
 
         print u"finished {method_name} on {num} products in {sec}s".format(
             method_name="call_sherlock".upper(),
