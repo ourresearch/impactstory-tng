@@ -639,23 +639,6 @@ class Person(db.Model):
         self.set_num_mentions()
         self.set_num_products()
 
-    # convenience method to call base again as a batch job,
-    # for example after adding license-storing code
-    def call_base_on_base1s(self):
-        products_with_base1 = [p for p in self.all_products if p.open_step == "base 1"]
-        self.call_base(products_with_base1)
-
-
-    # convenience method to call sherlock again as a batch job,
-    # for example after adding license-storing code
-    def call_sherlock_on_license_unknowns(self):
-        products_for_sherlock = []
-        for p in self.all_products:
-            if p.fulltext_url and not p.license:
-                products_for_sherlock += [p]
-        self.call_sherlock(products_for_sherlock)
-
-
 
     def set_depsy(self):
         if self.email:
@@ -761,6 +744,8 @@ class Person(db.Model):
         self.call_sherlock()
 
 
+    def call_sherlock_on_everything(self):
+        return self.call_sherlock(call_even_if_already_open=True)
 
     def call_sherlock(self, call_even_if_already_open=False):
         start_time = time()
@@ -779,7 +764,7 @@ class Person(db.Model):
 
         biblios_for_sherlock = [p.biblio_for_sherlock() for p in products_for_sherlock.values()]
         # print biblios_for_sherlock
-        url = u"http://api.oadoi.org/v1/publications?no-cache"
+        url = u"http://api.oadoi.org/v1/publications"
 
         # print u"calling sherlock with", biblios_for_sherlock
         print u"calling sherlock with {} products".format(len(biblios_for_sherlock))
@@ -797,6 +782,7 @@ class Person(db.Model):
                     my_product = products_for_sherlock[response_dict["product_id"]]
                     my_product.fulltext_url = response_dict["free_fulltext_url"]
                     my_product.license = response_dict["license"]
+                    my_product.evidence = response_dict["evidence"]
                     print u"got a new open product! {} {} ({})".format(
                         my_product.id, my_product.fulltext_url, my_product.license)
 

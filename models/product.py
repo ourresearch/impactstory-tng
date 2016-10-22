@@ -142,7 +142,7 @@ class Product(db.Model):
     user_supplied_fulltext_url = db.Column(db.Text)
     fulltext_url = db.Column(db.Text)
     license = db.Column(db.Text)
-    open_step = db.Column(db.Text)
+    evidence = db.Column(db.Text)
 
     error = db.Column(db.Text)
 
@@ -154,7 +154,7 @@ class Product(db.Model):
     def set_oa_from_user_supplied_fulltext_url(self, url):
         self.user_supplied_fulltext_url = url
         self.fulltext_url = url
-        self.open_step = "user supplied fulltext url"
+        self.evidence = "user supplied fulltext url"
         self.license = "unknown"
 
 
