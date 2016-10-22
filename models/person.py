@@ -778,13 +778,14 @@ class Person(db.Model):
         if r and r.status_code==200:
             results = r.json()["results"]
             for response_dict in results:
-                if response_dict["free_fulltext_url"]:
-                    my_product = products_for_sherlock[response_dict["product_id"]]
+                my_product = products_for_sherlock[response_dict["product_id"]]
+                if not my_product.user_supplied_fulltext_url:
                     my_product.fulltext_url = response_dict["free_fulltext_url"]
                     my_product.license = response_dict["license"]
                     my_product.evidence = response_dict["evidence"]
-                    print u"got a new open product! {} {} ({})".format(
-                        my_product.id, my_product.fulltext_url, my_product.license)
+                    if my_product.fulltext_url:
+                        print u"got a new open product! {} {} ({})".format(
+                            my_product.id, my_product.fulltext_url, my_product.license)
 
         open_products = [p for p in products_for_sherlock.values() if p.has_fulltext_url]
 
