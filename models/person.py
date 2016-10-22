@@ -788,6 +788,8 @@ class Person(db.Model):
                             my_product.id, my_product.fulltext_url, my_product.license)
 
         open_products = [p for p in products_for_sherlock.values() if p.has_fulltext_url]
+        print u"sherlock found {} open products out of of {} in request".format(
+            len(open_products), len(biblios_for_sherlock))
 
         print u"finished {method_name} on {num} products in {sec}s".format(
             method_name="call_sherlock".upper(),
