@@ -43,7 +43,8 @@ update_registry.register(Update(
 q = db.session.query(Person.id)
 update_registry.register(Update(
     job=Person.call_sherlock_on_everything,
-    query=q
+    query=q,
+    queue_id=0
 ))
 
 q = db.session.query(Person.id)
