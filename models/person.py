@@ -756,7 +756,7 @@ class Person(db.Model):
             if call_even_if_already_open:
                 products_for_sherlock[p.id] = p
             else:
-                if not p.has_fulltext_url or not p.license:
+                if not p.has_fulltext_url:
                     products_for_sherlock[p.id] = p
 
         if not products_for_sherlock:
