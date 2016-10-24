@@ -432,7 +432,7 @@ def orcid_login():
 @app.route("/api/me/orcid/connect", methods=["POST"])
 @login_required
 def orcid_connect():
-   print u"in orcid_connect with request.json {}".format(request.json)
+    print u"in orcid_connect with request.json {}".format(request.json)
 
     orcid_id = get_orcid_id_from_oauth(
         request.json['code'],
