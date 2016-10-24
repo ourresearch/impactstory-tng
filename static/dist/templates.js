@@ -764,7 +764,13 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "        <div class=\"tab-view publications row\" ng-if=\"tab=='publications'\">\n" +
     "            <div class=\"col-md-8 publications-col main-col\">\n" +
     "                <h3>\n" +
-    "                    {{ selectedGenre.count || products.length }}\n" +
+    "                    <span class=\"count\">\n" +
+    "                        {{ selectedGenre.count || products.length }}\n" +
+    "                    </span>\n" +
+    "                    <span class=\"most-recent\" ng-show=\"products.length==100\">\n" +
+    "                        most recent\n" +
+    "                    </span>\n" +
+    "\n" +
     "                    <span class=\"no-filter\" ng-if=\"!selectedGenre\">\n" +
     "                        publication<span ng-show=\"products.length\">s</span>\n" +
     "                    </span>\n" +
@@ -1180,7 +1186,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    we're highlighting the percentage of your work that's open.\n" +
     "                </p>\n" +
     "                <h3>Free to read</h3>\n" +
-    "                \n" +
+    "\n" +
     "                <p>\n" +
     "                    We've found <strong>{{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%</strong> of your publications\n" +
     "                    freely available online. That's great! Research shows that openly-available papers\n" +
@@ -1189,8 +1195,12 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    and <a href=\"https://www.altmetric.com/blog/attentionoa/\">discussed online</a> more than toll-access ones.\n" +
     "                </p>\n" +
     "                <p>\n" +
-    "                    You can increase your percentage of freely available papers by uploading fulltext\n" +
-    "                    to an open repository.\n" +
+    "                    You can increase your percentage of freely available papers by\n" +
+    "                    <a href=\"http://blog.impactstory.org/impact-challenge-data-repository/\">\n" +
+    "                         uploading them to an open repository.\n" +
+    "                    </a>\n" +
+    "\n" +
+    "\n" +
     "                </p>\n" +
     "                <div class=\"reuse\" ng-show=\"person.d.percent_open_license\">\n" +
     "                    <h3>Open to reuse</h3>\n" +
@@ -1215,7 +1225,15 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                <i class=\"fa fa-times\"></i>\n" +
     "                <span class=\"text\">Dismiss</span>\n" +
     "            </span>\n" +
+    "            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
+    "               target=\"_blank\"\n" +
+    "               class=\"btn btn-primary\"\n" +
+    "               ng-click=\"shareBadge()\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                <span class=\"text\">Share your score</span>\n" +
+    "            </a>\n" +
     "        </md-dialog-actions>\n" +
+    "\n" +
     "    </md-dialog>\n" +
     "</script>\n" +
     "\n" +
