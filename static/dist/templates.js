@@ -1180,7 +1180,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    we're highlighting the percentage of your work that's open.\n" +
     "                </p>\n" +
     "                <h3>Free to read</h3>\n" +
-    "                \n" +
+    "\n" +
     "                <p>\n" +
     "                    We've found <strong>{{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%</strong> of your publications\n" +
     "                    freely available online. That's great! Research shows that openly-available papers\n" +
