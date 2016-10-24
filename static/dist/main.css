@@ -1850,6 +1850,9 @@ md-dialog {
 md-dialog#aboutOaDialog h2 {
   color: #fb9d00;
 }
+md-dialog#aboutOaDialog .btn {
+  margin: 10px;
+}
 md-dialog#badgeDialog {
   padding: 20px 10px 0;
 }
@@ -1874,7 +1877,7 @@ md-dialog#badgeDialog .video-container iframe {
   margin: 0 auto;
 }
 md-dialog#badgeDialog .dialog-actions .btn {
-  margin-left: 10px;
+  margin: 10px;
   color: #555;
 }
 md-dialog#badgeDialog .dialog-actions .btn i {

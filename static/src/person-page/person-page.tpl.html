@@ -619,7 +619,15 @@
                 <i class="fa fa-times"></i>
                 <span class="text">Dismiss</span>
             </span>
+            <a href="https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
+               target="_blank"
+               class="btn btn-primary"
+               ng-click="shareBadge()">
+                <i class="fa fa-twitter"></i>
+                <span class="text">Share your score</span>
+            </a>
         </md-dialog-actions>
+
     </md-dialog>
 </script>
 
