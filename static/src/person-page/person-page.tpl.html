@@ -158,7 +158,13 @@
         <div class="tab-view publications row" ng-if="tab=='publications'">
             <div class="col-md-8 publications-col main-col">
                 <h3>
-                    {{ selectedGenre.count || products.length }}
+                    <span class="count">
+                        {{ selectedGenre.count || products.length }}
+                    </span>
+                    <span class="most-recent" ng-show="products.length==100">
+                        most recent
+                    </span>
+
                     <span class="no-filter" ng-if="!selectedGenre">
                         publication<span ng-show="products.length">s</span>
                     </span>
@@ -583,8 +589,12 @@
                     and <a href="https://www.altmetric.com/blog/attentionoa/">discussed online</a> more than toll-access ones.
                 </p>
                 <p>
-                    You can increase your percentage of freely available papers by uploading fulltext
-                    to an open repository.
+                    You can increase your percentage of freely available papers by
+                    <a href="http://blog.impactstory.org/impact-challenge-data-repository/">
+                         uploading them to an open repository.
+                    </a>
+
+
                 </p>
                 <div class="reuse" ng-show="person.d.percent_open_license">
                     <h3>Open to reuse</h3>
@@ -609,7 +619,15 @@
                 <i class="fa fa-times"></i>
                 <span class="text">Dismiss</span>
             </span>
+            <a href="https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
+               target="_blank"
+               class="btn btn-primary"
+               ng-click="shareBadge()">
+                <i class="fa fa-twitter"></i>
+                <span class="text">Share your score</span>
+            </a>
         </md-dialog-actions>
+
     </md-dialog>
 </script>
 
