@@ -408,7 +408,7 @@ def refresh_me():
 
 @app.route("/api/me/orcid/login", methods=["POST"])
 def orcid_login():
-   print u"in orcid_login with request.json {}".format(request.json)
+    print u"in orcid_login with request.json {}".format(request.json)
     my_orcid_id = get_orcid_id_from_oauth(
         request.json['code'],
         request.json['redirectUri']
