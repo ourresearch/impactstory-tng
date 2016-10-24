@@ -158,7 +158,13 @@
         <div class="tab-view publications row" ng-if="tab=='publications'">
             <div class="col-md-8 publications-col main-col">
                 <h3>
-                    {{ selectedGenre.count || products.length }}
+                    <span class="count">
+                        {{ selectedGenre.count || products.length }}
+                    </span>
+                    <span class="most-recent" ng-show="products.length==100">
+                        most recent
+                    </span>
+
                     <span class="no-filter" ng-if="!selectedGenre">
                         publication<span ng-show="products.length">s</span>
                     </span>
