@@ -103,7 +103,7 @@ angular.module("about-pages/about-data.tpl.html", []).run(["$templateCache", fun
     "        <ol>\n" +
     "            <li>\n" +
     "                First, look through your publications list\n" +
-    "                here on Impactstory. Find a publication that doesn't have \"free fulltext\" next to it.\n" +
+    "                here on Impactstory. Find a publication that doesn't have \"[full text]\" next to it.\n" +
     "            </li>\n" +
     "            <li>\n" +
     "                Go to an open repository like <a href=\"http://figshare.com\">figshare</a> or\n" +
@@ -811,6 +811,8 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "            </div>\n" +
     "\n" +
     "        </div>\n" +
+    "\n" +
+    "\n" +
     "\n" +
     "\n" +
     "        <!-- PUBLICATIONS view -->\n" +
