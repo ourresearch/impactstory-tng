@@ -765,7 +765,7 @@ class Person(db.Model):
 
         biblios_for_sherlock = [p.biblio_for_sherlock() for p in products_for_sherlock.values()]
         # print biblios_for_sherlock
-        url = u"http://api.oadoi.org/v1/publications"
+        url = u"http://api.oadoi.org/v1/publications?no-cache"
 
         # print u"calling sherlock with", biblios_for_sherlock
         print u"calling sherlock with {} products".format(len(biblios_for_sherlock))
