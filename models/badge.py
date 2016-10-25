@@ -552,6 +552,21 @@ class open_science_triathlete(BadgeAssigner):
             self.candidate_badge.value = 1
 
 
+class all_fulltext(BadgeAssigner):
+    display_name = "OA Hero"
+    group = "openness"
+    description = u"100% of your research is free to read online."
+    context = u"This level of availability puts you in the top {in_the_top_percentile}% of researchers."
+    importance = .99
+    show_in_ui = False
+
+    def decide_if_assigned(self, person):
+        if person.num_products >= 3 and person.percent_fulltext:
+            if person.percent_fulltext >= 1.0:
+                self.candidate_badge.value = person.percent_fulltext * 100
+                self.assigned = True
+
+
 class percent_fulltext(BadgeAssigner):
     display_name = "Open Access"
     group = "openness"
