@@ -876,6 +876,7 @@ angular.module('personPage', [
         $scope.d = {}
 
 
+
         var badgeUrlName = function(badge){
            return badge.display_name.toLowerCase().replace(/\s/g, "-")
         }
@@ -951,6 +952,16 @@ angular.module('personPage', [
         }
         else {
             $scope.showMendeleyDetails = false
+        }
+
+
+        // this is used when you want to tweet your profile
+        $scope.profileLinkToTweet = "https://impactstory.org/u/"
+        if (Person.d.twitter){
+            $scope.profileLinkToTweet += Person.d.twitter
+        }
+        else {
+            $scope.profileLinkToTweet += Person.d.orcid_id
         }
 
 
@@ -3094,7 +3105,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                                <i class=\"fa fa-arrow-up\"></i>\n" +
     "                                <span class=\"text\">Boost your score</span>\n" +
     "                            </a>\n" +
-    "                            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.twitter }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
+    "                            <a href=\"https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
     "                               target=\"_blank\"\n" +
     "                               class=\"share\"\n" +
     "                               ng-click=\"shareBadge()\">\n" +
@@ -3654,7 +3665,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                <i class=\"fa fa-times\"></i>\n" +
     "                <span class=\"text\">Dismiss</span>\n" +
     "            </span>\n" +
-    "            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.orgu/{{ person.d.twitter }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
+    "            <a href=\"https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
     "               target=\"_blank\"\n" +
     "               class=\"btn btn-primary\"\n" +
     "               ng-click=\"shareBadge()\">\n" +
