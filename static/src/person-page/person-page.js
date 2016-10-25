@@ -242,7 +242,6 @@ angular.module('personPage', [
                     $scope.person = Person
                     $scope.numFormat = NumFormat
                     $scope.cancel = function() {
-                        console.log("fucking cancel")
                         $mdDialog.cancel();
                     };
                 }
