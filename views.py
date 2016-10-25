@@ -363,7 +363,7 @@ def login_required(f):
             print u"in login_required with error, got DecodeError"
             return response
 
-        print u"in login_required. payload: {}: ".format(payload)
+        # print u"in login_required. payload: {}: ".format(payload)
 
         g.my_person = None
         if "id" in payload:
@@ -378,7 +378,7 @@ def login_required(f):
         if not g.my_person:
             print u"in login_required with error, no known keys in token payload: {}".format(payload)
 
-        print u"in login_required success, got a person {}".format(g.my_person)
+        # print u"in login_required success, got a person {}".format(g.my_person)
         return f(*args, **kwargs)
 
     return decorated_function
