@@ -346,6 +346,7 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if not request.headers.get('Authorization'):
             response = jsonify(message='Missing authorization header')
+            print u"in login_required with error, Missing authorization header"
             response.status_code = 401
             return response
 
@@ -354,13 +355,15 @@ def login_required(f):
         except DecodeError:
             response = jsonify(message='Token is invalid')
             response.status_code = 401
+            print u"in login_required with error, got DecodeError"
             return response
         except ExpiredSignature:
             response = jsonify(message='Token has expired')
             response.status_code = 401
+            print u"in login_required with error, got DecodeError"
             return response
 
-        # print u"*****payload: ", payload
+        # print u"in login_required. payload: {}: ".format(payload)
 
         g.my_person = None
         if "id" in payload:
@@ -373,9 +376,9 @@ def login_required(f):
             # fallback for old token format
             g.my_person = Person.query.filter_by(orcid_id=payload["sub"]).first()
         if not g.my_person:
-            print u"error logging in user, no known keys in token payload: {}".format(payload)
+            print u"in login_required with error, no known keys in token payload: {}".format(payload)
 
-        # print u"****in login_required, got a person", g.my_person
+        # print u"in login_required success, got a person {}".format(g.my_person)
         return f(*args, **kwargs)
 
     return decorated_function
@@ -405,15 +408,18 @@ def refresh_me():
 
 @app.route("/api/me/orcid/login", methods=["POST"])
 def orcid_login():
+    print u"in orcid_login with request.json {}".format(request.json)
     my_orcid_id = get_orcid_id_from_oauth(
         request.json['code'],
         request.json['redirectUri']
     )
     if not my_orcid_id:
+        print u"in orcid_login with error, no my_orcid_id"
         abort_json(401, "Bad ORCID response; the auth code you sent is probably expired.")
 
     my_person = Person.query.filter_by(orcid_id=my_orcid_id).first()
     if not my_person:
+        print u"in orcid_login with error, no my_person"
         abort_json(
             404,
             "We don't have that ORCID in the db.",
@@ -426,11 +432,14 @@ def orcid_login():
 @app.route("/api/me/orcid/connect", methods=["POST"])
 @login_required
 def orcid_connect():
+    print u"in orcid_connect with request.json {}".format(request.json)
+
     orcid_id = get_orcid_id_from_oauth(
         request.json['code'],
         request.json['redirectUri']
     )
     if not orcid_id:
+        print u"in orcid_login with error, no orcid_id"
         abort_json(500, "Invalid JSON return from ORCID during OAuth.")
 
     connect_orcid(g.my_person, orcid_id)
