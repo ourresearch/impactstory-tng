@@ -56,7 +56,7 @@ def get_orcid_id_from_oauth(auth_code, redirect_uri):
     headers = {"Accept": "application/json"}
     # First we exchange authorization code for access token;
     # the access token has the ORCID ID, which is actually all we need here.
-    r = requests.post(access_token_url, headers=headers, json=payload)
+    r = requests.post(access_token_url, headers=headers, data=payload)
     try:
         print u"get_orcid_id_from_oauth request status code: {}".format(r.status_code)
         print u"get_orcid_id_from_oauth json: {}".format(r.json())
