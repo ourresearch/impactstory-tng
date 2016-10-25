@@ -2494,17 +2494,16 @@ angular.module("about-pages/about-data.tpl.html", []).run(["$templateCache", fun
     "                the paper you've chosen. <a\n" +
     "                    href=\"http://blog.impactstory.org/impact-challenge-data-repository/\">Here's more detailed instructions.</a>\n" +
     "            </li>\n" +
-    "            <li>Once you've uploaded your (formerly!) paywalled paper, note the URL. Then return to Impactstory</li>\n" +
+    "            <li>Once you've uploaded your (formerly!) paywalled paper, note the new open URL you've created.\n" +
+    "            </li>\n" +
     "            <li>\n" +
-    "                Click on the paper you've uploaded. Paste your new open URL into the \"Add a link to free fulltext\"\n" +
+    "                Come back to Impactstory\n" +
+    "                and view your publications list. Click on the title of the paper you've uploaded. Paste your new open URL into the \"Add a link to free fulltext\"\n" +
     "                field at the top of the page.\n" +
     "            </li>\n" +
     "            <li>\n" +
-    "                Go to your Impactstory Settings page by clicking the gear icon at the top right of the screen.\n" +
-    "                Once there, click the \"Sync with my ORCID now\" button.\n" +
-    "            </li>\n" +
-    "            <li>\n" +
-    "                Done! When you view your profile you'll see your new higher score. Tweet it for the world to see!\n" +
+    "                Done! When you view your profile you'll see your new higher score\n" +
+    "                (you may need to wait a few seconds for it to recalculate). Tweet it for the world to see!\n" +
     "            </li>\n" +
     "        </ol>\n" +
     "        <p>\n" +
