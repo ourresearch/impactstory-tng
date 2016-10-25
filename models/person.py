@@ -486,8 +486,9 @@ class Person(db.Model):
     def recalculate_openness(self):
         self.set_openness()
         self.set_num_oa_licenses()
-        self.assign_badges(limit_to_badges=["percent_fulltext"])
-        self.set_badge_percentiles(limit_to_badges=["percent_fulltext"])
+        openness_badges = ["percent_fulltext", "all_fulltext", "open_license"]
+        self.assign_badges(limit_to_badges=openness_badges)
+        self.set_badge_percentiles(limit_to_badges=openness_badges)
 
     def set_num_oa_licenses(self):
         self.num_fulltext = 0
