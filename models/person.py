@@ -411,9 +411,15 @@ class Person(db.Model):
         try:
             print u"** calling call_apis"
             self.call_apis(high_priority=high_priority)
+            print u"** after call_apis, at {sec}s elapsed".format(
+                sec=elapsed(start_time)
+            )
 
             print u"** calling calculate"
             self.calculate()
+            print u"** after calculate, at {sec}s elapsed".format(
+                sec=elapsed(start_time)
+            )
 
             print u"** finished refreshing all {num} products for {orcid_id} ({name}) in {sec}s".format(
                 orcid_id=self.orcid_id,
