@@ -344,7 +344,9 @@ class Person(db.Model):
             print u"not calling orcid because no overwrite"
 
         # parse orcid so we now what to gather
+        start_time = time()
         self.set_from_orcid()
+        print u"set_from_orcid took {}s".format(elapsed(start_time, 2))
 
         products_without_dois = [p for p in self.products if not p.doi]
         if products_without_dois:
