@@ -64,12 +64,31 @@
                                 </span>
                             </span>
                         </div>
+                        <div class="open-access-actions">
+                            <a href="https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
+                               target="_blank"
+                               class="boost"
+                               ng-click="shareBadge()">
+                                <i class="fa fa-arrow-up"></i>
+                                <span class="text">Boost your score</span>
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
+                               target="_blank"
+                               class="share"
+                               ng-click="shareBadge()">
+                                <i class="fa fa-twitter"></i>
+                                <span class="text">Share your score</span>
+                            </a>
+
+
+                        </div>
                     </div>
                 </div>
             </div>
 
         </div>
         <div class="col-md-3 person-actions">
+            <!--
             <div class="tweet-profile">
                 <a href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.orcid_id }}&text=Check out the online impact of my research on @Impactstory:"
                    target="_blank"
@@ -80,6 +99,7 @@
                     <span class="text">share</span>
                 </a>
             </div>
+            -->
         </div>
     </div>
 

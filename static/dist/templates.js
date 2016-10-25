@@ -670,12 +670,31 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                                </span>\n" +
     "                            </span>\n" +
     "                        </div>\n" +
+    "                        <div class=\"open-access-actions\">\n" +
+    "                            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
+    "                               target=\"_blank\"\n" +
+    "                               class=\"boost\"\n" +
+    "                               ng-click=\"shareBadge()\">\n" +
+    "                                <i class=\"fa fa-arrow-up\"></i>\n" +
+    "                                <span class=\"text\">Boost your score</span>\n" +
+    "                            </a>\n" +
+    "                            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
+    "                               target=\"_blank\"\n" +
+    "                               class=\"share\"\n" +
+    "                               ng-click=\"shareBadge()\">\n" +
+    "                                <i class=\"fa fa-twitter\"></i>\n" +
+    "                                <span class=\"text\">Share your score</span>\n" +
+    "                            </a>\n" +
+    "\n" +
+    "\n" +
+    "                        </div>\n" +
     "                    </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
     "\n" +
     "        </div>\n" +
     "        <div class=\"col-md-3 person-actions\">\n" +
+    "            <!--\n" +
     "            <div class=\"tweet-profile\">\n" +
     "                <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.orcid_id }}&text=Check out the online impact of my research on @Impactstory:\"\n" +
     "                   target=\"_blank\"\n" +
@@ -686,6 +705,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    <span class=\"text\">share</span>\n" +
     "                </a>\n" +
     "            </div>\n" +
+    "            -->\n" +
     "        </div>\n" +
     "    </div>\n" +
     "\n" +
