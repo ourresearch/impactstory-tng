@@ -749,7 +749,7 @@ div.page.person, div.page.product-page {
 
 
   .person-header.row {
-    padding-bottom: 20px;
+    padding-bottom: 35px;
     line-height: 1;
 
     .content {
@@ -805,35 +805,50 @@ div.page.person, div.page.product-page {
 
 
           .open-access-info {
-            color: #333;
+            color: @openness;
             display: inline-block;
             margin-left: 3px;
-            &:hover {
-              text-decoration: underline;
-            }
+            margin-top: 7px;
+            font-size: 22px;
             i.fa {
               font-size: 85%;
-              color: #555;
+              //color: #555;
               //display: none;
             }
             .fulltext {
-              font-weight: 500;
-              font-size: 16px;
+              &:hover {
+                text-decoration: underline;
+              }
+              font-weight: bold;
               .ti-label {
               }
               .val {
-                font-size: 90%;
+                //font-size: 90%;
               }
 
             }
             .open-license {
               font-weight: 100;
-              font-size: 70%;
               margin-left: 5px;
+              font-size: 90%;
               @media @mobile {
                 display: block;
                 margin-top: 9px;
                 margin-left: 0;
+              }
+            }
+          }
+          .open-access-actions {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            //font-weight: 300;
+            a {
+              color: #333;
+              color: @openness;
+              padding: 5px;
+              //text-decoration: underline;
+              i.fa {
+                display: none;
               }
             }
           }

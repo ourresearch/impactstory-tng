@@ -79,6 +79,7 @@ angular.module('personPage', [
         $scope.d = {}
 
 
+
         var badgeUrlName = function(badge){
            return badge.display_name.toLowerCase().replace(/\s/g, "-")
         }
@@ -154,6 +155,16 @@ angular.module('personPage', [
         }
         else {
             $scope.showMendeleyDetails = false
+        }
+
+
+        // this is used when you want to tweet your profile
+        $scope.profileLinkToTweet = "https://impactstory.org/u/"
+        if (Person.d.twitter){
+            $scope.profileLinkToTweet += Person.d.twitter
+        }
+        else {
+            $scope.profileLinkToTweet += Person.d.orcid_id
         }
 
 
@@ -242,7 +253,6 @@ angular.module('personPage', [
                     $scope.person = Person
                     $scope.numFormat = NumFormat
                     $scope.cancel = function() {
-                        console.log("fucking cancel")
                         $mdDialog.cancel();
                     };
                 }
