@@ -704,7 +704,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                                </span>\n" +
     "                            </span>\n" +
     "                        </div>\n" +
-    "                        <div class=\"open-access-actions\">\n" +
+    "                        <div class=\"open-access-actions\" ng-show=\"person.belongsToCurrentUser()\">\n" +
     "                            <a href=\"about/data#boost-your-oa-score\"\n" +
     "                               target=\"_blank\"\n" +
     "                               class=\"\">\n" +
