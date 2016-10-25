@@ -69,7 +69,7 @@
                                 <i class="fa fa-arrow-up"></i>
                                 <span class="text">Boost your score</span>
                             </a>
-                            <a href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.twitter }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
+                            <a href="https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
                                target="_blank"
                                class="share"
                                ng-click="shareBadge()">
@@ -629,7 +629,7 @@
                 <i class="fa fa-times"></i>
                 <span class="text">Dismiss</span>
             </span>
-            <a href="https://twitter.com/intent/tweet?url=https://impactstory.orgu/{{ person.d.twitter }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
+            <a href="https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
                target="_blank"
                class="btn btn-primary"
                ng-click="shareBadge()">
