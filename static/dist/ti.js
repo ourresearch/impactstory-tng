@@ -1039,7 +1039,6 @@ angular.module('personPage', [
                     $scope.person = Person
                     $scope.numFormat = NumFormat
                     $scope.cancel = function() {
-                        console.log("fucking cancel")
                         $mdDialog.cancel();
                     };
                 }
@@ -2478,6 +2477,43 @@ angular.module("about-pages/about-data.tpl.html", []).run(["$templateCache", fun
     "    <h2>About the data</h2>\n" +
     "\n" +
     "\n" +
+    "    <h3 id=\"boost-your-oa-score\">Boost your #OAscore</h3>\n" +
+    "    <div>\n" +
+    "        <p>\n" +
+    "            You can boost the percentage of your work that's free to read by uploading copies of\n" +
+    "            paywalled papers to an open repository.\n" +
+    "        </p>\n" +
+    "        <ol>\n" +
+    "            <li>\n" +
+    "                First, look through your publications list\n" +
+    "                here on Impactstory. Find a publication that doesn't have \"free fulltext\" next to it.\n" +
+    "            </li>\n" +
+    "            <li>\n" +
+    "                Go to an open repository like <a href=\"http://figshare.com\">figshare</a> or\n" +
+    "                <a href=\"http://zenodo.org\">Zenodo</a> and upload\n" +
+    "                the paper you've chosen. <a\n" +
+    "                    href=\"http://blog.impactstory.org/impact-challenge-data-repository/\">Here's more detailed instructions.</a>\n" +
+    "            </li>\n" +
+    "            <li>Once you've uploaded your (formerly!) paywalled paper, note the URL. Then return to Impactstory</li>\n" +
+    "            <li>\n" +
+    "                Click on the paper you've uploaded. Paste your new open URL into the \"Add a link to free fulltext\"\n" +
+    "                field at the top of the page.\n" +
+    "            </li>\n" +
+    "            <li>\n" +
+    "                Go to your Impactstory Settings page by clicking the gear icon at the top right of the screen.\n" +
+    "                Once there, click the \"Sync with my ORCID now\" button.\n" +
+    "            </li>\n" +
+    "            <li>\n" +
+    "                Done! When you view your profile you'll see your new higher score. Tweet it for the world to see!\n" +
+    "            </li>\n" +
+    "        </ol>\n" +
+    "        <p>\n" +
+    "            Need any help? Contact us <a href=\"http://twitter.com/impactstory\">on Twitter</a> or open a help\n" +
+    "            ticket by clicking the help icon at the bottom right of your screen.\n" +
+    "        </p>\n" +
+    "    </div>\n" +
+    "\n" +
+    "\n" +
     "    <h3 id=\"data-sources\">Data sources</h3>\n" +
     "    <ul>\n" +
     "        <li>\n" +
@@ -3035,16 +3071,14 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    </div>\n" +
     "\n" +
     "                    <div class=\"person-profile-info\">\n" +
-    "                        <div class=\"open-access-info\" ng-click=\"showAboutOaDialog($event)\">\n" +
-    "                            <span class=\"fulltext\">\n" +
+    "                        <div class=\"open-access-info\">\n" +
+    "                            <span class=\"fulltext\" ng-click=\"showAboutOaDialog($event)\">\n" +
     "                                <i class=\"fa fa-unlock-alt\"></i>\n" +
     "                                <span class=\"ti-label\">\n" +
     "                                    open access\n" +
     "                                </span>\n" +
     "                                <span class=\"val\">\n" +
-    "                                    {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%\n" +
-    "                                </span>\n" +
-    "                            </span>\n" +
+    "                                    {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%</span></span>\n" +
     "                            <span class=\"open-license\">\n" +
     "                                <span class=\"ti-label\">\n" +
     "                                    full OA\n" +
@@ -3055,14 +3089,13 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                            </span>\n" +
     "                        </div>\n" +
     "                        <div class=\"open-access-actions\">\n" +
-    "                            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
+    "                            <a href=\"about/data#boost-your-oa-score\"\n" +
     "                               target=\"_blank\"\n" +
-    "                               class=\"boost\"\n" +
-    "                               ng-click=\"shareBadge()\">\n" +
+    "                               class=\"\">\n" +
     "                                <i class=\"fa fa-arrow-up\"></i>\n" +
     "                                <span class=\"text\">Boost your score</span>\n" +
     "                            </a>\n" +
-    "                            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
+    "                            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.twitter }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
     "                               target=\"_blank\"\n" +
     "                               class=\"share\"\n" +
     "                               ng-click=\"shareBadge()\">\n" +
@@ -3598,18 +3631,11 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    <a href=\"http://microblogging.infodocs.eu/wp-content/uploads/2015/12/openScience_oct2015_ver2.pdf\">read,</a>\n" +
     "                    and <a href=\"https://www.altmetric.com/blog/attentionoa/\">discussed online</a> more than toll-access ones.\n" +
     "                </p>\n" +
-    "                <p>\n" +
-    "                    You can increase your percentage of freely available papers by\n" +
-    "                    <a href=\"http://blog.impactstory.org/impact-challenge-data-repository/\">\n" +
-    "                         uploading them to an open repository.\n" +
-    "                    </a>\n" +
     "\n" +
-    "\n" +
-    "                </p>\n" +
     "                <div class=\"reuse\" ng-show=\"person.d.percent_open_license\">\n" +
     "                    <h3>Open to reuse</h3>\n" +
     "                    <p>\n" +
-    "                        Even better, you've published <strong>{{ numFormat.decimalToPerc(person.d.percent_open_license) }}%</strong>\n" +
+    "                        You've also published <strong>{{ numFormat.decimalToPerc(person.d.percent_open_license) }}%</strong>\n" +
     "                        of your papers under a fully Open license like <a\n" +
     "                            href=\"https://creativecommons.org/licenses/by/3.0/\">CC-BY.</a> That lets other researchers\n" +
     "                        build on your work by searching, remixing, indexing, data-mining them and more.\n" +
@@ -3629,7 +3655,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                <i class=\"fa fa-times\"></i>\n" +
     "                <span class=\"text\">Dismiss</span>\n" +
     "            </span>\n" +
-    "            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
+    "            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.orgu/{{ person.d.twitter }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
     "               target=\"_blank\"\n" +
     "               class=\"btn btn-primary\"\n" +
     "               ng-click=\"shareBadge()\">\n" +
@@ -3640,6 +3666,8 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "    </md-dialog>\n" +
     "</script>\n" +
+    "\n" +
+    "<\n" +
     "\n" +
     "");
 }]);

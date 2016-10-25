@@ -766,16 +766,11 @@ div.page.product-page .person-header.row .content div.bio .person-profile-info {
 }
 div.page.person .person-header.row .content div.bio .person-profile-info .open-access-info,
 div.page.product-page .person-header.row .content div.bio .person-profile-info .open-access-info {
-  color: #333;
   color: #fb9d00;
   display: inline-block;
   margin-left: 3px;
   margin-top: 7px;
   font-size: 22px;
-}
-div.page.person .person-header.row .content div.bio .person-profile-info .open-access-info:hover,
-div.page.product-page .person-header.row .content div.bio .person-profile-info .open-access-info:hover {
-  text-decoration: underline;
 }
 div.page.person .person-header.row .content div.bio .person-profile-info .open-access-info i.fa,
 div.page.product-page .person-header.row .content div.bio .person-profile-info .open-access-info i.fa {
@@ -784,6 +779,10 @@ div.page.product-page .person-header.row .content div.bio .person-profile-info .
 div.page.person .person-header.row .content div.bio .person-profile-info .open-access-info .fulltext,
 div.page.product-page .person-header.row .content div.bio .person-profile-info .open-access-info .fulltext {
   font-weight: bold;
+}
+div.page.person .person-header.row .content div.bio .person-profile-info .open-access-info .fulltext:hover,
+div.page.product-page .person-header.row .content div.bio .person-profile-info .open-access-info .fulltext:hover {
+  text-decoration: underline;
 }
 div.page.person .person-header.row .content div.bio .person-profile-info .open-access-info .open-license,
 div.page.product-page .person-header.row .content div.bio .person-profile-info .open-access-info .open-license {
