@@ -954,6 +954,8 @@ class Person(db.Model):
 
 
     def set_coauthors(self):
+        start_time = time()
+
         # comment out the commit.  this means coauthors made during this commit session don't show up on this refresh
         # but doing it because is so much faster
         # safe_commit(db)
@@ -966,13 +968,19 @@ class Person(db.Model):
                       (select doi from product where orcid_id='{}')""".format(self.orcid_id)
         rows = db.engine.execute(text(coauthor_orcid_id_query))
 
+        print u"elapsed {}s after query".format(elapsed(start_time, 2))
+
         # remove own orcid_id
-        orcid_ids = [row[0] for row in rows if row[0] if row[0] != self.id]
+        orcid_ids = [row[0] for row in rows if row[0] if row[0] != self.orcid_id]
         if not orcid_ids:
             return
 
+        print u"elapsed {}s after remove".format(elapsed(start_time, 2))
+
         # don't load products or badges
         coauthors = Person.query.filter(Person.orcid_id.in_(orcid_ids)).options(orm.noload('*')).all()
+
+        print u"elapsed {}s after query".format(elapsed(start_time, 2))
 
         resp = {}
         for coauthor in coauthors:
@@ -983,6 +991,7 @@ class Person(db.Model):
                 "num_posts": coauthor.num_posts,
             }
         self.coauthors = resp
+        print u"elapsed {}s after set".format(elapsed(start_time, 2))
 
 
     def get_event_dates(self):
