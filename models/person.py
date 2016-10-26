@@ -948,6 +948,10 @@ class Person(db.Model):
 
         start_time = time()
 
+        db.session.bulk_save_objects([self])
+        safe_commit(db)
+        print u"elapsed {}s after commit in coathors".format(elapsed(start_time, 2))
+
         # comment out the commit.  this means coauthors made during this commit session don't show up on this refresh
         # but doing it because is so much faster
         # safe_commit(db)
@@ -977,7 +981,7 @@ class Person(db.Model):
                 "num_posts": coauthor.num_posts,
             }
         self.coauthors = resp
-        print u"elapsed {}s after set".format(elapsed(start_time, 2))
+        print u"elapsed {}s end of coathors".format(elapsed(start_time, 2))
 
 
     def get_event_dates(self):
