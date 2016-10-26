@@ -243,7 +243,19 @@ angular.module('currentUser', [
                 setFromToken(resp.token)
             })
         }
-        
+
+        function profileLink(){
+            var url = "https://impactstory.org/u/"
+            if (data.twitter_screen_name) {
+                url += data.twitter_screen_name
+            }
+            else {
+                url += data.orcid_id
+            }
+            return url
+        }
+
+
         function bootIntercom(person){
             var percentOA = person.percent_fulltext
             if (percentOA === null) {
@@ -303,6 +315,7 @@ angular.module('currentUser', [
             setProperty: setProperty,
             d: data,
             logout: logout,
+            profileLink: profileLink,
             isLoggedIn: isLoggedIn,
             reloadFromServer: reloadFromServer,
             boot: boot,

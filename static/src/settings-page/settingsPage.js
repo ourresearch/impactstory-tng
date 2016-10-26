@@ -31,6 +31,20 @@ angular.module('settingsPage', [
         var myOrcidId = CurrentUser.d.orcid_id
         $scope.orcidId = myOrcidId
         $scope.givenNames = CurrentUser.d.given_names
+        $scope.currentUser = CurrentUser
+
+
+        // launching for the DORA anniv in december :)
+        $scope.dorafied = null
+        //$http.get("api/me")
+        //    .success(function(resp){
+        //        console.log("got stuff back from /me", resp)
+        //        if (resp.promos.dorafy){
+        //            $scope.dorafied = true
+        //        }
+        //    })
+
+
 
 
         $scope.wantToDelete = false
@@ -70,6 +84,19 @@ angular.module('settingsPage', [
                             console.log("we reloaded the Person after sync")
                         }
                     )
+                })
+        }
+
+        $scope.setDorafy = function(dorafy){
+            console.log("dorafy!", dorafy)
+            $scope.doraState = 'working'
+            var postData = {
+                dorafy: true
+            }
+            $http.post("api/me/promos", postData)
+                .success(function(resp){
+                    $scope.doraState = 'done'
+                    console.log("set the dorafy!", resp)
                 })
         }
 
