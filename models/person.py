@@ -945,6 +945,12 @@ class Person(db.Model):
 
 
     def set_coauthors(self):
+
+        # don't do coauthors right now, too slow
+        print u"COAUTHORS TEMPORARILY DISABLED"
+        return
+
+
         print u"starting coauthors"
         start_time = time()
 
