@@ -358,7 +358,9 @@ class Person(db.Model):
             print u"not calling orcid because no overwrite"
 
         # parse orcid so we now what to gather
+        start_time = time()
         self.set_from_orcid()
+        print u"set_from_orcid took {}s".format(elapsed(start_time, 2))
 
         products_without_dois = [p for p in self.products if not p.doi]
         if products_without_dois:
@@ -423,9 +425,15 @@ class Person(db.Model):
         try:
             print u"** calling call_apis"
             self.call_apis(high_priority=high_priority)
+            print u"** after call_apis, at {sec}s elapsed".format(
+                sec=elapsed(start_time)
+            )
 
             print u"** calling calculate"
             self.calculate()
+            print u"** after calculate, at {sec}s elapsed".format(
+                sec=elapsed(start_time)
+            )
 
             print u"** finished refreshing all {num} products for {orcid_id} ({name}) in {sec}s".format(
                 orcid_id=self.orcid_id,
@@ -779,7 +787,7 @@ class Person(db.Model):
 
         biblios_for_sherlock = [p.biblio_for_sherlock() for p in products_for_sherlock.values()]
         # print biblios_for_sherlock
-        url = u"http://api.oadoi.org/v1/publications"
+        url = u"http://api.oadoi.org/v1/publications?no-cache"
 
         # print u"calling sherlock with", biblios_for_sherlock
         print u"calling sherlock with {} products".format(len(biblios_for_sherlock))
