@@ -309,6 +309,7 @@ class Person(db.Model):
     saw_opencon_landing_page = db.Column(db.Boolean)
 
     num_fulltext = db.Column(db.Integer)
+    num_user_supplied_fulltext = db.Column(db.Integer)
     num_any_oa = db.Column(db.Integer)
     num_cc_by = db.Column(db.Integer)
     num_cc_restricted = db.Column(db.Integer)
@@ -520,6 +521,7 @@ class Person(db.Model):
 
     def set_num_oa_licenses(self):
         self.num_fulltext = 0
+        self.num_user_supplied_fulltext = 0
         self.num_any_oa = 0
         self.num_cc_by = 0
         self.num_cc_restricted = 0
@@ -528,6 +530,8 @@ class Person(db.Model):
         for p in self.all_products:
             if p.fulltext_url:
                 self.num_fulltext += 1
+            if p.user_supplied_fulltext_url:
+                self.num_user_supplied_fulltext += 1
 
             if p.fulltext_url and p.license:
                 if p.license != "unknown":

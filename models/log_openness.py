@@ -34,6 +34,7 @@ def save_openness_log(my_person):
 openness_columns = [
     "num_products",
     "num_fulltext",
+    "num_user_supplied_fulltext",
     "num_any_oa",
     "num_cc_by",
     "num_cc_restricted",
@@ -47,6 +48,7 @@ class LogOpenness(db.Model):
 
     num_products = db.Column(db.Integer)
     num_fulltext = db.Column(db.Integer)
+    num_user_supplied_fulltext = db.Column(db.Integer)
     num_any_oa = db.Column(db.Integer)
     num_cc_by = db.Column(db.Integer)
     num_cc_restricted = db.Column(db.Integer)
