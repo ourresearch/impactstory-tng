@@ -13,6 +13,7 @@ from models.person import refresh_profile
 from models.person import refresh_person
 from models.person import delete_person
 from models.person import update_person
+from models.person import update_promos
 from models.person import make_temporary_person_from_orcid
 from models.log_temp_profile import add_new_log_temp_profile
 from models.person import get_random_people
@@ -388,7 +389,10 @@ def login_required(f):
 @login_required
 def me():
     if request.method == "GET":
-        return jsonify({"token":g.my_person.get_token()})
+        return jsonify({
+            "token":g.my_person.get_token(),
+            "promos": g.my_person.promos
+        })
 
     elif request.method == "POST":
         updated_person = update_person(g.my_person, request.json)
@@ -403,6 +407,12 @@ def me():
 @login_required
 def refresh_me():
     refresh_person(g.my_person)
+    return jsonify({"token":  g.my_person.get_token()})
+
+@app.route("/api/me/promos", methods=["GET"])
+@login_required
+def update_promos_endpoint():
+    update_promos(g.my_person, request.json)
     return jsonify({"token":  g.my_person.get_token()})
 
 

@@ -102,6 +102,19 @@ def update_person(my_person, properties_to_change):
         print u"COMMIT fail on {}".format(my_person.orcid_id)
     return my_person
 
+# we should abstract this so it can work with any jsonb person column
+def update_promos(my_person, new_promos):
+    # note this does not overwrite anything unless you do it on purpose;
+    # if you don't give it the key, it ignores it.
+    for k, v in new_promos.iteritems():
+        my_person.promos[k] = v
+
+    db.session.merge(my_person)
+    commit_success = safe_commit(db)
+    if not commit_success:
+        print u"COMMIT fail on {}".format(my_person.orcid_id)
+    return my_person
+
 
 
 def set_person_claimed_at(my_person):
@@ -302,6 +315,7 @@ class Person(db.Model):
     num_cc0_pd = db.Column(db.Integer)
 
     coauthors = db.Column(MutableDict.as_mutable(JSONB))
+    promos = db.Column(MutableDict.as_mutable(JSONB))
 
     error = db.Column(db.Text)
 
@@ -1366,7 +1380,8 @@ class Person(db.Model):
             "coauthors": self.display_coauthors,
             "subscores": self.subscores,
             "products": [p.to_dict() for p in self.all_products],
-            "num_twitter_followers": self.num_twitter_followers
+            "num_twitter_followers": self.num_twitter_followers,
+            "promos": self.promos
         }
 
 
