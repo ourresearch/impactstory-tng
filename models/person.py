@@ -946,12 +946,6 @@ class Person(db.Model):
 
     def set_coauthors(self):
 
-        # don't do coauthors right now, too slow
-        print u"COAUTHORS TEMPORARILY DISABLED"
-        return
-
-
-        print u"starting coauthors"
         start_time = time()
 
         # comment out the commit.  this means coauthors made during this commit session don't show up on this refresh
@@ -964,22 +958,15 @@ class Person(db.Model):
                     from product
                     where doi in
                       (select doi from product where orcid_id='{}')""".format(self.orcid_id)
-        print u"elapsed {}s before query".format(elapsed(start_time, 2))
         rows = db.engine.execute(text(coauthor_orcid_id_query))
-
-        print u"elapsed {}s after query".format(elapsed(start_time, 2))
 
         # remove own orcid_id
         orcid_ids = [row[0] for row in rows if row[0] if row[0] != self.orcid_id]
         if not orcid_ids:
             return
 
-        print u"elapsed {}s after remove".format(elapsed(start_time, 2))
-
         # don't load products or badges
         coauthors = Person.query.filter(Person.orcid_id.in_(orcid_ids)).options(orm.noload('*')).all()
-
-        print u"elapsed {}s after query".format(elapsed(start_time, 2))
 
         resp = {}
         for coauthor in coauthors:
