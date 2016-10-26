@@ -639,23 +639,14 @@ class Person(db.Model):
         # everything else
         start_time = time()
         self.set_post_counts() # do this first
-        print u"elapsed {}s after set_post_counts".format(elapsed(start_time, 2))
         self.set_mendeley_sums()
-        print u"elapsed {}s after set_mendeley_sums".format(elapsed(start_time, 2))
         self.set_num_posts()
-        print u"elapsed {}s after set_num_posts".format(elapsed(start_time, 2))
         self.set_num_mentions()
-        print u"elapsed {}s after set_num_mentions".format(elapsed(start_time, 2))
         self.set_num_products()
-        print u"elapsed {}s after set_num_products".format(elapsed(start_time, 2))
         self.set_openness()  # do after set_fulltext_urls
-        print u"elapsed {}s after set_openness".format(elapsed(start_time, 2))
         self.set_num_oa_licenses() # do after set_fulltext_urls, before assign_badges
-        print u"elapsed {}s after set_num_oa_licenses".format(elapsed(start_time, 2))
         self.set_event_counts()
-        print u"elapsed {}s after set_event_counts".format(elapsed(start_time, 2))
         self.set_coauthors()  # do this last, uses scores
-        print u"elapsed {}s after set_coauthors".format(elapsed(start_time, 2))
         print u"finished calculating part of {method_name} on {num} products in {sec}s".format(
             method_name="calculate".upper(),
             num = len(self.products),
@@ -954,6 +945,7 @@ class Person(db.Model):
 
 
     def set_coauthors(self):
+        print u"starting coauthors"
         start_time = time()
 
         # comment out the commit.  this means coauthors made during this commit session don't show up on this refresh
@@ -966,6 +958,7 @@ class Person(db.Model):
                     from product
                     where doi in
                       (select doi from product where orcid_id='{}')""".format(self.orcid_id)
+        print u"elapsed {}s before query".format(elapsed(start_time, 2))
         rows = db.engine.execute(text(coauthor_orcid_id_query))
 
         print u"elapsed {}s after query".format(elapsed(start_time, 2))
