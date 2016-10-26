@@ -6,6 +6,61 @@
 
     </a>
 
+    <!-- launching for the DORA anniversary in December :) -->
+    <div class="setting-panel" ng-hide="true">
+        <h3>DORAfy <span><i class="fa fa-unlock-alt"></i> OAWeek only!</span></h3>
+        <p>
+            <a href="https://en.wikipedia.org/wiki/San_Francisco_Declaration_on_Research_Assessment/">
+            The San Francisco Declaration on Research Assessment (DORA)
+            </a>
+             intends to halt the practice of correlating the journal impact factor to the merits 
+            of a specific scientist's contributions: 
+        </p>
+        <blockquote>
+            Do not use journal-based metrics, such as Journal Impact Factors, as a surrogate measure
+            of the quality of individual research articles, to assess an individual scientist’s
+            contributions, or in hiring, promotion, or funding decisions.
+        </blockquote>
+        <p>
+            We love this idea. And in fact, we're signatories of DORA. The declaration is
+            celebrating it's fourth anniversary this week.
+        </p>
+        <p>
+            So, for this week, you can "DORAfy" your profile by hiding all the journals you've published in
+            (they'll come back after the 16th).
+
+            {{ currentUser.profileLink() }}
+        </p>
+        <div class="dorafy-controls">
+            <div class="dora-state waiting" ng-show="dorafied===false">
+                <span class="btn btn-lg btn-default"
+                      ng-click="setDorafy(true)">
+                    <i class="fa fa-check"></i>
+                    DORAfy me!
+                </span>
+            </div>
+            <div class="dora-state working" ng-show="dorafied===null">
+                <div class="loading-container" ng-show="!error">
+                    <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+                </div>
+            </div>
+            <div class="dora-state done" ng-show="dorafied===true">
+                <div class="success">
+                    <span class="text">You're DORAfied!</span>
+                    <a href="https://twitter.com/intent/tweet?url={{ currentUser.profileLink() }}&text=I DORAfied my @Impactstory profile to show my support for the @DORAssessment declaration! http://www.ascb.org/dora"
+                       target="_blank"
+                       class="btn btn-default">
+                        <i class="fa fa-twitter"></i>
+                        <span class="text">Share</span>
+                    </a>
+                </div>
+                <a class="undo" href="" ng-click="setDorafy(false)">
+                    undo
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div class="setting-panel">
         <h3>Sync data from ORCID</h3>
         <p>

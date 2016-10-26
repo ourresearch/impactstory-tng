@@ -286,15 +286,6 @@ angular.module("about-pages/about.tpl.html", []).run(["$templateCache", function
     "           <a href=\"about/achievements\">achievements</a> pages.\n" +
     "       </p>\n" +
     "\n" +
-    "      <!--\n" +
-    "      <p>Impactstory delivers <em>open metrics</em>, with <em>context</em>, for <em>diverse products</em>:</p>\n" +
-    "      <ul>\n" +
-    "         <li><b>Open metrics</b>: Our data (to the extent allowed by providers’ terms of service), <a href=\"https://github.com/total-impact\">code</a>, and <a href=\"http://blog.impactstory.org/2012/03/01/18535014681/\">governance</a> are all open.</li>\n" +
-    "         <li><b>With context</b>: To help scientists move from raw <a href=\"http://altmetrics.org/manifesto/\">altmetrics</a> data to <a href=\"http://asis.org/Bulletin/Apr-13/AprMay13_Piwowar_Priem.html\">impact profiles</a> that tell data-driven stories, we sort metrics by <em>engagement type</em> and <em>audience</em>. We also normalize based on comparison sets: an evaluator may not know if 5 forks on GitHub is a lot of attention, but they can understand immediately if their project ranked in the 95th percentile of all GitHub repos created that year.</li>\n" +
-    "         <li><b>Diverse products</b>: Datasets, software, slides, and other research products are presented as an integrated section of a comprehensive impact report, alongside articles&mdash;each genre a first-class citizen, each making its own kind of impact.</li>\n" +
-    "      </ul>\n" +
-    "      -->\n" +
-    "\n" +
     "      <h3 id=\"team\">team</h3>\n" +
     "\n" +
     "      <div class=\"team-member first\">\n" +
@@ -1285,7 +1276,6 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "    </md-dialog>\n" +
     "</script>\n" +
     "\n" +
-    "<\n" +
     "\n" +
     "");
 }]);
@@ -1490,6 +1480,61 @@ angular.module("settings-page/settings-page.tpl.html", []).run(["$templateCache"
     "        Back to my profile\n" +
     "\n" +
     "    </a>\n" +
+    "\n" +
+    "    <!-- launching for the DORA anniversary in December :) -->\n" +
+    "    <div class=\"setting-panel\" ng-hide=\"true\">\n" +
+    "        <h3>DORAfy <span><i class=\"fa fa-unlock-alt\"></i> OAWeek only!</span></h3>\n" +
+    "        <p>\n" +
+    "            <a href=\"https://en.wikipedia.org/wiki/San_Francisco_Declaration_on_Research_Assessment/\">\n" +
+    "            The San Francisco Declaration on Research Assessment (DORA)\n" +
+    "            </a>\n" +
+    "             intends to halt the practice of correlating the journal impact factor to the merits \n" +
+    "            of a specific scientist's contributions: \n" +
+    "        </p>\n" +
+    "        <blockquote>\n" +
+    "            Do not use journal-based metrics, such as Journal Impact Factors, as a surrogate measure\n" +
+    "            of the quality of individual research articles, to assess an individual scientist’s\n" +
+    "            contributions, or in hiring, promotion, or funding decisions.\n" +
+    "        </blockquote>\n" +
+    "        <p>\n" +
+    "            We love this idea. And in fact, we're signatories of DORA. The declaration is\n" +
+    "            celebrating it's fourth anniversary this week.\n" +
+    "        </p>\n" +
+    "        <p>\n" +
+    "            So, for this week, you can \"DORAfy\" your profile by hiding all the journals you've published in\n" +
+    "            (they'll come back after the 16th).\n" +
+    "\n" +
+    "            {{ currentUser.profileLink() }}\n" +
+    "        </p>\n" +
+    "        <div class=\"dorafy-controls\">\n" +
+    "            <div class=\"dora-state waiting\" ng-show=\"dorafied===false\">\n" +
+    "                <span class=\"btn btn-lg btn-default\"\n" +
+    "                      ng-click=\"setDorafy(true)\">\n" +
+    "                    <i class=\"fa fa-check\"></i>\n" +
+    "                    DORAfy me!\n" +
+    "                </span>\n" +
+    "            </div>\n" +
+    "            <div class=\"dora-state working\" ng-show=\"dorafied===null\">\n" +
+    "                <div class=\"loading-container\" ng-show=\"!error\">\n" +
+    "                    <md-progress-linear md-mode=\"indeterminate\"></md-progress-linear>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"dora-state done\" ng-show=\"dorafied===true\">\n" +
+    "                <div class=\"success\">\n" +
+    "                    <span class=\"text\">You're DORAfied!</span>\n" +
+    "                    <a href=\"https://twitter.com/intent/tweet?url={{ currentUser.profileLink() }}&text=I DORAfied my @Impactstory profile to show my support for the @DORAssessment declaration! http://www.ascb.org/dora\"\n" +
+    "                       target=\"_blank\"\n" +
+    "                       class=\"btn btn-default\">\n" +
+    "                        <i class=\"fa fa-twitter\"></i>\n" +
+    "                        <span class=\"text\">Share</span>\n" +
+    "                    </a>\n" +
+    "                </div>\n" +
+    "                <a class=\"undo\" href=\"\" ng-click=\"setDorafy(false)\">\n" +
+    "                    undo\n" +
+    "                </a>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
     "\n" +
     "    <div class=\"setting-panel\">\n" +
     "        <h3>Sync data from ORCID</h3>\n" +
