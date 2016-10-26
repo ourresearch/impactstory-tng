@@ -172,7 +172,7 @@ class Product(db.Model):
         # in case errors in calculate or anything else we add.
         try:
             self.set_altmetric_api_raw(high_priority)
-            self.calculate()
+            self.calculate_altmetric_attributes()
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
             raise
@@ -184,9 +184,12 @@ class Product(db.Model):
             db.session.rollback()
 
 
-    def calculate(self):
+    def calculate_altmetric_attributes(self):
+        start_time = time()
+
         if self.doi:
             self.url = u"http://doi.org/{}".format(self.doi)
+
         self.set_altmetric_score()
         self.set_altmetric_id()
         self.set_post_counts()
@@ -497,9 +500,6 @@ class Product(db.Model):
             # might throw requests.Timeout
             r = requests.get(url, timeout=10)  #timeout in seconds
 
-            print u"after requests in altmetric: {}s for {}".format(
-                elapsed(start_time, 2), url)
-
             # handle rate limit stuff
             if "x-hourlyratelimit-remaining" in r.headers:
                 hourly_rate_limit_remaining = int(r.headers["x-hourlyratelimit-remaining"])
@@ -507,11 +507,6 @@ class Product(db.Model):
                     print u"hourly_rate_limit_remaining=", hourly_rate_limit_remaining
             else:
                 hourly_rate_limit_remaining = None
-
-            if (hourly_rate_limit_remaining and (hourly_rate_limit_remaining < 500) and not high_priority) or \
-                    r.status_code == 420:
-                print u"sleeping for an hour until we have more calls remaining"
-                sleep(60*60) # an hour
 
             # Altmetric.com doesn't have this DOI, so the DOI has no metrics.
             if r.status_code == 404:
@@ -534,6 +529,8 @@ class Product(db.Model):
             else:
                 self.error = u"got unexpected altmetric status_code code {}".format(r.status_code)
 
+            # print u"after parsing in altmetric: {}s for {}".format(
+            #     elapsed(start_time, 2), url)
 
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
@@ -553,6 +550,7 @@ class Product(db.Model):
                     orcid_id=self.orcid_id,
                     error=self.error,
                     url=url)
+
 
     def set_altmetric_id(self):
         try:

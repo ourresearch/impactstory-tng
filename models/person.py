@@ -248,7 +248,7 @@ def refresh_person(my_person, high_priority=False):
 
 def refresh_profile(orcid_id, high_priority=False):
     print u"refreshing {}".format(orcid_id)
-    my_person = Person.query.filter_by(orcid_id=orcid_id).first()
+    my_person = Person.query.options(orm.undefer('*')).filter_by(orcid_id=orcid_id).first()
 
     # for testing on jason's local, so it doesn't have to do a real refresh
     # sleep(5)
