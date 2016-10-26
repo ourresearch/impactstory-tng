@@ -481,6 +481,7 @@ class Product(db.Model):
 
     def set_altmetric_api_raw(self, high_priority=False):
         try:
+            start_time = time()
             self.error = None
             self.altmetric_api_raw = None
 
@@ -495,6 +496,9 @@ class Product(db.Model):
 
             # might throw requests.Timeout
             r = requests.get(url, timeout=10)  #timeout in seconds
+
+            print u"after requests in altmetric: {}s for {}".format(
+                elapsed(start_time, 2), url)
 
             # handle rate limit stuff
             if "x-hourlyratelimit-remaining" in r.headers:
@@ -529,6 +533,7 @@ class Product(db.Model):
                 # print u"yay nonzero metrics for {doi}".format(doi=self.doi)
             else:
                 self.error = u"got unexpected altmetric status_code code {}".format(r.status_code)
+
 
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
