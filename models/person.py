@@ -605,9 +605,9 @@ class Person(db.Model):
             print u"not a hero."
             return
 
-        print u"you are a hero!  going to email you!"
+        print u"{} is a hero!  going to email you!".format(self.full_name)
         details_dict = self.to_dict()
-        # send(self.email, "You an an OA Hero!", "new_badge", {"profile": details_dict}, for_real=True)
+        send(self.email, "You're an Open Access Hero!", "new_badge", {"profile": details_dict}, for_real=True)
         # send(self.email, "You an an OA Hero!", "new_badge", {"profile": details_dict}, for_real=False)
 
 
