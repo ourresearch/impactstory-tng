@@ -555,9 +555,9 @@ class open_science_triathlete(BadgeAssigner):
 class all_fulltext(BadgeAssigner):
     display_name = "Open Hero"
     group = "openness"
-    description = u"""Every single one of your papers is free to read online. Wow! That demonstrates
-    a fantastic commitment to access that only 2% of other researchers achieve. Open access
-    <a href="https://whoneedsaccess.org/latest-news/">helps real people's</a>, and that's
+    description = u"""Every single one of your papers is free to read online. Wow! That's a
+    level of access only 2% of other researchers achieve. Open access
+    <a href="https://whoneedsaccess.org/latest-news/">helps real people</a>, and that's
     pretty heroic."""
     importance = .99
     context = ""

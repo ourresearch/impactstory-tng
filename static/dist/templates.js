@@ -695,18 +695,24 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                                </span>\n" +
     "                            </span>\n" +
     "                        </div>\n" +
-    "                        <div class=\"open-access-actions\" ng-show=\"person.belongsToCurrentUser()\">\n" +
+    "                        <div class=\"open-access-actions\">\n" +
     "                            <a href=\"about/data#boost-your-oa-score\"\n" +
+    "                               ng-show=\"person.d.percent_fulltext < 1 && person.belongsToCurrentUser()\"\n" +
     "                               target=\"_blank\"\n" +
-    "                               class=\"\">\n" +
-    "                                <i class=\"fa fa-arrow-up\"></i>\n" +
+    "                               class=\"boost-openness-score\">\n" +
     "                                <span class=\"text\">Boost your score</span>\n" +
+    "                            </a>\n" +
+    "                            <a href=\"u/{{ person.d.orcid_id }}/a/open-hero\"\n" +
+    "                               ng-show=\"person.d.percent_fulltext==1\"\n" +
+    "                               class=\"is-open-hero\">\n" +
+    "                                <i class=\"fa fa-star\"></i>\n" +
+    "                                <span>Open Hero!</span>\n" +
     "                            </a>\n" +
     "                            <a href=\"https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek\"\n" +
     "                               target=\"_blank\"\n" +
     "                               class=\"share\"\n" +
+    "                               ng-show=\"person.belongsToCurrentUser()\"\n" +
     "                               ng-click=\"shareBadge()\">\n" +
-    "                                <i class=\"fa fa-twitter\"></i>\n" +
     "                                <span class=\"text\">Share your score</span>\n" +
     "                            </a>\n" +
     "\n" +
