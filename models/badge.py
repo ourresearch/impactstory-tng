@@ -553,14 +553,16 @@ class open_science_triathlete(BadgeAssigner):
 
 
 class all_fulltext(BadgeAssigner):
-    display_name = "OA Hero"
+    display_name = "Open Hero"
     group = "openness"
-    description = u"""Every single one of your papers is free to read online. That's awesome! Research shows that openly-available papers
-                    are more likely to be <a href="http://sparceurope.org/oaca/">cited,</a>
-                    <a href="http://microblogging.infodocs.eu/wp-content/uploads/2015/12/openScience_oct2015_ver2.pdf">read,</a>
-                    and <a href="https://www.altmetric.com/blog/attentionoa/">discussed online</a> more than toll-access ones."""
+    description = u"""Every single one of your papers is free to read online. Wow! That demonstrates
+    a fantastic commitment to access that only 2% of other researchers achieve. Open access
+    <a href="https://whoneedsaccess.org/latest-news/">helps real people's</a>, and that's
+    pretty heroic."""
     importance = .99
-    show_in_ui = False
+    context = ""
+
+    show_in_ui = True
 
     def decide_if_assigned(self, person):
         if person.num_products >= 3 and person.percent_fulltext:
