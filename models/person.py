@@ -595,6 +595,23 @@ class Person(db.Model):
         save_email(self.orcid_id, new_event_counts)
 
 
+    def email_new_badge(self):
+        if not self.claimed_at:
+            return
+        if not self.email:
+            return
+
+        if not self.get_badge("all_fulltext"):
+            print u"not a hero."
+            return
+
+        print u"you are a hero!  going to email you!"
+        details_dict = self.to_dict()
+        # send(self.email, "You an an OA Hero!", "new_badge", {"profile": details_dict}, for_real=True)
+        # send(self.email, "You an an OA Hero!", "new_badge", {"profile": details_dict}, for_real=False)
+
+
+
     def run_log_openness(self):
         save_openness_log(self)
 
