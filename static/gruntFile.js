@@ -71,7 +71,7 @@ module.exports = function (grunt) {
       css: {
         files: ['dist/main.css'],
         options: {
-          livereload: true
+          livereload: 35729
         }
       }
 
