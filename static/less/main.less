@@ -839,17 +839,23 @@ div.page.person, div.page.product-page {
             }
           }
           .open-access-actions {
-            margin: 8px 0 0 0;
+            margin: 8px 0 0 2px;
             font-size: 14px;
             //font-weight: 300;
             a {
               color: #333;
               color: @openness;
-              padding: 5px;
-              //text-decoration: underline;
-              i.fa {
-                display: none;
+              padding: 5px 5px 5px 2px;
+              cursor: pointer;
+              &.is-open-hero {
+                font-weight: bold;
+                background: @openness;
+                color: #fff;
+                padding: 3px 10px;
+                margin-right: 5px;
+                border-radius: 3px;
               }
+
             }
           }
 

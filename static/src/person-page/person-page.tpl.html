@@ -62,18 +62,24 @@
                                 </span>
                             </span>
                         </div>
-                        <div class="open-access-actions" ng-show="person.belongsToCurrentUser()">
+                        <div class="open-access-actions">
                             <a href="about/data#boost-your-oa-score"
+                               ng-show="person.d.percent_fulltext < 1 && person.belongsToCurrentUser()"
                                target="_blank"
-                               class="">
-                                <i class="fa fa-arrow-up"></i>
+                               class="boost-openness-score">
                                 <span class="text">Boost your score</span>
+                            </a>
+                            <a href="u/{{ person.d.orcid_id }}/a/open-hero"
+                               ng-show="person.d.percent_fulltext==1"
+                               class="is-open-hero">
+                                <i class="fa fa-star"></i>
+                                <span>Open Hero!</span>
                             </a>
                             <a href="https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
                                target="_blank"
                                class="share"
+                               ng-show="person.belongsToCurrentUser()"
                                ng-click="shareBadge()">
-                                <i class="fa fa-twitter"></i>
                                 <span class="text">Share your score</span>
                             </a>
 
