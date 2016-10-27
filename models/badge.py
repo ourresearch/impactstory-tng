@@ -555,8 +555,10 @@ class open_science_triathlete(BadgeAssigner):
 class all_fulltext(BadgeAssigner):
     display_name = "OA Hero"
     group = "openness"
-    description = u"100% of your research is free to read online."
-    context = u"This level of availability puts you in the top {in_the_top_percentile}% of researchers."
+    description = u"""Every single one of your papers is free to read online. That's awesome! Research shows that openly-available papers
+                    are more likely to be <a href="http://sparceurope.org/oaca/">cited,</a>
+                    <a href="http://microblogging.infodocs.eu/wp-content/uploads/2015/12/openScience_oct2015_ver2.pdf">read,</a>
+                    and <a href="https://www.altmetric.com/blog/attentionoa/">discussed online</a> more than toll-access ones."""
     importance = .99
     show_in_ui = False
 
@@ -598,7 +600,7 @@ class open_license(BadgeAssigner):
 
     def decide_if_assigned(self, person):
         if person.num_products >= 3 and person.percent_open_license:
-            if person.percent_open_license >= 0.1:
+            if person.percent_open_license >= 0.25:
                 self.candidate_badge.value = person.percent_open_license * 100
                 self.assigned = True
 
