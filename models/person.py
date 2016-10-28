@@ -814,15 +814,16 @@ class Person(db.Model):
 
         biblios_for_sherlock = [p.biblio_for_sherlock() for p in products_for_sherlock.values()]
         # print biblios_for_sherlock
-        url = u"https://api.oadoi.org/v1/publications?email=team@impactstory.org"
+        # url = u"https://api.oadoi.org/v1/publications?email=team@impactstory.org"
+        url = u"https://api.oadoi.org/v1/publications"
 
         # print u"calling sherlock with", biblios_for_sherlock
         print u"calling sherlock with {} products".format(len(biblios_for_sherlock))
         post_body = {"biblios": biblios_for_sherlock}
 
-        # print "\n\n"
-        # print json.dumps(post_body)
-        # print "\n\n"
+        print "\n\n"
+        print json.dumps(post_body)
+        print "\n\n"
 
         r = requests.post(url, json=post_body)
         if r and r.status_code==200:
