@@ -253,11 +253,17 @@ class Product(db.Model):
                 if self.fulltext_url:
                     print u"got a new open product! {} {} ({})".format(
                         self.id, self.fulltext_url, self.license)
+            else:
+                print u"in set_data_from_oadoi: bad status_code={} for product {}. skipping.".format(
+                    r.status_code, self.id
+                )
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
             raise
         except IndexError:
             print u"IndexError in set_data_from_oadoi on product {}. skipping.".format(self.id)
+            print "post_body", post_body
+            print r.json()
         except Exception:
             logging.exception(u"exception in set_data_from_oadoi on product {}".format(self.id))
             self.error = "error in set_data_from_oadoi"
