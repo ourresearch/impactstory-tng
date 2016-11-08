@@ -230,6 +230,40 @@ class Product(db.Model):
             print u"in generic exception handler, so rolling back in case it is needed"
             db.session.rollback()
 
+    def set_data_from_oadoi(self, high_priority=False):
+        # set_altmetric_api_raw catches its own errors, but since this is the method
+        # called by the thread from Person.set_data_from_altmetric_for_all_products
+        # want to have defense in depth and wrap this whole thing in a try/catch too
+        # in case errors in calculate or anything else we add.
+        try:
+            # url = u"http://localhost:5000/v1/REWRITE/publications?email=team@impactstory.org"
+            url = u"http://api.oadoi.org/v1/REWRITE/publications?email=team@impactstory.org"
+            post_body = {"biblios": [self.biblio_for_oadoi()]}
+
+            # print "\n\n"
+            # print json.dumps(post_body)
+            # print "\n\n"
+
+            r = requests.post(url, json=post_body)
+            if r and r.status_code==200:
+                response_dict = r.json()["results"][0]
+                self.fulltext_url = response_dict["free_fulltext_url"]
+                self.license = response_dict["license"]
+                self.evidence = response_dict["evidence"]
+                if self.fulltext_url:
+                    print u"got a new open product! {} {} ({})".format(
+                        self.id, self.fulltext_url, self.license)
+        except (KeyboardInterrupt, SystemExit):
+            # let these ones through, don't save anything to db
+            raise
+        except Exception:
+            logging.exception("exception in set_data_from_oadoi")
+            self.error = "error in set_data_from_oadoi"
+            print self.error
+            print u"in generic exception handler, so rolling back in case it is needed"
+            db.session.rollback()
+
+
     def get_abstract(self):
         try:
             abstract = self.altmetric_api_raw["citation"]["abstract"]
@@ -885,7 +919,7 @@ class Product(db.Model):
         return resp
 
 
-    def biblio_for_sherlock(self):
+    def biblio_for_oadoi(self):
         response = {"product_id": self.id}
         if self.doi:
             response["doi"] = self.doi
