@@ -256,11 +256,13 @@ class Product(db.Model):
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
             raise
+        except IndexError:
+            print u"IndexError in set_data_from_oadoi on product {}. skipping.".format(self.id)
         except Exception:
-            logging.exception("exception in set_data_from_oadoi")
+            logging.exception(u"exception in set_data_from_oadoi on product {}".format(self.id))
             self.error = "error in set_data_from_oadoi"
             print self.error
-            print u"in generic exception handler, so rolling back in case it is needed"
+            print u"in generic exception handler for product {}, so rolling back in case it is needed".format(self.id)
             db.session.rollback()
 
 
