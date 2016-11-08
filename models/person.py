@@ -649,7 +649,7 @@ class Person(db.Model):
     def calculate(self):
         # things with api calls in them, or things needed to make those calls
         start_time = time()
-        self.set_fulltext_urls()  # do after set publisher, which gets issns
+        self.set_fulltext_urls()
         self.set_depsy()
         print u"finished api calling part of {method_name} on {num} products in {sec}s".format(
             method_name="calculate".upper(),
