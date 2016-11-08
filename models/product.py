@@ -236,8 +236,8 @@ class Product(db.Model):
         # want to have defense in depth and wrap this whole thing in a try/catch too
         # in case errors in calculate or anything else we add.
         try:
-            # url = u"http://localhost:5000/v1/REWRITE/publications?email=team@impactstory.org"
-            url = u"http://api.oadoi.org/v1/REWRITE/publications?email=team@impactstory.org"
+            # url = u"http://localhost:5000/v1/publications?email=team@impactstory.org"
+            url = u"http://api.oadoi.org/v1/publications?email=team@impactstory.org"
             post_body = {"biblios": [self.biblio_for_oadoi()]}
 
             # print "\n\n"
