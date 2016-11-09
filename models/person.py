@@ -808,6 +808,9 @@ class Person(db.Model):
             if call_even_if_already_open or not p.has_fulltext_url:
                 products_for_oadoi.append(p)
 
+        if not products_for_oadoi:
+            return
+
         self.set_data_for_all_products("set_data_from_oadoi", include_products=products_for_oadoi)
 
         open_products = [p for p in products_for_oadoi if p.has_fulltext_url]
