@@ -928,14 +928,13 @@ class Product(db.Model):
 
 
     def biblio_for_oadoi(self):
-        response = {"product_id": self.id}
+        response = {}
         if self.doi:
             response["doi"] = self.doi
             return response
         else:
-            response["url"] = self.url
             response["title"] = self.title
-            response["arxiv"] = self.arxiv
+            # could add an author name here too
         return response
 
 
