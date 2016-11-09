@@ -25,8 +25,7 @@ if __name__ == "__main__":
         run_now = (my_day_of_week == day_of_week_for_emails)
 
     # just for updating one
-    parser.add_argument('--id', nargs="?", type=str, help="id of the one thing you want to update")
-    parser.add_argument('--orcid', nargs="?", type=str, help="orcid id of the one thing you want to update")
+    # parser.add_argument('--orcid', nargs="?", type=str, help="orcid id of the one thing you want to update")
 
     if run_now:
         update.run_update(parsed_args)
