@@ -154,7 +154,7 @@ def enqueue_jobs(cls,
                     elapsed(new_loop_start_time)
                 )
             except ZeroDivisionError:
-                print u"not printing status because divide by zero"
+                print ".",
 
 
             new_loop_start_time = time()

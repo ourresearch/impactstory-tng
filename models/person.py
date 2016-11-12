@@ -170,6 +170,14 @@ def make_person(twitter_creds, high_priority=False, landing_page=None):
 def connect_orcid(my_person, orcid_id):
     print u"adding a brand new orcid_id for {}: {}".format(my_person.full_name, orcid_id)
     my_person.orcid_id = orcid_id
+
+    # save it here, so we've got their orcid
+    db.session.merge(my_person)
+    commit_success = safe_commit(db)
+    if not commit_success:
+        print u"COMMIT fail on {}".format(my_person.id)
+
+    # then keep going!
     return refresh_orcid_info_and_save(my_person)
 
 
