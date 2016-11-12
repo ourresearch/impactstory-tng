@@ -231,6 +231,9 @@ class Product(db.Model):
             db.session.rollback()
 
     def set_data_from_oadoi(self, high_priority=False):
+        # print u"starting set_data_from_oadoi with {}".format(self.doi)
+        start_time = time()
+
         # set_altmetric_api_raw catches its own errors, but since this is the method
         # called by the thread from Person.set_data_from_altmetric_for_all_products
         # want to have defense in depth and wrap this whole thing in a try/catch too
@@ -270,6 +273,7 @@ class Product(db.Model):
             print self.error
             print u"in generic exception handler for product {}, so rolling back in case it is needed".format(self.id)
             db.session.rollback()
+        print u"finished set_data_from_oadoi with {} in {}".format(self.doi, elapsed(start_time, 2))
 
 
     def get_abstract(self):
