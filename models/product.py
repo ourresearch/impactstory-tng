@@ -13,6 +13,7 @@ import iso8601
 import pytz
 from time import sleep
 from time import time
+from random import random
 import datetime
 
 from app import db
@@ -232,6 +233,10 @@ class Product(db.Model):
 
     def set_data_from_oadoi(self, high_priority=False):
         # print u"starting set_data_from_oadoi with {}".format(self.doi)
+        print "sleeping for a bit first"
+        sleep(5*random())
+        print "done sleeping"
+
         start_time = time()
 
         # set_altmetric_api_raw catches its own errors, but since this is the method
