@@ -240,7 +240,7 @@ class Product(db.Model):
         # want to have defense in depth and wrap this whole thing in a try/catch too
         # in case errors in calculate or anything else we add.
         try:
-            # url = u"http://localhost:5000/v1/publications?email=team@impactstory.org"
+            # url = u"http://localhost:5002/v1/publications?email=team@impactstory.org"
             url = u"http://api.oadoi.org/v1/publications?email=team@impactstory.org"
             post_body = {"biblios": [self.biblio_for_oadoi()]}
 
@@ -258,9 +258,8 @@ class Product(db.Model):
                     print u"got a new open product! {} {} ({})".format(
                         self.id, self.fulltext_url, self.license)
             else:
-                print u"in set_data_from_oadoi: bad status_code={} for product {}. skipping.".format(
-                    r.status_code, self.id
-                )
+                print u"in set_data_from_oadoi: bad status_code={} for product {} {}. skipping.".format(
+                    r.status_code, self.id, post_body)
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
             raise
