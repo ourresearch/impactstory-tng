@@ -799,7 +799,11 @@ class Person(db.Model):
                 p.set_oa_from_user_supplied_fulltext_url(p.user_supplied_fulltext_url)
 
         # then call oadoi on the rest!
-        self.call_oadoi()
+        if "schedule" in os.getenv("DYNO", ""):
+            print u"not calling call_oadoi because is a scheduled dyno"
+        else:
+            print u"isn't a scheduled dyno, so calling call_oadoi"
+            self.call_oadoi()
 
 
     def call_oadoi_on_everything(self):
