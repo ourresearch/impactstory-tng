@@ -25,16 +25,22 @@
             <!-- ORCID error -->
             <div class="orcid" ng-show="identityProvider=='orcid'">
                 <div class="msg">
-                    <i class="fa fa-exclamation-triangle"></i>
-                    Sorry, we don't recognize your ORCID account!
+                    <div class="main">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        Looks like you haven't created your Impactstory profile yet.
+                        To create a profile, you'll need to sign in with
+                        a Twitter account.
+                    </div>
                 </div>
 
                 <div class="btn btn-default login-button twitter"
-                     ng-click="currentUser.twitterAuthenticate('login')">
+                     ng-click="currentUser.twitterAuthenticate('register')">
                     <i class="fa fa-twitter"></i>
-                    Log in with Twitter instead
+                    Create my profile using Twitter
                 </div>
             </div>
+
+
 
             <!-- Twitter error -->
             <div class="twitter" ng-show="identityProvider=='twitter'">

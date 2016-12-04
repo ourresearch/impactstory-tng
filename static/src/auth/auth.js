@@ -79,6 +79,7 @@ angular.module('auth', [
 
 
 
+
         console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
             .success(function(resp){
@@ -99,6 +100,15 @@ angular.module('auth', [
                 if (status == 404) {
                     $scope.error = "not-found"
                     $scope.identityProviderId = error.identity_provider_id
+                }
+
+                // handle users who are loading this page with
+                // invalid or expired tokens. this is generally because they
+                // are refreshing the page. since the token they came in with
+                // only works once, this does not work.
+                if (status == 401){
+                    CurrentUser.logout()
+                    $location.url("/")
                 }
 
             })
