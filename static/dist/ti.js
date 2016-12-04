@@ -655,6 +655,7 @@ angular.module('auth', [
 
 
 
+
         console.log("sending this up to the server", requestObj)
         $http.post(url, requestObj)
             .success(function(resp){
@@ -675,6 +676,15 @@ angular.module('auth', [
                 if (status == 404) {
                     $scope.error = "not-found"
                     $scope.identityProviderId = error.identity_provider_id
+                }
+
+                // handle users who are loading this page with
+                // invalid or expired tokens. this is generally because they
+                // are refreshing the page. since the token they came in with
+                // only works once, this does not work.
+                if (status == 401){
+                    CurrentUser.logout()
+                    $location.url("/")
                 }
 
             })
@@ -2904,16 +2914,22 @@ angular.module("auth/oauth.tpl.html", []).run(["$templateCache", function($templ
     "            <!-- ORCID error -->\n" +
     "            <div class=\"orcid\" ng-show=\"identityProvider=='orcid'\">\n" +
     "                <div class=\"msg\">\n" +
-    "                    <i class=\"fa fa-exclamation-triangle\"></i>\n" +
-    "                    Sorry, we don't recognize your ORCID account!\n" +
+    "                    <div class=\"main\">\n" +
+    "                        <i class=\"fa fa-exclamation-triangle\"></i>\n" +
+    "                        Looks like you haven't created your Impactstory profile yet.\n" +
+    "                        To create a profile, you'll need to sign in with\n" +
+    "                        a Twitter account.\n" +
+    "                    </div>\n" +
     "                </div>\n" +
     "\n" +
     "                <div class=\"btn btn-default login-button twitter\"\n" +
-    "                     ng-click=\"currentUser.twitterAuthenticate('login')\">\n" +
+    "                     ng-click=\"currentUser.twitterAuthenticate('register')\">\n" +
     "                    <i class=\"fa fa-twitter\"></i>\n" +
-    "                    Log in with Twitter instead\n" +
+    "                    Create my profile using Twitter\n" +
     "                </div>\n" +
     "            </div>\n" +
+    "\n" +
+    "\n" +
     "\n" +
     "            <!-- Twitter error -->\n" +
     "            <div class=\"twitter\" ng-show=\"identityProvider=='twitter'\">\n" +
