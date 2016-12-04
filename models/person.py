@@ -170,6 +170,14 @@ def make_person(twitter_creds, high_priority=False, landing_page=None):
 def connect_orcid(my_person, orcid_id):
     print u"adding a brand new orcid_id for {}: {}".format(my_person.full_name, orcid_id)
     my_person.orcid_id = orcid_id
+
+    # save it here, so we've got their orcid
+    db.session.merge(my_person)
+    commit_success = safe_commit(db)
+    if not commit_success:
+        print u"COMMIT fail on {}".format(my_person.id)
+
+    # then keep going!
     return refresh_orcid_info_and_save(my_person)
 
 
@@ -595,21 +603,21 @@ class Person(db.Model):
         save_email(self.orcid_id, new_event_counts)
 
 
-    def email_new_badge(self):
-        if not self.claimed_at:
-            return
-        if not self.email:
-            return
-
-        if not self.get_badge("all_fulltext"):
-            print u"not a hero."
-            return
-
-        print u"{} is a hero!  going to email you!".format(self.full_name)
-        details_dict = self.to_dict()
-        send(self.email, "You're an Open Access Hero!", "new_badge", {"profile": details_dict}, for_real=True)
-        # send(self.email, "You an an OA Hero!", "new_badge", {"profile": details_dict}, for_real=False)
-
+    # def email_new_badge(self):
+    #     if not self.claimed_at:
+    #         return
+    #     if not self.email:
+    #         return
+    #
+    #     if not self.get_badge("all_fulltext"):
+    #         print u"not a hero."
+    #         return
+    #
+    #     print u"{} is a hero!  going to email you!".format(self.full_name)
+    #     details_dict = self.to_dict()
+    #     send(self.email, "You're an Open Access Hero!", "new_badge", {"profile": details_dict}, for_real=True)
+    #     # send(self.email, "You an an OA Hero!", "new_badge", {"profile": details_dict}, for_real=False)
+    #
 
 
     def run_log_openness(self):
@@ -649,7 +657,7 @@ class Person(db.Model):
     def calculate(self):
         # things with api calls in them, or things needed to make those calls
         start_time = time()
-        self.set_fulltext_urls()  # do after set publisher, which gets issns
+        self.set_fulltext_urls()
         self.set_depsy()
         print u"finished api calling part of {method_name} on {num} products in {sec}s".format(
             method_name="calculate".upper(),
@@ -790,62 +798,44 @@ class Person(db.Model):
             if p.user_supplied_fulltext_url:
                 p.set_oa_from_user_supplied_fulltext_url(p.user_supplied_fulltext_url)
 
-        # then call sherlock on the rest!
-        self.call_sherlock()
+        # then call oadoi on the rest!
+        if "schedule" in os.getenv("DYNO", ""):
+            print u"not calling call_oadoi because is a scheduled dyno"
+        else:
+            print u"isn't a scheduled dyno, so calling call_oadoi"
+            self.call_oadoi()
 
 
-    def call_sherlock_on_everything(self):
-        return self.call_sherlock(call_even_if_already_open=True)
+    def call_oadoi_on_everything(self):
+        return self.call_oadoi(call_even_if_already_open=True)
 
-    def call_sherlock(self, call_even_if_already_open=False):
+
+    def call_oadoi(self, call_even_if_already_open=False):
         start_time = time()
 
-        products_for_sherlock = {}
-
+        products_for_oadoi = []
         for p in self.products:
-            if call_even_if_already_open:
-                products_for_sherlock[p.id] = p
-            else:
-                if not p.has_fulltext_url:
-                    products_for_sherlock[p.id] = p
+            if p.user_supplied_fulltext_url:
+                continue
+            if call_even_if_already_open or not p.has_fulltext_url:
+                products_for_oadoi.append(p)
 
-        if not products_for_sherlock:
+        if not products_for_oadoi:
             return
 
-        biblios_for_sherlock = [p.biblio_for_sherlock() for p in products_for_sherlock.values()]
-        # print biblios_for_sherlock
-        url = u"http://api.oadoi.org/v1/publications?no-cache"
+        self.set_data_for_all_products("set_data_from_oadoi", include_products=products_for_oadoi)
 
-        # print u"calling sherlock with", biblios_for_sherlock
-        print u"calling sherlock with {} products".format(len(biblios_for_sherlock))
-        post_body = {"biblios": biblios_for_sherlock}
-
-        # print "\n\n"
-        # print json.dumps(post_body)
-        # print "\n\n"
-
-        r = requests.post(url, json=post_body)
-        if r and r.status_code==200:
-            results = r.json()["results"]
-            for response_dict in results:
-                my_product = products_for_sherlock[response_dict["product_id"]]
-                if not my_product.user_supplied_fulltext_url:
-                    my_product.fulltext_url = response_dict["free_fulltext_url"]
-                    my_product.license = response_dict["license"]
-                    my_product.evidence = response_dict["evidence"]
-                    if my_product.fulltext_url:
-                        print u"got a new open product! {} {} ({})".format(
-                            my_product.id, my_product.fulltext_url, my_product.license)
-
-        open_products = [p for p in products_for_sherlock.values() if p.has_fulltext_url]
-        print u"sherlock found {} of {} products had a free fulltext url ({})".format(
-            len(open_products), len(biblios_for_sherlock), round(float(len(open_products))/len(biblios_for_sherlock), 2))
+        open_products = [p for p in products_for_oadoi if p.has_fulltext_url]
+        print u"oadoi found {} of {} products had a free fulltext url ({})".format(
+            len(open_products), len(products_for_oadoi), round(float(len(open_products))/len(products_for_oadoi), 2))
 
         print u"finished {method_name} on {num} products in {sec}s".format(
-            method_name="call_sherlock".upper(),
-            num = len(products_for_sherlock),
+            method_name="call_oadoi".upper(),
+            num = len(products_for_oadoi),
             sec = elapsed(start_time, 2)
         )
+
+
 
     def set_data_for_all_products(self, method_name, high_priority=False, include_products=None):
         start_time = time()
@@ -969,8 +959,9 @@ class Person(db.Model):
 
         start_time = time()
 
-        # db.session.close()
+        # db.session.expunge_all()
         # db.session.bulk_save_objects([self])
+        # db.session.bulk_save_objects(self.products)
         # safe_commit(db)
         # print u"elapsed {}s after commit in coathors".format(elapsed(start_time, 2))
 
