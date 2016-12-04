@@ -34,6 +34,7 @@ from flask import jsonify
 from flask import render_template
 from flask import send_file
 from flask import g
+from flask import url_for
 
 import jwt
 from jwt import DecodeError
@@ -155,7 +156,9 @@ def logo_small():
     filename = "static/img/impactstory-logo.png"
     return send_file(filename, mimetype='image/png')
 
-
+@app.route("/favicon.ico")
+def favicon_ico():
+    return redirect(url_for("static", filename="img/favicon.ico"))
 
 
 

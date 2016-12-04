@@ -48,7 +48,6 @@ class Badge(db.Model):
     support = db.Column(db.Text)
     products = db.Column(MutableDict.as_mutable(JSONB))
 
-
     def __init__(self, assigned=True, **kwargs):
         self.id = shortuuid.uuid()[0:10]
         self.created = datetime.datetime.utcnow().isoformat()

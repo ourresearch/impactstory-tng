@@ -13,6 +13,7 @@ import iso8601
 import pytz
 from time import sleep
 from time import time
+from random import random
 import datetime
 
 from app import db
@@ -229,6 +230,51 @@ class Product(db.Model):
             print self.error
             print u"in generic exception handler, so rolling back in case it is needed"
             db.session.rollback()
+
+    def set_data_from_oadoi(self, high_priority=False):
+        # print u"starting set_data_from_oadoi with {}".format(self.doi)
+        start_time = time()
+
+        # set_altmetric_api_raw catches its own errors, but since this is the method
+        # called by the thread from Person.set_data_from_altmetric_for_all_products
+        # want to have defense in depth and wrap this whole thing in a try/catch too
+        # in case errors in calculate or anything else we add.
+        try:
+            # url = u"http://localhost:5002/v1/publications?email=team@impactstory.org"
+            url = u"http://api.oadoi.org/v1/publications?email=team@impactstory.org"
+            post_body = {"biblios": [self.biblio_for_oadoi()]}
+
+            # print "\n\n"
+            # print json.dumps(post_body)
+            # print "\n\n"
+
+            r = requests.post(url, json=post_body)
+            if r and r.status_code==200:
+                response_dict = r.json()["results"][0]
+                self.fulltext_url = response_dict["free_fulltext_url"]
+                self.license = response_dict["license"]
+                self.evidence = response_dict["evidence"]
+                if self.fulltext_url:
+                    print u"got a new open product! {} {} ({})".format(
+                        self.id, self.fulltext_url, self.license)
+            else:
+                print u"in set_data_from_oadoi: bad status_code={} for product {} {}. skipping.".format(
+                    r.status_code, self.id, post_body)
+        except (KeyboardInterrupt, SystemExit):
+            # let these ones through, don't save anything to db
+            raise
+        except IndexError:
+            print u"IndexError in set_data_from_oadoi on product {}. skipping.".format(self.id)
+            print "post_body", post_body
+            print r.json()
+        except Exception:
+            logging.exception(u"exception in set_data_from_oadoi on product {}".format(self.id))
+            self.error = "error in set_data_from_oadoi"
+            print self.error
+            print u"in generic exception handler for product {}, so rolling back in case it is needed".format(self.id)
+            db.session.rollback()
+        print u"finished set_data_from_oadoi with {} in {}".format(self.doi, elapsed(start_time, 2))
+
 
     def get_abstract(self):
         try:
@@ -885,15 +931,14 @@ class Product(db.Model):
         return resp
 
 
-    def biblio_for_sherlock(self):
-        response = {"product_id": self.id}
+    def biblio_for_oadoi(self):
+        response = {}
         if self.doi:
             response["doi"] = self.doi
             return response
         else:
-            response["url"] = self.url
             response["title"] = self.title
-            response["arxiv"] = self.arxiv
+            # could add an author name here too
         return response
 
 

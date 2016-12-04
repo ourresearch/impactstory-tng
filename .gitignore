@@ -69,6 +69,7 @@ venv/
 
 # env setup (added by heather)
 tng-env.sh
+.env
 
 # node modules used in Grunt
 static/node_modules

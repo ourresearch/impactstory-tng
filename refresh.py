@@ -40,7 +40,6 @@ if __name__ == "__main__":
     start = time()
     refresh(parsed.orcid_id)
 
-    db.session.remove()
     print "finished update in {}sec".format(elapsed(start))
 
 
