@@ -895,6 +895,7 @@ div.page.product-page .tab-view {
 }
 div.page.person .tab-view .main-col h3,
 div.page.product-page .tab-view .main-col h3 {
+  height: 30px;
   margin: 0 0 0 10px;
   text-transform: uppercase;
   font-size: 18px;
@@ -902,14 +903,22 @@ div.page.product-page .tab-view .main-col h3 {
 }
 div.page.person .tab-view .main-col h3 .filter .label,
 div.page.product-page .tab-view .main-col h3 .filter .label {
+  margin-left: 10px;
   font-size: 13px;
-  padding: .4em .8em .2em;
+  padding: .5em 1em .3em;
   vertical-align: 1px;
+  background: #fff;
+  color: #444;
+  border: 1px solid #777;
 }
 div.page.person .tab-view .main-col h3 .filter .label .content,
 div.page.product-page .tab-view .main-col h3 .filter .label .content {
   margin-right: 5px;
   text-transform: lowercase;
+}
+div.page.person .tab-view .main-col h3 .filter .label .content i,
+div.page.product-page .tab-view .main-col h3 .filter .label .content i {
+  margin-right: 5px;
 }
 div.page.person .tab-view .main-col h3 .filter .label .content img,
 div.page.product-page .tab-view .main-col h3 .filter .label .content img {
@@ -927,6 +936,7 @@ div.page.product-page .tab-view .main-col h3 .filter .label .content img {
 div.page.person .tab-view .main-col h3 .filter .label .close-button,
 div.page.product-page .tab-view .main-col h3 .filter .label .close-button {
   font-size: 18px;
+  vertical-align: top;
 }
 div.page.person .tab-view .main-col h3 a.tool,
 div.page.product-page .tab-view .main-col h3 a.tool {
