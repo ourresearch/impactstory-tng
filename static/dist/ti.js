@@ -895,12 +895,21 @@ angular.module('personPage', [
         console.log("retrieved the person", $scope.person)
 
         $scope.profileStatus = "all_good"
-        $scope.tab =  $routeParams.tab || "overview"
+
+        // redirect the legacy "activity" tab to "timeline" (new name)
+        if ($routeParams.tab == "activity"){
+            console.log("activity tab")
+            $location.url("u/" + Person.d.orcid_id + "/timeline")
+        }
+
 
         // overview tab
+        $scope.tab =  $routeParams.tab || "overview"
         if (!$routeParams.tab){
             $scope.tab = "overview"
         }
+
+
 
         // someone is linking to a specific badge. show overview page behind a popup
         else if ($routeParams.tab == "a") {
@@ -957,12 +966,6 @@ angular.module('personPage', [
         $scope.userForm = {}
 
         console.log("routeparamas", $routeParams)
-        if ($routeParams.filter == "mendeley"){
-            $scope.d.showMendeleyDetails = true
-        }
-        else {
-            $scope.showMendeleyDetails = false
-        }
 
 
         // this is used when you want to tweet your profile
@@ -1076,7 +1079,7 @@ angular.module('personPage', [
 
 
 
-        // posts and activity stuff
+        // posts and timeline stuff
         var posts = []
         _.each(Person.d.products, function(product){
             var myDoi = product.doi
@@ -1135,20 +1138,27 @@ angular.module('personPage', [
         }
 
         $scope.posts = makePostsWithRollups(posts)
-        $scope.mendeleySource = _.findWhere(Person.d.sources, {source_name: "mendeley"})
-        $scope.mendeleyCountries = _.map(_.pairs(Person.d.mendeley.country_percent), function(countryPair){
-            return {
-                name: countryPair[0],
-                percent: countryPair[1]
-            }
-        })
 
-        $scope.mendeleyDisciplines = _.map(_.pairs(Person.d.mendeley.subdiscipline_percent), function(pair){
-            return {
-                name: pair[0],
-                percent: pair[1]
-            }
-        })
+
+        // mendeley stuff.
+        // currently not using this.
+
+        //$scope.mendeleySource = _.findWhere(Person.d.sources, {source_name: "mendeley"})
+        //$scope.mendeleyCountries = _.map(_.pairs(Person.d.mendeley.country_percent), function(countryPair){
+        //    return {
+        //        name: countryPair[0],
+        //        percent: countryPair[1]
+        //    }
+        //})
+        //
+        //$scope.mendeleyDisciplines = _.map(_.pairs(Person.d.mendeley.subdiscipline_percent), function(pair){
+        //    return {
+        //        name: pair[0],
+        //        percent: pair[1]
+        //    }
+        //})
+
+
 
         $scope.postsFilter = function(post){
             if ($scope.selectedChannel) {
@@ -1173,10 +1183,10 @@ angular.module('personPage', [
         $scope.toggleSelectedChannel = function(channel){
             console.log("toggling selected channel", channel)
             if (channel.source_name == $routeParams.filter){
-                $location.url("u/" + Person.d.orcid_id + "/activity")
+                $location.url("u/" + Person.d.orcid_id + "/timeline")
             }
             else {
-                $location.url("u/" + Person.d.orcid_id + "/activity/" + channel.source_name)
+                $location.url("u/" + Person.d.orcid_id + "/timeline/" + channel.source_name)
             }
         }
 
@@ -3203,7 +3213,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "        <div class=\"tab-controls row tab-overview-{{ tab=='overview' }}\">\n" +
     "            <a class=\"tab overview selected-{{ tab=='overview' }}\" href=\"/u/{{ person.d.orcid_id }}\">overview</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='achievements' }}\" href=\"/u/{{ person.d.orcid_id }}/achievements\">achievements</a>\n" +
-    "            <a class=\"tab publications selected-{{ tab=='activity' }}\" href=\"/u/{{ person.d.orcid_id }}/activity\">activity</a>\n" +
+    "            <a class=\"tab publications selected-{{ tab=='timeline' }}\" href=\"/u/{{ person.d.orcid_id }}/timeline\">timeline</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='publications' }}\" href=\"/u/{{ person.d.orcid_id }}/publications\">publications</a>\n" +
     "        </div>\n" +
     "\n" +
@@ -3225,14 +3235,17 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "            </div>\n" +
     "\n" +
     "            <div class=\"col-md-7 big-col\">\n" +
-    "                <div class=\"mentions activity widget\">\n" +
+    "                <div class=\"mentions timeline widget\">\n" +
     "                    <div class=\"widget-header\">\n" +
-    "                        <h3>Activity</h3>\n" +
-    "                        <a class=\"more\" href=\"/u/{{ person.d.orcid_id }}/activity\">view all</a>\n" +
+    "                        <h3>Timeline</h3>\n" +
+    "                        <a class=\"more\" href=\"/u/{{ person.d.orcid_id }}/timeline\">view all</a>\n" +
     "                    </div>\n" +
     "                    <div class=\"channels\">\n" +
     "                        <span class=\"val total-posts\">{{ postsSum }}</span>\n" +
-    "                        <span class=\"ti-label\">Saves and shares across {{ sources.length }} channels:</span>\n" +
+    "                        <span class=\"ti-label\">\n" +
+    "                            Online mentions over {{ person.d.publishingAge }}\n" +
+    "                            year<span ng-show=\"person.d.publishingAge\">s</span>\n" +
+    "                        </span>\n" +
     "\n" +
     "                        <span class=\"channel\"\n" +
     "                              ng-class=\"{'more-than-3': $index > 3, 'more-than-8': $index > 8}\"\n" +
@@ -3468,13 +3481,14 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "\n" +
     "        <!-- MENTIONS view -->\n" +
-    "        <div class=\"tab-view activity row\" ng-if=\"tab=='activity'\">\n" +
+    "        <div class=\"tab-view timeline row\" ng-if=\"tab=='timeline'\">\n" +
     "            <div class=\"col-md-8 posts-col main-col\">\n" +
     "                <h3>\n" +
-    "                    <span class=\"ti-label\" ng-show=\"!selectedChannel\">saved and shared</span>\n" +
-    "                    <span class=\"ti-label\" ng-show=\"selectedChannel && selectedChannel.source_name != 'mendeley'\">shared</span>\n" +
-    "                    <span class=\"ti-label\" ng-show=\"selectedChannel.source_name=='mendeley'\">saved</span>\n" +
-    "                    {{ selectedChannel.posts_count || postsSum }} times\n" +
+    "                    {{ selectedChannel.posts_count || postsSum }}\n" +
+    "                    <span class=\"ti-label\" ng-show=\"!selectedChannel\">\n" +
+    "                        online mentions over {{ person.d.publishingAge }}\n" +
+    "                            year<span ng-show=\"person.d.publishingAge\">s</span>\n" +
+    "                    </span>\n" +
     "\n" +
     "\n" +
     "                    <span class=\"filter\" ng-if=\"selectedChannel\">\n" +
@@ -3490,6 +3504,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                </h3>\n" +
     "\n" +
     "                <!-- pseudo .view-item for mendeley so it can use same styles -->\n" +
+    "                <!--\n" +
     "                <div class=\"rollup mendeley-rollup view-item\"\n" +
     "                     ng-controller=\"mendeleyRollupCtrl\"\n" +
     "                     ng-show=\"mendeleySource && (!selectedChannel || selectedChannel.source_name=='mendeley')\">\n" +
@@ -3570,6 +3585,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                       </div>\n" +
     "                   </div>\n" +
     "                </div>\n" +
+    "                -->\n" +
     "\n" +
     "\n" +
     "                <div class=\"posts-wrapper\"\n" +
@@ -3593,7 +3609,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "            </div>\n" +
     "\n" +
     "            <div class=\"col-md-4 score-col small-col\">\n" +
-    "                <h4>Filter by activity</h4>\n" +
+    "                <h4>Filter by channel</h4>\n" +
     "                <div class=\"channel filter-option {{ channel.source_name }}\"\n" +
     "                    ng-class=\"{selected: selectedChannel.source_name==channel.source_name, unselected: selectedChannel && selectedChannel.source_name != channel.source_name}\"\n" +
     "                    ng-click=\"toggleSelectedChannel(channel)\"\n" +
