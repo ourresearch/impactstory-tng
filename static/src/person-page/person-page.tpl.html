@@ -120,7 +120,7 @@
         <div class="tab-controls row tab-overview-{{ tab=='overview' }}">
             <a class="tab overview selected-{{ tab=='overview' }}" href="/u/{{ person.d.orcid_id }}">overview</a>
             <a class="tab publications selected-{{ tab=='achievements' }}" href="/u/{{ person.d.orcid_id }}/achievements">achievements</a>
-            <a class="tab publications selected-{{ tab=='activity' }}" href="/u/{{ person.d.orcid_id }}/activity">activity</a>
+            <a class="tab publications selected-{{ tab=='timeline' }}" href="/u/{{ person.d.orcid_id }}/timeline">timeline</a>
             <a class="tab publications selected-{{ tab=='publications' }}" href="/u/{{ person.d.orcid_id }}/publications">publications</a>
         </div>
 
@@ -142,14 +142,17 @@
             </div>
 
             <div class="col-md-7 big-col">
-                <div class="mentions activity widget">
+                <div class="mentions timeline widget">
                     <div class="widget-header">
-                        <h3>Activity</h3>
-                        <a class="more" href="/u/{{ person.d.orcid_id }}/activity">view all</a>
+                        <h3>Timeline</h3>
+                        <a class="more" href="/u/{{ person.d.orcid_id }}/timeline">view all</a>
                     </div>
                     <div class="channels">
                         <span class="val total-posts">{{ postsSum }}</span>
-                        <span class="ti-label">Saves and shares across {{ sources.length }} channels:</span>
+                        <span class="ti-label">
+                            Online mentions over {{ person.d.publishingAge }}
+                            year<span ng-show="person.d.publishingAge">s</span>
+                        </span>
 
                         <span class="channel"
                               ng-class="{'more-than-3': $index > 3, 'more-than-8': $index > 8}"
@@ -385,13 +388,14 @@
 
 
         <!-- MENTIONS view -->
-        <div class="tab-view activity row" ng-if="tab=='activity'">
+        <div class="tab-view timeline row" ng-if="tab=='timeline'">
             <div class="col-md-8 posts-col main-col">
                 <h3>
-                    <span class="ti-label" ng-show="!selectedChannel">saved and shared</span>
-                    <span class="ti-label" ng-show="selectedChannel && selectedChannel.source_name != 'mendeley'">shared</span>
-                    <span class="ti-label" ng-show="selectedChannel.source_name=='mendeley'">saved</span>
-                    {{ selectedChannel.posts_count || postsSum }} times
+                    {{ selectedChannel.posts_count || postsSum }}
+                    <span class="ti-label" ng-show="!selectedChannel">
+                        online mentions over {{ person.d.publishingAge }}
+                            year<span ng-show="person.d.publishingAge">s</span>
+                    </span>
 
 
                     <span class="filter" ng-if="selectedChannel">
@@ -407,6 +411,7 @@
                 </h3>
 
                 <!-- pseudo .view-item for mendeley so it can use same styles -->
+                <!--
                 <div class="rollup mendeley-rollup view-item"
                      ng-controller="mendeleyRollupCtrl"
                      ng-show="mendeleySource && (!selectedChannel || selectedChannel.source_name=='mendeley')">
@@ -487,6 +492,7 @@
                        </div>
                    </div>
                 </div>
+                -->
 
 
                 <div class="posts-wrapper"
@@ -510,7 +516,7 @@
             </div>
 
             <div class="col-md-4 score-col small-col">
-                <h4>Filter by activity</h4>
+                <h4>Filter by channel</h4>
                 <div class="channel filter-option {{ channel.source_name }}"
                     ng-class="{selected: selectedChannel.source_name==channel.source_name, unselected: selectedChannel && selectedChannel.source_name != channel.source_name}"
                     ng-click="toggleSelectedChannel(channel)"

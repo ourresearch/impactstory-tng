@@ -759,7 +759,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "        <div class=\"tab-controls row tab-overview-{{ tab=='overview' }}\">\n" +
     "            <a class=\"tab overview selected-{{ tab=='overview' }}\" href=\"/u/{{ person.d.orcid_id }}\">overview</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='achievements' }}\" href=\"/u/{{ person.d.orcid_id }}/achievements\">achievements</a>\n" +
-    "            <a class=\"tab publications selected-{{ tab=='activity' }}\" href=\"/u/{{ person.d.orcid_id }}/activity\">activity</a>\n" +
+    "            <a class=\"tab publications selected-{{ tab=='timeline' }}\" href=\"/u/{{ person.d.orcid_id }}/timeline\">timeline</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='publications' }}\" href=\"/u/{{ person.d.orcid_id }}/publications\">publications</a>\n" +
     "        </div>\n" +
     "\n" +
@@ -781,14 +781,17 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "            </div>\n" +
     "\n" +
     "            <div class=\"col-md-7 big-col\">\n" +
-    "                <div class=\"mentions activity widget\">\n" +
+    "                <div class=\"mentions timeline widget\">\n" +
     "                    <div class=\"widget-header\">\n" +
-    "                        <h3>Activity</h3>\n" +
-    "                        <a class=\"more\" href=\"/u/{{ person.d.orcid_id }}/activity\">view all</a>\n" +
+    "                        <h3>Timeline</h3>\n" +
+    "                        <a class=\"more\" href=\"/u/{{ person.d.orcid_id }}/timeline\">view all</a>\n" +
     "                    </div>\n" +
     "                    <div class=\"channels\">\n" +
     "                        <span class=\"val total-posts\">{{ postsSum }}</span>\n" +
-    "                        <span class=\"ti-label\">Saves and shares across {{ sources.length }} channels:</span>\n" +
+    "                        <span class=\"ti-label\">\n" +
+    "                            Online mentions over {{ person.d.publishingAge }}\n" +
+    "                            year<span ng-show=\"person.d.publishingAge\">s</span>\n" +
+    "                        </span>\n" +
     "\n" +
     "                        <span class=\"channel\"\n" +
     "                              ng-class=\"{'more-than-3': $index > 3, 'more-than-8': $index > 8}\"\n" +
@@ -1024,13 +1027,14 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "\n" +
     "        <!-- MENTIONS view -->\n" +
-    "        <div class=\"tab-view activity row\" ng-if=\"tab=='activity'\">\n" +
+    "        <div class=\"tab-view timeline row\" ng-if=\"tab=='timeline'\">\n" +
     "            <div class=\"col-md-8 posts-col main-col\">\n" +
     "                <h3>\n" +
-    "                    <span class=\"ti-label\" ng-show=\"!selectedChannel\">saved and shared</span>\n" +
-    "                    <span class=\"ti-label\" ng-show=\"selectedChannel && selectedChannel.source_name != 'mendeley'\">shared</span>\n" +
-    "                    <span class=\"ti-label\" ng-show=\"selectedChannel.source_name=='mendeley'\">saved</span>\n" +
-    "                    {{ selectedChannel.posts_count || postsSum }} times\n" +
+    "                    {{ selectedChannel.posts_count || postsSum }}\n" +
+    "                    <span class=\"ti-label\" ng-show=\"!selectedChannel\">\n" +
+    "                        online mentions over {{ person.d.publishingAge }}\n" +
+    "                            year<span ng-show=\"person.d.publishingAge\">s</span>\n" +
+    "                    </span>\n" +
     "\n" +
     "\n" +
     "                    <span class=\"filter\" ng-if=\"selectedChannel\">\n" +
@@ -1046,6 +1050,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                </h3>\n" +
     "\n" +
     "                <!-- pseudo .view-item for mendeley so it can use same styles -->\n" +
+    "                <!--\n" +
     "                <div class=\"rollup mendeley-rollup view-item\"\n" +
     "                     ng-controller=\"mendeleyRollupCtrl\"\n" +
     "                     ng-show=\"mendeleySource && (!selectedChannel || selectedChannel.source_name=='mendeley')\">\n" +
@@ -1126,6 +1131,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                       </div>\n" +
     "                   </div>\n" +
     "                </div>\n" +
+    "                -->\n" +
     "\n" +
     "\n" +
     "                <div class=\"posts-wrapper\"\n" +
@@ -1149,7 +1155,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "            </div>\n" +
     "\n" +
     "            <div class=\"col-md-4 score-col small-col\">\n" +
-    "                <h4>Filter by activity</h4>\n" +
+    "                <h4>Filter by channel</h4>\n" +
     "                <div class=\"channel filter-option {{ channel.source_name }}\"\n" +
     "                    ng-class=\"{selected: selectedChannel.source_name==channel.source_name, unselected: selectedChannel && selectedChannel.source_name != channel.source_name}\"\n" +
     "                    ng-click=\"toggleSelectedChannel(channel)\"\n" +

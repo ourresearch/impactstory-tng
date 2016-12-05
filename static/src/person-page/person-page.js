@@ -88,12 +88,21 @@ angular.module('personPage', [
         console.log("retrieved the person", $scope.person)
 
         $scope.profileStatus = "all_good"
-        $scope.tab =  $routeParams.tab || "overview"
+
+        // redirect the legacy "activity" tab to "timeline" (new name)
+        if ($routeParams.tab == "activity"){
+            console.log("activity tab")
+            $location.url("u/" + Person.d.orcid_id + "/timeline")
+        }
+
 
         // overview tab
+        $scope.tab =  $routeParams.tab || "overview"
         if (!$routeParams.tab){
             $scope.tab = "overview"
         }
+
+
 
         // someone is linking to a specific badge. show overview page behind a popup
         else if ($routeParams.tab == "a") {
@@ -150,12 +159,6 @@ angular.module('personPage', [
         $scope.userForm = {}
 
         console.log("routeparamas", $routeParams)
-        if ($routeParams.filter == "mendeley"){
-            $scope.d.showMendeleyDetails = true
-        }
-        else {
-            $scope.showMendeleyDetails = false
-        }
 
 
         // this is used when you want to tweet your profile
@@ -269,7 +272,7 @@ angular.module('personPage', [
 
 
 
-        // posts and activity stuff
+        // posts and timeline stuff
         var posts = []
         _.each(Person.d.products, function(product){
             var myDoi = product.doi
@@ -328,20 +331,27 @@ angular.module('personPage', [
         }
 
         $scope.posts = makePostsWithRollups(posts)
-        $scope.mendeleySource = _.findWhere(Person.d.sources, {source_name: "mendeley"})
-        $scope.mendeleyCountries = _.map(_.pairs(Person.d.mendeley.country_percent), function(countryPair){
-            return {
-                name: countryPair[0],
-                percent: countryPair[1]
-            }
-        })
 
-        $scope.mendeleyDisciplines = _.map(_.pairs(Person.d.mendeley.subdiscipline_percent), function(pair){
-            return {
-                name: pair[0],
-                percent: pair[1]
-            }
-        })
+
+        // mendeley stuff.
+        // currently not using this.
+
+        //$scope.mendeleySource = _.findWhere(Person.d.sources, {source_name: "mendeley"})
+        //$scope.mendeleyCountries = _.map(_.pairs(Person.d.mendeley.country_percent), function(countryPair){
+        //    return {
+        //        name: countryPair[0],
+        //        percent: countryPair[1]
+        //    }
+        //})
+        //
+        //$scope.mendeleyDisciplines = _.map(_.pairs(Person.d.mendeley.subdiscipline_percent), function(pair){
+        //    return {
+        //        name: pair[0],
+        //        percent: pair[1]
+        //    }
+        //})
+
+
 
         $scope.postsFilter = function(post){
             if ($scope.selectedChannel) {
@@ -366,10 +376,10 @@ angular.module('personPage', [
         $scope.toggleSelectedChannel = function(channel){
             console.log("toggling selected channel", channel)
             if (channel.source_name == $routeParams.filter){
-                $location.url("u/" + Person.d.orcid_id + "/activity")
+                $location.url("u/" + Person.d.orcid_id + "/timeline")
             }
             else {
-                $location.url("u/" + Person.d.orcid_id + "/activity/" + channel.source_name)
+                $location.url("u/" + Person.d.orcid_id + "/timeline/" + channel.source_name)
             }
         }
 
