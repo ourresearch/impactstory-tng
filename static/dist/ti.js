@@ -3479,7 +3479,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "\n" +
     "                    <span class=\"filter\" ng-if=\"selectedChannel\">\n" +
-    "                        <span class=\"filter-intro\">on</span>\n" +
+    "                        <span class=\"filter-intro\">mentions on</span>\n" +
     "                        <span class=\"filter label label-default\">\n" +
     "                            <span class=\"content\">\n" +
     "                                <img class=\"icon\" ng-src=\"/static/img/favicons/{{ selectedChannel.source_name }}.ico\">\n" +
