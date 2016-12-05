@@ -1117,10 +1117,19 @@ div.page.product-page .tab-view.overview .widget.publications .fulltext .val {
 div.page.person .tab-view.overview .widget.badges .achievement,
 div.page.product-page .tab-view.overview .widget.badges .achievement {
   padding: 10px;
+  margin-bottom: 20px;
 }
 div.page.person .tab-view.overview .widget.badges .achievement .under,
 div.page.product-page .tab-view.overview .widget.badges .achievement .under {
-  font-size: 14px;
+  font-size: 16px;
+}
+div.page.person .tab-view.overview .widget.badges .achievement .under .descr,
+div.page.product-page .tab-view.overview .widget.badges .achievement .under .descr {
+  line-height: 1.3;
+}
+div.page.person .tab-view.overview .widget.badges .achievement .under .support,
+div.page.product-page .tab-view.overview .widget.badges .achievement .under .support {
+  display: none;
 }
 div.page.person .tab-view.overview .widget.badges .achievement .badge-actions,
 div.page.product-page .tab-view.overview .widget.badges .achievement .badge-actions {
@@ -1400,27 +1409,22 @@ div.page.product-page .row.person-footer .buttons a.btn {
   padding: 20px;
 }
 .view-item.achievement .content .title .extra.badge-level {
-  font-size: 16px;
-  float: right;
+  font-size: 80%;
   vertical-align: bottom;
   margin-left: 5px;
   margin-top: 4px;
   margin-right: 20px;
 }
-.view-item.achievement .content .title .extra.badge-level.bronze-badge {
-  color: #f29f51;
+.view-item.achievement .content .title .extra.badge-level i {
+  display: none;
 }
 .view-item.achievement .content .title .extra.badge-level.bronze-badge i.fa {
   font-size: 75%;
-}
-.view-item.achievement .content .title .extra.badge-level.silver-badge {
-  color: #999;
 }
 .view-item.achievement .content .title .extra.badge-level.silver-badge i.fa {
   font-size: 85%;
 }
 .view-item.achievement .content .title .extra.badge-level.gold-badge {
-  color: gold;
   font-weight: bold;
 }
 .view-item.achievement .content .title .extra.badge-level .text {
@@ -1472,10 +1476,13 @@ div.page.product-page .row.person-footer .buttons a.btn {
   opacity: 1;
 }
 .view-item.achievement .content .title {
-  font-size: 20px;
+  font-size: 22px;
 }
 .view-item.achievement .content .under {
-  font-size: 15px;
+  font-size: 17px;
+}
+.view-item.achievement .content .under .descr {
+  line-height: 1.5;
 }
 .view-item.achievement .content .under .descr em.n {
   font-size: 120%;
@@ -1488,7 +1495,7 @@ div.page.product-page .row.person-footer .buttons a.btn {
   text-decoration: underline;
 }
 .view-item.achievement .content .badge-actions {
-  font-size: 12px;
+  font-size: 15px;
   color: #777;
   padding: 5px 0;
   display: block;

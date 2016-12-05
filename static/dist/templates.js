@@ -899,7 +899,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "        <!-- BADGES view -->\n" +
     "        <div class=\"tab-view badges row\" ng-if=\"tab=='achievements'\">\n" +
-    "            <div class=\"col-md-8 main-col\">\n" +
+    "            <div class=\"col-md-9 main-col\">\n" +
     "                <h3>\n" +
     "                    <span ng-show=\"filteredBadges.length\" class=\"amount\">{{ filteredBadges.length }}</span>\n" +
     "                    <span ng-show=\"!filteredBadges.length\" class=\"amount\">No</span>\n" +
@@ -991,7 +991,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                </div>\n" +
     "            </div>\n" +
     "\n" +
-    "\n" +
+    "            <!--\n" +
     "            <div class=\"col-md-4 small-col\">\n" +
     "                <h4>Filter by dimension</h4>\n" +
     "                <div class=\"subscore filter-option {{ subscore.name }}\"\n" +
@@ -1009,6 +1009,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    </span>\n" +
     "                </div>\n" +
     "            </div>\n" +
+    "            -->\n" +
     "        </div>\n" +
     "\n" +
     "\n" +
