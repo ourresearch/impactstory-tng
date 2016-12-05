@@ -769,8 +769,8 @@ div.page.product-page .person-header.row .content div.bio .person-profile-info .
   color: #fb9d00;
   display: inline-block;
   margin-left: 3px;
-  margin-top: 7px;
-  font-size: 22px;
+  margin-top: 2px;
+  font-size: 16px;
 }
 div.page.person .person-header.row .content div.bio .person-profile-info .open-access-info i.fa,
 div.page.product-page .person-header.row .content div.bio .person-profile-info .open-access-info i.fa {
@@ -830,11 +830,18 @@ div.page.person .person-header.row .person-actions .tweet-profile,
 div.page.product-page .person-header.row .person-actions .tweet-profile {
   float: right;
   margin-right: 20px;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 div.page.person .person-header.row .person-actions .tweet-profile a,
 div.page.product-page .person-header.row .person-actions .tweet-profile a {
-  font-size: 13px;
+  background: #1565C0;
+  font-size: 16px;
+  color: #fff;
+  border: none;
+}
+div.page.person .person-header.row .person-actions .tweet-profile a:hover,
+div.page.product-page .person-header.row .person-actions .tweet-profile a:hover {
+  background: #104d92;
 }
 div.page.person div.tab-controls,
 div.page.product-page div.tab-controls {

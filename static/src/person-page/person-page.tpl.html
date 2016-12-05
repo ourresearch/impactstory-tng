@@ -53,35 +53,23 @@
                                 </span>
                                 <span class="val">
                                     {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%</span></span>
-                            <span class="open-license">
-                                <span class="ti-label">
-                                    full OA
-                                </span>
-                                <span class="val">
-                                    {{ numFormat.decimalToPerc(person.d.percent_open_license) }}%
-                                </span>
-                            </span>
                         </div>
                         <div class="open-access-actions">
-                            <a href="about/data#boost-your-oa-score"
-                               ng-show="person.d.percent_fulltext < 1 && person.belongsToCurrentUser()"
-                               target="_blank"
-                               class="boost-openness-score">
-                                <span class="text">Boost your score</span>
-                            </a>
                             <a href="u/{{ person.d.orcid_id }}/a/open-hero"
                                ng-show="person.d.percent_fulltext==1"
                                class="is-open-hero">
                                 <i class="fa fa-star"></i>
                                 <span>Open Hero!</span>
                             </a>
-                            <a href="https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
+                            <!--
+                            <a href="https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory."
                                target="_blank"
                                class="share"
                                ng-show="person.belongsToCurrentUser()"
                                ng-click="shareBadge()">
                                 <span class="text">Share your score</span>
                             </a>
+                            -->
 
 
                         </div>
@@ -91,9 +79,8 @@
 
         </div>
         <div class="col-md-3 person-actions">
-            <!--
             <div class="tweet-profile">
-                <a href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.orcid_id }}&text=Check out the online impact of my research on @Impactstory:"
+                <a href="https://twitter.com/intent/tweet?url=https://impactstory.org/u/{{ person.d.orcid_id }}&text=I learned about the online impact of my research on @Impactstory:"
                    target="_blank"
                    ng-click="shareProfile()"
                    ng-show="person.belongsToCurrentUser()"
@@ -102,7 +89,6 @@
                     <span class="text">share</span>
                 </a>
             </div>
-            -->
         </div>
     </div>
 
@@ -605,12 +591,7 @@
     <md-dialog id="aboutOaDialog">
         <md-dialog-content>
             <div class="md-dialog-content">
-                <h2 class="main"><i class="fa fa-unlock-alt"></i> What's your score?</h2>
-                <p>
-                    In celebration of <a href="http://www.openaccessweek.org/">Open Access Week,</a>
-                    we're highlighting the percentage of your work that's open.
-                </p>
-                <h3>Free to read</h3>
+                <h2 class="main"><i class="fa fa-unlock-alt"></i> How open are you?</h2>
 
                 <p>
                     We've found <strong>{{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%</strong> of your publications
@@ -620,16 +601,11 @@
                     and <a href="https://www.altmetric.com/blog/attentionoa/">discussed online</a> more than toll-access ones.
                 </p>
 
-                <div class="reuse" ng-show="person.d.percent_open_license">
-                    <h3>Open to reuse</h3>
-                    <p>
-                        You've also published <strong>{{ numFormat.decimalToPerc(person.d.percent_open_license) }}%</strong>
-                        of your papers under a fully Open license like <a
-                            href="https://creativecommons.org/licenses/by/3.0/">CC-BY.</a> That lets other researchers
-                        build on your work by searching, remixing, indexing, data-mining them and more.
-                    </p>
-                </div>
-
+                <p>
+                    To boost your score, just upload some of your articles to an open access
+                    repository and recalculate:
+                    <a href="http://localhost:5000/about/data#boost-your-oa-score">here's how.</a>
+                </p>
                 <p>
                     To learn more about Open Access and the importance of open licenses, check out <a
                         href="http://sparcopen.org/our-work/howopenisit/">HowOpenIsIt.</a>
@@ -643,7 +619,7 @@
                 <i class="fa fa-times"></i>
                 <span class="text">Dismiss</span>
             </span>
-            <a href="https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory. %23OAWeek"
+            <a href="https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory."
                target="_blank"
                class="btn btn-primary"
                ng-click="shareBadge()">

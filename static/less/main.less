@@ -808,8 +808,8 @@ div.page.person, div.page.product-page {
             color: @openness;
             display: inline-block;
             margin-left: 3px;
-            margin-top: 7px;
-            font-size: 22px;
+            margin-top: 2px;
+            font-size: 16px;
             i.fa {
               font-size: 85%;
               //color: #555;
@@ -879,10 +879,16 @@ div.page.person, div.page.product-page {
       .tweet-profile {
         float: right;
         margin-right: 20px;
-        margin-top: 15px;
+        margin-top: 10px;
         //display: none;
         a {
-          font-size: 13px;
+          background: @linkColor;
+          font-size: 16px;
+          color: #fff;
+          border: none;
+          &:hover {
+            background: darken(@linkColor, 10%);
+          }
         }
       }
     }
