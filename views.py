@@ -194,6 +194,17 @@ def profile_endpoint_polling(orcid_id):
 @app.route("/api/person/<orcid_id>.json")
 def profile_endpoint(orcid_id):
     my_person = Person.query.filter_by(orcid_id=orcid_id).first()
+
+
+    # the right was to do this is save an is_deleted flag in the db and check it here.
+    # this will work for now.
+    deleted_orcid_ids = [
+        "0000-0003-4875-1447",
+        "0000-0002-2942-6609"
+    ]
+    if orcid_id in deleted_orcid_ids:
+        abort_json(404, "This user is deleted")
+
     if not my_person:
         if not request.args.get("source"):
             if request.headers.getlist("X-Forwarded-For"):
