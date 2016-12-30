@@ -1745,7 +1745,7 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
 
 angular.module("static-pages/page-not-found.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("static-pages/page-not-found.tpl.html",
-    "<div class=\"landing static-page\">\n" +
+    "<div class=\"page-404 static-page\">\n" +
     "    <h1>Sorry, we couldn't find that page!</h1>\n" +
     "\n" +
     "</div>");

@@ -270,6 +270,18 @@ img.channel-icon.weibo {
   -webkit-filter: grayscale(100%);
   /* Chrome 19+, Safari 6+, Safari 6+ iOS */
 }
+.page-404 {
+  height: 80vh;
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  -webkit-justify-content: center;
+  -webkit-align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
 .landing.static-page .above-the-fold {
   margin-top: -54px;
   height: 100vh;
