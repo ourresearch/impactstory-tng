@@ -1244,7 +1244,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                <p>\n" +
     "                    To boost your score, just upload some of your articles to an open access\n" +
     "                    repository and recalculate:\n" +
-    "                    <a href=\"http://localhost:5000/about/data#boost-your-oa-score\">here's how.</a>\n" +
+    "                    <a href=\"/about/data#boost-your-oa-score\">here's how.</a>\n" +
     "                </p>\n" +
     "                <p>\n" +
     "                    To learn more about Open Access and the importance of open licenses, check out <a\n" +
