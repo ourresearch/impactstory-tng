@@ -105,7 +105,7 @@ angular.module('aboutPages', [])
         $timeout(function(){
             $anchorScroll();
         }, 500)
-        
+
         // copied from person page
         var subscoreSortOrder = {
             buzz: 1,
@@ -378,7 +378,7 @@ angular.module('app').controller('AppCtrl', function(
         }
     }
 
-    
+
     // genre config
     var genreIcons = {
         'article': "file-text-o",
@@ -516,7 +516,7 @@ angular.module('app').controller('AppCtrl', function(
 .controller('mendeleyRollupCtrl', function($scope){
     $scope.showMendeley = false
 })
-    
+
 .directive('subscorehelp', function(){
         return {
             restrict: "E",
@@ -1238,7 +1238,7 @@ angular.module('personPage', [
             openness: 3,
             fun: 4
         }
-        
+
         // put the badge counts in each subscore
         var subscores = _.map(Person.d.subscores, function(subscore){
             var matchingBadges = _.filter(Person.badgesToShow(), function(badge){
@@ -1503,7 +1503,7 @@ angular.module('currentUser', [
                                      $mdToast,
                                      $cookies,
                                      $timeout){
-        
+
         var data = {}
         var isLoading = false
         var sendToIntercom = function(){
@@ -1755,7 +1755,7 @@ angular.module('currentUser', [
             else {
                 percentOA * 100
             }
-    
+
             var intercomInfo = {
                 // basic user metadata
                 app_id: "z93rnxrs",
@@ -1763,7 +1763,7 @@ angular.module('currentUser', [
                 user_id: person.orcid_id, // orcid ID
                 claimed_at: moment(person.claimed_at).unix(),
                 email: person.email,
-    
+
                 // user stuff for analytics
                 percent_oa: percentOA,
                 num_posts: person.num_posts,
@@ -1774,17 +1774,17 @@ angular.module('currentUser', [
                 campaign: person.campaign,
                 fresh_orcid: person.fresh_orcid,
                 landing_page: $cookies.get("customLandingPage"),
-    
+
                 // we don't send person responses for deleted users (just 404s).
                 // so if we have a person response, this user isn't deleted.
                 // useful for when users deleted profile, then re-created later.
                 is_deleted: false
-    
+
             }
 
             console.log("sending to intercom", intercomInfo)
             window.Intercom("boot", intercomInfo)
-        } 
+        }
 
         function setFromToken(token){
             $auth.setToken(token) // synchronous
@@ -3698,7 +3698,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                <p>\n" +
     "                    To boost your score, just upload some of your articles to an open access\n" +
     "                    repository and recalculate:\n" +
-    "                    <a href=\"http://localhost:5000/about/data#boost-your-oa-score\">here's how.</a>\n" +
+    "                    <a href=\"/about/data#boost-your-oa-score\">here's how.</a>\n" +
     "                </p>\n" +
     "                <p>\n" +
     "                    To learn more about Open Access and the importance of open licenses, check out <a\n" +
