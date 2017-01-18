@@ -915,7 +915,8 @@ class Product(db.Model):
 
     @property
     def num_mentions(self):
-        return self.num_posts + self.mendeley_readers
+        # used to include mendeley readers, but not anymore
+        return self.num_posts
 
     @property
     def has_mentions(self):
