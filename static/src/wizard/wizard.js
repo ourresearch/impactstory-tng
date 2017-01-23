@@ -119,7 +119,7 @@ angular.module('wizard', [
                 CurrentUser.setFromToken(resp.token)
                 console.log("used to have " + oldNumberOfProducts + " products, now " + CurrentUser.d.num_products)
 
-                if (oldNumberOfProducts != CurrentUser.d.num_products){
+                if ((CurrentUser.d.num_products>=100) || (oldNumberOfProducts != CurrentUser.d.num_products)){
                     console.log("found the new products! assuming we're done getting products now.")
                     $scope.state = "making-profile"
                     $scope.num_products_added = CurrentUser.d.num_products - oldNumberOfProducts

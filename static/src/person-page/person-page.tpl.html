@@ -195,7 +195,7 @@
                     </span>
 
                     <a href="wizard/add-publications"
-                       ng-show="person.belongsToCurrentUser() && !selectedGenre"
+                       ng-show="person.belongsToCurrentUser() && products.length<100 && !selectedGenre"
                        class="tool btn btn-default btn-sm">
                         <i class="fa fa-plus"></i>
                         Add publications
