@@ -834,7 +834,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    </span>\n" +
     "\n" +
     "                    <a href=\"wizard/add-publications\"\n" +
-    "                       ng-show=\"person.belongsToCurrentUser() && !selectedGenre\"\n" +
+    "                       ng-show=\"person.belongsToCurrentUser() && products.length<100 && !selectedGenre\"\n" +
     "                       class=\"tool btn btn-default btn-sm\">\n" +
     "                        <i class=\"fa fa-plus\"></i>\n" +
     "                        Add publications\n" +
@@ -1270,8 +1270,6 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "    </md-dialog>\n" +
     "</script>\n" +
-    "\n" +
-    "\n" +
     "");
 }]);
 
@@ -1804,6 +1802,7 @@ angular.module("wizard/add-publications.tpl.html", []).run(["$templateCache", fu
     "                    If you ran into trouble, you may want to make sure you completed the\n" +
     "                    Scopus import wizard.\n" +
     "                </p>\n" +
+    "\n" +
     "\n" +
     "                <a href=\"http://orcid.scopusfeedback.com/\"\n" +
     "                   target=\"_blank\"\n" +
