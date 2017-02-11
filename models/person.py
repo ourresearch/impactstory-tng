@@ -803,7 +803,7 @@ class Person(db.Model):
         if "schedule" in dyno_name or "RQ_worker_queue" in dyno_name:
             print u"not calling call_oadoi because is a scheduled or RQ dyno"
         else:
-            print u"isn't a scheduled dyno, so calling call_oadoi"
+            print u"isn't a scheduled or rq dyno, so calling call_oadoi"
             self.call_oadoi()
 
 

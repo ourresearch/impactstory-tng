@@ -251,12 +251,15 @@ class Product(db.Model):
             r = requests.post(url, json=post_body)
             if r and r.status_code==200:
                 response_dict = r.json()["results"][0]
-                self.fulltext_url = response_dict["free_fulltext_url"]
-                self.license = response_dict["license"]
-                self.evidence = response_dict["evidence"]
-                if self.fulltext_url:
-                    print u"got a new open product! {} {} ({})".format(
-                        self.id, self.fulltext_url, self.license)
+                if not response_dict:
+                    print u"error: response_dict is empty in set_data_from_oadoi for {}. why?".format(url)
+                else:
+                    self.fulltext_url = response_dict["free_fulltext_url"]
+                    self.license = response_dict["license"]
+                    self.evidence = response_dict["evidence"]
+                    if self.fulltext_url:
+                        print u"got a new open product! {} {} ({})".format(
+                            self.id, self.fulltext_url, self.license)
             else:
                 print u"in set_data_from_oadoi: bad status_code={} for product {} {}. skipping.".format(
                     r.status_code, self.id, post_body)
