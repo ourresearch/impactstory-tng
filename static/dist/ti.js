@@ -2730,6 +2730,10 @@ angular.module("about-pages/about.tpl.html", []).run(["$templateCache", function
     "          incorporated as a 501(c)(3) nonprofit corporation.\n" +
     "       </p>\n" +
     "       <p>\n" +
+    "           In addition to the <a href=\"http://impactstory.org\">Impactstory application</a>, the Impactstory team has built\n" +
+    "           <a href=\"http://unpaywall.org\">Unpaywall</a>, <a href=\"http://oadoi.org\">oaDOI</a>, and <a href=\"http://depsy.org\">Depsy</a>.\n" +
+    "       </p>\n" +
+    "       <p>\n" +
     "           Contact us via <a href=\"mailto:team@impactstory.org\">email</a> or\n" +
     "           <a href=\"http://twitter.com/impactstory\">Twitter.</a>\n" +
     "\n" +
