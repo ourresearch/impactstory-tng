@@ -15,15 +15,6 @@ angular.module('currentUser', [
         
         var data = {}
         var isLoading = false
-        var sendToIntercom = function(){
-            // this is slow, but that's ok since it's async and doesn't affect the UX
-            // only call it if they have an orcid_id since the call needs it
-            if (data.orcid_id) {
-                $http.get("api/person/" + data.orcid_id).success(function(resp) {
-                    bootIntercom(resp)
-                })
-            }
-        }
 
         var isAuthenticatedPromise = function(){
             // this is actually a synchronous method, it just returns
@@ -220,7 +211,6 @@ angular.module('currentUser', [
             _.each(data, function(v, k){
                 delete data[k]
             })
-            Intercom('shutdown')
             return true
         }
 
@@ -256,44 +246,6 @@ angular.module('currentUser', [
         }
 
 
-        function bootIntercom(person){
-            var percentOA = person.percent_fulltext
-            if (percentOA === null) {
-                percentOA = undefined
-            }
-            else {
-                percentOA * 100
-            }
-
-            // not using Intercom any more, but keeping this data here in case
-            // we want it again.
-            var intercomInfo = {
-                // basic user metadata
-                app_id: "z93rnxrs",
-                name: person._full_name,
-                user_id: person.orcid_id, // orcid ID
-                claimed_at: moment(person.claimed_at).unix(),
-                email: person.email,
-    
-                // user stuff for analytics
-                percent_oa: percentOA,
-                num_posts: person.num_posts,
-                num_mentions: person.num_mentions,
-                num_products: person.products.length,
-                num_badges: person.badges.length,
-                num_twitter_followers: person.num_twitter_followers,
-                campaign: person.campaign,
-                fresh_orcid: person.fresh_orcid,
-                landing_page: $cookies.get("customLandingPage"),
-    
-                // we don't send person responses for deleted users (just 404s).
-                // so if we have a person response, this user isn't deleted.
-                // useful for when users deleted profile, then re-created later.
-                is_deleted: false
-    
-            }
-
-        }
 
         function setFromToken(token){
             $auth.setToken(token) // synchronous
@@ -301,7 +253,6 @@ angular.module('currentUser', [
                 data[k] = v
             })
 
-            sendToIntercom()
         }
 
         return {
