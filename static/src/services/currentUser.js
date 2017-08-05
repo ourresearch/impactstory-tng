@@ -264,7 +264,9 @@ angular.module('currentUser', [
             else {
                 percentOA * 100
             }
-    
+
+            // not using Intercom any more, but keeping this data here in case
+            // we want it again.
             var intercomInfo = {
                 // basic user metadata
                 app_id: "z93rnxrs",
@@ -291,9 +293,7 @@ angular.module('currentUser', [
     
             }
 
-            console.log("sending to intercom", intercomInfo)
-            window.Intercom("boot", intercomInfo)
-        } 
+        }
 
         function setFromToken(token){
             $auth.setToken(token) // synchronous
