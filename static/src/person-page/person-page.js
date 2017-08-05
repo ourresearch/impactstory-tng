@@ -214,23 +214,12 @@ angular.module('personPage', [
                         console.log("logged the tweet with our DB", resp)
                     })
 
-                window.Intercom("update", {
-                    user_id: myOrcid,
-                    tweeted_quickly: true
-                })
             }
 
         }
 
         $scope.shareBadge = function(badgeName){
-            window.Intercom('trackEvent', 'tweeted-badge', {
-                name: badgeName
-            });
             var myOrcid = $auth.getPayload().sub // orcid ID
-            window.Intercom("update", {
-                user_id: myOrcid,
-                latest_tweeted_badge: badgeName
-            })
         }
 
         $scope.showBadge = function(badge){

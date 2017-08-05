@@ -51,11 +51,6 @@ angular.module('settingsPage', [
         $scope.deleteProfile = function() {
             $http.delete("/api/me")
                 .success(function(resp){
-                    // let Intercom know
-                    window.Intercom("update", {
-                        user_id: myOrcidId,
-                        is_deleted: true
-                    })
 
                     CurrentUser.logout()
                     $location.path("/")
@@ -77,7 +72,6 @@ angular.module('settingsPage', [
                     CurrentUser.setFromToken(resp.token)
 
                     // force a reload of the person
-                    Intercom('trackEvent', 'synced-to-edit');
                     Person.load(myOrcidId, true).then(
                         function(resp){
                             $scope.syncState = "success"
@@ -86,6 +80,9 @@ angular.module('settingsPage', [
                     )
                 })
         }
+
+
+
 
         $scope.setDorafy = function(dorafy){
             console.log("dorafy!", dorafy)

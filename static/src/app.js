@@ -89,7 +89,6 @@ angular.module('app').run(function($route,
     $rootScope.$on('$routeChangeSuccess', function(next, current){
         window.scrollTo(0, 0)
         ga('send', 'pageview', { page: $location.url() });
-        window.Intercom('update')
 
     })
 

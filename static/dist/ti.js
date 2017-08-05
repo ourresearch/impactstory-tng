@@ -267,7 +267,6 @@ angular.module('app').run(function($route,
     $rootScope.$on('$routeChangeSuccess', function(next, current){
         window.scrollTo(0, 0)
         ga('send', 'pageview', { page: $location.url() });
-        window.Intercom('update')
 
     })
 
@@ -1021,23 +1020,12 @@ angular.module('personPage', [
                         console.log("logged the tweet with our DB", resp)
                     })
 
-                window.Intercom("update", {
-                    user_id: myOrcid,
-                    tweeted_quickly: true
-                })
             }
 
         }
 
         $scope.shareBadge = function(badgeName){
-            window.Intercom('trackEvent', 'tweeted-badge', {
-                name: badgeName
-            });
             var myOrcid = $auth.getPayload().sub // orcid ID
-            window.Intercom("update", {
-                user_id: myOrcid,
-                latest_tweeted_badge: badgeName
-            })
         }
 
         $scope.showBadge = function(badge){
@@ -1506,15 +1494,6 @@ angular.module('currentUser', [
         
         var data = {}
         var isLoading = false
-        var sendToIntercom = function(){
-            // this is slow, but that's ok since it's async and doesn't affect the UX
-            // only call it if they have an orcid_id since the call needs it
-            if (data.orcid_id) {
-                $http.get("api/person/" + data.orcid_id).success(function(resp) {
-                    bootIntercom(resp)
-                })
-            }
-        }
 
         var isAuthenticatedPromise = function(){
             // this is actually a synchronous method, it just returns
@@ -1711,7 +1690,6 @@ angular.module('currentUser', [
             _.each(data, function(v, k){
                 delete data[k]
             })
-            Intercom('shutdown')
             return true
         }
 
@@ -1747,44 +1725,6 @@ angular.module('currentUser', [
         }
 
 
-        function bootIntercom(person){
-            var percentOA = person.percent_fulltext
-            if (percentOA === null) {
-                percentOA = undefined
-            }
-            else {
-                percentOA * 100
-            }
-
-            // not using Intercom any more, but keeping this data here in case
-            // we want it again.
-            var intercomInfo = {
-                // basic user metadata
-                app_id: "z93rnxrs",
-                name: person._full_name,
-                user_id: person.orcid_id, // orcid ID
-                claimed_at: moment(person.claimed_at).unix(),
-                email: person.email,
-    
-                // user stuff for analytics
-                percent_oa: percentOA,
-                num_posts: person.num_posts,
-                num_mentions: person.num_mentions,
-                num_products: person.products.length,
-                num_badges: person.badges.length,
-                num_twitter_followers: person.num_twitter_followers,
-                campaign: person.campaign,
-                fresh_orcid: person.fresh_orcid,
-                landing_page: $cookies.get("customLandingPage"),
-    
-                // we don't send person responses for deleted users (just 404s).
-                // so if we have a person response, this user isn't deleted.
-                // useful for when users deleted profile, then re-created later.
-                is_deleted: false
-    
-            }
-
-        }
 
         function setFromToken(token){
             $auth.setToken(token) // synchronous
@@ -1792,7 +1732,6 @@ angular.module('currentUser', [
                 data[k] = v
             })
 
-            sendToIntercom()
         }
 
         return {
@@ -2097,11 +2036,6 @@ angular.module('settingsPage', [
         $scope.deleteProfile = function() {
             $http.delete("/api/me")
                 .success(function(resp){
-                    // let Intercom know
-                    window.Intercom("update", {
-                        user_id: myOrcidId,
-                        is_deleted: true
-                    })
 
                     CurrentUser.logout()
                     $location.path("/")
@@ -2123,7 +2057,6 @@ angular.module('settingsPage', [
                     CurrentUser.setFromToken(resp.token)
 
                     // force a reload of the person
-                    Intercom('trackEvent', 'synced-to-edit');
                     Person.load(myOrcidId, true).then(
                         function(resp){
                             $scope.syncState = "success"
@@ -2132,6 +2065,9 @@ angular.module('settingsPage', [
                     )
                 })
         }
+
+
+
 
         $scope.setDorafy = function(dorafy){
             console.log("dorafy!", dorafy)
