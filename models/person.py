@@ -16,6 +16,7 @@ from models.orcid import OrcidProfile
 from models.orcid import clean_orcid
 from models.orcid import NoOrcidException
 from models.orcid import OrcidDoesNotExist
+from models.badge import Badge
 from models.orcid import make_and_populate_orcid_profile
 from models.source import sources_metadata
 from models.source import Source
@@ -274,6 +275,17 @@ def refresh_profile(orcid_id, high_priority=False):
     return my_person
 
 
+def top_acheivement_persons(persons, achievements, limit):
+    top_persons = (
+        Person.query.
+            join(Person.badges).
+            filter(Person.orcid_id.in_(persons), Badge.name.in_(achievements)).
+            group_by(Person.orcid_id).
+            order_by(func.sum(Badge.percentile).desc()).
+            limit(limit)
+    )
+
+    return top_persons
 
 class Person(db.Model):
     id = db.Column(db.Text, primary_key=True)

@@ -15,6 +15,7 @@ from models.person import delete_person
 from models.person import update_person
 from models.person import update_promos
 from models.person import make_temporary_person_from_orcid
+from models.person import top_acheivement_persons
 from models.log_temp_profile import add_new_log_temp_profile
 from models.person import get_random_people
 from models.product import get_all_products
@@ -179,6 +180,24 @@ def api_test():
 @app.route("/api/test")
 def test0():
     return jsonify({"test": True})
+
+
+@app.route('/api/group/')
+def group():
+    if 'persons' not in request.args:
+        abort(400)
+
+    persons = Person.query.filter(Person.orcid_id.in_(request.args.get('persons')))
+    return jsonify([person.to_dict() for person in persons])
+
+
+@app.route('/api/group/top/')
+def group_top():
+    if not ('persons' in request.args and 'achievements' in request.args):
+        abort(400)
+
+    top_persons = top_acheivement_persons(request.args.get('persons'), request.args.get('achievements'), 3)
+    return jsonify([person.to_dict() for person in top_persons])
 
 
 
