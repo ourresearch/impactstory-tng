@@ -198,11 +198,13 @@ angular.module('app', [
     'badgeDefs',
     'numFormat',
     'person',
+    'group',
 
     // pages
     'staticPages',
     'productPage', // MUST be above personPage because personPage route is greedy for /p/
     'personPage',
+    'groupPage',
     'settingsPage',
     'wizard',
     'aboutPages'
@@ -378,7 +380,7 @@ angular.module('app').controller('AppCtrl', function(
         }
     }
 
-    
+
     // genre config
     var genreIcons = {
         'article': "file-text-o",
@@ -516,7 +518,7 @@ angular.module('app').controller('AppCtrl', function(
 .controller('mendeleyRollupCtrl', function($scope){
     $scope.showMendeley = false
 })
-    
+
 .directive('subscorehelp', function(){
         return {
             restrict: "E",
@@ -805,6 +807,30 @@ angular.module('footer', [
 
 
 
+angular.module('groupPage', [
+    'ngRoute',
+    'group'
+])
+    .config(function($routeProvider) {
+        $routeProvider.when('/g/:group_name/', {
+            templateUrl: 'group-page/group-page.tpl.html',
+            controller: 'groupPageCtrl',
+            reloadOnSearch: false,
+            resolve: {
+                persons: function($route, Group){
+                    return Group.getPersons($route.current.params.persons)
+                }
+            }
+        })
+    })
+
+    .controller("groupPageCtrl", function($scope, $route, persons) {
+      $scope.logo_url = $route.current.params.logo_url
+      $scope.title = $route.current.params.group_name
+      debugger;
+      $scope.persons = persons
+
+    })
 angular.module('personPage', [
     'ngRoute',
     'person'
@@ -1816,6 +1842,35 @@ angular.module('currentUser', [
             }
         }
     })
+angular.module('group', [
+])
+    .factory("Group", function($http, $q, $route, $rootScope){
+        var isLoading = false
+        function getPersons(persons){
+            var url = "/api/group/"
+            $rootScope.progressbar.start()
+            isLoading = true
+
+            var params = {'persons': persons}
+            return $http.get(url, { params:params }).then( function(resp){
+                    $rootScope.progressbar.complete()
+                    isLoading = false
+
+                    return resp.data
+
+                }, function(resp){
+                    $rootScope.progressbar.complete()
+                    isLoading = false
+                    $q.defer().reject()
+                })
+        }
+
+
+        return {
+            getPersons: getPersons,
+            isLoading: isLoading
+        }
+    })
 angular.module("numFormat", [])
 
     .factory("NumFormat", function($location){
@@ -2452,7 +2507,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/confirm-publications.tpl.html', 'wizard/connect-orcid.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'footer/footer.tpl.html', 'group-page/group-page.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/confirm-publications.tpl.html', 'wizard/connect-orcid.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -3042,6 +3097,41 @@ angular.module("footer/footer.tpl.html", []).run(["$templateCache", function($te
     "    </div>\n" +
     "\n" +
     "</div>");
+}]);
+
+angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("group-page/group-page.tpl.html",
+    "\n" +
+    "\n" +
+    "<div class=\"page person\">\n" +
+    "    <div class=\"person-header row\">\n" +
+    "        <div class=\"col-md-9 person-about\">\n" +
+    "            <div class=\"content\">\n" +
+    "                <div class=\"avatar\">\n" +
+    "                    <img ng-src=\"{{ logo_url }}\" alt=\"\"/>\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"bio\">\n" +
+    "                    <h2 class=\"name\">\n" +
+    "                       {{ title }}\n" +
+    "                    </h2>\n" +
+    "                    <div class=\"person-profile-info\">\n" +
+    "                        <div class=\"open-access-info\">\n" +
+    "                            <span>\n" +
+    "                                <i class=\"fa fa-unlock-alt\"></i>\n" +
+    "                                <span class=\"ti-label\">\n" +
+    "                                    open access\n" +
+    "                                </span>\n" +
+    "                                <span class=\"val\">\n" +
+    "                                    {{ persons.openness }}%</span></span>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "");
 }]);
 
 angular.module("helps.tpl.html", []).run(["$templateCache", function($templateCache) {

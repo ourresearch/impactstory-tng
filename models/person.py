@@ -287,6 +287,12 @@ def top_acheivement_persons(persons, achievements, limit):
 
     return top_persons
 
+
+def avg_openess(persons):
+    openness = Person.query.filter(Person.orcid_id.in_(persons)).with_entities(func.avg(Person.openness)).scalar()
+    return openness
+
+
 class Person(db.Model):
     id = db.Column(db.Text, primary_key=True)
     orcid_id = db.Column(db.Text, unique=True)
