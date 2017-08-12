@@ -246,6 +246,79 @@
             </div>
         </div>
 
+        <!-- MENTIONS view -->
+        <div class="tab-view timeline row" ng-if="tab=='timeline'">
+            <div class="col-md-8 posts-col main-col">
+                <h3>
+                    {{ selectedChannel.posts_count || postsSum }}
+                    <span class="ti-label" ng-show="!selectedChannel">
+                        online mentions over {{ person.d.publishingAge }}
+                            year<span ng-show="person.d.publishingAge">s</span>
+                    </span>
+
+
+                    <span class="filter" ng-if="selectedChannel">
+                        <span class="filter-intro">mentions on</span>
+                        <span class="filter label label-default">
+                            <span class="content">
+                                <img class="icon" ng-src="/static/img/favicons/{{ selectedChannel.source_name }}.ico">
+                                {{ selectedChannel.source_name }}
+                            </span>
+                            <span class="close-button" ng-click="toggleSelectedChannel(selectedChannel)">&times;</span>
+                        </span>
+                    </span>
+                </h3>
+
+                <div class="posts-wrapper"
+                     ng-repeat="post in posts | orderBy: '-posted_on' | filter: postsFilter as filteredPosts">
+
+                    <div class="post normal"
+                         ng-if="$index < viewItemsLimit && !(!selectedChannel && post.source=='twitter')"
+                         ng-include="'mention-item.tpl.html'"></div>
+
+                </div>
+
+                <div class="more">
+                    <span class="btn btn-default btn-sm"
+                          ng-click="viewItemsLimit = viewItemsLimit + 20"
+                          ng-show="viewItemsLimit < filteredPosts.length">
+                        <i class="fa fa-arrow-down"></i>
+                        See more
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="col-md-4 score-col small-col">
+                <h4>Filter by channel</h4>
+                <div class="channel filter-option {{ channel.source_name }}"
+                    ng-class="{selected: selectedChannel.source_name==channel.source_name, unselected: selectedChannel && selectedChannel.source_name != channel.source_name}"
+                    ng-click="toggleSelectedChannel(channel)"
+                    ng-repeat="channel in sources | orderBy: '-posts_count'">
+
+                    <span class="close-button">&times;</span>
+                    <span class="content">
+                        <span class="name">
+                            <img ng-src="/static/img/favicons/{{ channel.source_name }}.ico">
+                            {{ channel.display_name }}
+                        </span>
+                        <span class="val" ng-class="{'has-new': channel.events_last_week_count}">
+                            <md-tooltip ng-if="channel.events_last_week_count">
+                                {{ channel.events_last_week_count }} new enagements this week
+                            </md-tooltip>
+                            ({{ numFormat.short(channel.posts_count) }}
+                            <span class="new-last-week"
+                                  ng-show="channel.events_last_week_count">
+                                <i class="fa fa-arrow-up"></i>
+                            </span>)
+                        </span>
+                    </span>
+
+                </div>
+            </div>
+        </div>
+
+
         <div class="tab-view publications row" ng-if="tab=='publications'">
             <div class="col-md-8 publications-col main-col">
                 <h3>

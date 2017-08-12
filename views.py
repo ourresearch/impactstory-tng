@@ -15,7 +15,7 @@ from models.person import delete_person
 from models.person import update_person
 from models.person import update_promos
 from models.person import make_temporary_person_from_orcid
-from models.person import top_acheivement_persons, avg_openess
+from models.person import top_acheivement_persons, avg_openess, get_sources
 from models.log_temp_profile import add_new_log_temp_profile
 from models.person import get_random_people
 from models.product import Product
@@ -211,6 +211,7 @@ def group():
 
     badge_names = list({badge.name for person in persons for badge in person.badges_for_api})
     resp['badge_list'] = [badge.to_dict() for badge in Badge.query.filter(Badge.name.in_(badge_names))]
+    resp['source_list'] = get_sources(products)
 
     return jsonify(resp)
 

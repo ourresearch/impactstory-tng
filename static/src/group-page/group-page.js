@@ -67,6 +67,94 @@ angular.module('groupPage', [
             })
         }
 
+        // posts and timeline stuff
+        var posts = []
+        _.each(persons.product_list, function(product){
+            var myDoi = product.doi
+            var myPublicationId = product.id
+            var myTitle = product.title
+            _.each(product.posts, function(myPost){
+                myPost.citesDoi = myDoi
+                myPost.citesPublication = myPublicationId
+                myPost.citesTitle = myTitle
+                posts.push(myPost)
+            })
+        })
+
+        function makePostsWithRollups(posts){
+            var sortedPosts = _.sortBy(posts, "posted_on")
+            var postsWithRollups = []
+            function makeRollupPost(){
+                return {
+                    source: 'tweetRollup',
+                    posted_on: '',
+                    count: 0,
+                    tweets: []
+                }
+            }
+            var currentRollup = makeRollupPost()
+            _.each(sortedPosts, function(post){
+                if (post.source == 'twitter'){ // this post is a tween
+
+                    // we keep tweets as regular posts too
+                    postsWithRollups.push(post)
+
+                    // put the tweet in the rollup
+                    currentRollup.tweets.push(post)
+
+                    // rollup posted_on date will be date of *first* tweet in group
+                    currentRollup.posted_on = post.posted_on
+                }
+                else {
+                    postsWithRollups.push(post)
+
+                    // save the current rollup
+                    if (currentRollup.tweets.length){
+                        postsWithRollups.push(currentRollup)
+                    }
+
+                    // clear the current rollup
+                    currentRollup = makeRollupPost()
+                }
+            })
+
+            // there may be rollup still sitting around because no regular post at end
+            if (currentRollup.tweets.length){
+                postsWithRollups.push(currentRollup)
+            }
+            return postsWithRollups
+        }
+
+        $scope.posts = makePostsWithRollups(posts)
+
+        $scope.postsFilter = function(post){
+            if ($scope.selectedChannel) {
+                return post.source == $scope.selectedChannel.source_name
+            }
+            else { // we are trying to show unfiltered view
+
+                // but even in unfiltered view we want to hide tweets.
+                return post.source != 'twitter'
+
+            }
+        }
+
+        $scope.postsSum = 0
+        _.each(persons.source_list, function(v){
+            $scope.postsSum += v.posts_count
+        })
+
+        $scope.selectedChannel = _.findWhere(persons.source_list, {source_name: $routeParams.filter})
+
+        $scope.toggleSelectedChannel = function(channel){
+            console.log("toggling selected channel", channel)
+            if (channel.source_name == $routeParams.filter){
+                $location.url("g/" + $scope.title +  "/timeline" + $scope.url_params)
+            }
+            else {
+                $location.url("g/" + $scope.title + "/timeline/" + channel.source_name + $scope.url_params)
+            }
+        }
 
 
     })
