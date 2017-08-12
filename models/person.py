@@ -305,6 +305,15 @@ def avg_openess(persons):
     return openness
 
 
+def get_sources(products):
+    sources = []
+    for source_name in sources_metadata:
+        source = Source(source_name, products)
+        if source.posts_count > 0:
+            sources.append(source)
+    return sources
+
+
 class Person(db.Model):
     id = db.Column(db.Text, primary_key=True)
     orcid_id = db.Column(db.Text, unique=True)

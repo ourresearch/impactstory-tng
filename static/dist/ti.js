@@ -876,6 +876,94 @@ angular.module('groupPage', [
             })
         }
 
+        // posts and timeline stuff
+        var posts = []
+        _.each(persons.product_list, function(product){
+            var myDoi = product.doi
+            var myPublicationId = product.id
+            var myTitle = product.title
+            _.each(product.posts, function(myPost){
+                myPost.citesDoi = myDoi
+                myPost.citesPublication = myPublicationId
+                myPost.citesTitle = myTitle
+                posts.push(myPost)
+            })
+        })
+
+        function makePostsWithRollups(posts){
+            var sortedPosts = _.sortBy(posts, "posted_on")
+            var postsWithRollups = []
+            function makeRollupPost(){
+                return {
+                    source: 'tweetRollup',
+                    posted_on: '',
+                    count: 0,
+                    tweets: []
+                }
+            }
+            var currentRollup = makeRollupPost()
+            _.each(sortedPosts, function(post){
+                if (post.source == 'twitter'){ // this post is a tween
+
+                    // we keep tweets as regular posts too
+                    postsWithRollups.push(post)
+
+                    // put the tweet in the rollup
+                    currentRollup.tweets.push(post)
+
+                    // rollup posted_on date will be date of *first* tweet in group
+                    currentRollup.posted_on = post.posted_on
+                }
+                else {
+                    postsWithRollups.push(post)
+
+                    // save the current rollup
+                    if (currentRollup.tweets.length){
+                        postsWithRollups.push(currentRollup)
+                    }
+
+                    // clear the current rollup
+                    currentRollup = makeRollupPost()
+                }
+            })
+
+            // there may be rollup still sitting around because no regular post at end
+            if (currentRollup.tweets.length){
+                postsWithRollups.push(currentRollup)
+            }
+            return postsWithRollups
+        }
+
+        $scope.posts = makePostsWithRollups(posts)
+
+        $scope.postsFilter = function(post){
+            if ($scope.selectedChannel) {
+                return post.source == $scope.selectedChannel.source_name
+            }
+            else { // we are trying to show unfiltered view
+
+                // but even in unfiltered view we want to hide tweets.
+                return post.source != 'twitter'
+
+            }
+        }
+
+        $scope.postsSum = 0
+        _.each(persons.source_list, function(v){
+            $scope.postsSum += v.posts_count
+        })
+
+        $scope.selectedChannel = _.findWhere(persons.source_list, {source_name: $routeParams.filter})
+
+        $scope.toggleSelectedChannel = function(channel){
+            console.log("toggling selected channel", channel)
+            if (channel.source_name == $routeParams.filter){
+                $location.url("g/" + $scope.title +  "/timeline" + $scope.url_params)
+            }
+            else {
+                $location.url("g/" + $scope.title + "/timeline/" + channel.source_name + $scope.url_params)
+            }
+        }
 
 
     })
@@ -3423,6 +3511,79 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
+    "\n" +
+    "        <!-- MENTIONS view -->\n" +
+    "        <div class=\"tab-view timeline row\" ng-if=\"tab=='timeline'\">\n" +
+    "            <div class=\"col-md-8 posts-col main-col\">\n" +
+    "                <h3>\n" +
+    "                    {{ selectedChannel.posts_count || postsSum }}\n" +
+    "                    <span class=\"ti-label\" ng-show=\"!selectedChannel\">\n" +
+    "                        online mentions over {{ person.d.publishingAge }}\n" +
+    "                            year<span ng-show=\"person.d.publishingAge\">s</span>\n" +
+    "                    </span>\n" +
+    "\n" +
+    "\n" +
+    "                    <span class=\"filter\" ng-if=\"selectedChannel\">\n" +
+    "                        <span class=\"filter-intro\">mentions on</span>\n" +
+    "                        <span class=\"filter label label-default\">\n" +
+    "                            <span class=\"content\">\n" +
+    "                                <img class=\"icon\" ng-src=\"/static/img/favicons/{{ selectedChannel.source_name }}.ico\">\n" +
+    "                                {{ selectedChannel.source_name }}\n" +
+    "                            </span>\n" +
+    "                            <span class=\"close-button\" ng-click=\"toggleSelectedChannel(selectedChannel)\">&times;</span>\n" +
+    "                        </span>\n" +
+    "                    </span>\n" +
+    "                </h3>\n" +
+    "\n" +
+    "                <div class=\"posts-wrapper\"\n" +
+    "                     ng-repeat=\"post in posts | orderBy: '-posted_on' | filter: postsFilter as filteredPosts\">\n" +
+    "\n" +
+    "                    <div class=\"post normal\"\n" +
+    "                         ng-if=\"$index < viewItemsLimit && !(!selectedChannel && post.source=='twitter')\"\n" +
+    "                         ng-include=\"'mention-item.tpl.html'\"></div>\n" +
+    "\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"more\">\n" +
+    "                    <span class=\"btn btn-default btn-sm\"\n" +
+    "                          ng-click=\"viewItemsLimit = viewItemsLimit + 20\"\n" +
+    "                          ng-show=\"viewItemsLimit < filteredPosts.length\">\n" +
+    "                        <i class=\"fa fa-arrow-down\"></i>\n" +
+    "                        See more\n" +
+    "                    </span>\n" +
+    "                </div>\n" +
+    "\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"col-md-4 score-col small-col\">\n" +
+    "                <h4>Filter by channel</h4>\n" +
+    "                <div class=\"channel filter-option {{ channel.source_name }}\"\n" +
+    "                    ng-class=\"{selected: selectedChannel.source_name==channel.source_name, unselected: selectedChannel && selectedChannel.source_name != channel.source_name}\"\n" +
+    "                    ng-click=\"toggleSelectedChannel(channel)\"\n" +
+    "                    ng-repeat=\"channel in sources | orderBy: '-posts_count'\">\n" +
+    "\n" +
+    "                    <span class=\"close-button\">&times;</span>\n" +
+    "                    <span class=\"content\">\n" +
+    "                        <span class=\"name\">\n" +
+    "                            <img ng-src=\"/static/img/favicons/{{ channel.source_name }}.ico\">\n" +
+    "                            {{ channel.display_name }}\n" +
+    "                        </span>\n" +
+    "                        <span class=\"val\" ng-class=\"{'has-new': channel.events_last_week_count}\">\n" +
+    "                            <md-tooltip ng-if=\"channel.events_last_week_count\">\n" +
+    "                                {{ channel.events_last_week_count }} new enagements this week\n" +
+    "                            </md-tooltip>\n" +
+    "                            ({{ numFormat.short(channel.posts_count) }}\n" +
+    "                            <span class=\"new-last-week\"\n" +
+    "                                  ng-show=\"channel.events_last_week_count\">\n" +
+    "                                <i class=\"fa fa-arrow-up\"></i>\n" +
+    "                            </span>)\n" +
+    "                        </span>\n" +
+    "                    </span>\n" +
+    "\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
     "\n" +
     "        <div class=\"tab-view publications row\" ng-if=\"tab=='publications'\">\n" +
     "            <div class=\"col-md-8 publications-col main-col\">\n" +
