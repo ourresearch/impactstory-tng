@@ -830,7 +830,6 @@ angular.module('groupPage', [
         $scope.persons = persons
         $scope.url_params = window.location.search
         $scope.badges = Group.badgesToShow(persons.badge_list)
-        debugger;
 
 
         // genre stuff (don't know what it is)
@@ -3223,11 +3222,67 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "            <a class=\"tab publications selected-{{ tab=='achievements' }}\" href=\"/g/{{ title }}/achievements/{{ url_params }}\">achievements</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='timeline' }}\" href=\"/g/{{ title }}/timeline/{{ url_params }}\">timeline</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='publications' }}\" href=\"/g/{{ title }}/publications/{{ url_params }}\">publications</a>\n" +
+    "            <a class=\"tab publications selected-{{ tab=='investigators' }}\" href=\"/g/{{ title }}/investigators/{{ url_params }}\">investigators</a>\n" +
     "        </div>\n" +
     "\n" +
+    "        <div class=\"tab-view person-header row\" ng-if=\"tab=='investigators'\">\n" +
+    "            <div class=\"col-md-12 main-col\">\n" +
+    "                <div class=\"row\" ng-repeat=\"person in persons.top_person_list\">\n" +
+    "                    <div class=\"content\">\n" +
+    "                        <div class=\"avatar\">\n" +
+    "                          <a href=\"/u/{{ person.orcid_id }}\"><img ng-src=\"{{ person.picture }}\" alt=\"\"/></a>\n" +
+    "                        </div>\n" +
+    "\n" +
+    "                        <div class=\"bio\">\n" +
+    "                            <h2 class=\"name\">\n" +
+    "                                <a href=\"/u/{{ person.orcid_id }}\">{{ person.given_names }} {{ person.family_name }}</a>\n" +
+    "\n" +
+    "                                <span class=\"accounts\">\n" +
+    "                                    <a href=\"http://orcid.org/{{ person.orcid_id }}\">\n" +
+    "                                        <img src=\"static/img/favicons/orcid.ico\" alt=\"\">\n" +
+    "                                    </a>\n" +
+    "                                    <a href=\"http://depsy.org/person/{{ person.depsy_id }}\"\n" +
+    "                                            ng-show=\"person.depsy_id\">\n" +
+    "                                        <img src=\"static/img/favicons/depsy.png\" alt=\"\">\n" +
+    "                                    </a>\n" +
+    "                                    <a href=\"http://twitter.com/{{ person.twitter }}\"\n" +
+    "                                       ng-show=\"person.twitter\"\n" +
+    "                                       class=\"twitter\">\n" +
+    "                                        <img src=\"static/img/favicons/twitter.ico\" alt=\"\">\n" +
+    "                                    </a>\n" +
+    "                                </span>\n" +
+    "                            </h2>\n" +
+    "                            <div class=\"aff\">\n" +
+    "                                <span class=\"institution\">{{ person.affiliation_name }}</span>\n" +
+    "                                <span class=\"role\">\n" +
+    "                                    {{ person.affiliation_role_title }}\n" +
+    "                                </span>\n" +
+    "                            </div>\n" +
+    "\n" +
+    "                            <div class=\"person-profile-info\">\n" +
+    "                                <div class=\"open-access-info\">\n" +
+    "                                      <i class=\"fa fa-unlock-alt\"></i>\n" +
+    "                                      <span class=\"ti-label\">\n" +
+    "                                          open access\n" +
+    "                                      </span>\n" +
+    "                                      <span class=\"val\">\n" +
+    "                                          {{ numFormat.decimalToPerc(person.percent_fulltext) }}%</span>\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                  <div class=\"badges-wrapper\"\n" +
+    "                           ng-include=\"'badge-item.tpl.html'\"\n" +
+    "                           ng-repeat=\"badge in person.overview_badges | orderBy: '-sort_score' | limitTo: 3\">\n" +
+    "                  </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <!-- Investigators view -->\n" +
     "        <div class=\"tab-view person-header row\" ng-if=\"tab=='top_investigators'\">\n" +
     "            <div class=\"col-md-12 main-col\">\n" +
-    "                <div class=\"content\" ng-repeat=\"person in persons.top_person_list\">\n" +
+    "                <div class=\"content\" ng-repeat=\"person in persons.person_list\">\n" +
     "                    <div class=\"avatar\">\n" +
     "                      <a href=\"/u/{{ person.orcid_id }}\"><img ng-src=\"{{ person.picture }}\" alt=\"\"/></a>\n" +
     "                    </div>\n" +
