@@ -824,37 +824,60 @@ angular.module('groupPage', [
         })
     })
 
-    .controller("groupPageCtrl", function($scope, $route, persons, $routeParams, $location) {
-      $scope.logo_url = $route.current.params.logo_url
-      $scope.title = $route.current.params.group_name
-      $scope.persons = persons
-      $scope.url_params = window.location.search
+    .controller("groupPageCtrl", function($scope, $route, $routeParams, $location, Group, persons) {
+        $scope.logo_url = $route.current.params.logo_url
+        $scope.title = $route.current.params.group_name
+        $scope.persons = persons
+        $scope.url_params = window.location.search
+        $scope.badges = Group.badgesToShow(persons.badge_list)
+        debugger;
 
 
-      // genre stuff (don't know what it is)
-      var genreGroups = _.groupBy(persons.product_list, "genre")
-      var genres = []
-      _.each(genreGroups, function(v, k){
-          genres.push({
-              name: k,
-              display_name: k.split("-").join(" "),
-              count: v.length
-          })
-      })
+        // genre stuff (don't know what it is)
+        var genreGroups = _.groupBy(persons.product_list, "genre")
+        var genres = []
+        _.each(genreGroups, function(v, k){
+            genres.push({
+                name: k,
+                display_name: k.split("-").join(" "),
+                count: v.length
+            })
+        })
 
-      $scope.genres = genres
-      $scope.selectedGenre = _.findWhere(genres, {name: $routeParams.filter})
-      $scope.toggleSeletedGenre = function(genre){
-          if (genre.name === $routeParams.filter){
-              $location.url("g/" + $scope.title + "/publications/" + $scope.url_params)
-          }
-          else {
-              $location.url("g/" + $scope.title + "/publications/" + genre.name + '/' + $scope.url_params)
-          }
-      }
+        $scope.genres = genres
+        $scope.selectedGenre = _.findWhere(genres, {name: $routeParams.filter})
+        $scope.toggleSeletedGenre = function(genre){
+            if (genre.name === $routeParams.filter){
+                $location.url("g/" + $scope.title + "/publications/" + $scope.url_params)
+            }
+            else {
+                $location.url("g/" + $scope.title + "/publications/" + genre.name + '/' + $scope.url_params)
+            }
+        }
 
-      $scope.tab =  $routeParams.tab || "top_investigators"
-      $scope.viewItemsLimit = 20
+        $scope.tab =  $routeParams.tab || "top_investigators"
+        $scope.viewItemsLimit = 20
+
+
+        // some achievement stuff
+
+        var badgeUrlName = function(badge){
+           return badge.display_name.toLowerCase().replace(/\s/g, "-")
+        }
+        $scope.badgeUrlName = badgeUrlName
+
+        $scope.shareBadge = function(badgeName){
+            window.Intercom('trackEvent', 'tweeted-badge', {
+                name: badgeName
+            });
+            var myOrcid = $auth.getPayload().sub // orcid ID
+            window.Intercom("update", {
+                user_id: myOrcid,
+                latest_tweeted_badge: badgeName
+            })
+        }
+
+
 
     })
 angular.module('personPage', [
@@ -1916,6 +1939,11 @@ angular.module('group', [
 
         return {
             getPersons: getPersons,
+            badgesToShow: function(badges){
+                return _.filter(badges, function(badge){
+                    return !!badge.show_in_ui
+                })
+            },
             isLoading: isLoading
         }
     })
@@ -3245,6 +3273,102 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
+    "\n" +
+    "        <!-- BADGES view -->\n" +
+    "        <div class=\"tab-view badges row\" ng-if=\"tab=='achievements'\">\n" +
+    "            <div class=\"col-md-9 main-col\">\n" +
+    "                <h3>\n" +
+    "                    <span ng-show=\"filteredBadges.length\" class=\"amount\">{{ filteredBadges.length }}</span>\n" +
+    "                    <span ng-show=\"!filteredBadges.length\" class=\"amount\">No</span>\n" +
+    "                    achievement<span ng-hide=\"filteredBadges.length===1\">s</span>\n" +
+    "                    <span ng-show=\"filteredBadges.length===0\" class=\"yet\">yet</span>\n" +
+    "\n" +
+    "                    <span class=\"filter\" ng-if=\"selectedSubscore\">\n" +
+    "                        <span class=\"filter-intro\">in</span>\n" +
+    "                        <span class=\"filter label label-default {{ selectedSubscore.name }}\">\n" +
+    "                            <span class=\"content\">\n" +
+    "                                <i class=\"icon fa fa-{{ getBadgeIcon(selectedSubscore.name) }}\"></i>\n" +
+    "                                {{ selectedSubscore.display_name }}\n" +
+    "                            </span>\n" +
+    "                            <span class=\"close-button\" ng-click=\"toggleSeletedSubscore(selectedSubscore)\">&times;</span>\n" +
+    "                        </span>\n" +
+    "                    </span>\n" +
+    "                </h3>\n" +
+    "\n" +
+    "                <div class=\"subscore-info\" ng-show=\"selectedSubscore\">\n" +
+    "\n" +
+    "\n" +
+    "                    <!-- for all subscores -->\n" +
+    "                    <div class=\"personalized\">\n" +
+    "\n" +
+    "\n" +
+    "                        <span class=\"def buzz\" ng-show=\"selectedSubscore.name=='buzz'\">\n" +
+    "                            <strong>Buzz</strong> is the volume of online discussion round your research.\n" +
+    "                            It's a good (if coarse) measure of online interest around your work.\n" +
+    "                        </span>\n" +
+    "\n" +
+    "                        <span class=\"def engagement\" ng-show=\"selectedSubscore.name=='engagement'\">\n" +
+    "                            <strong>Engagement</strong> is about <em>how</em> people are interacting with your\n" +
+    "                            research online. What's the quality of the discussion, who is having it, and where?\n" +
+    "                        </span>\n" +
+    "\n" +
+    "\n" +
+    "                        <span class=\"def openness\" ng-show=\"selectedSubscore.name=='openness'\">\n" +
+    "                            <strong>Openness</strong> makes it easy for people to read and use\n" +
+    "                            your research.\n" +
+    "                        </span>\n" +
+    "\n" +
+    "                        <span class=\"def fun\" ng-show=\"selectedSubscore.name=='fun'\">\n" +
+    "                            <strong>Fun</strong> achievements are Not So Serious.\n" +
+    "                        </span>\n" +
+    "\n" +
+    "                        <span class=\"see-all-badges\">\n" +
+    "                            You can see all the possible <span class=\"subscore-name\">{{ selectedSubscore.name }}</span>\n" +
+    "                            achievements on their\n" +
+    "                            <a class=\"{{ selectedSubscore.name }}\" href=\"/about/achievements#{{ selectedSubscore.name }}\">\n" +
+    "                                help page.\n" +
+    "                            </a>\n" +
+    "                        </span>\n" +
+    "\n" +
+    "                        <div class=\"badges-count {{ selectedSubscore.name }}\">\n" +
+    "\n" +
+    "                            <!-- we've got some badges fro this subscore -->\n" +
+    "                            <span class=\"some-badges\" ng-show=\"filteredBadges.length\">\n" +
+    "                                You've earned {{ filteredBadges.length }} so far:\n" +
+    "                            </span>\n" +
+    "\n" +
+    "                            <!-- no badges at all for this subscore-->\n" +
+    "                            <span class=\"no-badges\" ng-show=\"!filteredBadges.length\">\n" +
+    "                                <span class=\"subscore-badges\" ng-show=\"selectedSubscore.name!='fun'\">\n" +
+    "                                    You haven't earned any yet&mdash;but if you keep doing great research and\n" +
+    "                                    <a href=\"http://www.scidev.net/global/communication/practical-guide/altmetrics-audience-connect-research.html\">\n" +
+    "                                        connecting it to a wide audience,\n" +
+    "                                    </a>\n" +
+    "                                    you will!\n" +
+    "                                </span>\n" +
+    "                                <span class=\"subscore-badges\" ng-show=\"selectedSubscore.name=='fun'\">\n" +
+    "                                    You haven't earned any of them so far&mdash;but don't get us wrong, we know you are\n" +
+    "                                    <a href=\"https://en.wikipedia.org/wiki/Happy_Fun_Ball\" class=\"fun\">super super fun.</a>\n" +
+    "                                    Just, in ways our scholarly communication website cannot yet measure.\n" +
+    "                                    Got an idea for a way we can fix that? Hit us up via\n" +
+    "                                    <a href=\"http://twitter.com/impactstory\">Twitter</a> or\n" +
+    "                                    <a href=\"mailto:team@impactstory.org\">email!</a>\n" +
+    "                                </span>\n" +
+    "                            </span>\n" +
+    "\n" +
+    "                        </div>\n" +
+    "\n" +
+    "\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"badges-wrapper\"\n" +
+    "                     ng-class=\"\"\n" +
+    "                     ng-include=\"'badge-item.tpl.html'\"\n" +
+    "                     ng-repeat=\"badge in badges | orderBy: '-sort_score' | filter: {group: selectedSubscore.name}:true as filteredBadges\">\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
     "        <div class=\"tab-view publications row\" ng-if=\"tab=='publications'\">\n" +
     "            <div class=\"col-md-8 publications-col main-col\">\n" +
     "                <h3>\n" +
@@ -3318,11 +3442,36 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
-    "\n" +
-    "\n" +
-    "\n" +
-    "\n" +
     "</div>\n" +
+    "\n" +
+    "<script type=\"text/ng-template\" id=\"badgeDialog.tpl.html\">\n" +
+    "    <md-dialog id=\"badgeDialog\">\n" +
+    "        <md-dialog-content>\n" +
+    "            <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>\n" +
+    "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
+    "            <div class=\"video-container\" ng-show=\"badge.name=='big_in_japan'\">\n" +
+    "                <iframe class=\"big-in-japan video youtube\"\n" +
+    "                        src=\"https://www.youtube.com/embed/tl6u2NASUzU\"\n" +
+    "                        frameborder=\"0\">\n" +
+    "\n" +
+    "                </iframe>\n" +
+    "            </div>\n" +
+    "        </md-dialog-content>\n" +
+    "        <md-dialog-actions class=\"dialog-actions\">\n" +
+    "            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:\"\n" +
+    "               target=\"_blank\"\n" +
+    "               class=\"btn btn-default\"\n" +
+    "               ng-click=\"shareBadge()\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                <span class=\"text\">Share</span>\n" +
+    "            </a>\n" +
+    "            <span ng-click=\"cancel()\" class=\"btn btn-default\">\n" +
+    "                <i class=\"fa fa-times\"></i>\n" +
+    "                <span class=\"text\">Dismiss</span>\n" +
+    "            </span>\n" +
+    "        </md-dialog-actions>\n" +
+    "    </md-dialog>\n" +
+    "</script>\n" +
     "");
 }]);
 

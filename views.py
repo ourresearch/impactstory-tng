@@ -21,6 +21,7 @@ from models.person import get_random_people
 from models.product import Product
 from models.product import get_all_products
 from models.refset import num_people_in_db
+from models.badge import Badge
 from models.badge import badge_configs
 from models.search import autocomplete
 from models.url_slugs_to_redirect import url_slugs_to_redirect
@@ -205,7 +206,11 @@ def group():
     resp['person_list'] = [person.to_dict() for person in persons]
     resp['top_person_list'] = [person.to_dict() for person in top_persons]
     resp['product_list'] = [product.to_dict() for product in products]
-    resp['coauthor_list'] = list({person.display_coauthors for person in persons if person.display_coauthors})
+    resp['coauthor_list'] = [coauthor for person in persons if person.display_coauthors
+                                  for coauthor in person.display_coauthors]
+
+    badge_names = list({badge.name for person in persons for badge in person.badges_for_api})
+    resp['badge_list'] = [badge.to_dict() for badge in Badge.query.filter(Badge.name.in_(badge_names))]
 
     return jsonify(resp)
 

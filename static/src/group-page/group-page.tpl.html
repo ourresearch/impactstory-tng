@@ -94,6 +94,102 @@
             </div>
         </div>
 
+
+        <!-- BADGES view -->
+        <div class="tab-view badges row" ng-if="tab=='achievements'">
+            <div class="col-md-9 main-col">
+                <h3>
+                    <span ng-show="filteredBadges.length" class="amount">{{ filteredBadges.length }}</span>
+                    <span ng-show="!filteredBadges.length" class="amount">No</span>
+                    achievement<span ng-hide="filteredBadges.length===1">s</span>
+                    <span ng-show="filteredBadges.length===0" class="yet">yet</span>
+
+                    <span class="filter" ng-if="selectedSubscore">
+                        <span class="filter-intro">in</span>
+                        <span class="filter label label-default {{ selectedSubscore.name }}">
+                            <span class="content">
+                                <i class="icon fa fa-{{ getBadgeIcon(selectedSubscore.name) }}"></i>
+                                {{ selectedSubscore.display_name }}
+                            </span>
+                            <span class="close-button" ng-click="toggleSeletedSubscore(selectedSubscore)">&times;</span>
+                        </span>
+                    </span>
+                </h3>
+
+                <div class="subscore-info" ng-show="selectedSubscore">
+
+
+                    <!-- for all subscores -->
+                    <div class="personalized">
+
+
+                        <span class="def buzz" ng-show="selectedSubscore.name=='buzz'">
+                            <strong>Buzz</strong> is the volume of online discussion round your research.
+                            It's a good (if coarse) measure of online interest around your work.
+                        </span>
+
+                        <span class="def engagement" ng-show="selectedSubscore.name=='engagement'">
+                            <strong>Engagement</strong> is about <em>how</em> people are interacting with your
+                            research online. What's the quality of the discussion, who is having it, and where?
+                        </span>
+
+
+                        <span class="def openness" ng-show="selectedSubscore.name=='openness'">
+                            <strong>Openness</strong> makes it easy for people to read and use
+                            your research.
+                        </span>
+
+                        <span class="def fun" ng-show="selectedSubscore.name=='fun'">
+                            <strong>Fun</strong> achievements are Not So Serious.
+                        </span>
+
+                        <span class="see-all-badges">
+                            You can see all the possible <span class="subscore-name">{{ selectedSubscore.name }}</span>
+                            achievements on their
+                            <a class="{{ selectedSubscore.name }}" href="/about/achievements#{{ selectedSubscore.name }}">
+                                help page.
+                            </a>
+                        </span>
+
+                        <div class="badges-count {{ selectedSubscore.name }}">
+
+                            <!-- we've got some badges fro this subscore -->
+                            <span class="some-badges" ng-show="filteredBadges.length">
+                                You've earned {{ filteredBadges.length }} so far:
+                            </span>
+
+                            <!-- no badges at all for this subscore-->
+                            <span class="no-badges" ng-show="!filteredBadges.length">
+                                <span class="subscore-badges" ng-show="selectedSubscore.name!='fun'">
+                                    You haven't earned any yet&mdash;but if you keep doing great research and
+                                    <a href="http://www.scidev.net/global/communication/practical-guide/altmetrics-audience-connect-research.html">
+                                        connecting it to a wide audience,
+                                    </a>
+                                    you will!
+                                </span>
+                                <span class="subscore-badges" ng-show="selectedSubscore.name=='fun'">
+                                    You haven't earned any of them so far&mdash;but don't get us wrong, we know you are
+                                    <a href="https://en.wikipedia.org/wiki/Happy_Fun_Ball" class="fun">super super fun.</a>
+                                    Just, in ways our scholarly communication website cannot yet measure.
+                                    Got an idea for a way we can fix that? Hit us up via
+                                    <a href="http://twitter.com/impactstory">Twitter</a> or
+                                    <a href="mailto:team@impactstory.org">email!</a>
+                                </span>
+                            </span>
+
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="badges-wrapper"
+                     ng-class=""
+                     ng-include="'badge-item.tpl.html'"
+                     ng-repeat="badge in badges | orderBy: '-sort_score' | filter: {group: selectedSubscore.name}:true as filteredBadges">
+                </div>
+            </div>
+        </div>
+
         <div class="tab-view publications row" ng-if="tab=='publications'">
             <div class="col-md-8 publications-col main-col">
                 <h3>
@@ -167,8 +263,33 @@
             </div>
         </div>
     </div>
-
-
-
-
 </div>
+
+<script type="text/ng-template" id="badgeDialog.tpl.html">
+    <md-dialog id="badgeDialog">
+        <md-dialog-content>
+            <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>
+            <div class="badge-container" ng-include="'badge-item.tpl.html'"></div>
+            <div class="video-container" ng-show="badge.name=='big_in_japan'">
+                <iframe class="big-in-japan video youtube"
+                        src="https://www.youtube.com/embed/tl6u2NASUzU"
+                        frameborder="0">
+
+                </iframe>
+            </div>
+        </md-dialog-content>
+        <md-dialog-actions class="dialog-actions">
+            <a href="https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:"
+               target="_blank"
+               class="btn btn-default"
+               ng-click="shareBadge()">
+                <i class="fa fa-twitter"></i>
+                <span class="text">Share</span>
+            </a>
+            <span ng-click="cancel()" class="btn btn-default">
+                <i class="fa fa-times"></i>
+                <span class="text">Dismiss</span>
+            </span>
+        </md-dialog-actions>
+    </md-dialog>
+</script>
