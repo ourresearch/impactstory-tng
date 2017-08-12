@@ -45,6 +45,55 @@
             <a class="tab publications selected-{{ tab=='timeline' }}" href="/g/{{ title }}/timeline/{{ url_params }}">timeline</a>
             <a class="tab publications selected-{{ tab=='publications' }}" href="/g/{{ title }}/publications/{{ url_params }}">publications</a>
         </div>
+
+        <div class="tab-view person-header row" ng-if="tab=='top_investigators'">
+            <div class="col-md-12 main-col">
+                <div class="content" ng-repeat="person in persons.top_person_list">
+                    <div class="avatar">
+                      <a href="/u/{{ person.orcid_id }}"><img ng-src="{{ person.picture }}" alt=""/></a>
+                    </div>
+
+                    <div class="bio">
+                        <h2 class="name">
+                            <a href="/u/{{ person.orcid_id }}">{{ person.given_names }} {{ person.family_name }}</a>
+
+                            <span class="accounts">
+                                <a href="http://orcid.org/{{ person.orcid_id }}">
+                                    <img src="static/img/favicons/orcid.ico" alt="">
+                                </a>
+                                <a href="http://depsy.org/person/{{ person.depsy_id }}"
+                                        ng-show="person.depsy_id">
+                                    <img src="static/img/favicons/depsy.png" alt="">
+                                </a>
+                                <a href="http://twitter.com/{{ person.twitter }}"
+                                   ng-show="person.twitter"
+                                   class="twitter">
+                                    <img src="static/img/favicons/twitter.ico" alt="">
+                                </a>
+                            </span>
+                        </h2>
+                        <div class="aff">
+                            <span class="institution">{{ person.affiliation_name }}</span>
+                            <span class="role">
+                                {{ person.affiliation_role_title }}
+                            </span>
+                        </div>
+
+                        <div class="person-profile-info">
+                            <div class="open-access-info">
+                                  <i class="fa fa-unlock-alt"></i>
+                                  <span class="ti-label">
+                                      open access
+                                  </span>
+                                  <span class="val">
+                                      {{ numFormat.decimalToPerc(person.percent_fulltext) }}%</span>
+                            </div>
+                        </div>
+                    </div>
+              </div>
+            </div>
+        </div>
+
         <div class="tab-view publications row" ng-if="tab=='publications'">
             <div class="col-md-8 publications-col main-col">
                 <h3>

@@ -1,13 +1,13 @@
 angular.module('group', [
 ])
-    .factory("Group", function($http, $q, $route, $rootScope){
+    .factory("Group", function($http, $location, $route, $rootScope){
         var isLoading = false
-        function getPersons(persons){
+        function getPersons(persons, achievements){
             var url = "/api/group/"
             $rootScope.progressbar.start()
             isLoading = true
 
-            var params = {'persons': persons}
+            var params = {'persons': persons, 'achievements': achievements}
             return $http.get(url, { params:params }).then( function(resp){
                     $rootScope.progressbar.complete()
                     isLoading = false
@@ -17,7 +17,7 @@ angular.module('group', [
                 }, function(resp){
                     $rootScope.progressbar.complete()
                     isLoading = false
-                    $q.defer().reject()
+                    $location.url('page-not-found')
                 })
         }
 

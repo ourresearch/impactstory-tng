@@ -283,10 +283,19 @@ def top_acheivement_persons(persons, achievements, limit):
         Person.query.
             join(Person.badges).
             filter(Person.orcid_id.in_(persons), Badge.name.in_(achievements)).
-            group_by(Person.orcid_id).
+            group_by(Person.id).
             order_by(func.sum(Badge.percentile).desc()).
-            limit(limit)
+            limit(limit).
+            all()
     )
+
+    # if persons with provided achievements is less then limit add another persons
+    new_limit = limit - len(top_persons)
+    if new_limit:
+        top_persons_ids = [person.orcid_id for person in top_persons]
+        top_persons.extend(Person.query.filter(~Person.orcid_id.in_(top_persons_ids), Person.orcid_id.in_(persons)).
+                           limit(new_limit).
+                           all())
 
     return top_persons
 
