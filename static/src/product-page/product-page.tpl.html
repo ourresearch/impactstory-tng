@@ -1,9 +1,9 @@
 <div class="page product-page">
     <div class="row biblio-row">
         <div class="biblio-col col-md-8">
-            <a href="/u/{{ person.d.orcid_id }}/publications" class="back-to-profile">
+            <a href="{{ url_back }}" class="back-to-profile">
                 <i class="fa fa-chevron-left"></i>
-                Back to {{ person.d.first_name }}'s publications
+                Back to {{ name_back }}'s publications
             </a>
             <div class="genre" ng-show="product.genre != 'article' && product.genre != 'other'">
                 <i class="fa fa-{{ getGenreIcon(product.genre) }}"></i>

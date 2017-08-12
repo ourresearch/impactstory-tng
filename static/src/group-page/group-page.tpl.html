@@ -27,4 +27,99 @@
             </div>
         </div>
     </div>
+
+    <div class="no-products" ng-show="!persons.product_list.length">
+        <h2 class="main">
+            Looks we've got no publications for this group.
+        </h2>
+        <p>
+            That's probably because group hasn't associated any
+            works with its ORCID profile.
+        </p>
+    </div>
+
+    <div class="has-products" ng-show="persons.product_list.length">
+        <div class="tab-controls row tab-overview-{{ tab=='top_investigators' }}">
+            <a class="tab overview selected-{{ tab=='top_investigators' }}" href="/g/{{ title }}/{{ url_params }}">Top investigators</a>
+            <a class="tab publications selected-{{ tab=='achievements' }}" href="/g/{{ title }}/achievements/{{ url_params }}">achievements</a>
+            <a class="tab publications selected-{{ tab=='timeline' }}" href="/g/{{ title }}/timeline/{{ url_params }}">timeline</a>
+            <a class="tab publications selected-{{ tab=='publications' }}" href="/g/{{ title }}/publications/{{ url_params }}">publications</a>
+        </div>
+        <div class="tab-view publications row" ng-if="tab=='publications'">
+            <div class="col-md-8 publications-col main-col">
+                <h3>
+                    <span class="count">
+                        {{ selectedGenre.count || persons.product_list.length }}
+                    </span>
+                    <span class="most-recent" ng-show="persons.product_list.length==100">
+                        most recent
+                    </span>
+
+                    <span class="no-filter" ng-if="!selectedGenre">
+                        publication<span ng-show="persons.product_list.length">s</span>
+                    </span>
+
+                    <span class="filter" ng-if="selectedGenre">
+                        <span class="word">published</span>
+                        <span class="label label-default">
+                            <span class="content">
+                                <i class="fa fa-{{ getGenreIcon(selectedGenre.name) }}"></i>
+                                {{ pluralize(selectedGenre.display_name, selectedGenre.count) }}
+                            </span>
+                            <span class="close-button" ng-click="toggleSeletedGenre(selectedGenre)">&times;</span>
+                        </span>
+                    </span>
+                </h3>
+
+                <div class="publication-wrapper"
+                     ng-if="$index < viewItemsLimit"
+                     ng-include="'publication-group-item.tpl.html'"
+                     ng-repeat="product in persons.product_list | orderBy: ['-num_mentions', '-is_oa_repository', '-is_oa_journal', 'doi'] | filter:{genre: selectedGenre.name}:true as filteredPublications">
+                </div>
+
+                <div class="more">
+                    <span class="btn btn-default btn-sm"
+                          ng-click="viewItemsLimit = viewItemsLimit + 20"
+                          ng-show="viewItemsLimit < filteredPublications.length">
+                        <i class="fa fa-arrow-down"></i>
+                        See more
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 badges-col small-col">
+
+                <div class="filter-by-genre" ng-show="genres.length > 1">
+                    <h4>Filter by genre</h4>
+
+                    <div class="genre-filter filter-option"
+                         ng-repeat="genre in genres"
+                         ng-class="{ unselected: selectedGenre && selectedGenre.name != genre.name, selected: selectedGenre.name == genre.name }">
+                        <span class="close-button" ng-click="toggleSeletedGenre(genre)">&times;</span>
+                        <span class="content" ng-click="toggleSeletedGenre(genre)">
+                            <span class="name">
+                                <i class="fa fa-{{ getGenreIcon(genre.name) }} icon"></i>
+                                {{ pluralize(genre.display_name, genre.count) }}
+                            </span>
+                            <span class="val">({{ genre.count }})</span>
+                        </span>
+
+                    </div>
+                </div>
+                <div class="coauthors" ng-show="persons.coauthor_list.length">
+                    <h4>Coauthors</h4>
+                    <div class="coauthor" ng-repeat="coauthor in persons.coauthor_list | orderBy: '-sort_score'">
+                        <span >
+                            <a href="u/{{ coauthor.orcid_id }}" class="name">
+                                {{ coauthor.name }}
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
 </div>

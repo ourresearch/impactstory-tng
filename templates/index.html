@@ -159,7 +159,65 @@
    </script>
 
 
+   <script type="text/ng-template" id="publication-group-item.tpl.html">
+        <div class="publication view-item">
+            <div class="icon">
+                <md-tooltip md-direction="top">
+                    {{ product.genre }}
+                </md-tooltip>
+                <i class="fa fa-{{ getGenreIcon(product.genre) }}"></i>
+            </div>
 
+            <div class="content">
+                <div class="title-row row">
+                    <div class="title col-md-10">
+                        <a href="g/{{ title }}/{{product.orcid_id}}/p/{{ product.id }}{{ url_params }}">{{ product.title }}</a>
+                    </div>
+                    <div class="fulltext col-md-2">
+                        <a class="val"
+                           target="_blank"
+                           href="{{ product.fulltext_url }}"
+                           ng-show="product.fulltext_url">
+                            [full text]
+                        </a>
+                        <!--a class="val"
+                           target="_blank"
+                           href="{{ product.license }}"
+                           ng-show="product.license && product.license != 'unknown'">
+                            <img  width="80" ng-src="/static/img/licenses/{{ product.license }}.png">
+                        </a-->
+                    </div>
+
+                </div>
+                <div class="under">
+                    <span class="year date">{{ product.year }}</span>
+                    <span class="attr">
+                        {{ product.journal }}
+                        <a class="missing-doi"
+                           href="g/{{ title }}/{{ product.orcid_id }}/p/{{ product.id }}{{ url_params }}"
+                           ng-show="!product.doi">
+                            <md-tooltip>
+                                We may be missing data for this publication
+                            </md-tooltip>
+                            <i class="fa fa-adjust"></i>
+                        </a>
+                    </span>
+                </div>
+                <div class="source-icons" ng-show="product.num_mentions">
+                    <a href="g/{{ title }}/{{ product.orcid_id }}/p/{{ product.id }}{{ url_params }}" class="sort-score">
+                        <span class="val">{{ product.num_mentions }}</span>
+                    </a>
+                    <span class="source-icon"
+                      ng-repeat="source in product.sources | orderBy: 'display_name'">
+                        <a href="g/{{ title }}/{{ productorcid_id }}/p/{{ product.id }}/{{ source.source_name }}{{ url_params }}">
+                            <img ng-src="/static/img/favicons/{{ source.source_name }}.ico"
+                                 class="{{source.source_name}} channel-icon">
+                        </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+   </script>
 
 
 

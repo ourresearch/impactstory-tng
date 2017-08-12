@@ -33,6 +33,19 @@ angular.module('productPage', [
         })
     })
 
+    .config(function($routeProvider) {
+        $routeProvider.when('/g/:title/:orcid/p/:id/', {
+            templateUrl: 'product-page/product-page.tpl.html',
+            controller: 'productPageCtrl',
+            resolve: {
+                personResp: function($http, $route, Person){
+                    console.log("loaded the person response in the route def")
+                    return Person.load($route.current.params.orcid)
+                }
+            }
+        })
+    })
+
 
 
     .controller("productPageCtrl", function($scope,
@@ -53,6 +66,15 @@ angular.module('productPage', [
 
         if (!product){
             $location.url("/u/" + Person.d.orcid_id + "/publications")
+        }
+
+        if ($routeParams.title) {
+            $scope.url_back = '/g/' + $routeParams.title + '/publications/' + window.location.search
+            $scope.name_back = $routeParams.title
+        }
+        else {
+            $scope.url_back = '/u/' + product.orcid_id + '/publications'
+            $scope.name_back = Person.d.first_name
         }
 
         $scope.person = Person
