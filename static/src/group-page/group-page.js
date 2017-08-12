@@ -9,7 +9,7 @@ angular.module('groupPage', [
             reloadOnSearch: false,
             resolve: {
                 persons: function($route, Group){
-                    return Group.getPersons($route.current.params.persons)
+                    return Group.getPersons($route.current.params.persons, $route.current.params.achievements)
                 }
             }
         })

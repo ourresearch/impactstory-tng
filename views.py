@@ -186,32 +186,28 @@ def test0():
 @app.route('/api/group/')
 def group():
     resp = {}
-    if 'persons' not in request.args:
+    if not ('persons' in request.args and 'achievements' in request.args):
         abort(400)
 
     person_ids = request.args.getlist('persons')
     if not isinstance(person_ids, list):
         person_ids = [person_ids]
+    achievement_names = request.args.getlist('achievements')
+    if not isinstance(achievement_names, list):
+        achievement_names = [achievement_names]
 
     persons = Person.query.filter(Person.orcid_id.in_(person_ids)).all()
     products = Product.query.filter(Product.orcid_id.in_(person_ids)).all()
+    top_persons = top_acheivement_persons(person_ids, achievement_names, 3)
+    print(top_persons)
 
     resp['openness'] = int(avg_openess(person_ids) * 100)
     resp['person_list'] = [person.to_dict() for person in persons]
+    resp['top_person_list'] = [person.to_dict() for person in top_persons]
     resp['product_list'] = [product.to_dict() for product in products]
     resp['coauthor_list'] = list({person.display_coauthors for person in persons if person.display_coauthors})
 
     return jsonify(resp)
-
-
-@app.route('/api/group/top/')
-def group_top():
-    if not ('persons' in request.args and 'achievements' in request.args):
-        abort(400)
-
-    top_persons = top_acheivement_persons(request.args.get('persons'), request.args.get('achievements'), 3)
-    return jsonify([person.to_dict() for person in top_persons])
-
 
 
 @app.route("/api/person/<orcid_id>/polling")
