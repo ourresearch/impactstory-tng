@@ -15,7 +15,7 @@ from models.person import delete_person
 from models.person import update_person
 from models.person import update_promos
 from models.person import make_temporary_person_from_orcid
-from models.person import top_acheivement_persons
+from models.person import top_acheivement_persons, avg_openess
 from models.log_temp_profile import add_new_log_temp_profile
 from models.person import get_random_people
 from models.product import get_all_products
@@ -184,11 +184,19 @@ def test0():
 
 @app.route('/api/group/')
 def group():
+    resp = {}
     if 'persons' not in request.args:
         abort(400)
 
-    persons = Person.query.filter(Person.orcid_id.in_(request.args.get('persons')))
-    return jsonify([person.to_dict() for person in persons])
+    person_ids = request.args.getlist('persons')
+    if not isinstance(person_ids, list):
+        person_ids = [person_ids]
+
+    persons = Person.query.filter(Person.orcid_id.in_(person_ids)).all()
+    resp['openness'] = int(avg_openess(person_ids) * 100)
+    resp['person_list'] = [person.to_dict() for person in persons]
+
+    return jsonify(resp)
 
 
 @app.route('/api/group/top/')
