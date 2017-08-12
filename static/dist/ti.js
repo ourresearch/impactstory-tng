@@ -812,7 +812,7 @@ angular.module('groupPage', [
     'group'
 ])
     .config(function($routeProvider) {
-        $routeProvider.when('/g/:group_name/', {
+        $routeProvider.when('/g/:group_name/:tab?/:filter?/', {
             templateUrl: 'group-page/group-page.tpl.html',
             controller: 'groupPageCtrl',
             reloadOnSearch: false,
@@ -824,11 +824,37 @@ angular.module('groupPage', [
         })
     })
 
-    .controller("groupPageCtrl", function($scope, $route, persons) {
+    .controller("groupPageCtrl", function($scope, $route, persons, $routeParams, $location) {
       $scope.logo_url = $route.current.params.logo_url
       $scope.title = $route.current.params.group_name
-      debugger;
       $scope.persons = persons
+      $scope.url_params = window.location.search
+
+
+      // genre stuff (don't know what it is)
+      var genreGroups = _.groupBy(persons.product_list, "genre")
+      var genres = []
+      _.each(genreGroups, function(v, k){
+          genres.push({
+              name: k,
+              display_name: k.split("-").join(" "),
+              count: v.length
+          })
+      })
+
+      $scope.genres = genres
+      $scope.selectedGenre = _.findWhere(genres, {name: $routeParams.filter})
+      $scope.toggleSeletedGenre = function(genre){
+          if (genre.name === $routeParams.filter){
+              $location.url("g/" + $scope.title + "/publications/" + $scope.url_params)
+          }
+          else {
+              $location.url("g/" + $scope.title + "/publications/" + genre.name + '/' + $scope.url_params)
+          }
+      }
+
+      $scope.tab =  $routeParams.tab || "top_investigators"
+      $scope.viewItemsLimit = 20
 
     })
 angular.module('personPage', [
@@ -1337,6 +1363,19 @@ angular.module('productPage', [
         })
     })
 
+    .config(function($routeProvider) {
+        $routeProvider.when('/g/:title/:orcid/p/:id/', {
+            templateUrl: 'product-page/product-page.tpl.html',
+            controller: 'productPageCtrl',
+            resolve: {
+                personResp: function($http, $route, Person){
+                    console.log("loaded the person response in the route def")
+                    return Person.load($route.current.params.orcid)
+                }
+            }
+        })
+    })
+
 
 
     .controller("productPageCtrl", function($scope,
@@ -1357,6 +1396,15 @@ angular.module('productPage', [
 
         if (!product){
             $location.url("/u/" + Person.d.orcid_id + "/publications")
+        }
+
+        if ($routeParams.title) {
+            $scope.url_back = '/g/' + $routeParams.title + '/publications/' + window.location.search
+            $scope.name_back = $routeParams.title
+        }
+        else {
+            $scope.url_back = '/u/' + product.orcid_id + '/publications'
+            $scope.name_back = Person.d.first_name
         }
 
         $scope.person = Person
@@ -3130,6 +3178,101 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "            </div>\n" +
     "        </div>\n" +
     "    </div>\n" +
+    "\n" +
+    "    <div class=\"no-products\" ng-show=\"!persons.product_list.length\">\n" +
+    "        <h2 class=\"main\">\n" +
+    "            Looks we've got no publications for this group.\n" +
+    "        </h2>\n" +
+    "        <p>\n" +
+    "            That's probably because group hasn't associated any\n" +
+    "            works with its ORCID profile.\n" +
+    "        </p>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"has-products\" ng-show=\"persons.product_list.length\">\n" +
+    "        <div class=\"tab-controls row tab-overview-{{ tab=='top_investigators' }}\">\n" +
+    "            <a class=\"tab overview selected-{{ tab=='top_investigators' }}\" href=\"/g/{{ title }}/{{ url_params }}\">Top investigators</a>\n" +
+    "            <a class=\"tab publications selected-{{ tab=='achievements' }}\" href=\"/g/{{ title }}/achievements/{{ url_params }}\">achievements</a>\n" +
+    "            <a class=\"tab publications selected-{{ tab=='timeline' }}\" href=\"/g/{{ title }}/timeline/{{ url_params }}\">timeline</a>\n" +
+    "            <a class=\"tab publications selected-{{ tab=='publications' }}\" href=\"/g/{{ title }}/publications/{{ url_params }}\">publications</a>\n" +
+    "        </div>\n" +
+    "        <div class=\"tab-view publications row\" ng-if=\"tab=='publications'\">\n" +
+    "            <div class=\"col-md-8 publications-col main-col\">\n" +
+    "                <h3>\n" +
+    "                    <span class=\"count\">\n" +
+    "                        {{ selectedGenre.count || persons.product_list.length }}\n" +
+    "                    </span>\n" +
+    "                    <span class=\"most-recent\" ng-show=\"persons.product_list.length==100\">\n" +
+    "                        most recent\n" +
+    "                    </span>\n" +
+    "\n" +
+    "                    <span class=\"no-filter\" ng-if=\"!selectedGenre\">\n" +
+    "                        publication<span ng-show=\"persons.product_list.length\">s</span>\n" +
+    "                    </span>\n" +
+    "\n" +
+    "                    <span class=\"filter\" ng-if=\"selectedGenre\">\n" +
+    "                        <span class=\"word\">published</span>\n" +
+    "                        <span class=\"label label-default\">\n" +
+    "                            <span class=\"content\">\n" +
+    "                                <i class=\"fa fa-{{ getGenreIcon(selectedGenre.name) }}\"></i>\n" +
+    "                                {{ pluralize(selectedGenre.display_name, selectedGenre.count) }}\n" +
+    "                            </span>\n" +
+    "                            <span class=\"close-button\" ng-click=\"toggleSeletedGenre(selectedGenre)\">&times;</span>\n" +
+    "                        </span>\n" +
+    "                    </span>\n" +
+    "                </h3>\n" +
+    "\n" +
+    "                <div class=\"publication-wrapper\"\n" +
+    "                     ng-if=\"$index < viewItemsLimit\"\n" +
+    "                     ng-include=\"'publication-group-item.tpl.html'\"\n" +
+    "                     ng-repeat=\"product in persons.product_list | orderBy: ['-num_mentions', '-is_oa_repository', '-is_oa_journal', 'doi'] | filter:{genre: selectedGenre.name}:true as filteredPublications\">\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"more\">\n" +
+    "                    <span class=\"btn btn-default btn-sm\"\n" +
+    "                          ng-click=\"viewItemsLimit = viewItemsLimit + 20\"\n" +
+    "                          ng-show=\"viewItemsLimit < filteredPublications.length\">\n" +
+    "                        <i class=\"fa fa-arrow-down\"></i>\n" +
+    "                        See more\n" +
+    "                    </span>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-4 badges-col small-col\">\n" +
+    "\n" +
+    "                <div class=\"filter-by-genre\" ng-show=\"genres.length > 1\">\n" +
+    "                    <h4>Filter by genre</h4>\n" +
+    "\n" +
+    "                    <div class=\"genre-filter filter-option\"\n" +
+    "                         ng-repeat=\"genre in genres\"\n" +
+    "                         ng-class=\"{ unselected: selectedGenre && selectedGenre.name != genre.name, selected: selectedGenre.name == genre.name }\">\n" +
+    "                        <span class=\"close-button\" ng-click=\"toggleSeletedGenre(genre)\">&times;</span>\n" +
+    "                        <span class=\"content\" ng-click=\"toggleSeletedGenre(genre)\">\n" +
+    "                            <span class=\"name\">\n" +
+    "                                <i class=\"fa fa-{{ getGenreIcon(genre.name) }} icon\"></i>\n" +
+    "                                {{ pluralize(genre.display_name, genre.count) }}\n" +
+    "                            </span>\n" +
+    "                            <span class=\"val\">({{ genre.count }})</span>\n" +
+    "                        </span>\n" +
+    "\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"coauthors\" ng-show=\"persons.coauthor_list.length\">\n" +
+    "                    <h4>Coauthors</h4>\n" +
+    "                    <div class=\"coauthor\" ng-repeat=\"coauthor in persons.coauthor_list | orderBy: '-sort_score'\">\n" +
+    "                        <span >\n" +
+    "                            <a href=\"u/{{ coauthor.orcid_id }}\" class=\"name\">\n" +
+    "                                {{ coauthor.name }}\n" +
+    "                            </a>\n" +
+    "                        </span>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "\n" +
+    "\n" +
+    "\n" +
     "</div>\n" +
     "");
 }]);
@@ -3826,9 +3969,9 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "<div class=\"page product-page\">\n" +
     "    <div class=\"row biblio-row\">\n" +
     "        <div class=\"biblio-col col-md-8\">\n" +
-    "            <a href=\"/u/{{ person.d.orcid_id }}/publications\" class=\"back-to-profile\">\n" +
+    "            <a href=\"{{ url_back }}\" class=\"back-to-profile\">\n" +
     "                <i class=\"fa fa-chevron-left\"></i>\n" +
-    "                Back to {{ person.d.first_name }}'s publications\n" +
+    "                Back to {{ name_back }}'s publications\n" +
     "            </a>\n" +
     "            <div class=\"genre\" ng-show=\"product.genre != 'article' && product.genre != 'other'\">\n" +
     "                <i class=\"fa fa-{{ getGenreIcon(product.genre) }}\"></i>\n" +

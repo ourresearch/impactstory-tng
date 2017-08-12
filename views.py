@@ -18,6 +18,7 @@ from models.person import make_temporary_person_from_orcid
 from models.person import top_acheivement_persons, avg_openess
 from models.log_temp_profile import add_new_log_temp_profile
 from models.person import get_random_people
+from models.product import Product
 from models.product import get_all_products
 from models.refset import num_people_in_db
 from models.badge import badge_configs
@@ -193,8 +194,12 @@ def group():
         person_ids = [person_ids]
 
     persons = Person.query.filter(Person.orcid_id.in_(person_ids)).all()
+    products = Product.query.filter(Product.orcid_id.in_(person_ids)).all()
+
     resp['openness'] = int(avg_openess(person_ids) * 100)
     resp['person_list'] = [person.to_dict() for person in persons]
+    resp['product_list'] = [product.to_dict() for product in products]
+    resp['coauthor_list'] = list({person.display_coauthors for person in persons if person.display_coauthors})
 
     return jsonify(resp)
 
