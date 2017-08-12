@@ -24,6 +24,11 @@ angular.module('group', [
 
         return {
             getPersons: getPersons,
+            badgesToShow: function(badges){
+                return _.filter(badges, function(badge){
+                    return !!badge.show_in_ui
+                })
+            },
             isLoading: isLoading
         }
     })
