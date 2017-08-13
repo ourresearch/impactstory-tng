@@ -15,10 +15,13 @@ from models.person import delete_person
 from models.person import update_person
 from models.person import update_promos
 from models.person import make_temporary_person_from_orcid
+from models.person import top_acheivement_persons, avg_openess, get_sources
 from models.log_temp_profile import add_new_log_temp_profile
 from models.person import get_random_people
+from models.product import Product
 from models.product import get_all_products
 from models.refset import num_people_in_db
+from models.badge import Badge
 from models.badge import badge_configs
 from models.search import autocomplete
 from models.url_slugs_to_redirect import url_slugs_to_redirect
@@ -180,6 +183,37 @@ def api_test():
 def test0():
     return jsonify({"test": True})
 
+
+@app.route('/api/group/')
+def group():
+    resp = {}
+    if not ('persons' in request.args and 'achievements' in request.args):
+        abort(400)
+
+    person_ids = request.args.getlist('persons')
+    if not isinstance(person_ids, list):
+        person_ids = [person_ids]
+    achievement_names = request.args.getlist('achievements')
+    if not isinstance(achievement_names, list):
+        achievement_names = [achievement_names]
+
+    persons = Person.query.filter(Person.orcid_id.in_(person_ids)).all()
+    products = Product.query.filter(Product.orcid_id.in_(person_ids)).all()
+    top_persons = top_acheivement_persons(person_ids, achievement_names, 3)
+    print(top_persons)
+
+    resp['openness'] = int(avg_openess(person_ids) * 100)
+    resp['person_list'] = [person.to_dict() for person in persons]
+    resp['top_person_list'] = [person.to_dict() for person in top_persons]
+    resp['product_list'] = [product.to_dict() for product in products]
+    resp['coauthor_list'] = [coauthor for person in persons if person.display_coauthors
+                                  for coauthor in person.display_coauthors]
+
+    badge_names = list({badge.name for person in persons for badge in person.badges_for_api})
+    resp['badge_list'] = [badge.to_dict() for badge in Badge.query.filter(Badge.name.in_(badge_names))]
+    resp['source_list'] = get_sources(products)
+
+    return jsonify(resp)
 
 
 @app.route("/api/person/<orcid_id>/polling")

@@ -198,11 +198,13 @@ angular.module('app', [
     'badgeDefs',
     'numFormat',
     'person',
+    'group',
 
     // pages
     'staticPages',
     'productPage', // MUST be above personPage because personPage route is greedy for /p/
     'personPage',
+    'groupPage',
     'settingsPage',
     'wizard',
     'aboutPages'
@@ -377,7 +379,7 @@ angular.module('app').controller('AppCtrl', function(
         }
     }
 
-    
+
     // genre config
     var genreIcons = {
         'article': "file-text-o",
@@ -515,7 +517,7 @@ angular.module('app').controller('AppCtrl', function(
 .controller('mendeleyRollupCtrl', function($scope){
     $scope.showMendeley = false
 })
-    
+
 .directive('subscorehelp', function(){
         return {
             restrict: "E",
@@ -804,6 +806,166 @@ angular.module('footer', [
 
 
 
+angular.module('groupPage', [
+    'ngRoute',
+    'group'
+])
+    .config(function($routeProvider) {
+        $routeProvider.when('/g/:group_name/:tab?/:filter?/', {
+            templateUrl: 'group-page/group-page.tpl.html',
+            controller: 'groupPageCtrl',
+            reloadOnSearch: false,
+            resolve: {
+                persons: function($route, Group){
+                    return Group.getPersons($route.current.params.persons, $route.current.params.achievements)
+                }
+            }
+        })
+    })
+
+    .controller("groupPageCtrl", function($scope, $route, $routeParams, $location, Group, persons) {
+        $scope.logo_url = $route.current.params.logo_url
+        $scope.title = $route.current.params.group_name
+        $scope.persons = persons
+        $scope.url_params = window.location.search
+        $scope.badges = Group.badgesToShow(persons.badge_list)
+
+
+        // genre stuff (don't know what it is)
+        var genreGroups = _.groupBy(persons.product_list, "genre")
+        var genres = []
+        _.each(genreGroups, function(v, k){
+            genres.push({
+                name: k,
+                display_name: k.split("-").join(" "),
+                count: v.length
+            })
+        })
+
+        $scope.genres = genres
+        $scope.selectedGenre = _.findWhere(genres, {name: $routeParams.filter})
+        $scope.toggleSeletedGenre = function(genre){
+            if (genre.name === $routeParams.filter){
+                $location.url("g/" + $scope.title + "/publications/" + $scope.url_params)
+            }
+            else {
+                $location.url("g/" + $scope.title + "/publications/" + genre.name + '/' + $scope.url_params)
+            }
+        }
+
+        $scope.tab =  $routeParams.tab || "top_investigators"
+        $scope.viewItemsLimit = 20
+
+
+        // some achievement stuff
+
+        var badgeUrlName = function(badge){
+           return badge.display_name.toLowerCase().replace(/\s/g, "-")
+        }
+        $scope.badgeUrlName = badgeUrlName
+
+        $scope.shareBadge = function(badgeName){
+            window.Intercom('trackEvent', 'tweeted-badge', {
+                name: badgeName
+            });
+            var myOrcid = $auth.getPayload().sub // orcid ID
+            window.Intercom("update", {
+                user_id: myOrcid,
+                latest_tweeted_badge: badgeName
+            })
+        }
+
+        // posts and timeline stuff
+        var posts = []
+        _.each(persons.product_list, function(product){
+            var myDoi = product.doi
+            var myPublicationId = product.id
+            var myTitle = product.title
+            _.each(product.posts, function(myPost){
+                myPost.citesDoi = myDoi
+                myPost.citesPublication = myPublicationId
+                myPost.citesTitle = myTitle
+                posts.push(myPost)
+            })
+        })
+
+        function makePostsWithRollups(posts){
+            var sortedPosts = _.sortBy(posts, "posted_on")
+            var postsWithRollups = []
+            function makeRollupPost(){
+                return {
+                    source: 'tweetRollup',
+                    posted_on: '',
+                    count: 0,
+                    tweets: []
+                }
+            }
+            var currentRollup = makeRollupPost()
+            _.each(sortedPosts, function(post){
+                if (post.source == 'twitter'){ // this post is a tween
+
+                    // we keep tweets as regular posts too
+                    postsWithRollups.push(post)
+
+                    // put the tweet in the rollup
+                    currentRollup.tweets.push(post)
+
+                    // rollup posted_on date will be date of *first* tweet in group
+                    currentRollup.posted_on = post.posted_on
+                }
+                else {
+                    postsWithRollups.push(post)
+
+                    // save the current rollup
+                    if (currentRollup.tweets.length){
+                        postsWithRollups.push(currentRollup)
+                    }
+
+                    // clear the current rollup
+                    currentRollup = makeRollupPost()
+                }
+            })
+
+            // there may be rollup still sitting around because no regular post at end
+            if (currentRollup.tweets.length){
+                postsWithRollups.push(currentRollup)
+            }
+            return postsWithRollups
+        }
+
+        $scope.posts = makePostsWithRollups(posts)
+
+        $scope.postsFilter = function(post){
+            if ($scope.selectedChannel) {
+                return post.source == $scope.selectedChannel.source_name
+            }
+            else { // we are trying to show unfiltered view
+
+                // but even in unfiltered view we want to hide tweets.
+                return post.source != 'twitter'
+
+            }
+        }
+
+        $scope.postsSum = 0
+        _.each(persons.source_list, function(v){
+            $scope.postsSum += v.posts_count
+        })
+
+        $scope.selectedChannel = _.findWhere(persons.source_list, {source_name: $routeParams.filter})
+
+        $scope.toggleSelectedChannel = function(channel){
+            console.log("toggling selected channel", channel)
+            if (channel.source_name == $routeParams.filter){
+                $location.url("g/" + $scope.title +  "/timeline" + $scope.url_params)
+            }
+            else {
+                $location.url("g/" + $scope.title + "/timeline/" + channel.source_name + $scope.url_params)
+            }
+        }
+
+
+    })
 angular.module('personPage', [
     'ngRoute',
     'person'
@@ -1299,6 +1461,19 @@ angular.module('productPage', [
         })
     })
 
+    .config(function($routeProvider) {
+        $routeProvider.when('/g/:title/:orcid/p/:id/', {
+            templateUrl: 'product-page/product-page.tpl.html',
+            controller: 'productPageCtrl',
+            resolve: {
+                personResp: function($http, $route, Person){
+                    console.log("loaded the person response in the route def")
+                    return Person.load($route.current.params.orcid)
+                }
+            }
+        })
+    })
+
 
 
     .controller("productPageCtrl", function($scope,
@@ -1319,6 +1494,15 @@ angular.module('productPage', [
 
         if (!product){
             $location.url("/u/" + Person.d.orcid_id + "/publications")
+        }
+
+        if ($routeParams.title) {
+            $scope.url_back = '/g/' + $routeParams.title + '/publications/' + window.location.search
+            $scope.name_back = $routeParams.title
+        }
+        else {
+            $scope.url_back = '/u/' + product.orcid_id + '/publications'
+            $scope.name_back = Person.d.first_name
         }
 
         $scope.person = Person
@@ -1753,6 +1937,40 @@ angular.module('currentUser', [
             isLoading: function(){
                 return !!isLoading
             }
+        }
+    })
+angular.module('group', [
+])
+    .factory("Group", function($http, $location, $route, $rootScope){
+        var isLoading = false
+        function getPersons(persons, achievements){
+            var url = "/api/group/"
+            $rootScope.progressbar.start()
+            isLoading = true
+
+            var params = {'persons': persons, 'achievements': achievements}
+            return $http.get(url, { params:params }).then( function(resp){
+                    $rootScope.progressbar.complete()
+                    isLoading = false
+
+                    return resp.data
+
+                }, function(resp){
+                    $rootScope.progressbar.complete()
+                    isLoading = false
+                    $location.url('page-not-found')
+                })
+        }
+
+
+        return {
+            getPersons: getPersons,
+            badgesToShow: function(badges){
+                return _.filter(badges, function(badge){
+                    return !!badge.show_in_ui
+                })
+            },
+            isLoading: isLoading
         }
     })
 angular.module("numFormat", [])
@@ -2388,7 +2606,7 @@ angular.module('wizard', [
 
 
 
-angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'footer/footer.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/confirm-publications.tpl.html', 'wizard/connect-orcid.tpl.html']);
+angular.module('templates.app', ['about-pages/about-badges.tpl.html', 'about-pages/about-data.tpl.html', 'about-pages/about-legal.tpl.html', 'about-pages/about-orcid.tpl.html', 'about-pages/about.tpl.html', 'about-pages/sample.tpl.html', 'about-pages/search.tpl.html', 'auth/login.tpl.html', 'auth/oauth.tpl.html', 'auth/orcid-login.tpl.html', 'auth/twitter-login.tpl.html', 'footer/footer.tpl.html', 'group-page/group-page.tpl.html', 'helps.tpl.html', 'loading.tpl.html', 'person-page/person-page-text.tpl.html', 'person-page/person-page.tpl.html', 'product-page/product-page.tpl.html', 'settings-page/settings-page.tpl.html', 'sidemenu.tpl.html', 'static-pages/landing.tpl.html', 'static-pages/page-not-found.tpl.html', 'wizard/add-publications.tpl.html', 'wizard/confirm-publications.tpl.html', 'wizard/connect-orcid.tpl.html']);
 
 angular.module("about-pages/about-badges.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("about-pages/about-badges.tpl.html",
@@ -2978,6 +3196,435 @@ angular.module("footer/footer.tpl.html", []).run(["$templateCache", function($te
     "    </div>\n" +
     "\n" +
     "</div>");
+}]);
+
+angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("group-page/group-page.tpl.html",
+    "\n" +
+    "\n" +
+    "<div class=\"page person\">\n" +
+    "    <div class=\"person-header row\">\n" +
+    "        <div class=\"col-md-9 person-about\">\n" +
+    "            <div class=\"content\">\n" +
+    "                <div class=\"avatar\">\n" +
+    "                    <img ng-src=\"{{ logo_url }}\" alt=\"\"/>\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"bio\">\n" +
+    "                    <h2 class=\"name\">\n" +
+    "                       {{ title }}\n" +
+    "                    </h2>\n" +
+    "                    <div class=\"person-profile-info\">\n" +
+    "                        <div class=\"open-access-info\">\n" +
+    "                            <span>\n" +
+    "                                <i class=\"fa fa-unlock-alt\"></i>\n" +
+    "                                <span class=\"ti-label\">\n" +
+    "                                    open access\n" +
+    "                                </span>\n" +
+    "                                <span class=\"val\">\n" +
+    "                                    {{ persons.openness }}%</span></span>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"no-products\" ng-show=\"!persons.product_list.length\">\n" +
+    "        <h2 class=\"main\">\n" +
+    "            Looks we've got no publications for this group.\n" +
+    "        </h2>\n" +
+    "        <p>\n" +
+    "            That's probably because group hasn't associated any\n" +
+    "            works with its ORCID profile.\n" +
+    "        </p>\n" +
+    "    </div>\n" +
+    "\n" +
+    "    <div class=\"has-products\" ng-show=\"persons.product_list.length\">\n" +
+    "        <div class=\"tab-controls row tab-overview-{{ tab=='top_investigators' }}\">\n" +
+    "            <a class=\"tab overview selected-{{ tab=='top_investigators' }}\" href=\"/g/{{ title }}/{{ url_params }}\">Top investigators</a>\n" +
+    "            <a class=\"tab publications selected-{{ tab=='achievements' }}\" href=\"/g/{{ title }}/achievements/{{ url_params }}\">achievements</a>\n" +
+    "            <a class=\"tab publications selected-{{ tab=='timeline' }}\" href=\"/g/{{ title }}/timeline/{{ url_params }}\">timeline</a>\n" +
+    "            <a class=\"tab publications selected-{{ tab=='publications' }}\" href=\"/g/{{ title }}/publications/{{ url_params }}\">publications</a>\n" +
+    "            <a class=\"tab publications selected-{{ tab=='investigators' }}\" href=\"/g/{{ title }}/investigators/{{ url_params }}\">investigators</a>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <div class=\"tab-view person-header row\" ng-if=\"tab=='investigators'\">\n" +
+    "            <div class=\"col-md-12 main-col\">\n" +
+    "                <div class=\"row\" ng-repeat=\"person in persons.top_person_list\">\n" +
+    "                    <div class=\"content\">\n" +
+    "                        <div class=\"avatar\">\n" +
+    "                          <a href=\"/u/{{ person.orcid_id }}\"><img ng-src=\"{{ person.picture }}\" alt=\"\"/></a>\n" +
+    "                        </div>\n" +
+    "\n" +
+    "                        <div class=\"bio\">\n" +
+    "                            <h2 class=\"name\">\n" +
+    "                                <a href=\"/u/{{ person.orcid_id }}\">{{ person.given_names }} {{ person.family_name }}</a>\n" +
+    "\n" +
+    "                                <span class=\"accounts\">\n" +
+    "                                    <a href=\"http://orcid.org/{{ person.orcid_id }}\">\n" +
+    "                                        <img src=\"static/img/favicons/orcid.ico\" alt=\"\">\n" +
+    "                                    </a>\n" +
+    "                                    <a href=\"http://depsy.org/person/{{ person.depsy_id }}\"\n" +
+    "                                            ng-show=\"person.depsy_id\">\n" +
+    "                                        <img src=\"static/img/favicons/depsy.png\" alt=\"\">\n" +
+    "                                    </a>\n" +
+    "                                    <a href=\"http://twitter.com/{{ person.twitter }}\"\n" +
+    "                                       ng-show=\"person.twitter\"\n" +
+    "                                       class=\"twitter\">\n" +
+    "                                        <img src=\"static/img/favicons/twitter.ico\" alt=\"\">\n" +
+    "                                    </a>\n" +
+    "                                </span>\n" +
+    "                            </h2>\n" +
+    "                            <div class=\"aff\">\n" +
+    "                                <span class=\"institution\">{{ person.affiliation_name }}</span>\n" +
+    "                                <span class=\"role\">\n" +
+    "                                    {{ person.affiliation_role_title }}\n" +
+    "                                </span>\n" +
+    "                            </div>\n" +
+    "\n" +
+    "                            <div class=\"person-profile-info\">\n" +
+    "                                <div class=\"open-access-info\">\n" +
+    "                                      <i class=\"fa fa-unlock-alt\"></i>\n" +
+    "                                      <span class=\"ti-label\">\n" +
+    "                                          open access\n" +
+    "                                      </span>\n" +
+    "                                      <span class=\"val\">\n" +
+    "                                          {{ numFormat.decimalToPerc(person.percent_fulltext) }}%</span>\n" +
+    "                                </div>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "                  <div class=\"badges-wrapper\"\n" +
+    "                           ng-include=\"'badge-item.tpl.html'\"\n" +
+    "                           ng-repeat=\"badge in person.overview_badges | orderBy: '-sort_score' | limitTo: 3\">\n" +
+    "                  </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <!-- Investigators view -->\n" +
+    "        <div class=\"tab-view person-header row\" ng-if=\"tab=='top_investigators'\">\n" +
+    "            <div class=\"col-md-12 main-col\">\n" +
+    "                <div class=\"content\" ng-repeat=\"person in persons.person_list\">\n" +
+    "                    <div class=\"avatar\">\n" +
+    "                      <a href=\"/u/{{ person.orcid_id }}\"><img ng-src=\"{{ person.picture }}\" alt=\"\"/></a>\n" +
+    "                    </div>\n" +
+    "\n" +
+    "                    <div class=\"bio\">\n" +
+    "                        <h2 class=\"name\">\n" +
+    "                            <a href=\"/u/{{ person.orcid_id }}\">{{ person.given_names }} {{ person.family_name }}</a>\n" +
+    "\n" +
+    "                            <span class=\"accounts\">\n" +
+    "                                <a href=\"http://orcid.org/{{ person.orcid_id }}\">\n" +
+    "                                    <img src=\"static/img/favicons/orcid.ico\" alt=\"\">\n" +
+    "                                </a>\n" +
+    "                                <a href=\"http://depsy.org/person/{{ person.depsy_id }}\"\n" +
+    "                                        ng-show=\"person.depsy_id\">\n" +
+    "                                    <img src=\"static/img/favicons/depsy.png\" alt=\"\">\n" +
+    "                                </a>\n" +
+    "                                <a href=\"http://twitter.com/{{ person.twitter }}\"\n" +
+    "                                   ng-show=\"person.twitter\"\n" +
+    "                                   class=\"twitter\">\n" +
+    "                                    <img src=\"static/img/favicons/twitter.ico\" alt=\"\">\n" +
+    "                                </a>\n" +
+    "                            </span>\n" +
+    "                        </h2>\n" +
+    "                        <div class=\"aff\">\n" +
+    "                            <span class=\"institution\">{{ person.affiliation_name }}</span>\n" +
+    "                            <span class=\"role\">\n" +
+    "                                {{ person.affiliation_role_title }}\n" +
+    "                            </span>\n" +
+    "                        </div>\n" +
+    "\n" +
+    "                        <div class=\"person-profile-info\">\n" +
+    "                            <div class=\"open-access-info\">\n" +
+    "                                  <i class=\"fa fa-unlock-alt\"></i>\n" +
+    "                                  <span class=\"ti-label\">\n" +
+    "                                      open access\n" +
+    "                                  </span>\n" +
+    "                                  <span class=\"val\">\n" +
+    "                                      {{ numFormat.decimalToPerc(person.percent_fulltext) }}%</span>\n" +
+    "                            </div>\n" +
+    "                        </div>\n" +
+    "                    </div>\n" +
+    "              </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "\n" +
+    "        <!-- BADGES view -->\n" +
+    "        <div class=\"tab-view badges row\" ng-if=\"tab=='achievements'\">\n" +
+    "            <div class=\"col-md-9 main-col\">\n" +
+    "                <h3>\n" +
+    "                    <span ng-show=\"filteredBadges.length\" class=\"amount\">{{ filteredBadges.length }}</span>\n" +
+    "                    <span ng-show=\"!filteredBadges.length\" class=\"amount\">No</span>\n" +
+    "                    achievement<span ng-hide=\"filteredBadges.length===1\">s</span>\n" +
+    "                    <span ng-show=\"filteredBadges.length===0\" class=\"yet\">yet</span>\n" +
+    "\n" +
+    "                    <span class=\"filter\" ng-if=\"selectedSubscore\">\n" +
+    "                        <span class=\"filter-intro\">in</span>\n" +
+    "                        <span class=\"filter label label-default {{ selectedSubscore.name }}\">\n" +
+    "                            <span class=\"content\">\n" +
+    "                                <i class=\"icon fa fa-{{ getBadgeIcon(selectedSubscore.name) }}\"></i>\n" +
+    "                                {{ selectedSubscore.display_name }}\n" +
+    "                            </span>\n" +
+    "                            <span class=\"close-button\" ng-click=\"toggleSeletedSubscore(selectedSubscore)\">&times;</span>\n" +
+    "                        </span>\n" +
+    "                    </span>\n" +
+    "                </h3>\n" +
+    "\n" +
+    "                <div class=\"subscore-info\" ng-show=\"selectedSubscore\">\n" +
+    "\n" +
+    "\n" +
+    "                    <!-- for all subscores -->\n" +
+    "                    <div class=\"personalized\">\n" +
+    "\n" +
+    "\n" +
+    "                        <span class=\"def buzz\" ng-show=\"selectedSubscore.name=='buzz'\">\n" +
+    "                            <strong>Buzz</strong> is the volume of online discussion round your research.\n" +
+    "                            It's a good (if coarse) measure of online interest around your work.\n" +
+    "                        </span>\n" +
+    "\n" +
+    "                        <span class=\"def engagement\" ng-show=\"selectedSubscore.name=='engagement'\">\n" +
+    "                            <strong>Engagement</strong> is about <em>how</em> people are interacting with your\n" +
+    "                            research online. What's the quality of the discussion, who is having it, and where?\n" +
+    "                        </span>\n" +
+    "\n" +
+    "\n" +
+    "                        <span class=\"def openness\" ng-show=\"selectedSubscore.name=='openness'\">\n" +
+    "                            <strong>Openness</strong> makes it easy for people to read and use\n" +
+    "                            your research.\n" +
+    "                        </span>\n" +
+    "\n" +
+    "                        <span class=\"def fun\" ng-show=\"selectedSubscore.name=='fun'\">\n" +
+    "                            <strong>Fun</strong> achievements are Not So Serious.\n" +
+    "                        </span>\n" +
+    "\n" +
+    "                        <span class=\"see-all-badges\">\n" +
+    "                            You can see all the possible <span class=\"subscore-name\">{{ selectedSubscore.name }}</span>\n" +
+    "                            achievements on their\n" +
+    "                            <a class=\"{{ selectedSubscore.name }}\" href=\"/about/achievements#{{ selectedSubscore.name }}\">\n" +
+    "                                help page.\n" +
+    "                            </a>\n" +
+    "                        </span>\n" +
+    "\n" +
+    "                        <div class=\"badges-count {{ selectedSubscore.name }}\">\n" +
+    "\n" +
+    "                            <!-- we've got some badges fro this subscore -->\n" +
+    "                            <span class=\"some-badges\" ng-show=\"filteredBadges.length\">\n" +
+    "                                You've earned {{ filteredBadges.length }} so far:\n" +
+    "                            </span>\n" +
+    "\n" +
+    "                            <!-- no badges at all for this subscore-->\n" +
+    "                            <span class=\"no-badges\" ng-show=\"!filteredBadges.length\">\n" +
+    "                                <span class=\"subscore-badges\" ng-show=\"selectedSubscore.name!='fun'\">\n" +
+    "                                    You haven't earned any yet&mdash;but if you keep doing great research and\n" +
+    "                                    <a href=\"http://www.scidev.net/global/communication/practical-guide/altmetrics-audience-connect-research.html\">\n" +
+    "                                        connecting it to a wide audience,\n" +
+    "                                    </a>\n" +
+    "                                    you will!\n" +
+    "                                </span>\n" +
+    "                                <span class=\"subscore-badges\" ng-show=\"selectedSubscore.name=='fun'\">\n" +
+    "                                    You haven't earned any of them so far&mdash;but don't get us wrong, we know you are\n" +
+    "                                    <a href=\"https://en.wikipedia.org/wiki/Happy_Fun_Ball\" class=\"fun\">super super fun.</a>\n" +
+    "                                    Just, in ways our scholarly communication website cannot yet measure.\n" +
+    "                                    Got an idea for a way we can fix that? Hit us up via\n" +
+    "                                    <a href=\"http://twitter.com/impactstory\">Twitter</a> or\n" +
+    "                                    <a href=\"mailto:team@impactstory.org\">email!</a>\n" +
+    "                                </span>\n" +
+    "                            </span>\n" +
+    "\n" +
+    "                        </div>\n" +
+    "\n" +
+    "\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"badges-wrapper\"\n" +
+    "                     ng-class=\"\"\n" +
+    "                     ng-include=\"'badge-item.tpl.html'\"\n" +
+    "                     ng-repeat=\"badge in badges | orderBy: '-sort_score' | filter: {group: selectedSubscore.name}:true as filteredBadges\">\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "        <!-- MENTIONS view -->\n" +
+    "        <div class=\"tab-view timeline row\" ng-if=\"tab=='timeline'\">\n" +
+    "            <div class=\"col-md-8 posts-col main-col\">\n" +
+    "                <h3>\n" +
+    "                    {{ selectedChannel.posts_count || postsSum }}\n" +
+    "                    <span class=\"ti-label\" ng-show=\"!selectedChannel\">\n" +
+    "                        online mentions over {{ person.d.publishingAge }}\n" +
+    "                            year<span ng-show=\"person.d.publishingAge\">s</span>\n" +
+    "                    </span>\n" +
+    "\n" +
+    "\n" +
+    "                    <span class=\"filter\" ng-if=\"selectedChannel\">\n" +
+    "                        <span class=\"filter-intro\">mentions on</span>\n" +
+    "                        <span class=\"filter label label-default\">\n" +
+    "                            <span class=\"content\">\n" +
+    "                                <img class=\"icon\" ng-src=\"/static/img/favicons/{{ selectedChannel.source_name }}.ico\">\n" +
+    "                                {{ selectedChannel.source_name }}\n" +
+    "                            </span>\n" +
+    "                            <span class=\"close-button\" ng-click=\"toggleSelectedChannel(selectedChannel)\">&times;</span>\n" +
+    "                        </span>\n" +
+    "                    </span>\n" +
+    "                </h3>\n" +
+    "\n" +
+    "                <div class=\"posts-wrapper\"\n" +
+    "                     ng-repeat=\"post in posts | orderBy: '-posted_on' | filter: postsFilter as filteredPosts\">\n" +
+    "\n" +
+    "                    <div class=\"post normal\"\n" +
+    "                         ng-if=\"$index < viewItemsLimit && !(!selectedChannel && post.source=='twitter')\"\n" +
+    "                         ng-include=\"'mention-item.tpl.html'\"></div>\n" +
+    "\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"more\">\n" +
+    "                    <span class=\"btn btn-default btn-sm\"\n" +
+    "                          ng-click=\"viewItemsLimit = viewItemsLimit + 20\"\n" +
+    "                          ng-show=\"viewItemsLimit < filteredPosts.length\">\n" +
+    "                        <i class=\"fa fa-arrow-down\"></i>\n" +
+    "                        See more\n" +
+    "                    </span>\n" +
+    "                </div>\n" +
+    "\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"col-md-4 score-col small-col\">\n" +
+    "                <h4>Filter by channel</h4>\n" +
+    "                <div class=\"channel filter-option {{ channel.source_name }}\"\n" +
+    "                    ng-class=\"{selected: selectedChannel.source_name==channel.source_name, unselected: selectedChannel && selectedChannel.source_name != channel.source_name}\"\n" +
+    "                    ng-click=\"toggleSelectedChannel(channel)\"\n" +
+    "                    ng-repeat=\"channel in sources | orderBy: '-posts_count'\">\n" +
+    "\n" +
+    "                    <span class=\"close-button\">&times;</span>\n" +
+    "                    <span class=\"content\">\n" +
+    "                        <span class=\"name\">\n" +
+    "                            <img ng-src=\"/static/img/favicons/{{ channel.source_name }}.ico\">\n" +
+    "                            {{ channel.display_name }}\n" +
+    "                        </span>\n" +
+    "                        <span class=\"val\" ng-class=\"{'has-new': channel.events_last_week_count}\">\n" +
+    "                            <md-tooltip ng-if=\"channel.events_last_week_count\">\n" +
+    "                                {{ channel.events_last_week_count }} new enagements this week\n" +
+    "                            </md-tooltip>\n" +
+    "                            ({{ numFormat.short(channel.posts_count) }}\n" +
+    "                            <span class=\"new-last-week\"\n" +
+    "                                  ng-show=\"channel.events_last_week_count\">\n" +
+    "                                <i class=\"fa fa-arrow-up\"></i>\n" +
+    "                            </span>)\n" +
+    "                        </span>\n" +
+    "                    </span>\n" +
+    "\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "\n" +
+    "\n" +
+    "        <div class=\"tab-view publications row\" ng-if=\"tab=='publications'\">\n" +
+    "            <div class=\"col-md-8 publications-col main-col\">\n" +
+    "                <h3>\n" +
+    "                    <span class=\"count\">\n" +
+    "                        {{ selectedGenre.count || persons.product_list.length }}\n" +
+    "                    </span>\n" +
+    "                    <span class=\"most-recent\" ng-show=\"persons.product_list.length==100\">\n" +
+    "                        most recent\n" +
+    "                    </span>\n" +
+    "\n" +
+    "                    <span class=\"no-filter\" ng-if=\"!selectedGenre\">\n" +
+    "                        publication<span ng-show=\"persons.product_list.length\">s</span>\n" +
+    "                    </span>\n" +
+    "\n" +
+    "                    <span class=\"filter\" ng-if=\"selectedGenre\">\n" +
+    "                        <span class=\"word\">published</span>\n" +
+    "                        <span class=\"label label-default\">\n" +
+    "                            <span class=\"content\">\n" +
+    "                                <i class=\"fa fa-{{ getGenreIcon(selectedGenre.name) }}\"></i>\n" +
+    "                                {{ pluralize(selectedGenre.display_name, selectedGenre.count) }}\n" +
+    "                            </span>\n" +
+    "                            <span class=\"close-button\" ng-click=\"toggleSeletedGenre(selectedGenre)\">&times;</span>\n" +
+    "                        </span>\n" +
+    "                    </span>\n" +
+    "                </h3>\n" +
+    "\n" +
+    "                <div class=\"publication-wrapper\"\n" +
+    "                     ng-if=\"$index < viewItemsLimit\"\n" +
+    "                     ng-include=\"'publication-group-item.tpl.html'\"\n" +
+    "                     ng-repeat=\"product in persons.product_list | orderBy: ['-num_mentions', '-is_oa_repository', '-is_oa_journal', 'doi'] | filter:{genre: selectedGenre.name}:true as filteredPublications\">\n" +
+    "                </div>\n" +
+    "\n" +
+    "                <div class=\"more\">\n" +
+    "                    <span class=\"btn btn-default btn-sm\"\n" +
+    "                          ng-click=\"viewItemsLimit = viewItemsLimit + 20\"\n" +
+    "                          ng-show=\"viewItemsLimit < filteredPublications.length\">\n" +
+    "                        <i class=\"fa fa-arrow-down\"></i>\n" +
+    "                        See more\n" +
+    "                    </span>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"col-md-4 badges-col small-col\">\n" +
+    "\n" +
+    "                <div class=\"filter-by-genre\" ng-show=\"genres.length > 1\">\n" +
+    "                    <h4>Filter by genre</h4>\n" +
+    "\n" +
+    "                    <div class=\"genre-filter filter-option\"\n" +
+    "                         ng-repeat=\"genre in genres\"\n" +
+    "                         ng-class=\"{ unselected: selectedGenre && selectedGenre.name != genre.name, selected: selectedGenre.name == genre.name }\">\n" +
+    "                        <span class=\"close-button\" ng-click=\"toggleSeletedGenre(genre)\">&times;</span>\n" +
+    "                        <span class=\"content\" ng-click=\"toggleSeletedGenre(genre)\">\n" +
+    "                            <span class=\"name\">\n" +
+    "                                <i class=\"fa fa-{{ getGenreIcon(genre.name) }} icon\"></i>\n" +
+    "                                {{ pluralize(genre.display_name, genre.count) }}\n" +
+    "                            </span>\n" +
+    "                            <span class=\"val\">({{ genre.count }})</span>\n" +
+    "                        </span>\n" +
+    "\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "                <div class=\"coauthors\" ng-show=\"persons.coauthor_list.length\">\n" +
+    "                    <h4>Coauthors</h4>\n" +
+    "                    <div class=\"coauthor\" ng-repeat=\"coauthor in persons.coauthor_list | orderBy: '-sort_score'\">\n" +
+    "                        <span >\n" +
+    "                            <a href=\"u/{{ coauthor.orcid_id }}\" class=\"name\">\n" +
+    "                                {{ coauthor.name }}\n" +
+    "                            </a>\n" +
+    "                        </span>\n" +
+    "                    </div>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "\n" +
+    "<script type=\"text/ng-template\" id=\"badgeDialog.tpl.html\">\n" +
+    "    <md-dialog id=\"badgeDialog\">\n" +
+    "        <md-dialog-content>\n" +
+    "            <h2>Check it out! {{ firstName }} unlocked this nifty achievement:</h2>\n" +
+    "            <div class=\"badge-container\" ng-include=\"'badge-item.tpl.html'\"></div>\n" +
+    "            <div class=\"video-container\" ng-show=\"badge.name=='big_in_japan'\">\n" +
+    "                <iframe class=\"big-in-japan video youtube\"\n" +
+    "                        src=\"https://www.youtube.com/embed/tl6u2NASUzU\"\n" +
+    "                        frameborder=\"0\">\n" +
+    "\n" +
+    "                </iframe>\n" +
+    "            </div>\n" +
+    "        </md-dialog-content>\n" +
+    "        <md-dialog-actions class=\"dialog-actions\">\n" +
+    "            <a href=\"https://twitter.com/intent/tweet?url=https://impactstory.org{{ badgeUrl }}&text=I unlocked the '{{ badge.display_name }}' achievement on @Impactstory:\"\n" +
+    "               target=\"_blank\"\n" +
+    "               class=\"btn btn-default\"\n" +
+    "               ng-click=\"shareBadge()\">\n" +
+    "                <i class=\"fa fa-twitter\"></i>\n" +
+    "                <span class=\"text\">Share</span>\n" +
+    "            </a>\n" +
+    "            <span ng-click=\"cancel()\" class=\"btn btn-default\">\n" +
+    "                <i class=\"fa fa-times\"></i>\n" +
+    "                <span class=\"text\">Dismiss</span>\n" +
+    "            </span>\n" +
+    "        </md-dialog-actions>\n" +
+    "    </md-dialog>\n" +
+    "</script>\n" +
+    "");
 }]);
 
 angular.module("helps.tpl.html", []).run(["$templateCache", function($templateCache) {
@@ -3672,9 +4319,9 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "<div class=\"page product-page\">\n" +
     "    <div class=\"row biblio-row\">\n" +
     "        <div class=\"biblio-col col-md-8\">\n" +
-    "            <a href=\"/u/{{ person.d.orcid_id }}/publications\" class=\"back-to-profile\">\n" +
+    "            <a href=\"{{ url_back }}\" class=\"back-to-profile\">\n" +
     "                <i class=\"fa fa-chevron-left\"></i>\n" +
-    "                Back to {{ person.d.first_name }}'s publications\n" +
+    "                Back to {{ name_back }}'s publications\n" +
     "            </a>\n" +
     "            <div class=\"genre\" ng-show=\"product.genre != 'article' && product.genre != 'other'\">\n" +
     "                <i class=\"fa fa-{{ getGenreIcon(product.genre) }}\"></i>\n" +
