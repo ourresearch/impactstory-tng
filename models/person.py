@@ -151,8 +151,6 @@ def make_temporary_person_from_orcid(orcid_id):
 
     print u"finished make_temporary_person_from_orcid: made new person for {}".format(my_person)
 
-    db.session.add(my_person)
-    db.session.commit()
     return my_person
 
 
