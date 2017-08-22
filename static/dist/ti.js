@@ -3446,7 +3446,7 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "                   <a class=\"more\" href=\"/g/{{ title }}/publications/{{ url_params }}\">view all</a>\n" +
     "               </div>\n" +
     "               <div class=\"publication-wrapper publication-wrapper-block\"\n" +
-    "                   ng-include=\"'publication-item.tpl.html'\"\n" +
+    "                   ng-include=\"'publication-group-item.tpl.html'\"\n" +
     "                   ng-repeat=\"product in persons.product_list | orderBy: ['-num_mentions', '-is_oa_repository', '-is_oa_journal', 'doi'] | limitTo: 3\">\n" +
     "               </div>\n" +
     "            </div>\n" +
