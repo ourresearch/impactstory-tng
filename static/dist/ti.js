@@ -3306,7 +3306,7 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "\n" +
     "    <div class=\"has-products\" ng-show=\"persons.product_list.length\">\n" +
     "        <div class=\"tab-controls row tab-overview-{{ tab=='top_investigators' }}\">\n" +
-    "            <a class=\"tab overview selected-{{ tab=='top_investigators' }}\" href=\"/g/{{ title }}/{{ url_params }}\">Top investigators</a>\n" +
+    "            <a class=\"tab overview selected-{{ tab=='top_investigators' }}\" href=\"/g/{{ title }}/{{ url_params }}\">overview</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='achievements' }}\" href=\"/g/{{ title }}/achievements/{{ url_params }}\">achievements</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='timeline' }}\" href=\"/g/{{ title }}/timeline/{{ url_params }}\">timeline</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='publications' }}\" href=\"/g/{{ title }}/publications/{{ url_params }}\">publications</a>\n" +
@@ -3367,54 +3367,91 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "            </div>\n" +
     "        </div>\n" +
     "\n" +
-    "        <!-- Investigators view -->\n" +
-    "        <div class=\"tab-view person-header row\" ng-if=\"tab=='top_investigators'\">\n" +
-    "            <div class=\"col-md-12 main-col\">\n" +
-    "                <div class=\"content\" ng-repeat=\"person in persons.person_list\">\n" +
-    "                    <div class=\"avatar\">\n" +
-    "                      <a href=\"/u/{{ person.orcid_id }}\"><img ng-src=\"{{ person.picture }}\" alt=\"\"/></a>\n" +
-    "                    </div>\n" +
+    "        <!-- OVERVIEW view -->\n" +
+    "        <div class=\"tab-view overview person-header row\" ng-if=\"tab=='top_investigators'\">\n" +
+    "           <div class=\"col-md-5\">\n" +
+    "               <div class=\"badges widget\">\n" +
+    "                   <div class=\"widget-header\">\n" +
+    "                       <h3>Top investigators</h3>\n" +
+    "                   </div>\n" +
+    "                   <div class=\"content\" ng-repeat=\"person in persons.person_list\">\n" +
+    "                       <div class=\"avatar\">\n" +
+    "                           <a href=\"/u/{{ person.orcid_id }}\"><img ng-src=\"{{ person.picture }}\" alt=\"\"/></a>\n" +
+    "                       </div>\n" +
     "\n" +
-    "                    <div class=\"bio\">\n" +
-    "                        <h2 class=\"name\">\n" +
-    "                            <a href=\"/u/{{ person.orcid_id }}\">{{ person.given_names }} {{ person.family_name }}</a>\n" +
+    "                       <div class=\"bio\">\n" +
+    "                           <h2 class=\"name\">\n" +
+    "                               <a href=\"/u/{{ person.orcid_id }}\">{{ person.given_names }} {{ person.family_name }}</a>\n" +
     "\n" +
-    "                            <span class=\"accounts\">\n" +
-    "                                <a href=\"http://orcid.org/{{ person.orcid_id }}\">\n" +
-    "                                    <img src=\"static/img/favicons/orcid.ico\" alt=\"\">\n" +
-    "                                </a>\n" +
-    "                                <a href=\"http://depsy.org/person/{{ person.depsy_id }}\"\n" +
-    "                                        ng-show=\"person.depsy_id\">\n" +
-    "                                    <img src=\"static/img/favicons/depsy.png\" alt=\"\">\n" +
-    "                                </a>\n" +
-    "                                <a href=\"http://twitter.com/{{ person.twitter }}\"\n" +
-    "                                   ng-show=\"person.twitter\"\n" +
-    "                                   class=\"twitter\">\n" +
-    "                                    <img src=\"static/img/favicons/twitter.ico\" alt=\"\">\n" +
-    "                                </a>\n" +
-    "                            </span>\n" +
-    "                        </h2>\n" +
-    "                        <div class=\"aff\">\n" +
-    "                            <span class=\"institution\">{{ person.affiliation_name }}</span>\n" +
-    "                            <span class=\"role\">\n" +
-    "                                {{ person.affiliation_role_title }}\n" +
-    "                            </span>\n" +
-    "                        </div>\n" +
+    "                               <span class=\"accounts\">\n" +
+    "                                   <a href=\"http://orcid.org/{{ person.orcid_id }}\">\n" +
+    "                                       <img src=\"static/img/favicons/orcid.ico\" alt=\"\">\n" +
+    "                                   </a>\n" +
+    "                                   <a href=\"http://depsy.org/person/{{ person.depsy_id }}\"\n" +
+    "                                           ng-show=\"person.depsy_id\">\n" +
+    "                                       <img src=\"static/img/favicons/depsy.png\" alt=\"\">\n" +
+    "                                   </a>\n" +
+    "                                   <a href=\"http://twitter.com/{{ person.twitter }}\"\n" +
+    "                                       ng-show=\"person.twitter\"\n" +
+    "                                       class=\"twitter\">\n" +
+    "                                       <img src=\"static/img/favicons/twitter.ico\" alt=\"\">\n" +
+    "                                   </a>\n" +
+    "                               </span>\n" +
+    "                           </h2>\n" +
+    "                           <div class=\"aff\">\n" +
+    "                               <span class=\"institution\">{{ person.affiliation_name }}</span>\n" +
+    "                               <span class=\"role\">\n" +
+    "                                   {{ person.affiliation_role_title }}\n" +
+    "                               </span>\n" +
+    "                           </div>\n" +
     "\n" +
-    "                        <div class=\"person-profile-info\">\n" +
-    "                            <div class=\"open-access-info\">\n" +
-    "                                  <i class=\"fa fa-unlock-alt\"></i>\n" +
-    "                                  <span class=\"ti-label\">\n" +
-    "                                      open access\n" +
-    "                                  </span>\n" +
-    "                                  <span class=\"val\">\n" +
+    "                           <div class=\"person-profile-info\">\n" +
+    "                               <div class=\"open-access-info\">\n" +
+    "                                   <i class=\"fa fa-unlock-alt\"></i>\n" +
+    "                                   <span class=\"ti-label\">\n" +
+    "                                       open access\n" +
+    "                                   </span>\n" +
+    "                                   <span class=\"val\">\n" +
     "                                      {{ numFormat.decimalToPerc(person.percent_fulltext) }}%</span>\n" +
-    "                            </div>\n" +
-    "                        </div>\n" +
-    "                    </div>\n" +
-    "              </div>\n" +
+    "                               </div>\n" +
+    "                           </div>\n" +
+    "                       </div>\n" +
+    "                   </div>\n" +
+    "               </div>\n" +
+    "               </div>\n" +
+    "          <div class=\"col-md-7 big-col\">\n" +
+    "            <div class=\"mentions timeline widget\">\n" +
+    "                <div class=\"widget-header\">\n" +
+    "                    <h3>Timeline</h3>\n" +
+    "                    <a class=\"more\" href=\"/g/{{ title }}/timeline/{{ url_params }}\">view all</a>\n" +
+    "                </div>\n" +
+    "                <div class=\"channels\">\n" +
+    "                    <span class=\"val total-posts\">{{ postsSum }}</span>\n" +
+    "                    <span class=\"ti-label\">\n" +
+    "                        Online mentions over {{ person.d.publishingAge }}\n" +
+    "                        year<span ng-show=\"person.d.publishingAge\">s</span>\n" +
+    "                    </span>\n" +
+    "                    <span class=\"channel\"\n" +
+    "                         ng-class=\"{'more-than-3': $index > 3, 'more-than-8': $index > 8}\"\n" +
+    "                         ng-repeat=\"channel in sources | orderBy: '-posts_count'\">\n" +
+    "                        <img ng-src=\"/static/img/favicons/{{ channel.source_name }}.ico\"\n" +
+    "                            class=\"channel-icon {{ channel.source_name }}\">\n" +
+    "                       <span class=\"val\">{{ numFormat.short(channel.posts_count) }}</span>\n" +
+    "                    </span>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "            <div class=\"publications widget\">\n" +
+    "               <div class=\"widget-header\">\n" +
+    "                   <h3>Publications</h3>\n" +
+    "                   <a class=\"more\" href=\"/g/{{ title }}/publications/{{ url_params }}\">view all</a>\n" +
+    "               </div>\n" +
+    "               <div class=\"publication-wrapper publication-wrapper-block\"\n" +
+    "                   ng-include=\"'publication-item.tpl.html'\"\n" +
+    "                   ng-repeat=\"product in persons.product_list | orderBy: ['-num_mentions', '-is_oa_repository', '-is_oa_journal', 'doi'] | limitTo: 3\">\n" +
+    "               </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
+    "     </div>\n" +
     "\n" +
     "\n" +
     "        <!-- BADGES view -->\n" +

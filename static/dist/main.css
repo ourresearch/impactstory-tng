@@ -716,6 +716,9 @@ div.page.product-page .person-header.row .content {
   display: -webkit-flex;
   display: flex;
 }
+div.page.person .person-header.row .publication-wrapper-block .content {
+  display: block;
+}
 div.page.person .person-header.row .content:before,
 div.page.product-page .person-header.row .content:before,
 div.page.person .person-header.row .content:after,
