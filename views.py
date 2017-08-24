@@ -197,10 +197,11 @@ def group():
     if not isinstance(achievement_names, list):
         achievement_names = [achievement_names]
 
-    persons = Person.query.filter(Person.orcid_id.in_(person_ids)).all()
+    persons = (Person.query.filter(Person.orcid_id.in_(person_ids))
+               .order_by(Person.openness.desc())
+               .all())
     products = Product.query.filter(Product.orcid_id.in_(person_ids)).all()
     top_persons = top_acheivement_persons(person_ids, achievement_names, 3)
-    print(top_persons)
 
     resp['openness'] = int(avg_openess(person_ids) * 100)
     resp['person_list'] = [person.to_dict() for person in persons]
