@@ -3284,7 +3284,7 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "                       {{ title }}\n" +
     "                    </h2>\n" +
     "                    <div class=\"person-profile-info\">\n" +
-    "                        <div class=\"open-access-info\">\n" +
+    "                        <div class=\"open-access-info\" ng-if=\"persons.openness\">\n" +
     "                            <span>\n" +
     "                                <i class=\"fa fa-unlock-alt\"></i>\n" +
     "                                <span class=\"ti-label\">\n" +
