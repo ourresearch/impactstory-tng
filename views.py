@@ -203,7 +203,6 @@ def group():
     products = Product.query.filter(Product.orcid_id.in_(person_ids)).all()
     top_persons = top_acheivement_persons(person_ids, achievement_names, 3)
 
-    resp['openness'] = int(avg_openess(person_ids) * 100)
     resp['person_list'] = [person.to_dict() for person in persons]
     resp['top_person_list'] = [person.to_dict() for person in top_persons]
     resp['product_list'] = [product.to_dict() for product in products]
@@ -236,6 +235,7 @@ def group():
         grouped_badges[badge['name']]['description'] = get_badge_description(badge['name'],
                                                                              grouped_badges[badge['name']]['percentile'])
 
+    resp['openness'] = grouped_badges['percent_fulltext']['percentile'] if 'percent_fulltext' in grouped_badges else None
     resp['grouped_badges'] = grouped_badges.values()
     resp['source_list'] = get_sources(products)
 
