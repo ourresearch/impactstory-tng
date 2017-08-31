@@ -228,6 +228,7 @@ class Badge(db.Model):
 
         resp =  {
             "id": self.id,
+            "orcid_id": self.orcid_id,
             "name": self.name,
             "created": date_as_iso_utc(self.created),
             "show_in_ui": self.my_badge_type.show_in_ui,

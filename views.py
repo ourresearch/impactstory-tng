@@ -26,7 +26,7 @@ from models.badge import badge_configs
 from models.search import autocomplete
 from models.url_slugs_to_redirect import url_slugs_to_redirect
 from models.twitter import get_twitter_creds
-from util import safe_commit
+from util import safe_commit, get_badge_description
 from util import elapsed
 
 from flask import make_response
@@ -211,7 +211,32 @@ def group():
                                   for coauthor in person.display_coauthors]
 
     badge_names = list({badge.name for person in persons for badge in person.badges_for_api})
-    resp['badge_list'] = [badge.to_dict() for badge in Badge.query.filter(Badge.name.in_(badge_names))]
+    badges = [badge.to_dict() for badge in Badge.query.filter(Badge.name.in_(badge_names))]
+    resp['badge_list'] = badges
+
+    grouped_badges = {}
+    badges_by_orcid_id = {}
+    for badge in badges:
+        badges_by_orcid_id.setdefault(badge['orcid_id'], {})
+        badges_by_orcid_id[badge['orcid_id']][badge['name']] = badge
+
+    for badge in badges:
+        if badge['name'] in grouped_badges:
+            continue
+        grouped_badges[badge['name']] = {'group': badge['group'], 'name': badge['name'], 'support_items': None,
+                                         'display_name': badge['display_name'], 'description': None,
+                                         'show_in_ui': badge['show_in_ui'], 'support_intro': None, 'context': None}
+        sum_score = 0
+        num_products = 0
+        orcid_ids = [b.orcid_id for b in Badge.query.filter(Badge.name == badge['name'])]
+        for person in Person.query.filter(Person.orcid_id.in_(orcid_ids)).all():
+            sum_score += person.num_products * badges_by_orcid_id[person.orcid_id][badge['name']]['value']
+            num_products += person.num_products
+        grouped_badges[badge['name']]['percentile'] = round(sum_score / num_products)
+        grouped_badges[badge['name']]['description'] = get_badge_description(badge['name'],
+                                                                             grouped_badges[badge['name']]['percentile'])
+
+    resp['grouped_badges'] = grouped_badges.values()
     resp['source_list'] = get_sources(products)
 
     return jsonify(resp)
