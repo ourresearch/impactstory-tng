@@ -827,9 +827,14 @@ angular.module('groupPage', [
     .controller("groupPageCtrl", function($scope, $route, $routeParams, $location, Group, persons) {
         $scope.logo_url = $route.current.params.logo_url
         $scope.title = $route.current.params.group_name
+        // sorted persons on investigators page
+        persons.persons_sorted_by_surname = persons.person_list.slice(0)
+        persons.persons_sorted_by_surname.sort(function (a, b) {
+          return ( a.family_name == b.family_name ) ? 0 : ( ( a.family_name > b.family_name ) ? 1 : -1 );
+        })
         $scope.persons = persons
         $scope.url_params = window.location.search
-        $scope.badges = Group.badgesToShow(persons.badge_list)
+        $scope.badges = Group.badgesToShow(persons.grouped_badges)
 
 
         // genre stuff (don't know what it is)
@@ -3315,7 +3320,7 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "\n" +
     "        <div class=\"tab-view person-header row\" ng-if=\"tab=='investigators'\">\n" +
     "            <div class=\"col-md-12 main-col\">\n" +
-    "                <div class=\"row\" ng-repeat=\"person in persons.top_person_list\">\n" +
+    "                <div class=\"row\" ng-repeat=\"person in persons.persons_sorted_by_surname\">\n" +
     "                    <div class=\"content\">\n" +
     "                        <div class=\"avatar\">\n" +
     "                          <a href=\"/u/{{ person.orcid_id }}\"><img ng-src=\"{{ person.picture }}\" alt=\"\"/></a>\n" +
