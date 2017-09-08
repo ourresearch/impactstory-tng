@@ -15,15 +15,18 @@ from models.person import delete_person
 from models.person import update_person
 from models.person import update_promos
 from models.person import make_temporary_person_from_orcid
+from models.person import top_acheivement_persons, avg_openess, get_sources
 from models.log_temp_profile import add_new_log_temp_profile
 from models.person import get_random_people
+from models.product import Product
 from models.product import get_all_products
 from models.refset import num_people_in_db
+from models.badge import Badge
 from models.badge import badge_configs
 from models.search import autocomplete
 from models.url_slugs_to_redirect import url_slugs_to_redirect
 from models.twitter import get_twitter_creds
-from util import safe_commit
+from util import safe_commit, get_badge_description
 from util import elapsed
 
 from flask import make_response
@@ -180,6 +183,63 @@ def api_test():
 def test0():
     return jsonify({"test": True})
 
+
+@app.route('/api/group/')
+def group():
+    resp = {}
+    if not ('persons' in request.args and 'achievements' in request.args):
+        abort(400)
+
+    person_ids = request.args.getlist('persons')
+    if not isinstance(person_ids, list):
+        person_ids = [person_ids]
+    achievement_names = request.args.getlist('achievements')
+    if not isinstance(achievement_names, list):
+        achievement_names = [achievement_names]
+
+    persons = (Person.query.filter(Person.orcid_id.in_(person_ids))
+               .order_by(Person.openness.desc())
+               .all())
+    products = Product.query.filter(Product.orcid_id.in_(person_ids)).all()
+    top_persons = top_acheivement_persons(person_ids, achievement_names, 3)
+
+    resp['person_list'] = [person.to_dict() for person in persons]
+    resp['top_person_list'] = [person.to_dict() for person in top_persons]
+    resp['product_list'] = [product.to_dict() for product in products]
+    resp['coauthor_list'] = [coauthor for person in persons if person.display_coauthors
+                                  for coauthor in person.display_coauthors]
+
+    badge_names = list({badge.name for person in persons for badge in person.badges_for_api})
+    badges = [badge.to_dict() for badge in Badge.query.filter(Badge.name.in_(badge_names))]
+    resp['badge_list'] = badges
+
+    grouped_badges = {}
+    badges_by_orcid_id = {}
+    for badge in badges:
+        badges_by_orcid_id.setdefault(badge['orcid_id'], {})
+        badges_by_orcid_id[badge['orcid_id']][badge['name']] = badge
+
+    for badge in badges:
+        if badge['name'] in grouped_badges:
+            continue
+        grouped_badges[badge['name']] = {'group': badge['group'], 'name': badge['name'], 'support_items': None,
+                                         'display_name': badge['display_name'], 'description': None,
+                                         'show_in_ui': badge['show_in_ui'], 'support_intro': None, 'context': None}
+        sum_score = 0
+        num_products = 0
+        orcid_ids = [b.orcid_id for b in Badge.query.filter(Badge.name == badge['name'])]
+        for person in Person.query.filter(Person.orcid_id.in_(orcid_ids)).all():
+            sum_score += person.num_products * badges_by_orcid_id[person.orcid_id][badge['name']]['value']
+            num_products += person.num_products
+        grouped_badges[badge['name']]['percentile'] = round(sum_score / num_products)
+        grouped_badges[badge['name']]['description'] = get_badge_description(badge['name'],
+                                                                             grouped_badges[badge['name']]['percentile'])
+
+    resp['openness'] = grouped_badges['percent_fulltext']['percentile'] if 'percent_fulltext' in grouped_badges else None
+    resp['grouped_badges'] = grouped_badges.values()
+    resp['source_list'] = get_sources(products)
+
+    return jsonify(resp)
 
 
 @app.route("/api/person/<orcid_id>/polling")

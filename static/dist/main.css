@@ -699,10 +699,25 @@ div.page.product-page .person-header.row {
   padding-bottom: 35px;
   line-height: 1;
 }
+div.page.person .person-header.row .main-col,
+div.page.product-page .person-header.row .main-col {
+  margin-left: 20px;
+}
+div.page.person .person-header.row .main-col .content,
+div.page.product-page .person-header.row .main-col .content {
+  margin-bottom: 30px;
+}
+div.page.person .person-header.row .main-col .content .name a,
+div.page.product-page .person-header.row .main-col .content .name a {
+  color: black;
+}
 div.page.person .person-header.row .content,
 div.page.product-page .person-header.row .content {
   display: -webkit-flex;
   display: flex;
+}
+div.page.person .person-header.row .publication-wrapper-block .content {
+  display: block;
 }
 div.page.person .person-header.row .content:before,
 div.page.product-page .person-header.row .content:before,
