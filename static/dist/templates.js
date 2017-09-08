@@ -1166,7 +1166,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "\n" +
     "    <div class=\"no-products\" ng-show=\"!person.d.products.length\">\n" +
     "        <h2 class=\"main\">\n" +
-    "            Looks we've got no publications for {{ person.d.first_name }}.\n" +
+    "            Looks like we've got no publications for {{ person.d.first_name }}.\n" +
     "        </h2>\n" +
     "        <p>\n" +
     "            That's probably because {{ person.d.first_name }} hasn't associated any\n" +
