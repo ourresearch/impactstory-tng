@@ -20,11 +20,13 @@ angular.module('app', [
     'badgeDefs',
     'numFormat',
     'person',
+    'group',
 
     // pages
     'staticPages',
     'productPage', // MUST be above personPage because personPage route is greedy for /p/
     'personPage',
+    'groupPage',
     'settingsPage',
     'wizard',
     'aboutPages'
@@ -199,7 +201,7 @@ angular.module('app').controller('AppCtrl', function(
         }
     }
 
-    
+
     // genre config
     var genreIcons = {
         'article': "file-text-o",
@@ -337,7 +339,7 @@ angular.module('app').controller('AppCtrl', function(
 .controller('mendeleyRollupCtrl', function($scope){
     $scope.showMendeley = false
 })
-    
+
 .directive('subscorehelp', function(){
         return {
             restrict: "E",

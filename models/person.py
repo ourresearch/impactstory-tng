@@ -16,6 +16,7 @@ from models.orcid import OrcidProfile
 from models.orcid import clean_orcid
 from models.orcid import NoOrcidException
 from models.orcid import OrcidDoesNotExist
+from models.badge import Badge
 from models.orcid import make_and_populate_orcid_profile
 from models.source import sources_metadata
 from models.source import Source
@@ -149,6 +150,7 @@ def make_temporary_person_from_orcid(orcid_id):
     my_person.refresh()
 
     print u"finished make_temporary_person_from_orcid: made new person for {}".format(my_person)
+
     return my_person
 
 
@@ -273,6 +275,41 @@ def refresh_profile(orcid_id, high_priority=False):
 
     return my_person
 
+
+def top_acheivement_persons(persons, achievements, limit):
+    top_persons = (
+        Person.query.
+            join(Person.badges).
+            filter(Person.orcid_id.in_(persons), Badge.name.in_(achievements)).
+            group_by(Person.id).
+            order_by(func.sum(Badge.percentile).desc()).
+            limit(limit).
+            all()
+    )
+
+    # if persons with provided achievements is less then limit add another persons
+    new_limit = limit - len(top_persons)
+    if new_limit:
+        top_persons_ids = [person.orcid_id for person in top_persons]
+        top_persons.extend(Person.query.filter(~Person.orcid_id.in_(top_persons_ids), Person.orcid_id.in_(persons)).
+                           limit(new_limit).
+                           all())
+
+    return top_persons
+
+
+def avg_openess(persons):
+    openness = Person.query.filter(Person.orcid_id.in_(persons)).with_entities(func.avg(Person.openness)).scalar()
+    return openness
+
+
+def get_sources(products):
+    sources = []
+    for source_name in sources_metadata:
+        source = Source(source_name, products)
+        if source.posts_count > 0:
+            sources.append(source)
+    return sources
 
 
 class Person(db.Model):

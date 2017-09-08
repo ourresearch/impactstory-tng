@@ -74,6 +74,18 @@ def cached_property(property_name):
     return property(cached_propery_get)
 
 
+def get_badge_description(badge_name, badge_value):
+    from models.badge import get_badge_assigner, dummy_badge_assigner
+    assigner = get_badge_assigner(badge_name)
+    assigner = assigner() if assigner else dummy_badge_assigner()
+    description_template = assigner.description
+    description_string = description_template.format(
+        value=conversational_number(badge_value),
+        one_hundred_minus_value=conversational_number(100 - badge_value)
+    )
+    return description_string
+
+
 # good for deduping strings.  output removes spaces so isn't readable.
 def normalize(text):
     response = text.lower()
