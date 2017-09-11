@@ -277,12 +277,14 @@ def refresh_profile(orcid_id, high_priority=False):
 
 
 def top_acheivement_persons(persons, achievements, limit):
+
     top_persons = (
         Person.query.
             join(Person.badges).
             filter(Person.orcid_id.in_(persons), Badge.name.in_(achievements)).
-            group_by(Person.id).
-            order_by(func.sum(Badge.percentile).desc()).
+            # group_by(Person.id).
+            # order_by(func.sum(Badge.percentile).desc()).
+            order_by(Badge.percentile.desc()).
             limit(limit).
             all()
     )

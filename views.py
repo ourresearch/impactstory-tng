@@ -209,35 +209,46 @@ def group():
     resp['coauthor_list'] = [coauthor for person in persons if person.display_coauthors
                                   for coauthor in person.display_coauthors]
 
-    badge_names = list({badge.name for person in persons for badge in person.badges_for_api})
-    badges = [badge.to_dict() for badge in Badge.query.filter(Badge.name.in_(badge_names))]
-    resp['badge_list'] = badges
-
+    badge_names = list(set([badge.name for person in persons for badge in person.badges_for_api]))
     grouped_badges = {}
-    badges_by_orcid_id = {}
-    for badge in badges:
-        badges_by_orcid_id.setdefault(badge['orcid_id'], {})
-        badges_by_orcid_id[badge['orcid_id']][badge['name']] = badge
 
-    for badge in badges:
-        if badge['name'] in grouped_badges:
+    for badge_name in badge_names:
+        from models.badge import badge_configs
+        try:
+            badge_config = badge_configs()[badge_name]
+        except KeyError:
             continue
-        grouped_badges[badge['name']] = {'group': badge['group'], 'name': badge['name'], 'support_items': None,
-                                         'display_name': badge['display_name'], 'description': None,
-                                         'show_in_ui': badge['show_in_ui'], 'support_intro': None, 'context': None}
-        sum_score = 0
-        num_products = 0
-        orcid_ids = [b.orcid_id for b in Badge.query.filter(Badge.name == badge['name'])]
-        for person in Person.query.filter(Person.orcid_id.in_(orcid_ids)).all():
-            sum_score += person.num_products * badges_by_orcid_id[person.orcid_id][badge['name']]['value']
-            num_products += person.num_products
-        grouped_badges[badge['name']]['percentile'] = round(sum_score / num_products)
-        grouped_badges[badge['name']]['description'] = get_badge_description(badge['name'],
-                                                                             grouped_badges[badge['name']]['percentile'])
+
+        grouped_badges[badge_name] = {'group': badge_config["group"],
+                                        'name': badge_config['name'],
+                                        'support_items': None,
+                                        'display_name': badge_config['display_name'],
+                                        'description': None,
+                                        'show_in_ui': True,  # filtering this for above
+                                        'support_intro': None,
+                                        'context': None}
+        sum_score = 0.0
+        num_products = 0.0
+        for person in persons:
+            if person.get_badge(badge_name):
+                badge_score = person.get_badge(badge_name)
+                sum_score += person.num_products * badge_score.value
+                num_products += person.num_products
+
+        if num_products:
+            grouped_badges[badge_name]['percentile'] = round(sum_score / num_products, 2)
+        else:
+            grouped_badges[badge_name]['percentile'] = None
+
+        try:
+            grouped_badges[badge_name]['description'] = get_badge_description(badge_name,
+                                                            grouped_badges[badge_name]['percentile'])
+        except TypeError:
+            grouped_badges[badge_name]['description'] = None
 
     resp['openness'] = grouped_badges['percent_fulltext']['percentile'] if 'percent_fulltext' in grouped_badges else None
     resp['grouped_badges'] = grouped_badges.values()
-    resp['source_list'] = get_sources(products)
+    resp['source_list'] = [source.to_dict() for source in get_sources(products)]
 
     return jsonify(resp)
 
