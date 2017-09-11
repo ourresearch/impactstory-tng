@@ -633,16 +633,20 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "    </div>\n" +
     "\n" +
     "    <div class=\"has-products\" ng-show=\"persons.product_list.length\">\n" +
-    "        <div class=\"tab-controls row tab-overview-{{ tab=='top_investigators' }}\">\n" +
-    "            <a class=\"tab overview selected-{{ tab=='top_investigators' }}\" href=\"/g/{{ title }}/{{ url_params }}\">Top investigators</a>\n" +
+    "        <div class=\"tab-controls row tab-overview-{{ tab=='foobar' }}\">\n" +
+    "            <a class=\"tab overview selected-{{ tab=='overview' }}\" href=\"/g/{{ title }}/{{ url_params }}\">Overview</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='achievements' }}\" href=\"/g/{{ title }}/achievements/{{ url_params }}\">achievements</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='timeline' }}\" href=\"/g/{{ title }}/timeline/{{ url_params }}\">timeline</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='publications' }}\" href=\"/g/{{ title }}/publications/{{ url_params }}\">publications</a>\n" +
     "            <a class=\"tab publications selected-{{ tab=='investigators' }}\" href=\"/g/{{ title }}/investigators/{{ url_params }}\">investigators</a>\n" +
     "        </div>\n" +
     "\n" +
-    "        <div class=\"tab-view person-header row\" ng-if=\"tab=='investigators'\">\n" +
-    "            <div class=\"col-md-12 main-col\">\n" +
+    "        <div class=\"tab-view overview person-header row\" ng-if=\"tab=='overview'\">\n" +
+    "            <div class=\"col-md-5\">\n" +
+    "              <div class=\"badges widget\">\n" +
+    "                <div class=\"widget-header\">\n" +
+    "                  <h3>Top investigators</h3>\n" +
+    "                </div>\n" +
     "                <div class=\"row\" ng-repeat=\"person in persons.top_person_list\">\n" +
     "                    <div class=\"content\">\n" +
     "                        <div class=\"avatar\">\n" +
@@ -693,10 +697,45 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "                  </div>\n" +
     "                </div>\n" +
     "            </div>\n" +
+    "          </div>\n" +
+    "          <div class=\"col-md-7 big-col\">\n" +
+    "            <div class=\"mentions timeline widget\">\n" +
+    "                <div class=\"widget-header\">\n" +
+    "                    <h3>Timeline</h3>\n" +
+    "                    <a class=\"more\" href=\"/u/{{ person.d.orcid_id }}/timeline\">view all</a>\n" +
+    "                </div>\n" +
+    "                <div class=\"channels\">\n" +
+    "                    <span class=\"val total-posts\">{{ postsSum }}</span>\n" +
+    "                    <span class=\"ti-label\">\n" +
+    "                        Online mentions over {{ person.d.publishingAge }}\n" +
+    "                        year<span ng-show=\"person.d.publishingAge\">s</span>\n" +
+    "                    </span>\n" +
+    "\n" +
+    "                    <span class=\"channel\"\n" +
+    "                          ng-class=\"{'more-than-3': $index > 3, 'more-than-8': $index > 8}\"\n" +
+    "                          ng-repeat=\"channel in sources | orderBy: '-posts_count'\">\n" +
+    "                        <img ng-src=\"/static/img/favicons/{{ channel.source_name }}.ico\"\n" +
+    "                             class=\"channel-icon {{ channel.source_name }}\">\n" +
+    "                        <span class=\"val\">{{ numFormat.short(channel.posts_count) }}</span>\n" +
+    "                    </span>\n" +
+    "                </div>\n" +
+    "            </div>\n" +
+    "\n" +
+    "            <div class=\"publications widget\">\n" +
+    "                <div class=\"widget-header\">\n" +
+    "                    <h3>Publications</h3>\n" +
+    "                    <a class=\"more\" href=\"/u/{{ person.d.orcid_id }}/publications\">view all</a>\n" +
+    "                </div>\n" +
+    "                <div class=\"publication-wrapper\"\n" +
+    "                     ng-include=\"'publication-item.tpl.html'\"\n" +
+    "                     ng-repeat=\"product in persons.product_list | orderBy: ['-num_mentions', '-is_oa_repository', '-is_oa_journal', 'doi'] | limitTo: 3\">\n" +
+    "                </div>\n" +
+    "\n" +
+    "            </div>\n" +
     "        </div>\n" +
     "\n" +
     "        <!-- Investigators view -->\n" +
-    "        <div class=\"tab-view person-header row\" ng-if=\"tab=='top_investigators'\">\n" +
+    "        <div class=\"tab-view person-header row\" ng-if=\"tab=='investigators'\">\n" +
     "            <div class=\"col-md-12 main-col\">\n" +
     "                <div class=\"content\" ng-repeat=\"person in persons.person_list\">\n" +
     "                    <div class=\"avatar\">\n" +
@@ -835,7 +874,7 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "                <div class=\"badges-wrapper\"\n" +
     "                     ng-class=\"\"\n" +
     "                     ng-include=\"'badge-item.tpl.html'\"\n" +
-    "                     ng-repeat=\"badge in badges | orderBy: '-sort_score' | filter: {group: selectedSubscore.name}:true as filteredBadges\">\n" +
+    "                     ng-repeat=\"badge in filteredBadges | orderBy: '-sort_score' | filter: {group: selectedSubscore.name}:true as filteredBadges\">\n" +
     "                </div>\n" +
     "            </div>\n" +
     "        </div>\n" +
