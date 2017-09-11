@@ -164,9 +164,11 @@ angular.module('app').controller('AppCtrl', function(
         $scope.global.showBottomStuff = true
         $scope.global.hideHeader = false
 
-        $scope.global.template = current.loadedTemplateUrl
-            .replace("/", "-")
-            .replace(".tpl.html", "")
+        if (current.loadedTemplateUrl) {
+            $scope.global.template = current.loadedTemplateUrl
+                .replace("/", "-")
+                .replace(".tpl.html", "")
+        }
         $scope.global.loggingIn = false
         $scope.global.title = null
         $scope.global.isLandingPage = false

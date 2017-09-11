@@ -39,15 +39,15 @@
     </div>
 
     <div class="has-products" ng-show="persons.product_list.length">
-        <div class="tab-controls row tab-overview-{{ tab=='top_investigators' }}">
-            <a class="tab overview selected-{{ tab=='top_investigators' }}" href="/g/{{ title }}/{{ url_params }}">Overview</a>
+        <div class="tab-controls row tab-overview-{{ tab=='foobar' }}">
+            <a class="tab overview selected-{{ tab=='overview' }}" href="/g/{{ title }}/{{ url_params }}">Overview</a>
             <a class="tab publications selected-{{ tab=='achievements' }}" href="/g/{{ title }}/achievements/{{ url_params }}">achievements</a>
             <a class="tab publications selected-{{ tab=='timeline' }}" href="/g/{{ title }}/timeline/{{ url_params }}">timeline</a>
             <a class="tab publications selected-{{ tab=='publications' }}" href="/g/{{ title }}/publications/{{ url_params }}">publications</a>
             <a class="tab publications selected-{{ tab=='investigators' }}" href="/g/{{ title }}/investigators/{{ url_params }}">investigators</a>
         </div>
 
-        <div class="tab-view overview person-header row" ng-if="tab=='investigators'">
+        <div class="tab-view overview person-header row" ng-if="tab=='overview'">
             <div class="col-md-5">
               <div class="badges widget">
                 <div class="widget-header">
@@ -141,7 +141,7 @@
         </div>
 
         <!-- Investigators view -->
-        <div class="tab-view person-header row" ng-if="tab=='top_investigators'">
+        <div class="tab-view person-header row" ng-if="tab=='investigators'">
             <div class="col-md-12 main-col">
                 <div class="content" ng-repeat="person in persons.person_list">
                     <div class="avatar">
@@ -280,7 +280,7 @@
                 <div class="badges-wrapper"
                      ng-class=""
                      ng-include="'badge-item.tpl.html'"
-                     ng-repeat="badge in badges | orderBy: '-sort_score' | filter: {group: selectedSubscore.name}:true as filteredBadges">
+                     ng-repeat="badge in filteredBadges | orderBy: '-sort_score' | filter: {group: selectedSubscore.name}:true as filteredBadges">
                 </div>
             </div>
         </div>

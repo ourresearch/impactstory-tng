@@ -11,7 +11,6 @@ angular.module('group', [
             return $http.get(url, { params:params }).then( function(resp){
                     $rootScope.progressbar.complete()
                     isLoading = false
-
                     return resp.data
 
                 }, function(resp){

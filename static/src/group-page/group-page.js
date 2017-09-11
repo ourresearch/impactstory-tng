@@ -20,8 +20,9 @@ angular.module('groupPage', [
         $scope.title = $route.current.params.group_name
         $scope.persons = persons
         $scope.url_params = window.location.search
-        $scope.badges = Group.badgesToShow(persons.badge_list)
+        $scope.filteredBadges = Group.badgesToShow(persons.grouped_badges)
 
+        console.log("$scope.filteredBadges", $scope.filteredBadges)
 
         // genre stuff (don't know what it is)
         var genreGroups = _.groupBy(persons.product_list, "genre")
