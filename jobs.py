@@ -23,9 +23,25 @@ def update_fn(cls, method_name, obj_id_list, shortcut_data=None, index=1):
     start = time()
 
     q = db.session.query(cls).options(orm.undefer('*')).filter(cls.id.in_(obj_id_list))
-
     obj_rows = q.all()
     num_obj_rows = len(obj_rows)
+
+    # if the queue includes items that aren't in the table, build them
+    # assume they can be built by calling cls(id=id)
+    if num_obj_rows != len(obj_id_list):
+        logger.info(u"not all objects are there, so creating")
+        ids_of_got_objects = [obj.id for obj in obj_rows]
+        for id in obj_id_list:
+            if id not in ids_of_got_objects:
+                new_obj = cls(id=id)
+                db.session.add(new_obj)
+        safe_commit(db)
+        logger.info(u"done")
+
+    q = db.session.query(cls).options(orm.undefer('*')).filter(cls.id.in_(obj_id_list))
+    obj_rows = q.all()
+    num_obj_rows = len(obj_rows)
+
     print "{repr}.{method_name}() got {num_obj_rows} objects in {elapsed}sec".format(
         repr=cls.__name__,
         method_name=method_name,
