@@ -40,14 +40,14 @@
             <div class="fulltext" ng-show="product.fulltext_url">
                 <a href="{{ product.fulltext_url }}">
                     <i class="fa fa-unlock-alt"></i>
-                    Free fulltext available
+                    Open access link available
                     <i class="fa fa-external-link"></i>
                 </a>
             </div>
             <div class="no-fulltext" ng-show="!product.fulltext_url && person.belongsToCurrentUser()">
                 <div class="btn btn-default" ng-click="setFulltextUrl($event)">
                     <i class="fa fa-link"></i>
-                    Add a link to free fulltext
+                    Add an open access link
                 </div>
             </div>
         </div>
