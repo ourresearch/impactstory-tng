@@ -3568,7 +3568,7 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "                    <span class=\"count\">\n" +
     "                        {{ selectedGenre.count || persons.product_list.length }}\n" +
     "                    </span>\n" +
-    "                    <span class=\"most-recent\" ng-show=\"persons.product_list.length==100\">\n" +
+    "                    <span class=\"most-recent\" ng-show=\"persons.product_list.length==50\">\n" +
     "                        most recent\n" +
     "                    </span>\n" +
     "\n" +
@@ -3764,7 +3764,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                            {{ person.d.affiliation_role_title }}\n" +
     "                        </span>\n" +
     "                    </div>\n" +
-    "\n" +
+    "                    <!--\n" +
     "                    <div class=\"person-profile-info\">\n" +
     "                        <div class=\"open-access-info\">\n" +
     "                            <span class=\"fulltext\" ng-click=\"showAboutOaDialog($event)\">\n" +
@@ -3782,7 +3782,6 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                                <i class=\"fa fa-star\"></i>\n" +
     "                                <span>Open Hero!</span>\n" +
     "                            </a>\n" +
-    "                            <!--\n" +
     "                            <a href=\"https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory.\"\n" +
     "                               target=\"_blank\"\n" +
     "                               class=\"share\"\n" +
@@ -3790,11 +3789,9 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                               ng-click=\"shareBadge()\">\n" +
     "                                <span class=\"text\">Share your score</span>\n" +
     "                            </a>\n" +
-    "                            -->\n" +
-    "\n" +
-    "\n" +
     "                        </div>\n" +
     "                    </div>\n" +
+    "                    -->\n" +
     "                </div>\n" +
     "            </div>\n" +
     "\n" +
@@ -3896,7 +3893,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                    <span class=\"count\">\n" +
     "                        {{ selectedGenre.count || products.length }}\n" +
     "                    </span>\n" +
-    "                    <span class=\"most-recent\" ng-show=\"products.length==100\">\n" +
+    "                    <span class=\"most-recent\" ng-show=\"products.length==50\">\n" +
     "                        most recent\n" +
     "                    </span>\n" +
     "\n" +

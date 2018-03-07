@@ -43,7 +43,7 @@
                             {{ person.d.affiliation_role_title }}
                         </span>
                     </div>
-
+                    <!--
                     <div class="person-profile-info">
                         <div class="open-access-info">
                             <span class="fulltext" ng-click="showAboutOaDialog($event)">
@@ -61,7 +61,6 @@
                                 <i class="fa fa-star"></i>
                                 <span>Open Hero!</span>
                             </a>
-                            <!--
                             <a href="https://twitter.com/intent/tweet?url={{ profileLinkToTweet }}&text=I've made {{ numFormat.decimalToPerc(person.d.percent_fulltext) }}%25 of my work free to read online. How about you%3F Find out your %23OAscore on @Impactstory."
                                target="_blank"
                                class="share"
@@ -69,11 +68,9 @@
                                ng-click="shareBadge()">
                                 <span class="text">Share your score</span>
                             </a>
-                            -->
-
-
                         </div>
                     </div>
+                    -->
                 </div>
             </div>
 
@@ -175,7 +172,7 @@
                     <span class="count">
                         {{ selectedGenre.count || products.length }}
                     </span>
-                    <span class="most-recent" ng-show="products.length==100">
+                    <span class="most-recent" ng-show="products.length==50">
                         most recent
                     </span>
 
