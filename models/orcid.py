@@ -153,7 +153,7 @@ def get_identifiers_from_biblio_dict(orcid_product_dict):
                     ns = eid['external-id-type']
                     nid = str(eid['external-id-value'].encode('utf-8')).lower()
                     identifiers.append((ns, nid))
-                except TypeError:
+                except (TypeError, AttributeError):
                     pass
     return identifiers
 
