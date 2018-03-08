@@ -153,10 +153,11 @@ class Product(db.Model):
         super(Product, self).__init__(**kwargs)
 
     def set_oa_from_user_supplied_fulltext_url(self, url):
-        self.user_supplied_fulltext_url = url
-        self.fulltext_url = url
-        self.evidence = "user supplied fulltext url"
-        self.license = "unknown"
+        if url:
+            self.user_supplied_fulltext_url = url
+            self.fulltext_url = url
+            self.evidence = "user supplied fulltext url"
+            self.license = "unknown"
 
 
     def set_biblio_from_orcid(self):
@@ -231,9 +232,32 @@ class Product(db.Model):
             print u"in generic exception handler, so rolling back in case it is needed"
             db.session.rollback()
 
+    @property
+    def matches_open_url_fragment(self):
+        if not self.url:
+            return False
+
+        for open_url_fragment in open_url_fragments:
+            if open_url_fragment in self.url:
+                return True
+
+        return False
+
     def set_data_from_oadoi(self, high_priority=False):
         # print u"starting set_data_from_oadoi with {}".format(self.doi)
         start_time = time()
+
+        if self.guess_genre() in ["preprint", "dataset", "report"]:
+            # print u"{} is genre {} so it has fulltext, don't need to call oadoi".format(self.id, self.guess_genre())
+            self.fulltext_url = self.url
+
+        # sometimes genre is "other" or similar but is still in an open place like figshare.  call these open.
+        if self.matches_open_url_fragment:
+            # print u"{} is open url fragment, so don't need to call oadoi".format(self.id)
+            self.fulltext_url = self.url
+
+        if not self.doi:
+            return
 
         # set_altmetric_api_raw catches its own errors, but since this is the method
         # called by the thread from Person.set_data_from_altmetric_for_all_products
@@ -241,34 +265,30 @@ class Product(db.Model):
         # in case errors in calculate or anything else we add.
         try:
             # url = u"http://localhost:5002/v1/publications?email=team@impactstory.org"
-            url = u"http://api.oadoi.org/v1/publications?email=team@impactstory.org"
-            post_body = {"biblios": [self.biblio_for_oadoi()]}
+            url = u"http://api.unpaywall.org/v2/{}?email=team+profiles@impactstory.org".format(self.doi)
 
-            # print "\n\n"
-            # print json.dumps(post_body)
-            # print "\n\n"
-
-            r = requests.post(url, json=post_body)
+            r = requests.get(url)
             if r and r.status_code==200:
-                response_dict = r.json()["results"][0]
-                if not response_dict:
-                    print u"error: response_dict is empty in set_data_from_oadoi for {}. why?".format(url)
-                else:
-                    self.fulltext_url = response_dict["free_fulltext_url"]
-                    self.license = response_dict["license"]
-                    self.evidence = response_dict["evidence"]
-                    if self.fulltext_url:
-                        print u"got a new open product! {} {} ({})".format(
-                            self.id, self.fulltext_url, self.license)
+                data = r.json()
+                if not self.journal:
+                    self.journal = data["journal_name"]
+                if not self.year:
+                    self.year = data["year"]
+                best_oa_location = data["best_oa_location"]
+                if best_oa_location:
+                    if not self.user_supplied_fulltext_url:
+                        self.fulltext_url = best_oa_location["url"]
+                    self.license = best_oa_location["license"]
+                    self.evidence = best_oa_location["evidence"]
             else:
-                print u"in set_data_from_oadoi: bad status_code={} for product {} {}. skipping.".format(
-                    r.status_code, self.id, post_body)
+                pass
+                # print u"in set_data_from_oadoi: bad status_code={} for product {}. skipping.".format(
+                #     r.status_code, self.id)
         except (KeyboardInterrupt, SystemExit):
             # let these ones through, don't save anything to db
             raise
         except IndexError:
             print u"IndexError in set_data_from_oadoi on product {}. skipping.".format(self.id)
-            print "post_body", post_body
             print r.json()
         except Exception:
             logging.exception(u"exception in set_data_from_oadoi on product {}".format(self.id))
@@ -276,7 +296,7 @@ class Product(db.Model):
             print self.error
             print u"in generic exception handler for product {}, so rolling back in case it is needed".format(self.id)
             db.session.rollback()
-        print u"finished set_data_from_oadoi with {} in {}".format(self.doi, elapsed(start_time, 2))
+        # print u"finished set_data_from_oadoi with {} in {}".format(self.doi, elapsed(start_time, 2))
 
 
     def get_abstract(self):
