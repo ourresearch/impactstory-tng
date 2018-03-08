@@ -546,8 +546,7 @@ class Person(db.Model):
         for product_to_add in products_to_add:
             needs_to_be_added = True
             for my_existing_product in self.products:
-                if my_existing_product.orcid_put_code == product_to_add.orcid_put_code:
-
+                if str(my_existing_product.orcid_put_code) == str(product_to_add.orcid_put_code):
                     # update the product biblio from the most recent orcid api response
                     my_existing_product.orcid_api_raw_json = product_to_add.orcid_api_raw_json
                     my_existing_product.set_biblio_from_orcid()
@@ -574,7 +573,7 @@ class Person(db.Model):
         self.num_cc_restricted = 0
         self.num_cc0_pd = 0
 
-        for p in self.all_products:
+        for p in self.products_with_dois:
             if p.fulltext_url:
                 self.num_fulltext += 1
             if p.user_supplied_fulltext_url:
@@ -785,7 +784,7 @@ class Person(db.Model):
         )
 
     def set_fresh_orcid(self):
-        orcid_created_date_timestamp = self.orcid_api_raw_json["orcid-history"]["submission-date"]["value"]
+        orcid_created_date_timestamp = self.orcid_api_raw_json["history"]["submission-date"]["value"]
         orcid_created_date = datetime.datetime.fromtimestamp(orcid_created_date_timestamp/1000)
         profile_created_date = self.created
         if not profile_created_date:
@@ -852,12 +851,7 @@ class Person(db.Model):
     def call_oadoi(self, call_even_if_already_open=False):
         start_time = time()
 
-        products_for_oadoi = []
-        for p in self.products:
-            if p.user_supplied_fulltext_url:
-                continue
-            if call_even_if_already_open or not p.has_fulltext_url:
-                products_for_oadoi.append(p)
+        products_for_oadoi = self.products_with_dois
 
         if not products_for_oadoi:
             return
@@ -1082,7 +1076,7 @@ class Person(db.Model):
 
     @property
     def percent_open_license(self):
-        if not self.all_products:
+        if not self.products_with_dois:
             return None
 
         num_open_license_products = 0
@@ -1091,8 +1085,10 @@ class Person(db.Model):
         if self.num_cc0_pd:
             num_open_license_products += self.num_cc0_pd
 
-        if self.num_products >= 1:
-            response = round((num_open_license_products/float(self.num_products)), 3)
+        num_products_with_dois = len(self.products_with_dois)
+
+        if num_products_with_dois >= 1:
+            response = min(1, round((num_open_license_products / float(num_products_with_dois)), 3))
         else:
             response = None
 
@@ -1101,14 +1097,16 @@ class Person(db.Model):
 
     @property
     def percent_fulltext(self):
-        if not self.all_products:
+
+        if not self.products_with_dois:
             return None
 
-        num_open_products = len([p for p in self.all_products if p.has_fulltext_url])
+        num_products_with_dois = len(self.products_with_dois)
+        num_open_products = len([p for p in self.products_with_dois if p.has_fulltext_url])
 
         # only defined if three or more products
-        if self.num_products >= 1:
-            response = round((num_open_products / float(self.num_products)), 3)
+        if num_products_with_dois >= 1:
+            response = min(1, round((num_open_products / float(num_products_with_dois)), 3))
         else:
             response = None
 

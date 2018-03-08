@@ -94,9 +94,9 @@ def call_orcid_api(url):
 
 
 def get_orcid_api_raw_profile(id):
-    url = "https://pub.orcid.org/v1.2/{id}/orcid-profile".format(id=id)
+    url = "https://pub.orcid.org/v2.1/{id}".format(id=id)
     orcid_resp_dict = call_orcid_api(url)
-    return orcid_resp_dict["orcid-profile"]
+    return orcid_resp_dict
 
 # main constructor
 def make_and_populate_orcid_profile(orcid_id):
@@ -145,12 +145,13 @@ def get_current_activity(activities):
 
 def get_identifiers_from_biblio_dict(orcid_product_dict):
     identifiers = []
-    if orcid_product_dict.get('work-external-identifiers', []):
-        for x in orcid_product_dict.get('work-external-identifiers', []):
-            for eid in orcid_product_dict['work-external-identifiers']['work-external-identifier']:
+    orcid_product_dict_summary = orcid_product_dict["work-summary"][0]
+    if orcid_product_dict_summary.get('external-ids', []):
+        for x in orcid_product_dict_summary.get('external-ids', []):
+            for eid in orcid_product_dict_summary['external-ids']['external-id']:
                 try:
-                    ns = eid['work-external-identifier-type']
-                    nid = str(eid['work-external-identifier-id']['value'].encode('utf-8')).lower()
+                    ns = eid['external-id-type']
+                    nid = str(eid['external-id-value'].encode('utf-8')).lower()
                     identifiers.append((ns, nid))
                 except TypeError:
                     pass
@@ -158,13 +159,13 @@ def get_identifiers_from_biblio_dict(orcid_product_dict):
 
 def get_isbn_from_biblio_dict(orcid_product_dict):
     for (ns, nid) in get_identifiers_from_biblio_dict(orcid_product_dict):
-        if ns == "ISBN":
+        if ns.lower() == "isbn":
             return nid.replace("-", "")
     return None
 
 def get_arxiv_from_biblio_dict(orcid_product_dict):
     for (ns, nid) in get_identifiers_from_biblio_dict(orcid_product_dict):
-        if ns == "ARXIV":
+        if ns.lower() == "arxiv":
             return nid.lower().replace("arxiv:", "")
     return None
 
@@ -172,53 +173,56 @@ def get_arxiv_from_biblio_dict(orcid_product_dict):
 def get_doi_from_biblio_dict(orcid_product_dict):
     doi = None
     for (ns, nid) in get_identifiers_from_biblio_dict(orcid_product_dict):
-        if ns == "DOI":
+        if ns.lower() == "doi":
             try:
                 doi = clean_doi(nid)  # throws error unless valid DOI
             except (TypeError, NoDoiException):
                 pass
 
     if not doi:
+
         # try url
-        try:
-            id_string = str(orcid_product_dict['url']['value'].encode('utf-8')).lower()
-            if is_doi_url(id_string):
-                doi = clean_doi(id_string)  # throws error unless valid DOI
-        except (TypeError, NoDoiException):
-            doi = None
+        for (ns, nid) in get_identifiers_from_biblio_dict(orcid_product_dict):
+            try:
+                if is_doi_url(nid):
+                    doi = clean_doi(nid)  # throws error unless valid DOI
+            except (TypeError, NoDoiException):
+                pass
+
+
     return doi
 
 
 def set_biblio_from_biblio_dict(my_product, biblio_dict):
-    my_product.orcid_put_code = biblio_dict["put-code"]
+    my_product.orcid_put_code = str(biblio_dict["work-summary"][0]["put-code"])
 
 
     citation_fields = {}
     try:
-        if biblio_dict["work-citation"]["work-citation-type"].lower() == "bibtex":
-            citation_fields = parse(biblio_dict["work-citation"]["citation"])[0]
+        if biblio_dict["work-summary"][0]["citation"]["citation-type"].lower() == "bibtex":
+            citation_fields = parse(biblio_dict["citation"]["citation"])[0]
             # print "citation_fields", citation_fields
     except (TypeError, KeyError, IndexError):
         pass
 
 
     try:
-        my_product.type = str(biblio_dict["work-type"].encode('utf-8')).lower().replace("_", "-")
+        my_product.type = str(biblio_dict["work-summary"][0]["type"].encode('utf-8')).lower().replace("_", "-")
     except (TypeError, KeyError):
         my_product.type = None
         pass
 
     # replace many white spaces and \n with just one space
     try:
-        my_product.title = re.sub(u"\s+", u" ", biblio_dict["work-title"]["title"]["value"])
+        my_product.title = re.sub(u"\s+", u" ", biblio_dict["work-summary"][0]["title"]["title"]["value"])
         replace_whitespace_pattern = re.compile(u"\s+")
-        my_product.title = replace_whitespace_pattern.sub(u" ", biblio_dict["work-title"]["title"]["value"])
+        my_product.title = replace_whitespace_pattern.sub(u" ", biblio_dict["work-summary"][0]["title"]["title"]["value"])
     except (TypeError, KeyError):
         my_product.title = None
         pass
 
     try:
-        my_product.journal = biblio_dict["journal-title"]["value"]
+        my_product.journal = biblio_dict["work-summary"][0]["journal-title"]["value"]
     except (TypeError, KeyError):
         if "journal" in citation_fields:
             my_product.journal = citation_fields["journal"]
@@ -227,7 +231,7 @@ def set_biblio_from_biblio_dict(my_product, biblio_dict):
 
     # just get year for now
     try:
-        my_product.year = biblio_dict["publication-date"]["year"]["value"]
+        my_product.year = biblio_dict["work-summary"][0]["publication-date"]["year"]["value"]
     except (TypeError, KeyError):
         if "year" in citation_fields:
             my_product.year = citation_fields["year"]
@@ -236,7 +240,7 @@ def set_biblio_from_biblio_dict(my_product, biblio_dict):
 
 
     try:
-        my_product.url = biblio_dict["url"]["value"]
+        my_product.url = biblio_dict["work-summary"][0]["url"]["value"]
     except (TypeError, KeyError, AttributeError):
         try:
             my_product.url = None
@@ -246,7 +250,7 @@ def set_biblio_from_biblio_dict(my_product, biblio_dict):
 
     try:
         author_name_list = []
-        contributors = biblio_dict["work-contributors"]["contributor"]
+        contributors = biblio_dict["work-summary"][0]["work-contributors"]["contributor"]
         for contributor in contributors:
             name = contributor["credit-name"]["value"]
             author_name_list.append(name)
@@ -264,7 +268,7 @@ def set_biblio_from_biblio_dict(my_product, biblio_dict):
         pass
 
     try:
-        my_product.orcid_importer = biblio_dict["source"]["source-name"]["value"]
+        my_product.orcid_importer = biblio_dict["work-summary"][0]["source"]["source-name"]["value"]
     except (TypeError, KeyError):
         my_product.orcid_importer = None
         pass
@@ -288,28 +292,28 @@ class OrcidProfile(object):
     @property
     def given_names(self):
         try:
-            return self.api_raw_profile["orcid-bio"]["personal-details"]["given-names"]["value"]
+            return self.api_raw_profile["person"]["name"]["given-names"]["value"]
         except (KeyError, TypeError):
             return None
 
     @property
     def family_name(self):
         try:
-            return self.api_raw_profile["orcid-bio"]["personal-details"]["family-name"]["value"]
+            return self.api_raw_profile["person"]["name"]["family-name"]["value"]
         except (KeyError, TypeError):
             return None
 
     @property
     def credit_name(self):
         try:
-            return self.api_raw_profile["orcid-bio"]["personal-details"]["credit-name"]["value"]
+            return self.api_raw_profile["person"]["name"]["credit-name"]["value"]
         except (KeyError, TypeError):
             return None
 
     @property
     def other_names(self):
         try:
-            return self.api_raw_profile["orcid-bio"]["personal-details"]["other-names"]["value"]
+            return self.api_raw_profile["person"]["name"]["other-names"]["value"]
         except (KeyError, TypeError):
             return None
 
@@ -333,14 +337,14 @@ class OrcidProfile(object):
     @property
     def biography(self):
         try:
-            return self.api_raw_profile["orcid-bio"]["biography"]["value"]
+            return self.api_raw_profile["person"]["biography"]["content"]
         except (KeyError, TypeError):
             return None
 
     @property
     def researcher_urls(self):
         try:
-            urls_dict = self.api_raw_profile["orcid-bio"]["researcher-urls"]["researcher-url"]
+            urls_dict = self.api_raw_profile["person"]["researcher-urls"]["researcher-url"]
             if not urls_dict:
                 urls_dict = None
             return urls_dict
@@ -350,7 +354,7 @@ class OrcidProfile(object):
     @property
     def keywords(self):
         try:
-            return self.api_raw_profile["orcid-bio"]["keywords"]["keyword"][0]["value"]
+            return self.api_raw_profile["person"]["keywords"]["keyword"][0]["value"]
         except (KeyError, TypeError):
             return None
 
@@ -358,7 +362,7 @@ class OrcidProfile(object):
     @property
     def works(self):
         try:
-            works = self.api_raw_profile["orcid-activities"]["orcid-works"]["orcid-work"]
+            works = self.api_raw_profile["activities-summary"]["works"]["group"]
         except TypeError:
             works = None
 
@@ -375,7 +379,7 @@ class OrcidProfile(object):
         latest_year = 0
         for work in self.works:
             try:
-                year = int(work["publication-date"]["year"]["value"])
+                year = int(work["work-summary"][0]["publication-date"]["year"]["value"])
             except TypeError:
                 # no year found
                 continue
@@ -387,7 +391,7 @@ class OrcidProfile(object):
         if not best:
             best = self.works[0]
 
-        return best["work-title"]["title"]["value"]
+        return best["work-summary"][0]["title"]["title"]["value"]
 
 
 
@@ -400,31 +404,30 @@ class OrcidProfile(object):
     def affiliations(self):
         ret = []
         try:
-            affiliation_list = self.api_raw_profile["orcid-activities"]["affiliations"]["affiliation"]
+            affiliation_list = self.api_raw_profile["activities-summary"]["employments"]["employment-summary"]
         except (TypeError, ):
             return ret
 
         for affl in affiliation_list:
-            if affl["type"]=="EMPLOYMENT":
-                affl_name = affl["organization"]["name"]
-                role_title = affl["role-title"]
+            affl_name = affl["organization"]["name"]
+            role_title = affl["role-title"]
 
-                try:
-                    start_year = int(affl["start-date"]["year"]["value"])
-                except (KeyError, TypeError,):
-                    start_year = None
+            try:
+                start_year = int(affl["start-date"]["year"]["value"])
+            except (KeyError, TypeError,):
+                start_year = None
 
-                try:
-                    end_year = int(affl["end-date"]["year"]["value"])
-                except (KeyError, TypeError,):
-                    end_year = None
+            try:
+                end_year = int(affl["end-date"]["year"]["value"])
+            except (KeyError, TypeError,):
+                end_year = None
 
-                ret.append({
-                    "name": affl_name,
-                    "role_title": role_title,
-                    "start_year": start_year,
-                    "end_year": end_year
-                    })
+            ret.append({
+                "name": affl_name,
+                "role_title": role_title,
+                "start_year": start_year,
+                "end_year": end_year
+                })
         return ret
 
     @property
@@ -437,13 +440,13 @@ class OrcidProfile(object):
     def funding(self):
         ret = []
         try:
-            funding_list = self.api_raw_profile["orcid-activities"]["funding-list"]["funding"]
+            funding_list = self.api_raw_profile["activities-summary"]["fundings"]["group"]["funding-summary"]
         except (TypeError, ):
             return ret
 
         for fund in funding_list:
             funder = fund["organization"]["name"]
-            title = fund["funding-title"]["title"]["value"]
+            title = fund["funding-summary"]["title"]["title"]["value"]
             try:
                 end_year = int(fund["end-date"]["year"]["value"])
             except (KeyError, TypeError,):

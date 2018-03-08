@@ -577,9 +577,10 @@ class percent_fulltext(BadgeAssigner):
     description = u"{value}% of your research is free to read online."
     context = u"This level of availability puts you in the top {in_the_top_percentile}% of researchers."
     importance = .9
+    show_in_ui = True
 
     def decide_if_assigned(self, person):
-        if person.num_products >= 3 and person.percent_fulltext:
+        if person.products_with_dois and len(person.products_with_dois) >= 3 and person.percent_fulltext:
             if person.percent_fulltext >= 0.5:
                 self.candidate_badge.value = person.percent_fulltext * 100
                 self.assigned = True
@@ -590,18 +591,16 @@ class percent_fulltext(BadgeAssigner):
                 else:
                     self.candidate_badge.support = ""
 
-
-
 class open_license(BadgeAssigner):
     display_name = "Open License"
     group = "openness"
     description = u"{value}% of your research has a CC-BY, CC0, or public domain license."
     context = u"This level of availability puts you in the top {in_the_top_percentile}% of researchers."
     importance = .8
-    show_in_ui = False
+    show_in_ui = True
 
     def decide_if_assigned(self, person):
-        if person.num_products >= 3 and person.percent_open_license:
+        if person.products_with_dois and len(person.products_with_dois) >= 3and person.percent_open_license:
             if person.percent_open_license >= 0.25:
                 self.candidate_badge.value = person.percent_open_license * 100
                 self.assigned = True
