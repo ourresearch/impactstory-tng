@@ -19,6 +19,9 @@ class NoOrcidException(Exception):
 class OrcidDoesNotExist(Exception):
     pass
 
+class OrcidApiCallFails(Exception):
+    pass
+
 
 def clean_orcid(dirty_orcid):
     if not dirty_orcid:
@@ -84,6 +87,10 @@ def call_orcid_api(url):
     if r.status_code == 404:
         print u"404, ORCID not found"
         raise OrcidDoesNotExist("Not a valid ORCID")
+
+    if r.status_code != 200:
+        print u"{}, ORCID api error: {}".format(r.status_code, r.json().get("developer-message", ""))
+        raise OrcidApiCallFails("API call to this orcid fails")
 
     # print "got ORCID results in {elapsed}s for {url}".format(
     #     url=url,
