@@ -430,13 +430,15 @@ class Person(db.Model):
             print u"** all products have altmetric data and no overwrite, so not calling altmetric"
         print u"elapsed in call_apis after set_data_from_altmetric is {}s".format(elapsed(start_time, 2))
 
-        products_without_mendeley = [p for p in self.products if not p.mendeley_api_raw]
-        if overwrite_metrics or products_without_mendeley:
-            print u"** calling set_data_for_all_products for mendeley"
-            self.set_data_for_all_products("set_data_from_mendeley", high_priority)
-        else:
-            print u"** all products have mendeley data and no overwrite, so not calling mendeley"
-        print u"elapsed in call_apis after set_data_from_mendeley is {}s".format(elapsed(start_time, 2))
+
+        # products_without_mendeley = [p for p in self.products if not p.mendeley_api_raw]
+        # if overwrite_metrics or products_without_mendeley:
+        #     print u"** calling set_data_for_all_products for mendeley"
+        #     self.set_data_for_all_products("set_data_from_mendeley", high_priority)
+        # else:
+        #     print u"** all products have mendeley data and no overwrite, so not calling mendeley"
+        #
+        # print u"elapsed in call_apis after set_data_from_mendeley is {}s".format(elapsed(start_time, 2))
 
 
     # doesn't have error handling; called by refresh when you want it to be robust
