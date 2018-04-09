@@ -61,10 +61,10 @@ def get_orcid_id_from_oauth(auth_code, redirect_uri):
     # the access token has the ORCID ID, which is actually all we need here.
     r = requests.post(access_token_url, headers=headers, data=payload)
     try:
-        print u"get_orcid_id_from_oauth request status code: {}".format(r.status_code)
-        print u"get_orcid_id_from_oauth json: {}".format(r.json())
+        # print u"get_orcid_id_from_oauth request status code: {}".format(r.status_code)
+        # print u"get_orcid_id_from_oauth json: {}".format(r.json())
         orcid_id = r.json()["orcid"]
-        print u"in get_orcid_id_from_oauth, got orcid_id {}".format(orcid_id)
+        # print u"in get_orcid_id_from_oauth, got orcid_id {}".format(orcid_id)
         return r.json()["orcid"]
     except KeyError:
         print u"bad news: got no 'orcid' key back from ORCID! Got this: {}".format(r.json())
@@ -89,7 +89,7 @@ def call_orcid_api(url):
         raise OrcidDoesNotExist("Not a valid ORCID")
 
     if r.status_code != 200:
-        print u"{}, ORCID api error: {}".format(r.status_code, r.json().get("developer-message", ""))
+        print u"{}, ORCID api error: {}".format(r.status_code, r.text)
         raise OrcidApiCallFails("API call to this orcid fails")
 
     # print "got ORCID results in {elapsed}s for {url}".format(
