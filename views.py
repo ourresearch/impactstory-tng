@@ -612,7 +612,6 @@ def twitter_disconnect_endpoint():
 # doesn't save anything in database, just proxy for calling twitter.com
 @app.route("/api/auth/twitter/request-token")
 def get_twitter_request_token():
-    print "in get_twitter_request_token"
     request_token_url = 'https://api.twitter.com/oauth/request_token'
 
     oauth = OAuth1(
@@ -621,13 +620,8 @@ def get_twitter_request_token():
         callback_uri=request.args.get('redirectUri')
     )
 
-    print "oauth", oauth
-
     r = requests.post(request_token_url, auth=oauth)
-    print r
     oauth_token_dict = dict(parse_qsl(r.text))
-
-    print "oauth_token_dict", oauth_token_dict
 
     return jsonify(oauth_token_dict)
 
