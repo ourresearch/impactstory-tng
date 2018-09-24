@@ -135,7 +135,7 @@ class Product(db.Model):
 
     altmetric_id = db.Column(db.Text)
     altmetric_score = db.Column(db.Float)
-    post_counts = db.Column(MutableDict.as_mutable(JSONB))
+    # post_counts = db.Column(MutableDict.as_mutable(JSONB))  # don't store post_counts anymore, just calculate them
     post_details = db.Column(MutableDict.as_mutable(JSONB))
     poster_counts = db.Column(MutableDict.as_mutable(JSONB))
     event_dates = db.Column(MutableDict.as_mutable(JSONB))
@@ -194,7 +194,7 @@ class Product(db.Model):
 
         self.set_altmetric_score()
         self.set_altmetric_id()
-        self.set_post_counts()
+        # self.set_post_counts()  don't store post counts for now, just calculate them
         self.set_poster_counts()
         self.set_post_details()
         self.set_event_dates()
@@ -319,19 +319,24 @@ class Product(db.Model):
         return abstract
 
 
-    def post_counts_by_source(self, source):
-        if not self.post_counts:
-            return 0
+    # don't store post_counts anymore, just calculate them
+    @property
+    def post_counts(self):
+        my_dict = defaultdict(int)
+        for post in self.posts:
+            my_dict[post["source"]] += 1
+        return my_dict
 
-        if source in self.post_counts:
-            return self.post_counts[source]
-        return 0
+    def post_counts_by_source(self, source):
+        if not self.posts:
+            return 0
+        count = len([post for post in self.posts if post["source"] == source])
+        return count
+
 
     @property
     def num_posts(self):
-        if self.post_counts:
-            return sum(self.post_counts.values())
-        return 0
+        return len(self.posts)
 
     @property
     def posts(self):
@@ -404,22 +409,23 @@ class Product(db.Model):
         self.post_details = {"list": all_post_dicts}
         return self.post_details
 
-    def set_post_counts(self):
-        self.post_counts = {}
-
-        if not self.altmetric_api_raw or "counts" not in self.altmetric_api_raw:
-            return
-
-        exclude_keys = ["total", "readers"]
-        for k in self.altmetric_api_raw["counts"]:
-            if k not in exclude_keys:
-                source = k
-                count = int(self.altmetric_api_raw["counts"][source]["posts_count"])
-                self.post_counts[source] = count
-                # print u"setting posts for {source} to {count} for {doi}".format(
-                #     source=source,
-                #     count=count,
-                #     doi=self.doi)
+    # don't store post_counts anymore, just calculate them
+    # def set_post_counts(self):
+    #     self.post_counts = {}
+    #
+    #     if not self.altmetric_api_raw or "counts" not in self.altmetric_api_raw:
+    #         return
+    #
+    #     exclude_keys = ["total", "readers"]
+    #     for k in self.altmetric_api_raw["counts"]:
+    #         if k not in exclude_keys:
+    #             source = k
+    #             count = int(self.altmetric_api_raw["counts"][source]["posts_count"])
+    #             self.post_counts[source] = count
+    #             print u"setting posts for {source} to {count} for {doi}".format(
+    #                 source=source,
+    #                 count=count,
+    #                 doi=self.doi)
 
 
     def set_poster_counts(self):
