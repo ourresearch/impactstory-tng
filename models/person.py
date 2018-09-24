@@ -599,13 +599,9 @@ class Person(db.Model):
         if not self.email:
             return
 
-        DATE_NOTIFICATION_EMAILS_STARTED = "2016-07-01"
+        DATE_NOTIFICATION_EMAILS_STARTED = "2018-09-10"
         if not self.events_emailed:
             self.events_emailed = {"emailed": []}
-
-        # fake it for now
-        # DATE_NOTIFICATION_EMAILS_STARTED = "2017-01-01"
-        # self.events_emailed = {"emailed": []}
 
         print u"looking for new stuff to email for {}".format(self.email)
         posts = self.get_posts()

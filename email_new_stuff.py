@@ -5,6 +5,7 @@ import argparse
 
 import update
 
+# to test just one: python email_new_stuff.py --now --orcid=0000-0003-1613-5981
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run stuff.")
@@ -24,8 +25,6 @@ if __name__ == "__main__":
         my_day_of_week = calendar.day_name[my_date.weekday()]
         run_now = (my_day_of_week == day_of_week_for_emails)
 
-    # just for updating one
-    # parser.add_argument('--orcid', nargs="?", type=str, help="orcid id of the one thing you want to update")
 
     if run_now:
         update.run_update(parsed_args)
