@@ -15,7 +15,7 @@ examples of calling this:
 python update.py Person.refresh --limit 10 --chunk 5 --rq
 
 # update one thing not using rq
-python update.py Package.test --id 0000-1111-2222-3333
+python update.py Person.refresh --orcid 0000-1111-2222-3333
 
 """
 
