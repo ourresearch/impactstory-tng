@@ -1,5 +1,6 @@
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.sql.expression import func
 
 from models.country import country_info
 from models.scientist_stars import scientists_twitter
@@ -34,7 +35,12 @@ def badge_configs():
     configs = {}
     for assigner in all_badge_assigners():
         if assigner.show_in_ui and assigner.valid_badge:
-            configs[assigner.__name__] = assigner.config_dict()
+            config_dict = assigner.config_dict()
+            # take a random achievement
+            badge = Badge.query.filter_by(name=config_dict["name"]).order_by(func.random()).first()
+            # generate link to user profile with taken achievement
+            config_dict["person_url"] = "/u/%s" % badge.orcid_id if badge else ""
+            configs[assigner.__name__] = config_dict
     return configs
 
 
@@ -290,6 +296,7 @@ class BadgeAssigner(object):
             "display_name": cls.display_name,
             "group": cls.group,
             "description": cls.description,
+            "person_url": ""
         }
         return resp
 

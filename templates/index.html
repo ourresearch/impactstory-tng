@@ -230,12 +230,12 @@
              ng-controller="badgeItemCtrl">
 
             <div class="icon group-{{ badge.group }}">
-                <img ng-src="static/img/badges/{{ badge.name }}.png" alt="">
+              <a ng-href="{{ badge.person_url }}"><img ng-src="static/img/badges/{{ badge.name }}.png" alt=""></a>
             </div>
 
             <div class="content">
                 <div class="title group-{{ badge.group }}">
-                    <span class="name">{{badge.display_name}}</span>
+                  <a ng-href="{{ badge.person_url }}"><span class="name">{{badge.display_name}}</span></a>
                     <!--
                     <span class="val extra" ng-show="badge.percentile > .5">
                         <md-tooltip>

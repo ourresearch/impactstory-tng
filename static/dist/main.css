@@ -1483,16 +1483,16 @@ div.page.product-page .row.person-footer .buttons a.btn {
     display: block;
   }
 }
-.view-item.achievement .group-engagement {
+.view-item.achievement .group-engagement, .view-item.achievement .group-engagement a {
   color: #2196F3;
 }
-.view-item.achievement .group-openness {
+.view-item.achievement .group-openness, .view-item.achievement .group-openness a {
   color: #fb9d00;
 }
-.view-item.achievement .group-buzz {
+.view-item.achievement .group-buzz, .view-item.achievement .group-buzz a {
   color: #4CAF50;
 }
-.view-item.achievement .group-fun {
+.view-item.achievement .group-fun, .view-item.achievement .group-fun a {
   color: #9C27B0;
 }
 .view-item.achievement.badge-star_wars .under em {
