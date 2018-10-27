@@ -570,34 +570,22 @@ class Product(db.Model):
             if not self.doi:
                 return
 
-            url = u"http://api.altmetric.com/v1/fetch/doi/{doi}?key={key}&exclude_sources=twitter".format(
+            url = u"http://api.altmetric.com/v1/fetch/doi/{doi}?key={key}".format(
                 doi=self.clean_doi,
                 key=os.getenv("ALTMETRIC_KEY")
             )
-            # print u"calling {}".format(url)
-
             # might throw requests.Timeout
             r = requests.get(url, timeout=10)  #timeout in seconds
 
             # handle rate limit stuff
-            if "x-hourlyratelimit-remaining" in r.headers:
-                hourly_rate_limit_remaining = int(r.headers["x-hourlyratelimit-remaining"])
-                print u"DEBUG: altmetric.com hourly_rate_limit_remaining=", hourly_rate_limit_remaining
-                if hourly_rate_limit_remaining != 3600:
-                    print u"altmetric.com hourly_rate_limit_remaining=", hourly_rate_limit_remaining
-            else:
-                hourly_rate_limit_remaining = None
+            if r.status_code == 429:
+                print u"over altmetric.com rate limit (got 429) so calling without twitter"
 
-            # handle rate limit stuff
-            if (hourly_rate_limit_remaining and (hourly_rate_limit_remaining < 500) and not high_priority) or \
-                    r.status_code == 420 or r.status_code == 429:
-
-                dyno_name = os.getenv("DYNO", "")
-                if "schedule" in dyno_name or "RQ_worker_queue" in dyno_name:
-                    print u"sleeping for an hour because over altmetric.com rate limit and is a scheduled or RQ dyno"
-                    sleep(60*60) # an hour
-                else:
-                    print u"over altmetric.com rate limit but not a scheduled dyno so not going to sleep right now"
+                url = u"http://api.altmetric.com/v1/fetch/doi/{doi}?key={key}&exclude_sources=twitter".format(
+                    doi=self.clean_doi,
+                    key=os.getenv("ALTMETRIC_KEY")
+                )
+                r = requests.get(url, timeout=10)  #timeout in seconds
 
 
             # Altmetric.com doesn't have this DOI, so the DOI has no metrics.
