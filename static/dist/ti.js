@@ -2734,7 +2734,7 @@ angular.module("about-pages/about-data.tpl.html", []).run(["$templateCache", fun
     "            </li>\n" +
     "        </ol>\n" +
     "        <p>\n" +
-    "            Need any help? Contact us <a href=\"http://twitter.com/impactstory\">on Twitter</a> or open a help\n" +
+    "            Need any help? Contact us <a href=\"https://twitter.com/impactstory\">on Twitter</a> or open a help\n" +
     "            ticket by clicking the help icon at the bottom right of your screen.\n" +
     "        </p>\n" +
     "    </div>\n" +
@@ -2761,7 +2761,7 @@ angular.module("about-pages/about-data.tpl.html", []).run(["$templateCache", fun
     "            of our profile system.\n" +
     "        </li>\n" +
     "        <li>\n" +
-    "            <a href=\"http://twitter.com\">Twitter</a> supplies a convenient identity provider for signin (also, more Twitter\n" +
+    "            <a href=\"https://twitter.com\">Twitter</a> supplies a convenient identity provider for signin (also, more Twitter\n" +
     "            analytics are on the roadmap).\n" +
     "        </li>\n" +
     "    </ul>\n" +
@@ -2891,7 +2891,7 @@ angular.module("about-pages/about.tpl.html", []).run(["$templateCache", function
     "       </p>\n" +
     "       <p>\n" +
     "           Contact us via <a href=\"mailto:team@impactstory.org\">email</a> or\n" +
-    "           <a href=\"http://twitter.com/impactstory\">Twitter.</a>\n" +
+    "           <a href=\"https://twitter.com/impactstory\">Twitter.</a>\n" +
     "\n" +
     "       </p>\n" +
     "       <p>\n" +
@@ -2906,7 +2906,7 @@ angular.module("about-pages/about.tpl.html", []).run(["$templateCache", function
     "         <img src=\"/static/img/heather.jpg\" height=100/>\n" +
     "         <p><strong>Heather Piwowar</strong> is a cofounder of Impactstory and a leading researcher in research data availability and data reuse. She wrote one of the first papers measuring the <a href=\"http://www.plosone.org/article/info:doi/10.1371/journal.pone.0000308\">citation benefit of publicly available research data</a>, has studied  <a href=\"http://www.plosone.org/article/info:doi/10.1371/journal.pone.0018657\">patterns in  data archiving</a>, <a href=\"https://peerj.com/preprints/1/\">patterns of data reuse</a>, and the <a href=\"http://researchremix.wordpress.com/2010/10/12/journalpolicyproposal\">impact of journal data sharing policies</a>.</p>\n" +
     "\n" +
-    "         <p>Heather has a bachelor’s and master’s degree from MIT in electrical engineering, 10 years of experience as a software engineer, and a Ph.D. in Biomedical Informatics from the U of Pittsburgh.  She is an <a href=\"http://www.slideshare.net/hpiwowar\">frequent speaker</a> on research data archiving, writes a well-respected <a href=\"http://researchremix.wordpress.com\">research blog</a>, and is active on twitter (<a href=\"http://twitter.com/researchremix\">@researchremix</a>). </p>\n" +
+    "         <p>Heather has a bachelor’s and master’s degree from MIT in electrical engineering, 10 years of experience as a software engineer, and a Ph.D. in Biomedical Informatics from the U of Pittsburgh.  She is an <a href=\"http://www.slideshare.net/hpiwowar\">frequent speaker</a> on research data archiving, writes a well-respected <a href=\"http://researchremix.wordpress.com\">research blog</a>, and is active on twitter (<a href=\"https://twitter.com/researchremix\">@researchremix</a>). </p>\n" +
     "      </div>\n" +
     "\n" +
     "      <div class=\"team-member subsequent\">\n" +
@@ -2966,7 +2966,7 @@ angular.module("about-pages/about.tpl.html", []).run(["$templateCache", function
     "\n" +
     "      <div id=\"contact\">\n" +
     "         <h3>Contact</h3>\n" +
-    "         <p>We'd love to hear your feedback, ideas, or just chat! Reach us at <a href=\"mailto:team@impactstory.org\">team@impactstory.org</a> or on <a href=\"http://twitter.com/Impactstory\">twitter</a>.\n" +
+    "         <p>We'd love to hear your feedback, ideas, or just chat! Reach us at <a href=\"mailto:team@impactstory.org\">team@impactstory.org</a> or on <a href=\"https://twitter.com/Impactstory\">twitter</a>.\n" +
     "      </div>\n" +
     "\n" +
     "\n" +
@@ -2983,7 +2983,7 @@ angular.module("about-pages/sample.tpl.html", []).run(["$templateCache", functio
     "        <div class=\"product row\" ng-repeat=\"product in products\">\n" +
     "            <div class=\"id col-xs-2\">{{ product.id }}</div>\n" +
     "            <div class=\"link col-xs-10\">\n" +
-    "                <a href=\"http://doi.org/{{ product.doi }}\">{{ product.title }}</a>\n" +
+    "                <a href=\"https://doi.org/{{ product.doi }}\">{{ product.title }}</a>\n" +
     "\n" +
     "            </div>\n" +
     "\n" +
@@ -3268,14 +3268,14 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "                                <a href=\"/u/{{ person.orcid_id }}\">{{ person.given_names }} {{ person.family_name }}</a>\n" +
     "\n" +
     "                                <span class=\"accounts\">\n" +
-    "                                    <a href=\"http://orcid.org/{{ person.orcid_id }}\">\n" +
+    "                                    <a href=\"https://orcid.org/{{ person.orcid_id }}\">\n" +
     "                                        <img src=\"static/img/favicons/orcid.ico\" alt=\"\">\n" +
     "                                    </a>\n" +
     "                                    <a href=\"http://depsy.org/person/{{ person.depsy_id }}\"\n" +
     "                                            ng-show=\"person.depsy_id\">\n" +
     "                                        <img src=\"static/img/favicons/depsy.png\" alt=\"\">\n" +
     "                                    </a>\n" +
-    "                                    <a href=\"http://twitter.com/{{ person.twitter }}\"\n" +
+    "                                    <a href=\"https://twitter.com/{{ person.twitter }}\"\n" +
     "                                       ng-show=\"person.twitter\"\n" +
     "                                       class=\"twitter\">\n" +
     "                                        <img src=\"static/img/favicons/twitter.ico\" alt=\"\">\n" +
@@ -3357,14 +3357,14 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "                            <a href=\"/u/{{ person.orcid_id }}\">{{ person.given_names }} {{ person.family_name }}</a>\n" +
     "\n" +
     "                            <span class=\"accounts\">\n" +
-    "                                <a href=\"http://orcid.org/{{ person.orcid_id }}\">\n" +
+    "                                <a href=\"https://orcid.org/{{ person.orcid_id }}\">\n" +
     "                                    <img src=\"static/img/favicons/orcid.ico\" alt=\"\">\n" +
     "                                </a>\n" +
     "                                <a href=\"http://depsy.org/person/{{ person.depsy_id }}\"\n" +
     "                                        ng-show=\"person.depsy_id\">\n" +
     "                                    <img src=\"static/img/favicons/depsy.png\" alt=\"\">\n" +
     "                                </a>\n" +
-    "                                <a href=\"http://twitter.com/{{ person.twitter }}\"\n" +
+    "                                <a href=\"https://twitter.com/{{ person.twitter }}\"\n" +
     "                                   ng-show=\"person.twitter\"\n" +
     "                                   class=\"twitter\">\n" +
     "                                    <img src=\"static/img/favicons/twitter.ico\" alt=\"\">\n" +
@@ -3471,7 +3471,7 @@ angular.module("group-page/group-page.tpl.html", []).run(["$templateCache", func
     "                                    <a href=\"https://en.wikipedia.org/wiki/Happy_Fun_Ball\" class=\"fun\">super super fun.</a>\n" +
     "                                    Just, in ways our scholarly communication website cannot yet measure.\n" +
     "                                    Got an idea for a way we can fix that? Hit us up via\n" +
-    "                                    <a href=\"http://twitter.com/impactstory\">Twitter</a> or\n" +
+    "                                    <a href=\"https://twitter.com/impactstory\">Twitter</a> or\n" +
     "                                    <a href=\"mailto:team@impactstory.org\">email!</a>\n" +
     "                                </span>\n" +
     "                            </span>\n" +
@@ -3744,14 +3744,14 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                       {{ person.d.given_names }} {{ person.d.family_name }}\n" +
     "\n" +
     "                        <span class=\"accounts\">\n" +
-    "                            <a href=\"http://orcid.org/{{ person.d.orcid_id }}\">\n" +
+    "                            <a href=\"https://orcid.org/{{ person.d.orcid_id }}\">\n" +
     "                                <img src=\"static/img/favicons/orcid.ico\" alt=\"\">\n" +
     "                            </a>\n" +
     "                            <a href=\"http://depsy.org/person/{{ person.d.depsy_id }}\"\n" +
     "                                    ng-show=\"person.d.depsy_id\">\n" +
     "                                <img src=\"static/img/favicons/depsy.png\" alt=\"\">\n" +
     "                            </a>\n" +
-    "                            <a href=\"http://twitter.com/{{ person.d.twitter }}\"\n" +
+    "                            <a href=\"https://twitter.com/{{ person.d.twitter }}\"\n" +
     "                               ng-show=\"person.d.twitter\"\n" +
     "                               class=\"twitter\">\n" +
     "                                <img src=\"static/img/favicons/twitter.ico\" alt=\"\">\n" +
@@ -3816,7 +3816,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "        </h2>\n" +
     "        <p>\n" +
     "            That's probably because {{ person.d.first_name }} hasn't associated any\n" +
-    "            works with <a href=\"http://orcid.org/{{ person.d.orcid_id }}\">his or her ORCID profile.</a>\n" +
+    "            works with <a href=\"https://orcid.org/{{ person.d.orcid_id }}\">his or her ORCID profile.</a>\n" +
     "        </p>\n" +
     "    </div>\n" +
     "\n" +
@@ -4053,7 +4053,7 @@ angular.module("person-page/person-page.tpl.html", []).run(["$templateCache", fu
     "                                    <a href=\"https://en.wikipedia.org/wiki/Happy_Fun_Ball\" class=\"fun\">super super fun.</a>\n" +
     "                                    Just, in ways our scholarly communication website cannot yet measure.\n" +
     "                                    Got an idea for a way we can fix that? Hit us up via\n" +
-    "                                    <a href=\"http://twitter.com/impactstory\">Twitter</a> or\n" +
+    "                                    <a href=\"https://twitter.com/impactstory\">Twitter</a> or\n" +
     "                                    <a href=\"mailto:team@impactstory.org\">email!</a>\n" +
     "                                </span>\n" +
     "                            </span>\n" +
@@ -4374,7 +4374,7 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "\n" +
     "            <div class=\"journal\">\n" +
     "                <span class=\"year\">{{product.year}}</span>\n" +
-    "                <a href=\"http://doi.org/{{ product.doi }}\"\n" +
+    "                <a href=\"https://doi.org/{{ product.doi }}\"\n" +
     "                   ng-show=\"product.doi\"\n" +
     "                   class=\"journal\">\n" +
     "                    {{product.journal}}\n" +
@@ -4427,7 +4427,7 @@ angular.module("product-page/product-page.tpl.html", []).run(["$templateCache", 
     "                <p>\n" +
     "                    If you've\n" +
     "                    got a DOI for this publication we don't know about, you can add\n" +
-    "                    it in <a href=\"http://orcid.org/{{ person.d.orcid_id }}\" target=\"_blank\">your ORCID</a>\n" +
+    "                    it in <a href=\"https://orcid.org/{{ person.d.orcid_id }}\" target=\"_blank\">your ORCID</a>\n" +
     "                    and then re-sync.\n" +
     "                </p>\n" +
     "            </div>\n" +
@@ -4790,7 +4790,7 @@ angular.module("static-pages/landing.tpl.html", []).run(["$templateCache", funct
     "    <div class=\"landing-footer\">\n" +
     "        <div class=\"links col\">\n" +
     "            <a href=\"about\">About</a>\n" +
-    "            <a href=\"http://twitter.com/impactstory\">Twitter</a>\n" +
+    "            <a href=\"https://twitter.com/impactstory\">Twitter</a>\n" +
     "            <a href=\"https://github.com/Impactstory/impactstory-tng\">GitHub</a>\n" +
     "        </div>\n" +
     "        <div class=\"funders col\">\n" +
@@ -4958,7 +4958,7 @@ angular.module("wizard/connect-orcid.tpl.html", []).run(["$templateCache", funct
     "            <p>Let's get your profile set up.</p>\n" +
     "\n" +
     "            <p>\n" +
-    "                Impactstory is built on <a href=\"http://orcid.org\">ORCID</a>,\n" +
+    "                Impactstory is built on <a href=\"https://orcid.org\">ORCID</a>,\n" +
     "                a global nonprofit registry of researchers and their publications.\n" +
     "            </p>\n" +
     "            <p>Do you have an ORCID ID?</p>\n" +
