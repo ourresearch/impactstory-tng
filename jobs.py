@@ -128,7 +128,8 @@ def enqueue_jobs(cls,
     object_ids = [row[0] for row in row_list]
 
     num_jobs = len(object_ids)
-    print "adding {} jobs to queue...".format(num_jobs)
+    if use_rq:
+        print "adding {} jobs to queue...".format(num_jobs)
 
     # iterate through chunks of IDs like [[id1, id2], [id3, id4], ...  ]
     object_ids_chunk = []
@@ -148,6 +149,7 @@ def enqueue_jobs(cls,
             job.meta["object_ids_chunk"] = object_ids_chunk
             job.save()
         else:
+            print "not using rq"
             update_fn_args.append(shortcut_data)
             update_fn(*update_fn_args, index=index)
 

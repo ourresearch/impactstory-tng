@@ -258,6 +258,7 @@ def refresh_person(my_person, high_priority=False):
 
 def refresh_profile(orcid_id, high_priority=False):
     print u"refreshing {}".format(orcid_id)
+
     my_person = Person.query.options(orm.undefer('*')).filter_by(orcid_id=orcid_id).first()
 
     # for testing on jason's local, so it doesn't have to do a real refresh
@@ -476,7 +477,7 @@ class Person(db.Model):
     # doesn't throw errors; sets error column if error
     def refresh(self, high_priority=False):
         print u"* refreshing {} ({})".format(self.orcid_id, self.full_name)
-        self.error = None
+        self.error = ""
         start_time = time()
         try:
             print u"** calling call_apis"
@@ -1001,13 +1002,11 @@ class Person(db.Model):
                     where doi in
                       (select doi from product where orcid_id='{}')""".format(self.orcid_id)
         rows = db.engine.execute(text(coauthor_orcid_id_query))
-        print rows
 
         # remove own orcid_id
         orcid_ids = [row[0] for row in rows if row[0] if row[0] != self.orcid_id]
         if not orcid_ids:
             return
-        print orcid_ids
 
         # don't load products or badges
         coauthors = Person.query.filter(Person.orcid_id.in_(orcid_ids)).options(orm.noload('*')).all()

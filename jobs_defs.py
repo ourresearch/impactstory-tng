@@ -1,6 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy import orm
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.sql.expression import func
 
 from app import db
 import app
@@ -13,6 +14,7 @@ from models import person
 
 q = db.session.query(Person.id)
 q = q.filter(Person.orcid_id != None)
+q = q.order_by(func.random())
 update_registry.register(Update(
     job=Person.refresh,
     query=q,
