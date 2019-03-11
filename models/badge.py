@@ -600,7 +600,7 @@ class open_license(BadgeAssigner):
     show_in_ui = True
 
     def decide_if_assigned(self, person):
-        if person.products_with_dois and len(person.products_with_dois) >= 3and person.percent_open_license:
+        if person.products_with_dois and len(person.products_with_dois) >= 3 and person.percent_open_license:
             if person.percent_open_license >= 0.25:
                 self.candidate_badge.value = person.percent_open_license * 100
                 self.assigned = True
