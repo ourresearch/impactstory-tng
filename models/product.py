@@ -558,80 +558,80 @@ class Product(db.Model):
 
 
     def set_altmetric_api_raw(self, high_priority=False):
-        self.error = "not calling altmetric.com until we handle ratelimiting"
-        print self.error
-        return
+        # self.error = "not calling altmetric.com until we handle ratelimiting"
+        # print self.error
+        # return
 
-        # try:
-        #     start_time = time()
-        #     self.error = None
-        #     self.altmetric_api_raw = None
-        #
-        #     if not self.doi:
-        #         return
-        #
-        #     url = u"http://api.altmetric.com/v1/fetch/doi/{doi}?key={key}".format(
-        #         doi=self.clean_doi,
-        #         key=os.getenv("ALTMETRIC_KEY")
-        #     )
-        #     # might throw requests.Timeout
-        #     r = requests.get(url, timeout=10)  #timeout in seconds
-        #
-        #     # handle rate limit stuff
-        #     if r.status_code == 429:
-        #         print u"over altmetric.com rate limit (got 429) so calling without twitter"
-        #
-        #         url = u"http://api.altmetric.com/v1/fetch/doi/{doi}?key={key}&exclude_sources=twitter".format(
-        #             doi=self.clean_doi,
-        #             key=os.getenv("ALTMETRIC_KEY")
-        #         )
-        #         r = requests.get(url, timeout=10)  #timeout in seconds
-        #
-        #
-        #     # Altmetric.com doesn't have this DOI, so the DOI has no metrics.
-        #     if r.status_code == 404:
-        #         # altmetric.com doesn't have any metrics for this doi
-        #         self.altmetric_api_raw = {"error": "404"}
-        #     elif r.status_code == 403:
-        #         if r.text == "You must have a commercial license key to use this call.":
-        #             # this is the error we get when we have a bad doi with a # in it.  Record, but don't throw error
-        #             self.altmetric_api_raw = {"error": "403. Altmetric.com says must have a commercial license key to use this call"}
-        #         else:
-        #             self.error = 'got a 403 for unknown reasons'
-        #     elif r.status_code == 420:
-        #         self.error = "hard-stop rate limit error setting altmetric.com metrics"
-        #     elif r.status_code == 429:
-        #         self.error = "rate limit error setting altmetric.com metrics"
-        #     elif r.status_code == 400:
-        #         self.altmetric_api_raw = {"error": "400. Altmetric.com says bad doi"}
-        #     elif r.status_code == 200:
-        #         # we got a good status code, the DOI has metrics.
-        #         self.altmetric_api_raw = r.json()
-        #         # print u"yay nonzero metrics for {doi}".format(doi=self.doi)
-        #     else:
-        #         self.error = u"got unexpected altmetric status_code code {}".format(r.status_code)
-        #
-        #     # print u"after parsing in altmetric: {}s for {}".format(
-        #     #     elapsed(start_time, 2), url)
-        #
-        # except (KeyboardInterrupt, SystemExit):
-        #     # let these ones through, don't save anything to db
-        #     raise
-        # except requests.Timeout:
-        #     self.error = "timeout from requests when getting altmetric.com metrics"
-        #     print self.error
-        # except Exception:
-        #     logging.exception("exception in set_altmetric_api_raw")
-        #     self.error = "misc error in set_altmetric_api_raw"
-        #     print u"in generic exception handler, so rolling back in case it is needed"
-        #     db.session.rollback()
-        # finally:
-        #     if self.error:
-        #         print u"ERROR on {doi} profile {orcid_id}: {error}, calling {url}".format(
-        #             doi=self.clean_doi,
-        #             orcid_id=self.orcid_id,
-        #             error=self.error,
-        #             url=url)
+        try:
+            start_time = time()
+            self.error = None
+            self.altmetric_api_raw = None
+
+            if not self.doi:
+                return
+
+            url = u"http://api.altmetric.com/v1/fetch/doi/{doi}?key={key}".format(
+                doi=self.clean_doi,
+                key=os.getenv("ALTMETRIC_KEY")
+            )
+            # might throw requests.Timeout
+            r = requests.get(url, timeout=10)  #timeout in seconds
+
+            # handle rate limit stuff
+            if r.status_code == 429:
+                print u"over altmetric.com rate limit (got 429) so calling without twitter"
+
+                url = u"http://api.altmetric.com/v1/fetch/doi/{doi}?key={key}&exclude_sources=twitter".format(
+                    doi=self.clean_doi,
+                    key=os.getenv("ALTMETRIC_KEY")
+                )
+                r = requests.get(url, timeout=10)  #timeout in seconds
+
+
+            # Altmetric.com doesn't have this DOI, so the DOI has no metrics.
+            if r.status_code == 404:
+                # altmetric.com doesn't have any metrics for this doi
+                self.altmetric_api_raw = {"error": "404"}
+            elif r.status_code == 403:
+                if r.text == "You must have a commercial license key to use this call.":
+                    # this is the error we get when we have a bad doi with a # in it.  Record, but don't throw error
+                    self.altmetric_api_raw = {"error": "403. Altmetric.com says must have a commercial license key to use this call"}
+                else:
+                    self.error = 'got a 403 for unknown reasons'
+            elif r.status_code == 420:
+                self.error = "hard-stop rate limit error setting altmetric.com metrics"
+            elif r.status_code == 429:
+                self.error = "rate limit error setting altmetric.com metrics"
+            elif r.status_code == 400:
+                self.altmetric_api_raw = {"error": "400. Altmetric.com says bad doi"}
+            elif r.status_code == 200:
+                # we got a good status code, the DOI has metrics.
+                self.altmetric_api_raw = r.json()
+                # print u"yay nonzero metrics for {doi}".format(doi=self.doi)
+            else:
+                self.error = u"got unexpected altmetric status_code code {}".format(r.status_code)
+
+            # print u"after parsing in altmetric: {}s for {}".format(
+            #     elapsed(start_time, 2), url)
+
+        except (KeyboardInterrupt, SystemExit):
+            # let these ones through, don't save anything to db
+            raise
+        except requests.Timeout:
+            self.error = "timeout from requests when getting altmetric.com metrics"
+            print self.error
+        except Exception:
+            logging.exception("exception in set_altmetric_api_raw")
+            self.error = "misc error in set_altmetric_api_raw"
+            print u"in generic exception handler, so rolling back in case it is needed"
+            db.session.rollback()
+        finally:
+            if self.error:
+                print u"ERROR on {doi} profile {orcid_id}: {error}, calling {url}".format(
+                    doi=self.clean_doi,
+                    orcid_id=self.orcid_id,
+                    error=self.error,
+                    url=url)
 
 
     def set_altmetric_id(self):

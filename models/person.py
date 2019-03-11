@@ -990,15 +990,15 @@ class Person(db.Model):
 
         start_time = time()
 
-        # db.session.expunge_all()
-        # db.session.bulk_save_objects([self])
-        # db.session.bulk_save_objects(self.products)
-        # safe_commit(db)
-        # print u"elapsed {}s after commit in coathors".format(elapsed(start_time, 2))
+        db.session.expunge_all()
+        db.session.bulk_save_objects([self])
+        db.session.bulk_save_objects(self.products)
+        safe_commit(db)
+        print u"elapsed {}s after commit in coathors".format(elapsed(start_time, 2))
 
         # comment out the commit.  this means coauthors made during this commit session don't show up on this refresh
         # but doing it because is so much faster
-        # safe_commit(db)
+        safe_commit(db)
 
         # now go for it
         # print u"running coauthors for {}".format(self.orcid_id)
@@ -1007,11 +1007,13 @@ class Person(db.Model):
                     where doi in
                       (select doi from product where orcid_id='{}')""".format(self.orcid_id)
         rows = db.engine.execute(text(coauthor_orcid_id_query))
+        print rows
 
         # remove own orcid_id
         orcid_ids = [row[0] for row in rows if row[0] if row[0] != self.orcid_id]
         if not orcid_ids:
             return
+        print orcid_ids
 
         # don't load products or badges
         coauthors = Person.query.filter(Person.orcid_id.in_(orcid_ids)).options(orm.noload('*')).all()
