@@ -990,15 +990,9 @@ class Person(db.Model):
 
         start_time = time()
 
-        db.session.expunge_all()
-        db.session.bulk_save_objects([self])
-        db.session.bulk_save_objects(self.products)
-        safe_commit(db)
-        print u"elapsed {}s after commit in coathors".format(elapsed(start_time, 2))
-
         # comment out the commit.  this means coauthors made during this commit session don't show up on this refresh
         # but doing it because is so much faster
-        safe_commit(db)
+        # safe_commit(db)
 
         # now go for it
         # print u"running coauthors for {}".format(self.orcid_id)
