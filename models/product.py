@@ -190,7 +190,7 @@ class Product(db.Model):
         start_time = time()
 
         if self.doi:
-            self.url = u"http://doi.org/{}".format(self.doi)
+            self.url = u"https://doi.org/{}".format(self.doi)
 
         self.set_altmetric_score()
         self.set_altmetric_id()
@@ -467,7 +467,7 @@ class Product(db.Model):
     #
     #         if twitter_handle not in tweeter_dicts:
     #             tweeter_dict = {}
-    #             tweeter_dict["url"] = u"http://twitter.com/{}".format(twitter_handle)
+    #             tweeter_dict["url"] = u"https://twitter.com/{}".format(twitter_handle)
     #
     #             if "name" in post["author"]:
     #                 tweeter_dict["name"] = post["author"]["name"]

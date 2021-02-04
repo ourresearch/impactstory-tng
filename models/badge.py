@@ -434,7 +434,7 @@ class megafan(BadgeAssigner):
                     self.candidate_badge.add_product(my_product)  # add the one for the new max
                     biggest_fan = fan_name
 
-        self.candidate_badge.support = u"Thanks, <a href='http://twitter.com/{fan}'>@{fan}</a>.".format(
+        self.candidate_badge.support = u"Thanks, <a href='https://twitter.com/{fan}'>@{fan}</a>.".format(
             fan=biggest_fan)
 
 
@@ -676,7 +676,7 @@ class famous_follower(BadgeAssigner):
         if len(fans) > 1:
             self.assigned = True
             self.candidate_badge.value = len(fans)
-            fan_urls = [u"<a href='http://twitter.com/{fan}'>@{fan}</a>".format(fan=fan) for fan in fans]
+            fan_urls = [u"<a href='https://twitter.com/{fan}'>@{fan}</a>".format(fan=fan) for fan in fans]
             self.candidate_badge.support = u"The Big Deal Scientists who tweeted your research include: {}".format(u",".join(fan_urls))
 
 
@@ -807,7 +807,7 @@ class famous_follower(BadgeAssigner):
 #
 #         if self.assigned:
 #             self.candidate_badge.value = len(fans)
-#             fan_urls = [u"<a href='http://twitter.com/{fan}'>@{fan}</a>".format(fan=fan) for fan in fans]
+#             fan_urls = [u"<a href='https://twitter.com/{fan}'>@{fan}</a>".format(fan=fan) for fan in fans]
 #             self.candidate_badge.support = u"BFFs include: {}".format(u",".join(fan_urls))
 #
 
