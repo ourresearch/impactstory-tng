@@ -272,7 +272,8 @@ def profile_endpoint(orcid_id):
     deleted_orcid_ids = [
         "0000-0003-4875-1447",
         "0000-0002-2942-6609",
-        "0000-0002-4812-4745"
+        "0000-0002-4812-4745",
+        "0000-0003-1393-5457"
     ]
     if orcid_id in deleted_orcid_ids:
         abort_json(404, "This user is deleted")
